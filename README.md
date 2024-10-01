@@ -1,6 +1,14 @@
 # 2024-MedicRecall2
-
-## Overview / About the Project
+## Contents
+- [**2024-MedicRecall2**](#2024-MedicRecall2)
+  - [**Project Overview**](#project-overview)
+  - [**Stakeholders**](#stakeholders)
+  - [**User Stories**](#user-stories)
+  - [**Project Requirements**](#project-requirements)
+  - [**Additional Features**](#additional-features)
+  - [**Team Members**](#team-members)
+  
+## Project Overview
 This is the third iteration of the study support tool for medical students undergoing the MSRA exams. In this particular iteration, based on previous years’ work, we aim to:
 
 - Release a working mobile app on both Android and iOS
@@ -24,7 +32,7 @@ This is the third iteration of the study support tool for medical students under
 
 Further information on our stakeholders can be found here:
 
-## Document User Stories
+## User Stories
 - **As a Trainee/Junior Doctor**, I want to access a variety of revision resources related to my course and retain the information effectively. I would require an accurate feedback system so that I can understand where I was wrong and how I could improve on my areas of weakness.
 
 - **As a Doctor**, I want to quickly brush up on my knowledge so that I do not forget important concepts. I would prefer brief summaries of information so that I can study on the move or during breaks.
@@ -42,7 +50,8 @@ Further information on our stakeholders can be found here:
   - Implement revision reminders  
   - Develop quarterly mini-exams
 
-## Additional Features (if time and resources permit)
+## Additional Features
+If time and resources permit we plan to include:
 - **Virtual Study Coach**  
   - Implement a virtual coach similar to Duolingo’s 'Duo' character  
   - **Purpose:** Guide users through their exam preparation period
@@ -54,3 +63,14 @@ Further information on our stakeholders can be found here:
 - **Interactive Scenarios**  
   - Integrate video-simulated scenario questions  
   - **Purpose:** Enhance practical learning and decision-making skills
+
+## Team Members
+| Member                       | Email                                                 |
+| ---------------------------- | ----------------------------------------------------- |
+| Clarissa Ch'ng               | [fr22378@bristol.ac.uk](mailto:fr22378@bristol.ac.uk) |
+| Elsa Wakfi                   | [xp23980@bristol.ac.uk](mailto:xp23980@bristol.ac.uk) |
+| Tinaye Samuel Chibanda       | [ua20351@bristol.ac.uk](mailto:ua20351@bristol.ac.uk) |
+| Rowan Watcham                | [no23481@bristol.ac.uk](mailto:no23481@bristol.ac.uk) |
+| Dennis Han                   | [jf23616@bristol.ac.uk](mailto:jf23616@bristol.ac.uk) |
+| Saud Binlebdah               | [hr22169@bristol.ac.uk](mailto:hr22169@bristol.ac.uk) |
+
