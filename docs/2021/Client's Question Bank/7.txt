@@ -1,0 +1,147 @@
+Confidentiality
+
+- When can you break confidentiality?
+    - If the patient consents to it
+    - Harm to others (not the patient) - senior
+    - Inform colleagues directly involved in patient care
+    - Notifiable diseases - required by law - led by seniors
+    - HIV partner, you do break confidentiality as safety comes above
+    - Child under 13 wanting to have sex
+    - Otherwise do nothing
+- When should you not inform the patient that you are going to break confidentiality?
+    - If police are involved and telling the patient will defeat the purpose of the disclosure
+    - Otherwise always inform the patient first, this is good practice as it maintains trust between patients and doctors
+- Can you break confidentiality in the case of domestic violence?
+    - Yes, but only breach if there is weapons or children (vulnerable dependants) involved
+- Can you break confidentiality in the case of knife or gun crime?
+    - Yes, Inform the police
+    - make sure the patient is safe and explore whether there are concerns with domestic violence - even if the story suggests that it was not domestic
+    - Explore the accounts surrounding the event to ensure there were no other children or young adults at risk
+- Can you break confidentiality in the case of a patient planning to commit suicide?
+    - You can inform the team directly involved in their care
+    - But only break confidentiality (tell police) if the patient does not have capacity
+- What do you do if the patient tells you they are involved in criminal activity?
+    - Only break confidentiality (inform the police) if there is a risk of serious harm to others
+- Can blood samples be taken without consent if the patient is unconscious?
+    - Can be taken but results can only be used as evidence with retrospective consent
+- Can you break confidentiality in the case of a patient driving when they should not?
+    - Is the patients responsibility to first inform the DVLA
+    - If they don't (you see them driving in the carpark), you do
+- When do you not need to gain informed consent for using medical imaging?
+    - Anything that does not have any patient identifiable features
+    - Images of internal structures, pathology slides, lateroscopic and endoscopic, USS, X-rays, organ function recordings (echo)
+- What are the notifiable diseases?
+    - Meningitis, anthrax, COVID-19, Legionnaires disease, malaria, measles, mumps, rubella, rabies, TB, whooping cough, yellow fever
+    - Full list - [https://www.gov.uk/guidance/notifiable-diseases-and-causative-organisms-how-to-report](https://www.gov.uk/guidance/notifiable-diseases-and-causative-organisms-how-to-report)
+- What can constitute a break of confidentiality?
+    - Sharing of any information with another party not directly involved in that patients care
+    - Not always a name, any identifiable information
+- Can you alter old notes?
+    - NO, need to always make it clear it is a retrospective change, leaving any original content the same as how it was found
+    - This constitutes tampering with evidence and ever should be done
+- Who do you approach first if you observe a colleague breaking confidentiality?
+    - Approach them first before escalating,
+    - This gives them a chance to rectify it or explain why confidentiality needed to be broken
+- What to do if you meet someone in sexual health clinic who has an STD and does not want to say who their sexual partners are?
+    - Your first priority is to always treat the patient in front of you
+    - Then you ask about the other partners and explore why they do not want to tell them
+- What to do if a patient says they do illegal drug
+    - using illicit drugs is not extreme enough to break confidentiality
+    - Unless they are putting themselves or someone else in harm, this could be considered if they have any dependents such as children?
+- What to do when a relative is asking for patient info over the phone when the patient is unconscious?
+    - Balance risk of confidentiality breach with distress to the family
+    - Try and confirm their identity over the phone
+    - As she is unconscious, suggest they come in to find out more (i.e. give limited info)
+    - Unless they indicate otherwise, it is reasonable to assume that patients would want those closest to them to be kept informed of their general condition and prognosis
+- Can you ever withhold a diagnosis to a patient?
+    - No, you have a duty to tell them
+    - However, you can delay a diagnosis if the patient is confused and unable to understand at the time
+- What to do if a relative turns up asking about the condition of a patient?
+    - Info cannot be given without consent but telling the relative something that they already know about the patient is allowed and a good option as this may ease any tensions
+    - Find the patient and ask if it is okey to give details of their admission
+    - Try to be helpful to the relative without compromising confidentitality
+- Who do you inform if you have mistakenly compromised patient info e.g. losing a memory stick or leaving notes on the bus?
+    - The best thing to do is to report this to information governance
+    - Your consultant would also be able to manage this situation
+    - Then asking medical defence union is an option but not that helpful
+- What should you do if colleagues are discussing a patient in the public canteen but are not using a name?
+    - A name does not have to be used for a person to be identified so still should take action
+- Should you give data to private companies if they request it?
+    - no, it is not appropriate even if anonymised
+    - Not within the remit of an FY1
+- What to do if you overhear a patient is worried about if their data will be used in trials as the centre is known for its research output?
+    - 1) Ask the patient about their concerns
+    - 2) Then offer reassurance if appropriate (in the case of clinical study involvement)
+    - 3) Then you can try and rectify the issue for the long term (ensure all patients are informed about how their data is used)
+- What if relatives want to discuss a diagnosis with you without the patient?
+    - First ask the patient if this is ok
+    - Then get more info on the patient if unfamiliar
+    - Discuss with family and address concerns, potentially with a nurse present
+    - Can discuss around something that they already know - (addresses relative demand) but this is a risky conversation as you may inadvertently break confidentiality
+- What are appropriate actions if a woman tells you about domestic abuse which threatens minors?
+    - Have to tell social services
+    - Tell the patient you will do this first
+    - Provide contact details for independent advice - a abuse charity
+    - Informing your consultant is also a good first action to take - they need to be aware of safeguarding issues as soon as possible
+- What to do if a policeman arrives and wants to speak to a patient about an assault
+    - Ask the patient if he is happy to speak to the police
+    - Inform your senior
+    - Dont tell him anything without consent but still facilitate the investigation
+- How do you manage a patient presenting with domestic abuse who does not want police involvement?
+    - Advise that they go to a domestic violence support group (independent advice), document
+    - Good practice to draw detailed pictures of the injuries and document everything
+- Do you need to gain consent to discuss a medical error with relatives?
+    - Yes, you need to seek consent from the patient before discussing anything with the relatives.
+    - Good to ask relatives what they know about a mistake before having the conversation with them (information gathering)
+- What to do if a colleague is texting you, patient, identifiable information?
+    - Do not engage
+    - Delete the messages and talk to the colleague about the issue as soon as possible
+- Should you breach confidentiality in cases of domestic violence?
+    - Only if there are weapons or vulnerable dependants involved
+    - Always offer information about domestic abuse charities
+- What to do if you diagnose a notifiable disease?
+    - Contact a PHE consultant
+    - Tell the patient what you are doing and notify a senior
+
+Child protection rules
+
+- Is it illegal for a parent to hit their child?
+    - Technically only if it leaves a mark
+    - If you see this you need to need to inform a senior
+- When is a young person deemed to have capacity?
+    - 16 and over you are presumed to have capacity
+    - If the child is under the age of 16, Gillik competence needs to be assesed
+- What situation does the Fraser guidelines apply to?
+    - advice and treatment relating to contraception and sexual health (terminations and STIs) in persons less than 18 years old
+- When to prescribe contraception in an under 18-year-old without their parent's knowledge?
+    - When they are able to fulfil the Fraser guidelines:
+    - the young person cannot be persuaded to inform their parents - this should be expl
+    - the young person understands the professional's advice
+    - The young person is likely to begin, or to continue having, sexual intercourse with or without contraceptive treatment
+    - unless the young person receives contraceptive treatment, their physical or mental health, or both, are likely to suffer
+    - the young person's best interests require them to receive contraceptive advice or treatment with or without parental consent
+- What to do if a girl of 15 asks for an oral contraceptive?
+    - This scenario relates to Fraser competence
+    - Encourage them to inform their parents
+    - While it is against the law to have sex at 15 you should act in best interests
+    - You should prescribe the oral contraceptive if Fraser competent and contact a senior or child protection officer for advice
+- What to do if a girl aged 12 asks for contraception?
+    - Children under 13 are deemed to lack the capacity to consent to sexual relations
+    - Therefore, even if the parents are there, you should always inform your consultant
+    - Confidentiality needs to be broken and the local child protection agency needs to be informed
+- When is Gillick competence used?
+    - Gillick competency can be used when young people (<18) wish to have treatment without their parents knowing.  If they are deemed mature enough, they can consent to treatment that their parents advise against
+    - It can also be used to refuse medical treatment. However, if a young person refuses treatment which may lead to their death or severe permanent harm, their decision can be overruled.
+    - Source [https://learning.nspcc.org.uk/child-protection-system/gillick-competence-fraser-guidelines#heading-top](https://learning.nspcc.org.uk/child-protection-system/gillick-competence-fraser-guidelines#heading-top)
+- What to do if you are suspicious of non-accidental injury in a child presenting to ED?
+    - Admit the child to hospital
+    - Contact seniors in the department, referral to child protection is a consultant to consultant referral and should not be done by an FY1
+    - Making an anonymous call to social services is not appropriate - unprofessional
+- What is within your level of competency when dealing with a potential NAI?
+    - Get seniors involved
+    - Admit the child
+    - Ask the child about what brought them into the hospital
+- Who can consent for a procedure on behalf of minors?
+    - The biological mother always
+    - The biological father if married or on the birth certificate
+    - The child if they are gilik competent

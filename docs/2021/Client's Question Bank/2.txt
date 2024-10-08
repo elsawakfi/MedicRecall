@@ -1,0 +1,141 @@
+Maintaining patient focus
+
+- What should be your number one priority in any scenario
+    - Patient safety, dignity or comfort
+    - If this is compromised, you must take prompt action as your first priority
+    - Resource - Good Medical Practice Paragraph 25
+- How many times should you attempt a procedure (e.g. cannulation) before asking another doctor to try?
+    - Generally recommended that after 2 failed attempts, you ask another colleague to try (this depends on hospital guidelines)
+- What if emergency treatment is needed for an unconscious patient
+    - You can act in their best interests
+    - Inform next of kin and get senior input
+- What do you do when a patient has concerns about how their data is being used (3 actions)
+    - Explore the concerns
+    - Address these concerns and reassure them if their concerns are not true
+    - Contribute to a long-term solution to this - ask the ward manager to communicate with patients that their data will not be used without consent
+- Is it acceptable to not tell a patient about the results of a test?
+    - yes, you do not have to tell them the results of a test if they explicitly say that they do not want to know
+    - But you should explain the implications of this choice, find out why not, and record this conversation in the notes
+- How to manage a patients request to die at home?
+    - Say that the team will take into account his wishes
+    - Discuss at MDT
+    - Involve GP
+    - only involve family with explicit consent
+- What to do if a patient makes a complaint about you?
+    - Discuss concerns with the patient
+    - offer a senior member of team to speak to
+    - Inform of PALS
+- What if you have a suspicion of elder abuse?
+    - Document any evidence or discussion
+    - Take a detailed history
+    - Flag the issue to the vulnerable adults team
+    - Involve a senior is also appropriate
+- A patient with dementia tells you they are being abused in their care home
+    - tell consultant - dealing with this is not within the remit of an F1
+    - Calling the police may be better than calling the care home yourself as they may be complicit and thick could harm the investigation
+
+Driving
+
+- What should you do if a patient has a condition or is undergoing treatment that may affect their ability to drive (e.g. epilepsy)
+    - Explain that their condition may affect their ability to drive and tell them that they have a legal duty to inform the DVLA or DVA
+    - tell the patient that you may be obliged to
+    disclose relevant medical information about
+    them, in confidence, to the DVLA or DVA if
+    they continue to drive when they are not fit
+    to do so
+    - make a note of any advice you have given to
+    a patient about their fitness to drive in their
+    medical record.
+    - [https://www.gmc-uk.org/-/media/documents/gmc-guidance-for-doctors---confidentiality---patients-fitness-to-drive-and-reporting-concer-70063275.pdf](https://www.gmc-uk.org/-/media/documents/gmc-guidance-for-doctors---confidentiality---patients-fitness-to-drive-and-reporting-concer-70063275.pdf)
+- What would you do if a patient continues to drive after being told not to?
+    - You should make every reasonable effort
+    to persuade them to stop.
+    - If you do not manage to persuade the patient to stop driving, or you discover that they are continuing to drive against your advice, you should consider whether the patient’s refusal to stop driving leaves others exposed to a risk of death or serious harm.
+    - If you believe that it does, you should contact
+    the DVLA or DVA promptly and disclose any
+    relevant medical information, in confidence, to
+    the medical adviser.
+    - As an FY1 you will not need to handle this situation alone and so should involve this to a senior
+    - [https://www.gmc-uk.org/-/media/documents/gmc-guidance-for-doctors---confidentiality---patients-fitness-to-drive-and-reporting-concer-70063275.pdf](https://www.gmc-uk.org/-/media/documents/gmc-guidance-for-doctors---confidentiality---patients-fitness-to-drive-and-reporting-concer-70063275.pdf)
+- What should you do if a patient asks you on a date?
+    - Politely decline
+    - Explain why it is inappropriate - GMC advise against starting sexual relations with current patients
+    - Attempt to re-establish a professional boundary and continue to provide care
+
+Intimate examination
+
+- What is classed as an intimate examination?
+    - Any medical examination which the patient considers intimate or intrusive.  This may vary from patient to patient, for example, a Muslim woman wearing a hijab may find a respiratory examination invasive while another patient may not
+    - An examination of the rectum, genitalia and breasts are always considered as intimate examinations
+- How do you perform an intimate examination?
+    - Gain consent, explain what you will do and how exposed they will be
+    - Confirm that they are happy to go ahead and that they can stop the exam at any time if they are uncomfortable
+- When is having a chaperone needed?
+    - Intimate examinations
+    - When a patient is making or discussing a complaint with you
+    - When a patient or relative is angry or upset
+- Who can act as a chaperone?
+    - An impartial member of the healthcare team with no relation to the doctor or patient
+    - Full name and role should be documented
+    - The patients family member or spouse cannot act as a chaperone - you need another member of staff
+- How do you manage the situation where a nurse alerts you to an acutely unwell patient?
+    - Always assess the patient first, you can use a member of the ward team to help (most likely the ward nurse)
+    - Make the assessment and start initial management
+    - Then contact a senior colleague (preferably your speciality trainee) to alert them of the situation
+- What to do when a patient suggests that their husband can act as a chaperone?
+    - Close personal contacts cannot act as a chaperone but are welcome to sit in on the examination if the patient wants
+    - Document this conversation
+    - Still get a chaperone
+
+DNACPR
+
+- What is a DNA CPR?
+    - Do Not Attempt Resuscitation (DNAR) is a legal order that is placed in the medical notes and states that cardiopulmonary resuscitation/advanced cardiac life support should not be performed if the patient’s heart and/or breathing were to stop.
+    - UKFPO glossary
+- How is the DNA CPR decision made?
+    - The responsibility for this decision lies ultimately with the senior doctor looking after the patient (consultant or registrar)
+    - Although it is ultimately a medical decision, discussion with the patient is best practice so that their wishes are respected.
+    - The wishes of relatives are less important
+- Who can sign a DNA CPR?
+    - Anyone that has a full licence (F2 and above can sign this form) but junior members need to have it countersigned by the responsible consultant
+    - Not FY1s
+    - Can have initial discussions
+    
+    ![Screenshot 2021-11-30 at 10.24.18.png](Patient%20focus%20a0f6c396284f4d4999303eec7f7d2d4f/Screenshot_2021-11-30_at_10.24.18.png)
+    
+- What should you do if you come across an arrested elderly patient and you cannot find a DNA CRP form?
+    - You commence CPR
+    - Call for help
+    - Raise your concerns about the benefits of the CPR attempt and ask people to look for the form
+- Who is involved in the DNACPR (do not attempt CPR) decision?
+    - It is ultimately a medical decision so a senior on the team looking after the patient has ultimate authority
+    - However, it is best practice to discuss with the patient
+    - Relatives’ thoughts also do matter but are not as important
+- What to do if you come across an elderly person who has collapsed?
+    - If they have suffered a cardiac arrest and you are not sure if they have a DNACPR form in place, start CPR immediately
+    - Call for help
+    - Get someone to find his DNAPCR status
+
+Mental capacity
+
+- What is the mental health act?
+    - A statutory framework, which sets out when patients can be compulsorily treated for a mental disorder without consent, to protect them or others from harm.
+    - Patients cannot be compulsorily treated for a physical condition under the terms of the MHA.
+- What is the mental capacity act used for
+    - A way of making a decision regarding the physical treatment of a patient if they do not have to capacity to understand, believe, retain and weigh up info)
+- What to do if a patient with a psychiatric disorder is refusing chemo but seems to understand the risks
+    - If they have capacity, accept their decision and document this in the notes
+    - Assess mental capacity not mental state - two different things
+- What are the 5 key principles of the mental capacity act?
+    - A person must be assumed to have capacity unless it is established that he/she lacks capacity
+    - A person is not to be treated as unable to make a decision unless all practicable steps to help him to do so have been taken without success
+    - A person is not to be treated as unable to make a decision merely because he makes an unwise decision
+    - An act done, or decision made, under this Act for or on behalf of a person who lacks capacity must be done, or made, in his best interests
+    - Before the act is done, or the decision is made, regard must be had to whether the purpose for which it is needed can be as effectively achieved in a way that is less restrictive of the person's rights and freedom of action
+- When should capacity be assessed?
+    - You are required to make an assessment of capacity before carrying out any care or treatment if you have reasonable belief someone lacks capacity
+    - Therefore, if there is any doubt about whether the patient can: Understand information given to them, Retain that information long enough to be able to make the decision, Weigh up the information available to make the decision or Communicate their decision
+    - [https://www.scie.org.uk/mca/practice/assessing-capacity](https://www.scie.org.uk/mca/practice/assessing-capacity)
+- Can you assume that someone lacks capacity if they have a certain disease such as dementia?
+    - No,  Capacity should be assumed unless it is proved otherwise - principle 1 of the MCA
+    - Never assume someone does not have capacity even if they have end-stage dementia
