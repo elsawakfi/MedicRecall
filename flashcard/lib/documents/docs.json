@@ -1,0 +1,134 @@
+[
+  {
+    "name": "Root",
+    "superclasses": "",
+    "subclasses": "",
+    "type": 2,
+    "responsibilities": [
+      "contains everything the user sees (UI)",
+      "contains everything needed to run the application"
+    ],
+    "collaborators": [
+      "main",
+      "feed",
+      "notes",
+      "settings",
+      "quizpage",
+      "Topics",
+      "Study",
+      "result",
+      "recover_pass",
+      "quizpage",
+      "quiz",
+      "login",
+      "recover_pass"
+    ]
+  },
+  {
+    "name": "quizpage",
+    "superclasses": "FrontEnd",
+    "subclasses": "quiz",
+    "type": 1,
+    "responsibilities": [
+      "a page for users to test themselves with a test"
+    ],
+    "collaborators": [
+      "quiz"
+    ]
+  },
+  {
+    "name": "study",
+    "superclasses": "FrontEnd",
+    "subclasses": "Topics",
+    "type": 1,
+    "responsibilities": [
+      "contains flashcards for studyng new material"
+    ],
+    "collaborators": [
+      "quiz, result, Questions, Topics"
+    ]
+  },
+  {
+    "name": "Login",
+    "superclasses": "FrontEnd",
+    "subclasses": "recover_pass",
+    "type": 1,
+    "responsibilities": [
+      "Login the user"
+    ],
+    "collaborators": [
+      "recover_pass"
+    ]
+  },
+  {
+    "name": "dashboard",
+    "superclasses": "",
+    "subclasses": "",
+    "type": 1,
+    "responsibilities": [
+      "show main fee and activities on the application",
+      "show countdown till inputted user date"
+    ],
+    "collaborators": [
+      " main"
+    ]
+  },
+  {
+    "name": "settings",
+    "superclasses": "",
+    "subclasses": "help, information",
+    "type": 1,
+    "responsibilities": [
+      "show settings to the application",
+      "additional user support",
+      "allow user customization "
+    ],
+    "collaborators": [
+      "main",
+      "help",
+      "- information"
+    ]
+  },
+  {
+    "name": "clendar",
+    "superclasses": "",
+    "subclasses": "",
+    "type": 1,
+    "responsibilities": [
+      "record all user activities",
+      "incorperate spaced repetition",
+      "allow user customization and plan on their own"
+    ],
+    "collaborators": [
+      "study"
+    ]
+  },
+  {
+    "name": "revision",
+    "superclasses": "",
+    "subclasses": "",
+    "type": 1,
+    "responsibilities": [
+      "allow users to revisit previously studied topics"
+    ],
+    "collaborators": [
+      "study",
+      "calander"
+    ]
+  },
+  {
+    "name": "editFlashcard",
+    "superclasses": "",
+    "subclasses": "",
+    "type": 1,
+    "responsibilities": [
+      "Allow users to edit pre-existing flashcards"
+    ],
+    "collaborators": [
+      "study",
+      "calander",
+      "revision",
+      "quizpage"
+    ]
+  }
+]

@@ -1,0 +1,7 @@
+applications:
+  - name: Flashcard
+memory: 64M
+path: build/web/
+buildpack: staticfile_buildpack
+routes:
+  - route: flashcard-<lsm>.<eu-gb>.cf.appdomain.cloud
