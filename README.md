@@ -93,7 +93,7 @@ To build Medicrecall yourself, you will need the following tools:
 - An emulator capable of running either:
   - Android 6.0 or above, or
   - iOS 11.0 or above
-- Flutter SDK ([Available here](https://docs.flutter.dev/get-started/install))
+- Flutter SDK version 3.7.12 ([Available here](https://docs.flutter.dev/release/archive))
 - A clone of the repository via: `git clone https://github.com/spe-uob/2024-MedicRecall2.git` or `git clone git@github.com:spe-uob/2024-MedicRecall2.git`
 
 ### Build
