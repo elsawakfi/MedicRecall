@@ -108,21 +108,23 @@ To build Medicrecall yourself, you will need the following tools:
 
 ## Tech Stack
 
-- **Languages**: [Dart](https://dart.dev/)
+- **Language**: [Dart](https://dart.dev/)
 - **Front-End**: [Flutter](https://flutter.dev/)
 - **Back-End**: [Firebase](https://firebase.google.com/)
-- **Database**: [Firebase Firestore](https://firebase.google.com/docs/firestore)
-- **Targeted Platforms**: Windows, macOS, Linux, iOS and Android
+- **Database**: [Cloud Firestore](https://firebase.google.com/docs/firestore)
+- **Targeted Platforms**: Browser, Android and iOS
 
 <details>
   <summary>Firebase Structure</summary>
     <p align="left">
-      <img width="470" alt="image" src="https://user-images.githubusercontent.com/98459342/215339659-6753675e-f5d8-4566-ab32-5f4cdd8817e5.png">
+      <img width="470" alt="image" src="https://user-images.githubusercontent.com/98459342/215339659-6753675e-f5d8-4566-ab32-5f4cdd8817e5.png" style="box-shadow: 5px 5px 10px rgba(0,0,0,0.5)">
     </p>     
 </details>
 
 ## Architecture Diagram
--> To be implemented
+<p align="left">
+  <img width="470" alt="architecture image" src="docs/2024/Architecture/Architecture.png" style="box-shadow: 5px 5px 10px rgba(0,0,0,0.5)";>
+</p>
 
 ## Team Members
 
