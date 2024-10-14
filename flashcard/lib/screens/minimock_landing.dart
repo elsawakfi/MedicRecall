@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/screens/minimock_exam.dart';
+import 'package:flashcard_x/widgets/drawer_widget.dart';
 
 class MiniMockLanding extends StatefulWidget {
   const MiniMockLanding({Key? key}) : super(key: key);
@@ -12,8 +13,42 @@ class MiniMockLandingState extends State<MiniMockLanding> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const DrawMain(),
+        appBar: AppBar(
+          // backgroundColor: Colors.blue,
+            elevation: 0,
+            title:  Align(
+              alignment: const Alignment(-0.05,0),
+              child: Stack(
+                children: [
+                  Positioned(
+                    top: 2.3,
+                    child: Image.asset(
+                      'assets/newlogo.png',
+                      fit: BoxFit.cover,
+                      height: 34,
+                    ),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.only(left: 32),
+                    padding: const EdgeInsets.all(8.0),
+                    child: const Text('Mini-Mocks',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            centerTitle: true,
+            leading: Builder(
+                builder: (context) => GestureDetector(
+                  onTap: () => Scaffold.of(context).openDrawer(),
+                  child: const Icon(
+                    Icons.menu,
+                  ),
+                ))),
       body: Container(
-        color: Colors.lightBlue[800], // Set the background color of the page
+        //color:Color.fromARGB(255, 33, 100, 159), 
         padding: const EdgeInsets.all(16.0), // Add some padding
         child: Center( // Center the column vertically and horizontally
           child: Column(
