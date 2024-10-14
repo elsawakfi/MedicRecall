@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class MyWidget extends StatefulWidget {
-  const MyWidget({Key? key}) : super(key: key);
+class MiniMockLanding extends StatefulWidget {
+  const MiniMockLanding({Key? key}) : super(key: key);
   
   @override
-  State<MyWidget> createState() => _MyWidgetState();
+  State<MiniMockLanding> createState() => MiniMockLandingState();
 }
 
-class _MyWidgetState extends State<MyWidget> {
+class MiniMockLandingState extends State<MiniMockLanding> {
   @override
   Widget build(BuildContext context) {
     return const Placeholder();
