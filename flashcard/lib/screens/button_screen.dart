@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:flashcard_x/utils/theme_provider.dart';
 
 // TODO: Add a button to the screen
 class CustomFloatingButton extends StatelessWidget {
@@ -10,6 +9,7 @@ class CustomFloatingButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      margin: const EdgeInsets.only(bottom: 55),
       width: 210,
       height: 40.31,
       decoration: BoxDecoration(
@@ -54,7 +54,7 @@ void _showRevisionPlanDialog(BuildContext context) {
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        backgroundColor: const Color.fromARGB(255, 180, 193, 203),
+        backgroundColor: const Color(0xFFE6EDF2),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(0),
         ),
@@ -96,7 +96,7 @@ void _showExamDateDialog(BuildContext context) {
       return StatefulBuilder(
         builder: (context, setState) {
           return AlertDialog(
-            backgroundColor: const Color.fromARGB(255, 180, 193, 203),
+            backgroundColor: const Color(0xFFE6EDF2),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(0),
             ),
@@ -175,9 +175,9 @@ void _showRepetitionDialog(BuildContext context) {
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        backgroundColor: const Color.fromARGB(255, 180, 193, 203),
+        backgroundColor: const Color(0xFFE6EDF2),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(0),
         ),
         title: const Text(
           'How many repetitions of the official paper link?',
