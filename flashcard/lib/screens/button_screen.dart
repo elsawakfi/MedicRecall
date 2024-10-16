@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:flashcard_x/utils/theme_provider.dart';
 
 // TODO: Add a button to the screen
 class CustomFloatingButton extends StatelessWidget {
@@ -53,15 +54,15 @@ void _showRevisionPlanDialog(BuildContext context) {
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        backgroundColor: const Color.fromARGB(255, 235, 230, 239),
+        backgroundColor: const Color.fromARGB(255, 180, 193, 203),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(0),
         ),
         title: const Text(
           'Do you want to start your revision plan today?',
           style: TextStyle(
-            color: Color.fromARGB(255, 98, 86, 139),
-            fontSize: 14,
+            color: Color.fromRGBO(21, 58, 103, 1),
+            fontSize: 21,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -95,15 +96,15 @@ void _showExamDateDialog(BuildContext context) {
       return StatefulBuilder(
         builder: (context, setState) {
           return AlertDialog(
-            backgroundColor: const Color.fromARGB(255, 235, 230, 239),
+            backgroundColor: const Color.fromARGB(255, 180, 193, 203),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(0),
             ),
             title: const Text(
               'What is your exam date?',
               style: TextStyle(
-                color: Color.fromARGB(255, 98, 86, 139),
-                fontSize: 14,
+                color: Color.fromRGBO(21, 58, 103, 1),
+                fontSize: 21,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -125,7 +126,7 @@ void _showExamDateDialog(BuildContext context) {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 98, 86, 139),
+                    backgroundColor: const Color.fromRGBO(21, 58, 103, 1),
                   ),
                   child: const Text('Pick Date'),
                 ),
@@ -137,7 +138,7 @@ void _showExamDateDialog(BuildContext context) {
                   style: TextStyle(
                     color: _selectedDate != null
                         ? Colors.black
-                        : const Color.fromARGB(255, 98, 86, 139),
+                        : const Color.fromRGBO(21, 58, 103, 1),
                   ),
                 ),
               ],
@@ -174,15 +175,15 @@ void _showRepetitionDialog(BuildContext context) {
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        backgroundColor: const Color.fromARGB(255, 235, 230, 239),
+        backgroundColor: const Color.fromARGB(255, 180, 193, 203),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
         title: const Text(
           'How many repetitions of the official paper link?',
           style: TextStyle(
-            color: Color.fromARGB(255, 98, 86, 139),
-            fontSize: 14,
+            color:  Color.fromRGBO(21, 58, 103, 1),
+            fontSize: 21,
             fontWeight: FontWeight.w500,
           ),
         ),
