@@ -140,13 +140,13 @@ class _CustomFloatingButtonState extends State<CustomFloatingButton> {
             TextButton(
               onPressed: () {
                 final int? repetitions = int.tryParse(_controller.text);
-                if (repetitions != null && repetitions > 0) {
+                if (repetitions != null && repetitions > 0 && repetitions < 10) {
                   Navigator.of(context).pop();
                   // Add your action here after repetitions are submitted
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Please enter a valid number greater than zero'),
+                      content: Text('Please enter a number between 1 and 9'),
                     ),
                   );
                 }
