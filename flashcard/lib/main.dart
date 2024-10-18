@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'package:flashcard_x/screens/dashboard_screen.dart';
 import 'package:flashcard_x/screens/landing_screen.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
@@ -25,7 +26,9 @@ Future<void> main() async {
     [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown],
   );
 
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+  options: DefaultFirebaseOptions.currentPlatform,
+);
 
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive).then((_) {
     // full screen mode
