@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flashcard_x/screens/minimock_exam.dart';
+import 'package:flashcard_x/screens/minimock_exam1.dart';
+import 'package:flashcard_x/screens/minimock_exam2.dart';
 import 'package:flashcard_x/widgets/drawer_widget.dart';
+
 
 class MiniMockLanding extends StatefulWidget {
   const MiniMockLanding({Key? key}) : super(key: key);
@@ -57,56 +59,56 @@ class MiniMockLandingState extends State<MiniMockLanding> {
               SizedBox(height: 10),
               SizedBox(
                 height: 50,
-                width: 500, // Set a fixed width for the button
+                width: 1000, // Set a fixed width for the button
                 child: ElevatedButton.icon(
                   onPressed: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => const MiniMockExam(),
+                        builder: (context) => const MiniMockExam1(),
                       ),
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
+                    backgroundColor: Colors.white,
                     elevation: 10,
                     padding: const EdgeInsets.symmetric(vertical: 15),
                   ),
                   icon: const Icon(
                     Icons.lock_open_sharp,
                     size: 30,
-                    color: Colors.white,
+                    color: Colors.black,
                   ),
                   label: const Text(
                     'Mini Mock 1',
-                    style: TextStyle(color: Colors.white, fontSize: 20),
+                    style: TextStyle(color: Colors.black, fontSize: 20),
                   ),
                 ),
               ),
               const SizedBox(height: 50),
               SizedBox(
                 height: 50,
-                width: 500, // Set a fixed width for the button
+                width: 1000, // Set a fixed width for the button
                 child: ElevatedButton.icon(
                   onPressed: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => const MiniMockExam(),
+                        builder: (context) => const MiniMockExam2(),
                       ),
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
+                    backgroundColor: Colors.white,
                     elevation: 10,
                     padding: const EdgeInsets.symmetric(vertical: 15),
                   ),
                   icon: const Icon(
                     Icons.lock_open_sharp,
                     size: 30,
-                    color: Colors.white,
+                    color: Colors.black,
                   ),
                   label: const Text(
                     'Mini Mock 2',
-                    style: TextStyle(color: Colors.white, fontSize: 20),
+                    style: TextStyle(color: Colors.black, fontSize: 20),
                   ),
                 ),
               ),
