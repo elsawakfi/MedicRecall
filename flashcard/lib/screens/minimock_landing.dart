@@ -20,7 +20,7 @@ class MiniMockLandingState extends State<MiniMockLanding> {
           // backgroundColor: Colors.blue,
             elevation: 0,
             title:  Align(
-              alignment: const Alignment(-0.05,0),
+              alignment: const Alignment(-1.0,0),
               child: Stack(
                 children: [
                   Positioned(
@@ -31,17 +31,19 @@ class MiniMockLandingState extends State<MiniMockLanding> {
                       height: 34,
                     ),
                   ),
+            
                   Container(
                     margin: const EdgeInsets.only(left: 32),
                     padding: const EdgeInsets.all(8.0),
                     child: const Text('Mini-Mocks',
+                    textAlign: TextAlign.left,
                     ),
                   ),
                 ],
               ),
             ),
 
-            centerTitle: true,
+            centerTitle: false,
             leading: Builder(
                 builder: (context) => GestureDetector(
                   onTap: () => Scaffold.of(context).openDrawer(),
@@ -102,7 +104,7 @@ class MiniMockLandingState extends State<MiniMockLanding> {
                     padding: const EdgeInsets.symmetric(vertical: 15),
                   ),
                   icon: const Icon(
-                    Icons.lock_open_sharp,
+                    Icons.lock_clock_sharp,
                     size: 30,
                     color: Colors.black,
                   ),
