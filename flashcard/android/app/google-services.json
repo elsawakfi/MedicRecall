@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "901209154940-n3nu0kc306ciqbps1915uvgu4rbc7n66.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.flashcard_x",
+            "certificate_hash": "21c092eb5e906485bd55f6c4dd78e2b87af1fc6a"
+          }
+        },
+        {
           "client_id": "901209154940-1jo9qb1mmj6ig2auu3matnindmvv7815.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -29,6 +37,49 @@
             {
               "client_id": "901209154940-1jo9qb1mmj6ig2auu3matnindmvv7815.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "901209154940-8e57affj5qk2kupjhtrbjrslm9ruqd5i.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.app"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:901209154940:android:0dfb7e0fadefe88c31f0f9",
+        "android_client_info": {
+          "package_name": "com.medicrecall.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "901209154940-1jo9qb1mmj6ig2auu3matnindmvv7815.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAX0jrO4OrBgaLqqGKM4TK1oqFpTjKgO-8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "901209154940-1jo9qb1mmj6ig2auu3matnindmvv7815.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "901209154940-8e57affj5qk2kupjhtrbjrslm9ruqd5i.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.app"
+              }
             }
           ]
         }
