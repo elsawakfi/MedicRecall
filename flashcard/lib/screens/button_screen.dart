@@ -116,7 +116,7 @@ class _CustomFloatingButtonState extends State<CustomFloatingButton> {
 
   // Show dialog to ask for number of repetitions
   void _showRepetitionDialog(BuildContext context) {
-    final _controller = TextEditingController();
+    final controller = TextEditingController();
 
     showDialog(
       context: context,
@@ -124,7 +124,7 @@ class _CustomFloatingButtonState extends State<CustomFloatingButton> {
         return _buildAlertDialog(
           title: 'How many repetitions of the official paper link?',
           content: TextField(
-            controller: _controller,
+            controller: controller,
             keyboardType: TextInputType.number,
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
@@ -139,7 +139,7 @@ class _CustomFloatingButtonState extends State<CustomFloatingButton> {
           actions: [
             TextButton(
               onPressed: () {
-                final int? repetitions = int.tryParse(_controller.text);
+                final int? repetitions = int.tryParse(controller.text);
                 if (repetitions != null && repetitions > 0 && repetitions < 10) {
                   Navigator.of(context).pop();
                   // Add your action here after repetitions are submitted
