@@ -305,13 +305,13 @@ class LandingState extends State<Landing> {
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: const [
                                     Icon(
-                                      Icons.calendar_today_outlined,
+                                      Icons.assignment_outlined,
                                       color: Colors.white,
                                     ),
                                     SizedBox(width: 10),
                                     Expanded(
                                       child: Text(
-                                        'Minimock',
+                                        'Mini-mock',
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontSize: 34,
