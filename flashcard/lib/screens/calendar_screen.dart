@@ -7,6 +7,7 @@ import 'package:flashcard_x/widgets/event.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/screens/dashboard_screen.dart';
+import 'package:flashcard_x/screens/button_screen.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 /*
@@ -514,7 +515,12 @@ class CalendarStateO extends State<Calendar> {
                     deleteAllEvents();
                     setState(() {});
                   },
-                  child: const Text("DELETE ALL"),
+                  
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    ),
+                    textColor:  const Color.fromARGB(255, 243, 167, 162),
+                    child: const Text("DELETE ALL"), 
                 ),
 
                 Row(
@@ -709,7 +715,7 @@ class CalendarStateO extends State<Calendar> {
                         },
                       ),
                     ])),
-        label: const Text("Add event", style: TextStyle(color: Colors.black)),
+        label: const Text("Add event", style: TextStyle(color: Colors.white)),
         icon: const Icon(Icons.add),
       ),
     );
