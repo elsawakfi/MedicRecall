@@ -433,8 +433,8 @@ class LandingState extends State<Landing> {
                       ))),
             ],
           )),
-           floatingActionButton: const CustomFloatingButton(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
+          floatingActionButton: const CustomFloatingButton(),
+          floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
     );
   }
 
