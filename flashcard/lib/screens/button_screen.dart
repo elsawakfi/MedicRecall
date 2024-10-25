@@ -1,6 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flashcard_x/screens/sign_in_screen.dart';
+import 'package:flashcard_x/widgets/drawer_widget.dart';
+import 'package:flashcard_x/widgets/event.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flashcard_x/screens/dashboard_screen.dart';
+import 'package:table_calendar/table_calendar.dart';
+import 'calendar_screen.dart';
 
 class CustomFloatingButton extends StatefulWidget {
   const CustomFloatingButton({Key? key}) : super(key: key);
@@ -11,6 +21,20 @@ class CustomFloatingButton extends StatefulWidget {
 
 class _CustomFloatingButtonState extends State<CustomFloatingButton> {
   DateTime? _examDate;
+  final CollectionReference _userCollectionRef =
+      FirebaseFirestore.instance.collection('users');
+
+  late CollectionReference _eventsCollectionRef;
+
+  CollectionReference users = FirebaseFirestore.instance.collection('users');
+
+  final FirebaseAuth auth = FirebaseAuth.instance;
+  late User user;
+
+  
+  int buildCount = 0;
+  bool testDayBool = true;
+  late String testDayString = "Test day not set";
 
   // Helper method 
   Widget _buildAlertDialog({
@@ -35,6 +59,65 @@ class _CustomFloatingButtonState extends State<CustomFloatingButton> {
       actions: actions,
     );
   }
+  
+
+//Repurposed getter from calendar_screen.dart
+  Future<void> getTestDay() async {
+    QuerySnapshot querySnapshot =
+        await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+
+    var userFromDb = querySnapshot.docs.first;
+    Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
+    //if the Test Day field isn't null and is in the database we update the UI with it. Otherwise it is displayed as being not set.
+    if ((data.containsKey("TestDay") || data["TestDay"] != null) && (buildCount <= 2 || (_examDate != null && buildCount > 2))) {
+      testDayBool = false;
+      _examDate = DateTime.fromMicrosecondsSinceEpoch(userFromDb["TestDay"]
+          .microsecondsSinceEpoch); //firebase is weird. conversion from TimeStamp to DateTime object
+      String? day = _examDate?.day.toString();
+      String? month = _examDate?.month.toString();
+      String? year = _examDate?.year.toString();
+      testDayString = '$day-$month-$year';
+    } else {
+      testDayBool = true;
+    }
+    setState(() {});
+  }
+  //Repurposed setter from calendar_screen.dart
+  Future<void> updateTestDay(DateTime date) async {
+    CollectionReference users = FirebaseFirestore.instance.collection('users');
+    QuerySnapshot u =
+      await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+
+      /*  FIRST update on database */
+    var id = u.docs.last.id; //id being where the user's id details
+    users.doc(id).update(
+        {"TestDay": _examDate}); // update field testday to what is passed as param
+    await getTestDay();
+    setState(() {});
+  }
+
+  Future<void> getUser() async {
+    NavigatorState nav = Navigator.of(context);
+    if (auth.currentUser == null) {
+      var tmp = await auth
+          .authStateChanges()
+          .first;
+      if (tmp == null) {
+        nav.push(
+            MaterialPageRoute(
+              builder: (context) => const SignInScreen(),
+            )
+        );
+      } else {
+        user = tmp;
+      }
+    } else {
+      user = auth.currentUser!;
+    }
+  }
+
+  
+  
 
   //  revision dialog 
   void _showRevisionPlanDialog(BuildContext context) {
@@ -73,6 +156,8 @@ class _CustomFloatingButtonState extends State<CustomFloatingButton> {
           title: 'What is your exam date?',
           content: Column(
             mainAxisSize: MainAxisSize.min,
+            
+            //if statement to check if firebase already has exam date in database
             children: [
               ElevatedButton(
                 onPressed: () async {
@@ -84,7 +169,9 @@ class _CustomFloatingButtonState extends State<CustomFloatingButton> {
                   );
                   if (picked != null) {
                     setState(() {
-                      _examDate = picked; // Update parent state
+                      _examDate = picked;
+                      updateTestDay(picked); // Update parent state
+                      testDayBool = false;
                     });
                     Navigator.of(context).pop();
                     _showRepetitionDialog(context); // Proceed to next dialog
@@ -168,6 +255,9 @@ class _CustomFloatingButtonState extends State<CustomFloatingButton> {
 
   @override
   Widget build(BuildContext context) {
+    buildCount++;
+    getUser();
+    getTestDay();
     return Container(
       margin: const EdgeInsets.only(bottom: 55),
       width: 210,
@@ -183,8 +273,30 @@ class _CustomFloatingButtonState extends State<CustomFloatingButton> {
         ],
       ),
       child: FloatingActionButton.extended(
+        label: Text(
+          _examDate!=null
+              ? '${_calculateDaysUntilExam(_examDate!)} Days to Your Exam'
+              : 'Set Your Exam Date',
+          style: const TextStyle(
+            color: Color.fromARGB(255, 98, 86, 139),
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
         onPressed: () {
-          _showRevisionPlanDialog(context);
+          getTestDay();
+          if(testDayBool){
+            _showRevisionPlanDialog(context);
+          }
+          else if(!testDayBool){
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return _buildAlertDialog(
+                  title: 'Exam Date Already Set',
+                  content: const SizedBox(), // Empty content for this dialog
+                  actions: [],);});
+          }
         },
         backgroundColor: const Color.fromARGB(255, 235, 230, 239),
         shape: RoundedRectangleBorder(
@@ -194,17 +306,8 @@ class _CustomFloatingButtonState extends State<CustomFloatingButton> {
           Icons.calendar_today,
           color: Color.fromARGB(255, 98, 86, 139),
         ),
-        label: Text(
-          _examDate != null
-              ? '${_calculateDaysUntilExam(_examDate!)} Days to Your Exam'
-              : 'Set Your Exam Date',
-          style: const TextStyle(
-            color: Color.fromARGB(255, 98, 86, 139),
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
+        
       ),
     );
-  }
-}
+  }}
+
