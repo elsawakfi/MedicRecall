@@ -6,6 +6,7 @@ import 'package:flashcard_x/screens/calendar_screen.dart';
 import 'package:flashcard_x/screens/dashboard_screen.dart';
 import 'package:flashcard_x/screens/faq.dart';
 import 'package:flashcard_x/screens/flashcard_editor_screen.dart';
+import 'package:flashcard_x/screens/minimock_landing.dart';
 // import 'package:flashcard_x/screens/exam_guide_screen.dart';
 // import 'package:flashcard_x/screens/resources.dart';
 import 'package:flashcard_x/screens/settings_screen.dart' as setting;
@@ -280,6 +281,51 @@ class LandingState extends State<Landing> {
                               ),
                             ),
                           ),
+                          const SizedBox(height: 40),
+                          Center(
+                            child: Container(
+                              constraints: const BoxConstraints(maxWidth: 400),
+                              child: TextButton(
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+                                  foregroundColor: Colors.blueGrey,
+                                  backgroundColor: Colors.blueGrey,
+                                  side: const BorderSide(color: Colors.blueGrey, width: 2),
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.all(Radius.circular(100)),
+                                  ),
+                                ),
+                                onPressed: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const MiniMockLanding(),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: const [
+                                    Icon(
+                                      Icons.assignment_outlined,
+                                      color: Colors.white,
+                                    ),
+                                    SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(
+                                        'Mini-mock',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 34,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        
                           const SizedBox(height: 40),
                           Center(
                             child: Container(
