@@ -45,7 +45,18 @@ class MiniMockExam1State extends State<MiniMockExam1> {
                   onTap: () => Scaffold.of(context).openDrawer(),
                   child: const Icon(
                     Icons.menu,
+            // centerTitle: true,
+            // leading: Builder(
+            //     builder: (context) => GestureDetector(
+            //       onTap: () => Scaffold.of(context).openDrawer(),
+            //       child: const Icon(
+            //         Icons.menu,
                   ),
                 ))));
+                // ElevatedButton(
+                //   onPressed: (){
+
+                // },
+                // child: ,)
   }
 }
