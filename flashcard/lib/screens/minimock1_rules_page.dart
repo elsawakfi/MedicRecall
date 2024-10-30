@@ -50,18 +50,25 @@ class MiniMock1RulesState extends State<MiniMock1Rules> {
                   child: const Icon(
                     Icons.menu,
                   ),
-                ))));
-                
-                ElevatedButton(
-                  onPressed: (){
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const MiniMockExam1(),
-                      ),
-                    );
-                  },
-                  child: Text('Start'),
+                )
+            )
+
+        ),
+        body: Center(
+          child: ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const MiniMockExam1(),
+                  ),
                 );
+              },
+              child: Text('Start'),
+            ),
+          ),
+    );
+
     }
   }
 
