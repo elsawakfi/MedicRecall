@@ -8,7 +8,7 @@ import 'package:flashcard_x/screens/reset_password_screen.dart';
 class SignInScreen extends StatefulWidget {
   static String id = 'login';
 
-  const SignInScreen({Key? key}) : super(key: key);
+  const SignInScreen({super.key});
 
   @override
   State<SignInScreen> createState() => SignInScreenState();

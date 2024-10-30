@@ -3,7 +3,7 @@ import 'package:flashcard_x/widgets/drawer_widget.dart';
 
 
 class MiniMockExam2 extends StatefulWidget {
-  const MiniMockExam2({Key? key}) : super(key: key);
+  const MiniMockExam2({super.key});
 
   @override
   State<MiniMockExam2> createState() => MiniMockExam2State();

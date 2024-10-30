@@ -7,7 +7,7 @@ import '../widgets/drawer_widget.dart';
 import 'add_flashcard_screen.dart';
 
 class FlashcardEditor extends StatefulWidget {
-  const FlashcardEditor({Key? key}) : super(key: key);
+  const FlashcardEditor({super.key});
 
   @override
   State<FlashcardEditor> createState() => FlashcardEditorState();
