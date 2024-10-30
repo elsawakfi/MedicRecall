@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'dashboard_screen.dart';
 import 'ms_questions.dart';
+import 'package:flashcard_x/screens/button_screen.dart';
 
 
 // first we define our mark scheme info class - DONE
@@ -33,7 +34,7 @@ class MSInfo {
 }
 
 class UMS extends StatelessWidget {
-  const UMS({Key? key}) : super(key: key);
+  const UMS({super.key});
 
 /*
 Have the first place be an explanation of the mark scheme, leave blank for rn
@@ -237,6 +238,8 @@ Have the first place be an explanation of the mark scheme, leave blank for rn
               )
             ],
           )),
+          floatingActionButton: const CustomFloatingButton(),
+          floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
     );
   }
 }

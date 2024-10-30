@@ -34,7 +34,7 @@ class MSSingle extends StatefulWidget {
   final List<int> typeQuestions;
   final int currentIndex;
 
-  const MSSingle({Key? key, required this.msiSingle, required this.allQuestions, required this.typeQuestions, required this.currentIndex}) : super(key: key);
+  const MSSingle({super.key, required this.msiSingle, required this.allQuestions, required this.typeQuestions, required this.currentIndex});
 
   @override
 
@@ -381,7 +381,7 @@ class _MSSingleState extends State<MSSingle> {
 class LabelWidget extends StatelessWidget {
   final String labelText;
 
-  const LabelWidget({Key? key, required this.labelText}) : super(key: key);
+  const LabelWidget({super.key, required this.labelText});
 
   @override
   Widget build(BuildContext context) {

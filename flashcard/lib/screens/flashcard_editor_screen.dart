@@ -2,12 +2,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flashcard_x/screens/button_screen.dart';
 
 import '../widgets/drawer_widget.dart';
 import 'add_flashcard_screen.dart';
 
 class FlashcardEditor extends StatefulWidget {
-  const FlashcardEditor({Key? key}) : super(key: key);
+  const FlashcardEditor({super.key});
 
   @override
   State<FlashcardEditor> createState() => FlashcardEditorState();
@@ -206,6 +207,8 @@ class FlashcardEditorState extends State<FlashcardEditor> {
           ],
         ),
       ),
+      floatingActionButton: const CustomFloatingButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
     );
   }
 

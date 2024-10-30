@@ -6,7 +6,9 @@ import 'package:flashcard_x/screens/calendar_screen.dart';
 import 'package:flashcard_x/screens/dashboard_screen.dart';
 import 'package:flashcard_x/screens/faq.dart';
 import 'package:flashcard_x/screens/flashcard_editor_screen.dart';
+import 'package:flashcard_x/screens/button_screen.dart';
 import 'package:flashcard_x/screens/minimock_landing.dart';
+
 // import 'package:flashcard_x/screens/exam_guide_screen.dart';
 // import 'package:flashcard_x/screens/resources.dart';
 import 'package:flashcard_x/screens/settings_screen.dart' as setting;
@@ -25,7 +27,7 @@ Do i need to pass the user's name over?
 class Landing extends StatefulWidget {
   static String id = 'landing';
 
-  const Landing({Key? key}) : super(key: key);
+  const Landing({super.key});
 
   @override
   State<StatefulWidget> createState() => LandingState();
@@ -305,13 +307,13 @@ class LandingState extends State<Landing> {
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: const [
                                     Icon(
-                                      Icons.calendar_today_outlined,
+                                      Icons.assignment_outlined,
                                       color: Colors.white,
                                     ),
                                     SizedBox(width: 10),
                                     Expanded(
                                       child: Text(
-                                        'Minimock',
+                                        'Mini-mock',
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontSize: 34,
@@ -478,6 +480,8 @@ class LandingState extends State<Landing> {
                       ))),
             ],
           )),
+          floatingActionButton: const CustomFloatingButton(),
+          floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
     );
   }
 

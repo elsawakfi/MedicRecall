@@ -6,7 +6,7 @@ class FolderGridView extends StatelessWidget {
   final CollectionReference flashcards =
       FirebaseFirestore.instance.collection('flashcards');
 
-  FolderGridView({Key? key}) : super(key: key);
+  FolderGridView({super.key});
 
   @override
   Widget build(BuildContext context) {
