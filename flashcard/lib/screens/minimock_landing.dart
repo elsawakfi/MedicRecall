@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flashcard_x/screens/minimock_exam1.dart';
 import 'package:flashcard_x/screens/minimock_exam2.dart';
 import 'package:flashcard_x/widgets/drawer_widget.dart';
+import 'package:flashcard_x/screens/button_screen.dart';
 
 
 class MiniMockLanding extends StatefulWidget {
@@ -118,6 +119,8 @@ class MiniMockLandingState extends State<MiniMockLanding> {
           ),
         ),
       ),
+      floatingActionButton: const CustomFloatingButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
     );
   }
 }
