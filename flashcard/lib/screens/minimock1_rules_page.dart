@@ -54,7 +54,7 @@ class MiniMock1RulesState extends State<MiniMock1Rules> {
             )
 
         ),
-        body: Center(
+        body: Align(alignment: Alignment(0.9, 0.9),
           child: ElevatedButton(
               onPressed: () {
                 Navigator.push(
