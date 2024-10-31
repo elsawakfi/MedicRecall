@@ -69,7 +69,7 @@ List<String> topicsList = [
 List<dynamic> topicsSeen = [];
 
 class Calendar extends StatefulWidget {
-  const Calendar({Key? key}) : super(key: key);
+  const Calendar({super.key});
 
   @override
   CalendarStateO createState() => CalendarStateO();

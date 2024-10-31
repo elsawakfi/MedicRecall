@@ -46,7 +46,7 @@ Future<void> main() async {
 }
 
 class Flashcard extends StatelessWidget {
-  const Flashcard({Key? key}) : super(key: key);
+  const Flashcard({super.key});
 
   @override
   Widget build(BuildContext context) {

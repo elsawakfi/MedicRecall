@@ -28,7 +28,7 @@ Do i need to pass the user's name over?
 class Landing extends StatefulWidget {
   static String id = 'landing';
 
-  const Landing({Key? key}) : super(key: key);
+  const Landing({super.key});
 
   @override
   State<StatefulWidget> createState() => LandingState();

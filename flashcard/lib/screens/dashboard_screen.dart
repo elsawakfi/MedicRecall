@@ -12,7 +12,7 @@ import 'package:intl/intl.dart';
 class HomePage extends StatefulWidget {
   static String id = 'home';
 
-  const HomePage({Key? key, required this.title}) : super(key: key);
+  const HomePage({super.key, required this.title});
   final String title;
 
   @override

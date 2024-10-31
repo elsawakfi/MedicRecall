@@ -9,11 +9,10 @@ class AnswerBox extends StatelessWidget {
       answerTap; //void call back used as a shorthand for void function, cannot just just funciton
 
   const AnswerBox(
-      {Key? key,
+      {super.key,
       required this.answerText,
       required this.answerColor,
-      required this.answerTap})
-      : super(key: key);
+      required this.answerTap});
 
   answer({answerText, answerColor}) {
     // TODO: implement Answer

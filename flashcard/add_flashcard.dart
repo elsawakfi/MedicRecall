@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 // import 'package:flashcard_x/main.dart';
 
 class Notes extends StatelessWidget {
-  const Notes({Key? key}) : super(key: key);
+  const Notes({super.key});
 
   void homepage(BuildContext context) {
     // this method returns the user to the main page

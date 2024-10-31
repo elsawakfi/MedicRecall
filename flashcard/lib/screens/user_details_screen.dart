@@ -7,7 +7,7 @@ import 'package:flashcard_x/utils/authentication.dart';
 import 'package:flutter/material.dart';
 
 class UserDetailsPage extends StatefulWidget {
-  const UserDetailsPage({Key? key}) : super(key: key);
+  const UserDetailsPage({super.key});
 
   @override
   State<UserDetailsPage> createState() => UserDetailsPageState();

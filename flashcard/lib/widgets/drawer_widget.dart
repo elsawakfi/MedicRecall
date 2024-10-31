@@ -13,7 +13,7 @@ import '../screens/calendar_screen.dart';
 import '../screens/flashcard_editor_screen.dart';
 
 class DrawMain extends StatelessWidget {
-  const DrawMain({Key? key}) : super(key: key);
+  const DrawMain({super.key});
 
   @override
   Widget build(BuildContext context) {
