@@ -11,11 +11,11 @@ class RegistrationForm extends StatefulWidget {
   final FocusNode passwordFocusNode;
 
   const RegistrationForm({
-    Key? key,
+    super.key,
     required this.nameFocusNode,
     required this.emailFocusNode,
     required this.passwordFocusNode,
-  }) : super(key: key);
+  });
 
   @override
   State<RegistrationForm> createState() => _RegistrationFormState();

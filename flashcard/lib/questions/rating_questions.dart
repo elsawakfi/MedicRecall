@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class RatingQuestions extends StatefulWidget {
-  const RatingQuestions({Key? key}) : super(key: key);
+  const RatingQuestions({super.key});
 
   @override
   RatingQuestionsStateO createState() => RatingQuestionsStateO();
