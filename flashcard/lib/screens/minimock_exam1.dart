@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/pageLayout.dart';
+import 'package:flashcard_x/screens/minimock_feedback.dart';
 
 
 class MiniMockExam1 extends StatefulWidget {
@@ -34,17 +35,23 @@ class MiniMockExam1State extends State<MiniMockExam1> {
     // Initialise questions and answer lists based on the queried data
     setState(() {
       questions = fetchedQuestions;
-      //Generates questions.length number of lists (each with length relative to the question they represent), initialised with falses
-      multiChoiceAnswers = List.generate(questions.length, (index) {
-        return List<bool>.filled(questions[index]['options'].length, false);
-      });
-      //var rankingQuestions = questions.where((question) => question['type'] == "ranking").toList();
-      rankingAnswers = List.generate(questions.length, (index) {
-        return List<String>.from(questions[index]['options']);
-      });
-    });
-}
 
+      for (var doc in questions){
+        String type = doc['type'];
+        switch (type) {
+          case 'ranking':
+            // Add a list of ordered letter 'A', 'B', ... based on quesiton index
+            rankingAnswers.add(List<String>.generate(doc['options'].length, (index) => String.fromCharCode(65 + index)));
+            break;
+          case 'multiple choice':
+            // Add a list of booleans
+            multiChoiceAnswers.add(List<bool>.filled(doc['options'].length, false));
+            break;
+          default:
+        }
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,20 +78,28 @@ class MiniMockExam1State extends State<MiniMockExam1> {
                   onReorder: (oldIndex, newIndex) {
                     setState(() {
                       if(newIndex > oldIndex) newIndex --; // Adjust the list based on movement of item
-                      final option = rankingAnswers[currentQuestion].removeAt(oldIndex);
-                      rankingAnswers[currentQuestion].insert(newIndex, option);
+                      // Update position of option in answer list
+                      final ranking = rankingAnswers[currentQuestion].removeAt(oldIndex);
+                      rankingAnswers[currentQuestion].insert(newIndex, ranking);
+                      // Update position of option text in question list
+                      final option = questions[currentQuestion]['options'].removeAt(oldIndex);
+                      questions[currentQuestion]['options'].insert(newIndex, option);
                     });
                   },
                   // Create children for the reorderable list using questions
-                  children: rankingAnswers[currentQuestion].asMap().entries.map<Widget>((entry) {
-                    // int optionIndex = entry.key;
+                  children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
+                    int optionIndex = entry.key;
                     String option = entry.value;
-                    int originalIndex = questions[currentQuestion]['options'].indexOf(option);
-                    String optionLetter = String.fromCharCode(65 + originalIndex);
-                    return ListTile(
+                    String optionLetter = rankingAnswers[currentQuestion][optionIndex];
+                    return ReorderableDragStartListener(
                       key: ValueKey(option),
-                      title: Text('$optionLetter. $option', style: TextStyle(color: Colors.white, fontSize: 20)),
-                      trailing: Icon(Icons.drag_handle),
+                      index: optionIndex,
+                      child: Card(
+                        child: ListTile(
+                          title: Text('$optionLetter. $option', style: TextStyle(color: Colors.blueGrey, fontSize: 20)),
+                          trailing: Icon(Icons.drag_handle , color: Colors.blueGrey),
+                        )
+                      )
                     );
                   }).toList(),
                 ),
@@ -93,23 +108,31 @@ class MiniMockExam1State extends State<MiniMockExam1> {
             // If the question is a multiple choice question, display checkboxes
             else if(questions[currentQuestion]['type'] == "multiple choice") ...[
               //Line below takes the result of the map() and spreads its widgets into the children of Column
-              ...questions[currentQuestion]['options'].asMap().entries.map((entry) {
-                int optionIndex = entry.key;
-                String option = entry.value;
-                String optionLetter = String.fromCharCode(65 + optionIndex);
-                return ListTile(
-                  title: Text('$optionLetter. $option', style: TextStyle(color: Colors.white, fontSize: 16)),
-                  leading: Checkbox(
-                    value: multiChoiceAnswers[currentQuestion][optionIndex],
-                    onChanged: (value) {
-                      setState(() {
-                        multiChoiceAnswers[currentQuestion][optionIndex] = value!;
-                      });
-                    },
-                    side: BorderSide( color: Colors.white),
-                  ),
-                );
-              })
+              Expanded(
+                child: Column(
+                  children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
+                    int optionIndex = entry.key;
+                    String option = entry.value;
+                    int questionIndex = currentQuestion - rankingAnswers.length;
+                    String optionLetter = String.fromCharCode(65 + optionIndex);
+                    return ListTile(
+                      title: Text('$optionLetter. $option', style: TextStyle(color: Colors.white, fontSize: 16)),
+                      leading: Checkbox(
+                        value: multiChoiceAnswers[questionIndex][optionIndex],
+                        onChanged: (value) {
+                          int checkedCount = multiChoiceAnswers[questionIndex].where((element) => element).length;
+                          if (checkedCount < 3 || value == false) {
+                            setState(() {
+                              multiChoiceAnswers[questionIndex][optionIndex] = value!;
+                            });
+                          }
+                        },
+                        side: BorderSide( color: Colors.white),
+                      ),
+                    );
+                  }).toList()
+                )
+              )
             ],
 
             // Buttons to change questions
@@ -136,6 +159,19 @@ class MiniMockExam1State extends State<MiniMockExam1> {
                     },
                     icon: Icon(Icons.arrow_forward, color: Colors.white),
                     label: Text('Next', style: TextStyle(color: Colors.white, fontSize: 16)),
+                  ),
+                if (currentQuestion == questions.length - 1)
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const MiniMockFeedback(),
+                        ),
+                      );
+                    },
+                    icon: Icon(Icons.arrow_forward, color: Colors.white),
+                    label: Text('Finish', style: TextStyle(color: Colors.white, fontSize: 16)),
                   ),
               ],
             ),
