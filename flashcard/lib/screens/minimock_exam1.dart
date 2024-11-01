@@ -21,6 +21,7 @@ class MiniMockExam1State extends State<MiniMockExam1> {
   List<List<bool>> multiChoiceAnswers = []; // For each question store selected options as a list of booleans
   List<List<String>> rankingAnswers = [];
   List<Map<String, dynamic>> questions = []; // Store question data with the question number as key e.g Q14
+  final options = 'ABCDEFGH';
 
   @override
   void initState() {
@@ -106,7 +107,6 @@ class MiniMockExam1State extends State<MiniMockExam1> {
   }
 
   List<List<String>> booleanToString(List<List<bool>> multiChoice) {
-    const options = 'ABCDEFGH';
     List<List<String>> multiChoiceLetters = [];
     for (int i = 0; i < multiChoice.length; i++){
       List<String> letters = [
@@ -161,7 +161,7 @@ class MiniMockExam1State extends State<MiniMockExam1> {
                       index: optionIndex,
                       child: Card(
                         child: ListTile(
-                          title: Text('$optionLetter. $option', style: TextStyle(color: Colors.blueGrey, fontSize: 20)),
+                          title: Text('${optionIndex+1}:   $optionLetter. $option', style: TextStyle(color: Colors.blueGrey, fontSize: 20)),
                           trailing: Icon(Icons.drag_handle , color: Colors.blueGrey),
                         )
                       )
@@ -174,28 +174,30 @@ class MiniMockExam1State extends State<MiniMockExam1> {
             else if(questions[currentQuestion]['type'] == "multiple choice") ...[
               //Line below takes the result of the map() and spreads its widgets into the children of Column
               Expanded(
-                child: Column(
-                  children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
-                    int optionIndex = entry.key;
-                    String option = entry.value;
-                    int questionIndex = currentQuestion - rankingAnswers.length;
-                    String optionLetter = String.fromCharCode(65 + optionIndex);
-                    return ListTile(
-                      title: Text('$optionLetter. $option', style: TextStyle(color: Colors.white, fontSize: 16)),
-                      leading: Checkbox(
-                        value: multiChoiceAnswers[questionIndex][optionIndex],
-                        onChanged: (value) {
-                          int checkedCount = multiChoiceAnswers[questionIndex].where((element) => element).length;
-                          if (checkedCount < 3 || value == false) {
-                            setState(() {
-                              multiChoiceAnswers[questionIndex][optionIndex] = value!;
-                            });
-                          }
-                        },
-                        side: BorderSide( color: Colors.white),
-                      ),
-                    );
-                  }).toList()
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
+                      int optionIndex = entry.key;
+                      String option = entry.value;
+                      int questionIndex = currentQuestion - rankingAnswers.length;
+                      String optionLetter = options[optionIndex];
+                      return ListTile(
+                        title: Text('$optionLetter. $option', style: TextStyle(color: Colors.white, fontSize: 16)),
+                        leading: Checkbox(
+                          value: multiChoiceAnswers[questionIndex][optionIndex],
+                          onChanged: (value) {
+                            int checkedCount = multiChoiceAnswers[questionIndex].where((element) => element).length;
+                            if (checkedCount < 3 || value == false) {
+                              setState(() {
+                                multiChoiceAnswers[questionIndex][optionIndex] = value!;
+                              });
+                            }
+                          },
+                          side: BorderSide( color: Colors.white),
+                        ),
+                      );
+                    }).toList()
+                  )
                 )
               )
             ],
