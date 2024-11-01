@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/pageLayout.dart';
 import 'package:flashcard_x/screens/minimock_feedback.dart';
@@ -12,6 +14,9 @@ class MiniMockExam1 extends StatefulWidget {
 }
 
 class MiniMockExam1State extends State<MiniMockExam1> {
+  final FirebaseAuth auth = FirebaseAuth.instance;
+  late User user;
+
   int currentQuestion = 0;
   List<List<bool>> multiChoiceAnswers = []; // For each question store selected options as a list of booleans
   List<List<String>> rankingAnswers = [];
@@ -20,12 +25,33 @@ class MiniMockExam1State extends State<MiniMockExam1> {
   @override
   void initState() {
     super.initState();
+    getUser();
     getQuestions(); // Fetch the questions on initialisation (Needed as this is not to be called in the widget build)
   }
 
+  Future<void> getUser() async {
+    NavigatorState nav = Navigator.of(context);
+    if (auth.currentUser == null) {
+      var tmp = await auth
+          .authStateChanges()
+          .first;
+      if (tmp == null) {
+        nav.push(
+            MaterialPageRoute(
+              builder: (context) => const SignInScreen(),
+            )
+        );
+      } else {
+        user = tmp;
+      }
+    } else {
+      user = auth.currentUser!;
+    }
+  }
   // Fetch mini-mock-1 questions from firestore and store as a list of maps
   Future<List<Map<String, dynamic>>> queryQuestionData() async {
-    QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('mini-mock-1').orderBy('questionNumber').get(); //questions are not properly stored in order on firestore so order via a field instead
+    //questions are not properly stored in order on firestore so order via a field instead
+    QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('mini-mock-1').orderBy('questionNumber').get();
     return snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
   }
 
@@ -51,6 +77,45 @@ class MiniMockExam1State extends State<MiniMockExam1> {
         }
       }
     });
+  }
+
+  Future<void> updateExamResults(List<List<String>> answers) async {
+    Map<String, List<String>> answerMap = {
+      for (int i = 0; i < questions.length; i++) '${i+1}' : answers[i]
+    };
+
+    try {
+      final CollectionReference users = FirebaseFirestore.instance.collection(
+          'users');
+      QuerySnapshot u =
+      await users.where("userID", isEqualTo: user.uid).get();
+      var id = u.docs.last.id;
+      DocumentReference userDocRef = FirebaseFirestore.instance.collection(
+          'users').doc(id);
+      DocumentReference examAnswersDocRef = userDocRef.collection(
+          'Exam answers').doc("mini-mock1Answers");
+
+      await examAnswersDocRef.set({
+        'answers': answerMap,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+    }catch(e){
+      print("updateExamResults error: $e");
+    }
+
+  }
+
+  List<List<String>> booleanToString(List<List<bool>> multiChoice) {
+    const options = 'ABCDEFGH';
+    List<List<String>> multiChoiceLetters = [];
+    for (int i = 0; i < multiChoice.length; i++){
+      List<String> letters = [
+        for (int j = 0; j < multiChoice[i].length; j++)
+        if (multiChoice[i][j] ) options[j]
+      ];
+      multiChoiceLetters.add(letters);
+    }
+    return multiChoiceLetters;
   }
 
   @override
@@ -163,6 +228,11 @@ class MiniMockExam1State extends State<MiniMockExam1> {
                 if (currentQuestion == questions.length - 1)
                   ElevatedButton.icon(
                     onPressed: () {
+                      List<List<String>> multiChoiceFormatted = booleanToString(multiChoiceAnswers);
+                      List<List<String>> finalAnswerList = [];
+                      finalAnswerList.addAll(rankingAnswers);
+                      finalAnswerList.addAll(multiChoiceFormatted);
+                      updateExamResults(finalAnswerList);
                       Navigator.push(
                         context,
                         MaterialPageRoute(
