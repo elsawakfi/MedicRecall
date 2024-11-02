@@ -6,7 +6,9 @@ import 'package:flashcard_x/screens/calendar_screen.dart';
 import 'package:flashcard_x/screens/dashboard_screen.dart';
 import 'package:flashcard_x/screens/faq.dart';
 import 'package:flashcard_x/screens/flashcard_editor_screen.dart';
+import 'package:flashcard_x/screens/button_screen.dart';
 import 'package:flashcard_x/screens/minimock_landing.dart';
+
 // import 'package:flashcard_x/screens/exam_guide_screen.dart';
 // import 'package:flashcard_x/screens/resources.dart';
 import 'package:flashcard_x/screens/settings_screen.dart' as setting;
@@ -478,6 +480,8 @@ class LandingState extends State<Landing> {
                       ))),
             ],
           )),
+          floatingActionButton: const CustomFloatingButton(),
+          floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
     );
   }
 

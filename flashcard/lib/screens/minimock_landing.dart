@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flashcard_x/screens/minimock_exam1.dart';
 import 'package:flashcard_x/screens/minimock_exam2.dart';
 import 'package:flashcard_x/widgets/drawer_widget.dart';
+import 'package:flashcard_x/screens/minimock1_rules_page.dart';
 
 
 class MiniMockLanding extends StatefulWidget {
@@ -66,7 +67,7 @@ class MiniMockLandingState extends State<MiniMockLanding> {
                   onPressed: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => const MiniMockExam1(),
+                        builder: (context) => const MiniMock1Rules(),
                       ),
                     );
                   },

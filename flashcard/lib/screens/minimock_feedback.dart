@@ -3,14 +3,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flashcard_x/widgets/pageLayout.dart';
 import 'package:flashcard_x/widgets/drawer_widget.dart';
 
-class MiniMockFeedBack extends StatefulWidget {
-  const MiniMockFeedBack({super.key});
+class MiniMockFeedback extends StatefulWidget {
+  const MiniMockFeedback({super.key});
 
   @override
-  State<MiniMockFeedBack> createState() => MinimockFeedbackState();
+  State<MiniMockFeedback> createState() => MinimockFeedbackState();
 }
 
-class MinimockFeedbackState extends State<MiniMockFeedBack> {
+class MinimockFeedbackState extends State<MiniMockFeedback> {
 
   List<Map<String, dynamic>> answerKeys = [];
 
