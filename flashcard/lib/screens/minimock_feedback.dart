@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/pageLayout.dart';
 import 'package:flashcard_x/widgets/drawer_widget.dart';
 
-class MiniMockFeedBack extends StatefulWidget {
-  const MiniMockFeedBack({super.key});
+class MiniMockFeedback extends StatefulWidget {
+  const MiniMockFeedback({super.key});
 
   @override
-  State<MiniMockFeedBack> createState() => MinimockFeedbackState();
+  State<MiniMockFeedback> createState() => MinimockFeedbackState();
 }
 
-class MinimockFeedbackState extends State<MiniMockFeedBack> {
+class MinimockFeedbackState extends State<MiniMockFeedback> {
   @override
   Widget build(BuildContext context) {
    return Scaffold(
