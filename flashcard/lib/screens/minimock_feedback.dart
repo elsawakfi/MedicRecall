@@ -59,8 +59,17 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
             Text(
               answerKeys[currentQuestion]['question'],
               style: TextStyle(fontSize: 18),
+
             ),
             SizedBox(height: 20),
+            //Display the explanation of the question
+            Text(
+              answerKeys[currentQuestion]['explanation'],
+              style: TextStyle(fontSize: 18),
+            ),
+
+           
+
 
             //compare the answers keys and the user's answers and provided
             //format tbd

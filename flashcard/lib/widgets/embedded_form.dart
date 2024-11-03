@@ -4,7 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
 
 class EmbeddedForm extends StatefulWidget{
-  const EmbeddedForm ({Key? key}) : super(key: key);
+  const EmbeddedForm ({super.key});
 
   @override
   State<EmbeddedForm> createState() => _EmbeddedFormState();
