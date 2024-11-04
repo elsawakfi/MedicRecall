@@ -223,11 +223,128 @@ class _CustomFloatingButtonState extends State<CustomFloatingButton> {
                     repetitions > 0 &&
                     repetitions < 10) {
                   Navigator.of(context).pop();
-                  // Add your action here after repetitions are submitted
+                  _showOptionsDialog(context); // Proceed to next dialog
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Please enter a number between 1 and 9'),
+                    ),
+                  );
+                }
+              },
+              child: const Text('Submit'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showOptionsDialog(BuildContext context) {
+    final checkbox1 = ValueNotifier<bool>(false);
+    final checkbox2 = ValueNotifier<bool>(false);
+    final checkbox3 = ValueNotifier<bool>(false);
+    final checkbox4 = ValueNotifier<bool>(false);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return _buildAlertDialog(
+          title: 'What resources do you want to use?',
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  ValueListenableBuilder(
+                    valueListenable: checkbox1,
+                    builder: (context, value, child) {
+                      return Checkbox(
+                        value: value,
+                        onChanged: (value) {
+                          checkbox1.value = value!;
+                        },
+                      );
+                    },
+                  ),
+                  Text(
+                    'Official paper',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  ValueListenableBuilder(
+                    valueListenable: checkbox2,
+                    builder: (context, value, child) {
+                      return Checkbox(
+                        value: value,
+                        onChanged: (value) {
+                          checkbox2.value = value!;
+                        },
+                      );
+                    },
+                  ),
+                  Text(
+                    'full-sized mock exam',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  ValueListenableBuilder(
+                    valueListenable: checkbox3,
+                    builder: (context, value, child) {
+                      return Checkbox(
+                        value: value,
+                        onChanged: (value) {
+                          checkbox3.value = value!;
+                        },
+                      );
+                    },
+                  ),
+                  Text(
+                    'Mini-mocks',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  ValueListenableBuilder(
+                    valueListenable: checkbox4,
+                    builder: (context, value, child) {
+                      return Checkbox(
+                        value: value,
+                        onChanged: (value) {
+                          checkbox4.value = value!;
+                        },
+                      );
+                    },
+                  ),
+                  Text(
+                    'Flashcards',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                if (checkbox1.value ||
+                    checkbox2.value ||
+                    checkbox3.value ||
+                    checkbox4.value) {
+                  Navigator.of(context).pop();
+                  // Add your action here after options are submitted
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please select at least one option'),
                     ),
                   );
                 }
