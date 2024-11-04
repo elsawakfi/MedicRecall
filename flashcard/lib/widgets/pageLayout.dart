@@ -6,10 +6,10 @@ class PageLayout extends StatelessWidget {
   final Widget body;       // Body of the screen that can change on different screens
 
   const PageLayout({
-    Key? key,
+    super.key,
     required this.titleText,
     required this.body,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

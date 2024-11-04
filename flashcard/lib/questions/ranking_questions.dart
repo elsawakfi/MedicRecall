@@ -19,7 +19,7 @@ whichever is best to mark against according to the table
  */
 
 class RankingQuestions extends StatefulWidget {
-  const RankingQuestions({Key? key}) : super(key: key);
+  const RankingQuestions({super.key});
 
   @override
   RankingQuestionsStateO createState() => RankingQuestionsStateO();

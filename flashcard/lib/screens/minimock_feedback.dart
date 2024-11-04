@@ -1,9 +1,9 @@
-import 'dart:ffi';
-
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flashcard_x/screens/sign_in_screen.dart';
+import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/pageLayout.dart';
-import 'package:flashcard_x/widgets/drawer_widget.dart';
+import 'package:flashcard_x/screens/minimock_feedback.dart';
 
 class MiniMockFeedBack extends StatefulWidget {
   const MiniMockFeedBack({super.key});
@@ -15,11 +15,35 @@ class MiniMockFeedBack extends StatefulWidget {
 class MinimockFeedbackState extends State<MiniMockFeedBack> {
   int currentQuestion = 0;
   List<Map<String, dynamic>> answerKeys = [];
+  final FirebaseAuth auth = FirebaseAuth.instance;
+  late User user;
 
    @override
   void initState() {
     super.initState();
     fetchAnswerKeys(); // Fetch the questions on initialisation (Needed as this is not to be called in the widget build)
+    getUser();
+    //fetchUserAnswers(); //Fetch the user's answers from the database
+  }
+
+  Future<void> getUser() async {
+    NavigatorState nav = Navigator.of(context);
+    if (auth.currentUser == null) {
+      var tmp = await auth
+          .authStateChanges()
+          .first;
+      if (tmp == null) {
+        nav.push(
+            MaterialPageRoute(
+              builder: (context) => const SignInScreen(),
+            )
+        );
+      } else {
+        user = tmp;
+      }
+    } else {
+      user = auth.currentUser!;
+    }
   }
 
 
@@ -42,6 +66,39 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
     }
   }
 
+  Future<Map<String, dynamic>?> fetchUserAnwsers() async {
+  try {
+    final CollectionReference users = FirebaseFirestore.instance.collection('users');
+    
+    // Retrieve the user document based on userID
+    QuerySnapshot u = await users.where("userID", isEqualTo: user.uid).get();
+    if (u.docs.isEmpty) {
+      print("No user document found with the specified userID.");
+      return null;
+    }
+    
+    var id = u.docs.last.id;
+    DocumentReference examAnswersDocRef = users.doc(id).collection('Exam answers').doc("mini-mock1Answers");
+    
+    // Fetch the answers document
+    DocumentSnapshot docSnapshot = await examAnswersDocRef.get();
+    if (docSnapshot.exists) {
+      // Return the data in the document as a map
+      return docSnapshot.data() as Map<String, dynamic>?;
+    } else {
+      print("Exam answers document does not exist.");
+      return null;
+    }
+  } catch (e) {
+    print("getExamResults error: $e");
+    return null;
+  }
+}
+
+
+
+
+
   //need to query for the user's answers stored in firebase
 
   @override
@@ -61,7 +118,28 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
               style: TextStyle(fontSize: 18),
             ),
             SizedBox(height: 20),
-            //Display the explanation of the question
+            //display the selectd answers and the correct answers
+            Row(
+              children: [
+                //rendering logic for the comparison of answers
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+
+                ),
+                SizedBox(width: 20),
+                //displays the correct answers
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: answerKeys[currentQuestion]['correct_answers'].map((letter) => Text(
+                    letter,
+                    style: TextStyle(fontSize: 18),
+                  )).toList()
+                ),
+              ],
+
+            ),
+            SizedBox(height: 20),
+             //Display the explanation of the question
             Text(
               answerKeys[currentQuestion]['explanation'],
               style: TextStyle(fontSize: 18),

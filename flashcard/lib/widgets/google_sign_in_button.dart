@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import '../screens/landing_screen.dart';
 
 class GoogleSignInButton extends StatefulWidget {
-  const GoogleSignInButton({Key? key}) : super(key: key);
+  const GoogleSignInButton({super.key});
 
   @override
   State<GoogleSignInButton> createState() => _GoogleSignInButtonState();
