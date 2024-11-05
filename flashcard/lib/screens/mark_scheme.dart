@@ -34,7 +34,7 @@ class MSInfo {
 }
 
 class UMS extends StatelessWidget {
-  const UMS({Key? key}) : super(key: key);
+  const UMS({super.key});
 
 /*
 Have the first place be an explanation of the mark scheme, leave blank for rn

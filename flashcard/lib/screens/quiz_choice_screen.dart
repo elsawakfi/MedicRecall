@@ -9,7 +9,7 @@ import '../questions/rating_questions.dart';
 int textSize = 30;
 
 class Questions extends StatelessWidget {
-  const Questions({Key? key}) : super(key: key);
+  const Questions({super.key});
 
   @override
   Widget build(BuildContext context) {

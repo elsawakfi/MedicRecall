@@ -11,7 +11,7 @@ import 'landing_screen.dart';
 class VerifyEmailScreen extends StatefulWidget {
   static String id = 'verifyEmail';
 
-  const VerifyEmailScreen({Key? key}) : super(key: key);
+  const VerifyEmailScreen({super.key});
 
   @override
   State<VerifyEmailScreen> createState() => _VerifyEmailScreenState();

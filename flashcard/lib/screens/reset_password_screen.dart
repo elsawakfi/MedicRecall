@@ -7,7 +7,7 @@ import '../utils/authentication.dart';
 import '../utils/string_validation.dart';
 
 class ForgotPassword extends StatefulWidget {
-  const ForgotPassword({Key? key}) : super(key: key);
+  const ForgotPassword({super.key});
 
   @override
   State<ForgotPassword> createState() => _ForgotPassword();

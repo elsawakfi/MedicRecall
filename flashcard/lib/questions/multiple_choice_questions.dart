@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class MCQ extends StatefulWidget {
-  const MCQ({Key? key}) : super(key: key);
+  const MCQ({super.key});
 
   @override
   MCQStateO createState() => MCQStateO();

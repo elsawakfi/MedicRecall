@@ -87,9 +87,9 @@ class MSI extends StatefulWidget {
 
   // in constructor, require a type to be handed over
   const MSI({
-    Key? key,
+    super.key,
     required this.qtype,
-  }) : super(key: key);
+  });
 
   // MSInfo is required
 

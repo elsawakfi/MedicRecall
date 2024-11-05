@@ -5,7 +5,7 @@ import 'package:flashcard_x/widgets/embedded_form.dart';
 import 'package:flutter/material.dart';
 
 class FeedbackScreen extends StatelessWidget {
-  const FeedbackScreen({Key? key}) : super(key: key);
+  const FeedbackScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

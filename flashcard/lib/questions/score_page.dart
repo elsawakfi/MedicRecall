@@ -24,12 +24,12 @@ class ScorePage extends StatefulWidget {
   final String questionRationale;
 
   const ScorePage({
-    Key? key,
+    super.key,
     required this.score,
     required this.threshold,
     required this.maxMark,
     required this.questionRationale,
-  }) : super(key: key);
+  });
 
   @override
   State<ScorePage> createState() => _ScorePageState();

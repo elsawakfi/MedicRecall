@@ -6,7 +6,7 @@ import 'package:flashcard_x/screens/button_screen.dart';
 
 
 class MiniMockLanding extends StatefulWidget {
-  const MiniMockLanding({Key? key}) : super(key: key);
+  const MiniMockLanding({super.key});
   
   @override
   State<MiniMockLanding> createState() => MiniMockLandingState();

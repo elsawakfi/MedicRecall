@@ -3,7 +3,7 @@ import 'package:flashcard_x/questions/score_page.dart';
 import 'package:flutter/material.dart';
 
 class MCQ extends StatefulWidget {
-  const MCQ({Key? key}) : super(key: key);
+  const MCQ({super.key});
 
   @override
   State<MCQ> createState() => _MCQState();

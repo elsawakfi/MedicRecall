@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class MinimockMS extends StatefulWidget {
-  const MinimockMS({Key? key}) : super(key: key);
+  const MinimockMS({super.key});
 
   @override
   State<MinimockMS> createState() => MinimockMSState();
