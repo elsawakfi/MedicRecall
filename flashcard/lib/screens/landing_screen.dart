@@ -8,8 +8,8 @@ import 'package:flashcard_x/screens/faq.dart';
 import 'package:flashcard_x/screens/flashcard_editor_screen.dart';
 import 'package:flashcard_x/screens/button_screen.dart';
 import 'package:flashcard_x/screens/minimock_landing.dart';
-import 'package:flashcard_x/screens/button_screen.dart';
-import 'package:flashcard_x/screens/minimock_landing.dart';
+//import 'package:flashcard_x/screens/button_screen.dart';
+//import 'package:flashcard_x/screens/minimock_landing.dart';
 // import 'package:flashcard_x/screens/exam_guide_screen.dart';
 // import 'package:flashcard_x/screens/resources.dart';
 import 'package:flashcard_x/screens/settings_screen.dart' as setting;
@@ -28,7 +28,7 @@ Do i need to pass the user's name over?
 class Landing extends StatefulWidget {
   static String id = 'landing';
 
-  const Landing({Key? key}) : super(key: key);
+  const Landing({super.key});
 
   @override
   State<StatefulWidget> createState() => LandingState();

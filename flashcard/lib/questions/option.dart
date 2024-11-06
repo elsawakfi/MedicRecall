@@ -28,12 +28,11 @@ class Option extends StatefulWidget {
 
   const Option(
       // initialising the parameters
-      {Key? key,
+      {super.key,
       required this.optionText,
       required this.optionChoice,
       required this.onChanged,
-      required this.items})
-      : super(key: key);
+      required this.items});
 
   @override
   State<Option> createState() =>

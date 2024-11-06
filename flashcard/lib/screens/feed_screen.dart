@@ -21,8 +21,7 @@ class AboveEverything extends StatelessWidget {
       subtopics; //lets us keep track of what state has changed, and rebuild
   final int count; //widgets accordingly.
   const AboveEverything(
-      {Key? key, required this.subtopics, required this.count})
-      : super(key: key);
+      {super.key, required this.subtopics, required this.count});
   @override
   //hello
   Widget build(BuildContext context) {

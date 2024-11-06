@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 class MsComments extends StatefulWidget {
   final String msID;
 
-  const MsComments({Key? key, required this.msID}) : super(key: key);
+  const MsComments({super.key, required this.msID});
 
   @override
   MsCommentsE createState() => MsCommentsE();

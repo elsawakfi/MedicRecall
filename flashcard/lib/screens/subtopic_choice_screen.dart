@@ -8,8 +8,7 @@ import 'feed_screen.dart';
 
 class SubtopicChoice extends StatefulWidget {
   const SubtopicChoice(
-      {Key? key, required this.flashcardSet, required this.subtopics})
-      : super(key: key);
+      {super.key, required this.flashcardSet, required this.subtopics});
   final String flashcardSet;
   final List<String> subtopics;
 

@@ -4,7 +4,7 @@ import 'package:flashcard_x/widgets/pageLayout.dart';
 
 
 class MiniMockExam1 extends StatefulWidget {
-  const MiniMockExam1({Key? key}) : super(key: key);
+  const MiniMockExam1({super.key});
 
   @override
   State<MiniMockExam1> createState() => MiniMockExam1State();
