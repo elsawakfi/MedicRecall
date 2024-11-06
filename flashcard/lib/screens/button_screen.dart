@@ -294,8 +294,27 @@ class _CustomFloatingButtonState extends State<CustomFloatingButton> {
               builder: (BuildContext context) {
                 return _buildAlertDialog(
                   title: 'Exam Date Already Set',
-                  content: const SizedBox(), // Empty content for this dialog
-                  actions: [],);});
+                  content: Text(
+                    'Your exam date is already set to $testDayString.\nDo you want to change it?',
+                    style: TextStyle(
+                      color: const Color.fromRGBO(21, 58, 103, 1),
+                      fontSize: 16,
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(), 
+                      child: Text('Cancel')),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => Calendar()),
+                        );
+                      },
+                      child: Text('Change Exam Date')
+                    ),
+                  ],);});
           }
         },
         backgroundColor: const Color.fromARGB(255, 235, 230, 239),
