@@ -1,3 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/screens/minimock_exam1.dart';
 import 'package:flashcard_x/screens/minimock_exam2.dart';
@@ -13,6 +16,60 @@ class MiniMockLanding extends StatefulWidget {
 }
 
 class MiniMockLandingState extends State<MiniMockLanding> {
+  final FirebaseAuth auth = FirebaseAuth.instance;
+  late User user;
+
+  @override
+  void initState() {
+    super.initState();
+    getUser();
+    getTestDay(); // Fetch the questions on initialisation (Needed as this is not to be called in the widget build)
+  }
+
+  Future<void> getUser() async {
+    NavigatorState nav = Navigator.of(context);
+    if (auth.currentUser == null) {
+      var tmp = await auth
+          .authStateChanges()
+          .first;
+      if (tmp == null) {
+        nav.push(
+            MaterialPageRoute(
+              builder: (context) => const SignInScreen(),
+            )
+        );
+      } else {
+        user = tmp;
+      }
+    } else {
+      user = auth.currentUser!;
+    }
+  }
+
+  // Get the question data from the firestore
+  Future<void> getTestDay() async {
+    QuerySnapshot querySnapshot =
+    await FirebaseFirestore.instance.collection("users").where("userID", isEqualTo: user.uid).get();
+
+    var userFromDb = querySnapshot.docs.first;
+    Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
+    //if the Test Day field isn't null and is in the database we update the UI with it. Otherwise it is displayed as being not set.
+    if (data.containsKey("TestDay") || data["TestDay"] != null) {
+      var testDay = DateTime.fromMicrosecondsSinceEpoch(userFromDb["TestDay"]
+          .microsecondsSinceEpoch); //firebase is weird. conversion from TimeStamp to DateTime object
+      String? day = testDay.day.toString();
+      String? month = testDay.month.toString();
+      String? year = testDay.year.toString();
+      final DateTime today =
+      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+
+      int daysUntilTest = (testDay.difference(today).inHours/24).round();
+
+      // testDayString = '$day-$month-$year';
+    } else {
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
