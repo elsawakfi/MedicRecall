@@ -136,7 +136,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                         Text("Correct Answer", style: TextStyle(color: Colors.green)),
                     if (userAnswers != null &&
                         userAnswers[currentQuestion] != null &&
-                        answerKeys[currentQuestion]['correct_answers'].length != userAnswers[currentQuestion]['mini-mock1Answers'].length) 
+                        answerKeys[currentQuestion]['correct_answers'].length != userAnswers[currentQuestion]['mini-mock1Answers']) 
                         Text("Incorrect Answer", style: TextStyle(color: Colors.red)),
                   ],
                 ],
