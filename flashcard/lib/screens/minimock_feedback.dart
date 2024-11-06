@@ -23,11 +23,11 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
   void initState() {
     super.initState();
     fetchAnswerKeys(); // Fetch the questions on initialisation (Needed as this is not to be called in the widget build)
-    getUser();
-    fetchUserAnwsers(); //Fetch the user's answers from the database
+    //getUser();
+    //fetchUserAnwsers(); //Fetch the user's answers from the database
   }
 
-  Future<void> getUser() async {
+ /*Future<void> getUser() async {
     NavigatorState nav = Navigator.of(context);
     if (auth.currentUser == null) {
       var tmp = await auth
@@ -45,7 +45,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
     } else {
       user = auth.currentUser!;
     }
-  }
+  }*/
 
 
   Future<List<Map<String, dynamic>>> getAnswerData() async {
@@ -53,10 +53,10 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
     return snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
   }
 
-  Future<List<Map<String, dynamic>>> getUserAnswerData() async {
+  /*Future<List<Map<String, dynamic>>> getUserAnswerData() async {
     QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('users').where('userId', isEqualTo: user.uid).get(); //questions are not properly stored in order on firestore so order via a field instead
     return snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
-  }
+  }*/
 
   Future<void> fetchAnswerKeys() async {
     try {
@@ -72,7 +72,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
     }
   }
 
-  Future<void> fetchUserAnwsers() async {
+  /*Future<void> fetchUserAnwsers() async {
     try {
       // Fetch the question data (this simulates your Future)
       List<Map<String, dynamic>> fetchedUserAnswers = await getUserAnswerData();
@@ -85,7 +85,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
       print('Error fetching questions: $error');
     }
   
-}
+}*/
 
 
 
@@ -114,7 +114,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
             Row(
               children: [
                 //rendering logic for the comparison of answers
-                Column(
+                /*Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                   if (answerKeys[currentQuestion]['type'] == "ranking") ...[
@@ -140,12 +140,12 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                         Text("Incorrect Answer", style: TextStyle(color: Colors.red)),
                   ],
                 ],
-              ),
+              ),*/
                 SizedBox(width: 20),
                 //displays the correct answers
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: answerKeys[currentQuestion]['correct_answers'].map((letter) => Text(
+                  children: (answerKeys[currentQuestion]['correct_answers'] as List<dynamic>).map((letter) => Text(
                     letter,
                     style: TextStyle(fontSize: 18),
                   )).toList()
