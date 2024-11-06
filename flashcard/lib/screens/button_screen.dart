@@ -210,7 +210,8 @@ class _CustomFloatingButtonState extends State<CustomFloatingButton> {
       builder: (BuildContext context) {
         return _buildAlertDialog(
           title: 'How many repetitions of the official paper link?',
-          content: TextField(
+          content: 
+          TextField(
             controller: controller,
             keyboardType: TextInputType.number,
             inputFormatters: [
@@ -226,6 +227,13 @@ class _CustomFloatingButtonState extends State<CustomFloatingButton> {
           actions: [
             TextButton(
               onPressed: () {
+               Navigator.of(context).pop();
+                    _showExamDateDialog(context);
+              },
+              child: const Text('Previous'),
+            ),
+            TextButton(
+              onPressed: () {
                 final int? repetitions = int.tryParse(controller.text);
                 if (repetitions != null && repetitions > 0 && repetitions < 10) {
                   Navigator.of(context).pop();
@@ -238,7 +246,7 @@ class _CustomFloatingButtonState extends State<CustomFloatingButton> {
                   );
                 }
               },
-              child: const Text('Submit'),
+              child: const Text('Submit'), // change it to 'Next' once we have more questions in
             ),
           ],
         );
@@ -317,6 +325,7 @@ class _CustomFloatingButtonState extends State<CustomFloatingButton> {
                   ],);});
           }
         },
+        clipBehavior: Clip.none,
         backgroundColor: const Color.fromARGB(255, 235, 230, 239),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
