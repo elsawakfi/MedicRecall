@@ -9,8 +9,8 @@ import 'package:flashcard_x/widgets/event.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/screens/dashboard_screen.dart';
-import 'package:table_calendar/table_calendar.dart';
-import 'calendar_screen.dart'; */
+import 'package:table_calendar/table_calendar.dart';*/
+import 'calendar_screen.dart'; 
 
 class CustomFloatingButton extends StatefulWidget {
   const CustomFloatingButton({super.key});
@@ -295,7 +295,7 @@ class _CustomFloatingButtonState extends State<CustomFloatingButton> {
                     },
                   ),
                   Text(
-                    'full-sized mock exam',
+                    'Full-sized mock exam',
                     style: TextStyle(color: Colors.black),
                   ),
                 ],
