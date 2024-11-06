@@ -15,6 +15,7 @@ class MiniMockFeedBack extends StatefulWidget {
 class MinimockFeedbackState extends State<MiniMockFeedBack> {
   int currentQuestion = 0;
   List<Map<String, dynamic>> answerKeys = [];
+   List<Map<String, dynamic>> userAnswers = [];
   final FirebaseAuth auth = FirebaseAuth.instance;
   late User user;
 
@@ -23,7 +24,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
     super.initState();
     fetchAnswerKeys(); // Fetch the questions on initialisation (Needed as this is not to be called in the widget build)
     getUser();
-    //fetchUserAnswers(); //Fetch the user's answers from the database
+    fetchUserAnwsers(); //Fetch the user's answers from the database
   }
 
   Future<void> getUser() async {
@@ -52,6 +53,11 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
     return snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
   }
 
+  Future<List<Map<String, dynamic>>> getUserAnswerData() async {
+    QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('users').where('userId', isEqualTo: user.uid).get(); //questions are not properly stored in order on firestore so order via a field instead
+    return snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+  }
+
   Future<void> fetchAnswerKeys() async {
     try {
       // Fetch the question data (this simulates your Future)
@@ -66,33 +72,19 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
     }
   }
 
-  Future<Map<String, dynamic>?> fetchUserAnwsers() async {
-  try {
-    final CollectionReference users = FirebaseFirestore.instance.collection('users');
-    
-    // Retrieve the user document based on userID
-    QuerySnapshot u = await users.where("userID", isEqualTo: user.uid).get();
-    if (u.docs.isEmpty) {
-      print("No user document found with the specified userID.");
-      return null;
+  Future<void> fetchUserAnwsers() async {
+    try {
+      // Fetch the question data (this simulates your Future)
+      List<Map<String, dynamic>> fetchedUserAnswers = await getUserAnswerData();
+
+      // Initialise questions and selectedOptions based on fetched data
+      setState(() {
+        userAnswers = fetchedUserAnswers;
+      });
+    } catch (error) {
+      print('Error fetching questions: $error');
     }
-    
-    var id = u.docs.last.id;
-    DocumentReference examAnswersDocRef = users.doc(id).collection('Exam answers').doc("mini-mock1Answers");
-    
-    // Fetch the answers document
-    DocumentSnapshot docSnapshot = await examAnswersDocRef.get();
-    if (docSnapshot.exists) {
-      // Return the data in the document as a map
-      return docSnapshot.data() as Map<String, dynamic>?;
-    } else {
-      print("Exam answers document does not exist.");
-      return null;
-    }
-  } catch (e) {
-    print("getExamResults error: $e");
-    return null;
-  }
+  
 }
 
 
@@ -124,8 +116,31 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                 //rendering logic for the comparison of answers
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                  if (answerKeys[currentQuestion]['type'] == "ranking") ...[
+                    if (userAnswers != null &&
+                       userAnswers[currentQuestion] != null &&
+                      answerKeys[currentQuestion]['correct_answers'] == userAnswers[currentQuestion]['mini-mock1Answers']) 
+                        Text("Correct Answer", style: TextStyle(color: Colors.green)),
+                    if (userAnswers != null &&
+                        userAnswers[currentQuestion] != null &&
+                        answerKeys[currentQuestion]['correct_answers'] != userAnswers[currentQuestion]['mini-mock1Answers']) 
+                        Text("Incorrect Answer", style: TextStyle(color: Colors.red)),
 
-                ),
+
+                  ],
+                  if (answerKeys[currentQuestion]['type'] == "multiple choice") ...[
+                     if (userAnswers != null &&
+                       userAnswers[currentQuestion] != null &&
+                      answerKeys[currentQuestion]['correct_answers'].length == userAnswers[currentQuestion]['mini-mock1Answers'].length) 
+                        Text("Correct Answer", style: TextStyle(color: Colors.green)),
+                    if (userAnswers != null &&
+                        userAnswers[currentQuestion] != null &&
+                        answerKeys[currentQuestion]['correct_answers'].length != userAnswers[currentQuestion]['mini-mock1Answers'].length) 
+                        Text("Incorrect Answer", style: TextStyle(color: Colors.red)),
+                  ],
+                ],
+              ),
                 SizedBox(width: 20),
                 //displays the correct answers
                 Column(
