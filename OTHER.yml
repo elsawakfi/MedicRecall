@@ -1,6 +1,6 @@
-name: MedicRecall2 Bug Report
-description: Submit a bug report to help us improve!
-title: "[Issue]"
+name: MedicRecall2 Issue Report
+description: Submit a issue report to help us improve!
+title: "[Type of Issue]"
 projects: ["spe-upb/2024-MedicRecall2"]
 body:
   - type: dropdown
