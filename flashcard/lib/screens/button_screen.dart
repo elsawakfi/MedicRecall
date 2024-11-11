@@ -9,8 +9,8 @@ import 'package:flashcard_x/widgets/event.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/screens/dashboard_screen.dart';
-import 'package:table_calendar/table_calendar.dart';
-import 'calendar_screen.dart'; */
+import 'package:table_calendar/table_calendar.dart';*/
+import 'calendar_screen.dart'; 
 
 class CustomFloatingButton extends StatefulWidget {
   const CustomFloatingButton({super.key});
@@ -202,7 +202,8 @@ class _CustomFloatingButtonState extends State<CustomFloatingButton> {
       builder: (BuildContext context) {
         return _buildAlertDialog(
           title: 'How many repetitions of the official paper link?',
-          content: TextField(
+          content: 
+          TextField(
             controller: controller,
             keyboardType: TextInputType.number,
             inputFormatters: [
@@ -216,6 +217,13 @@ class _CustomFloatingButtonState extends State<CustomFloatingButton> {
             ),
           ),
           actions: [
+            TextButton(
+              onPressed: () {
+               Navigator.of(context).pop();
+                    _showExamDateDialog(context);
+              },
+              child: const Text('Previous'),
+            ),
             TextButton(
               onPressed: () {
                 final int? repetitions = int.tryParse(controller.text);
@@ -232,7 +240,7 @@ class _CustomFloatingButtonState extends State<CustomFloatingButton> {
                   );
                 }
               },
-              child: const Text('Submit'),
+              child: const Text('Submit'), // change it to 'Next' once we have more questions in
             ),
           ],
         );
@@ -287,7 +295,7 @@ class _CustomFloatingButtonState extends State<CustomFloatingButton> {
                     },
                   ),
                   Text(
-                    'full-sized mock exam',
+                    'Full-sized mock exam',
                     style: TextStyle(color: Colors.black),
                   ),
                 ],
@@ -400,16 +408,34 @@ class _CustomFloatingButtonState extends State<CustomFloatingButton> {
             _showRevisionPlanDialog(context);
           } else if (!testDayBool) {
             showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return _buildAlertDialog(
-                    title: 'Exam Date Already Set',
-                    content: const SizedBox(), // Empty content for this dialog
-                    actions: [],
-                  );
-                });
+              context: context,
+              builder: (BuildContext context) {
+                return _buildAlertDialog(
+                  title: 'Exam Date Already Set',
+                  content: Text(
+                    'Your exam date is already set to $testDayString.\nDo you want to change it?',
+                    style: TextStyle(
+                      color: const Color.fromRGBO(21, 58, 103, 1),
+                      fontSize: 16,
+                    ),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(), 
+                      child: Text('Cancel')),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => Calendar()),
+                        );
+                      },
+                      child: Text('Change Exam Date')
+                    ),
+                  ],);});
           }
         },
+        clipBehavior: Clip.none,
         backgroundColor: const Color.fromARGB(255, 235, 230, 239),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),

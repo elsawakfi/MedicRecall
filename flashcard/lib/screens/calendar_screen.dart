@@ -377,6 +377,7 @@ Widget build(BuildContext context) {
   return Scaffold(
     drawer: const DrawMain(),
     appBar: AppBar(
+      clipBehavior: Clip.none,
       leading: Builder(
         builder: (context) => GestureDetector(
           onTap: () => Scaffold.of(context).openDrawer(),
@@ -412,7 +413,7 @@ Widget build(BuildContext context) {
           ),
         ],
       ),
-      centerTitle: true,
+      // centerTitle: true,
     ),
     body: Stack(
       children: [
