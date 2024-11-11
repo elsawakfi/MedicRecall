@@ -23,11 +23,11 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
   void initState() {
     super.initState();
     fetchAnswerKeys(); // Fetch the questions on initialisation (Needed as this is not to be called in the widget build)
-    //getUser();
-    //fetchUserAnwsers(); //Fetch the user's answers from the database
+    getUser();
+    fetchUserAnwsers(); //Fetch the user's answers from the database
   }
 
- /*Future<void> getUser() async {
+ Future<void> getUser() async {
     NavigatorState nav = Navigator.of(context);
     if (auth.currentUser == null) {
       var tmp = await auth
@@ -45,7 +45,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
     } else {
       user = auth.currentUser!;
     }
-  }*/
+  }
 
 
   Future<List<Map<String, dynamic>>> getAnswerData() async {
@@ -53,10 +53,10 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
     return snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
   }
 
-  /*Future<List<Map<String, dynamic>>> getUserAnswerData() async {
+  Future<List<Map<String, dynamic>>> getUserAnswerData() async {
     QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('users').where('userId', isEqualTo: user.uid).get(); //questions are not properly stored in order on firestore so order via a field instead
     return snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
-  }*/
+  }
 
   Future<void> fetchAnswerKeys() async {
     try {
@@ -72,7 +72,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
     }
   }
 
-  /*Future<void> fetchUserAnwsers() async {
+  Future<void> fetchUserAnwsers() async {
     try {
       // Fetch the question data (this simulates your Future)
       List<Map<String, dynamic>> fetchedUserAnswers = await getUserAnswerData();
@@ -85,7 +85,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
       print('Error fetching questions: $error');
     }
   
-}*/
+}
 
 
 
