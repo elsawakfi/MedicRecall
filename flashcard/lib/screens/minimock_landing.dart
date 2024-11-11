@@ -18,12 +18,13 @@ class MiniMockLanding extends StatefulWidget {
 class MiniMockLandingState extends State<MiniMockLanding> {
   final FirebaseAuth auth = FirebaseAuth.instance;
   late User user;
+  int? daysUntilTest;
 
   @override
   void initState() {
     super.initState();
     getUser();
-    getTestDay(); // Fetch the questions on initialisation (Needed as this is not to be called in the widget build)
+    getTestDay();
   }
 
   Future<void> getUser() async {
@@ -46,7 +47,7 @@ class MiniMockLandingState extends State<MiniMockLanding> {
     }
   }
 
-  // Get the question data from the firestore
+  // Function from calendar_screen
   Future<void> getTestDay() async {
     QuerySnapshot querySnapshot =
     await FirebaseFirestore.instance.collection("users").where("userID", isEqualTo: user.uid).get();
@@ -54,19 +55,19 @@ class MiniMockLandingState extends State<MiniMockLanding> {
     var userFromDb = querySnapshot.docs.first;
     Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
     //if the Test Day field isn't null and is in the database we update the UI with it. Otherwise it is displayed as being not set.
+    print("hollo");
     if (data.containsKey("TestDay") || data["TestDay"] != null) {
       var testDay = DateTime.fromMicrosecondsSinceEpoch(userFromDb["TestDay"]
           .microsecondsSinceEpoch); //firebase is weird. conversion from TimeStamp to DateTime object
-      String? day = testDay.day.toString();
-      String? month = testDay.month.toString();
-      String? year = testDay.year.toString();
       final DateTime today =
       DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
-
-      int daysUntilTest = (testDay.difference(today).inHours/24).round();
-
-      // testDayString = '$day-$month-$year';
+      setState(() {
+        daysUntilTest = (testDay.difference(today).inHours/24).round();
+      });
     } else {
+      setState(() {
+        daysUntilTest = -1;
+      });
     }
   }
 
@@ -109,7 +110,9 @@ class MiniMockLandingState extends State<MiniMockLanding> {
                     Icons.menu,
                   ),
                 ))),
-      body: Container(
+      body: daysUntilTest == null
+          ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
+          : Container(
         //color:Color.fromARGB(255, 33, 100, 159), 
         padding: const EdgeInsets.all(16.0), // Add some padding
         child: Center( // Center the column vertically and horizontally
@@ -121,20 +124,22 @@ class MiniMockLandingState extends State<MiniMockLanding> {
                 height: 50,
                 width: 1000, // Set a fixed width for the button
                 child: ElevatedButton.icon(
-                  onPressed: () {
+                  onPressed: daysUntilTest! > -1
+                    ? () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) => const MiniMock1Rules(),
                       ),
                     );
-                  },
+                  }
+                  : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     elevation: 10,
                     padding: const EdgeInsets.symmetric(vertical: 15),
                   ),
-                  icon: const Icon(
-                    Icons.lock_open_sharp,
+                  icon: Icon(
+                    daysUntilTest! > -1 ? Icons.lock_open_sharp: Icons.lock_clock_sharp,
                     size: 30,
                     color: Colors.black,
                   ),
@@ -149,24 +154,26 @@ class MiniMockLandingState extends State<MiniMockLanding> {
                 height: 50,
                 width: 1000, // Set a fixed width for the button
                 child: ElevatedButton.icon(
-                  onPressed: () {
+                  onPressed: daysUntilTest! < 7 && daysUntilTest! > -1
+                    ? () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) => const MiniMockExam2(),
                       ),
                     );
-                  },
+                  }
+                  : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     elevation: 10,
                     padding: const EdgeInsets.symmetric(vertical: 15),
                   ),
-                  icon: const Icon(
-                    Icons.lock_clock_sharp,
+                  icon: Icon(
+                    daysUntilTest! < 7 && daysUntilTest! > -1 ? Icons.lock_open_sharp: Icons.lock_clock_sharp,
                     size: 30,
                     color: Colors.black,
                   ),
-                  label: const Text(
+                  label: Text(
                     'Mini Mock 2',
                     style: TextStyle(color: Colors.black, fontSize: 20),
                   ),

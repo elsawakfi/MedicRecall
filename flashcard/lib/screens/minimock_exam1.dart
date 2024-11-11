@@ -238,7 +238,7 @@ class MiniMockExam1State extends State<MiniMockExam1> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const MiniMockFeedback(),
+                          builder: (context) => const MiniMockFeedBack(),
                         ),
                       );
                     },
