@@ -55,7 +55,6 @@ class MiniMockLandingState extends State<MiniMockLanding> {
     var userFromDb = querySnapshot.docs.first;
     Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
     //if the Test Day field isn't null and is in the database we update the UI with it. Otherwise it is displayed as being not set.
-    print("hollo");
     if (data.containsKey("TestDay") || data["TestDay"] != null) {
       var testDay = DateTime.fromMicrosecondsSinceEpoch(userFromDb["TestDay"]
           .microsecondsSinceEpoch); //firebase is weird. conversion from TimeStamp to DateTime object
