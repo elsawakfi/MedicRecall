@@ -1,0 +1,112 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flashcard_x/widgets/event.dart';
+import 'calendar_screen.dart';
+import 'button_screen.dart';
+
+class StudySessionManager {
+  final CollectionReference _userCollectionRef = FirebaseFirestore.instance.collection('users');
+  final FirebaseAuth auth = FirebaseAuth.instance;
+  late User user;
+
+  late CollectionReference _eventsCollectionRef;
+
+  Future<void> getSelectedResources(String userId) async {
+    try {
+      DocumentSnapshot userDoc = await _userCollectionRef.doc(userId).get();
+      if (userDoc.exists) {
+        List<String> selectedResources = List<String>.from(userDoc['selectedResources']);
+        print('Selected resources: $selectedResources');
+        // Use the selected resources as needed
+      } else {
+        print('User document does not exist');
+      }
+    } catch (e) {
+      print('Error retrieving selected resources: $e');
+    }
+  }
+
+  // Generate study sessions based on user data and test day
+  Future<Map<DateTime, List<Event>>> generateStudySessions(
+      DateTime testDay, User user) async {
+    Map<DateTime, List<Event>> generatedEvents = {};
+
+    QuerySnapshot querySnapshot = await _userCollectionRef
+        .where("userID", isEqualTo: user.uid)
+        .get();
+
+    // Get topics and related data from the database or pass them as arguments
+    var topicCount = querySnapshot.docs.last["topicCount"];
+    var topicLastSeen = querySnapshot.docs.last["topicLastSeen"];
+
+    String studyMaterial = querySnapshot.docs.last["studyMaterial"];
+
+    int daysUntilTest =
+        (testDay.difference(DateTime.now()).inHours / 24).round();
+
+    // Loop through topics to generate study sessions
+    for (var i = 0; i < topicCount.length; i++) {
+      // Calculate when the topic should be revised next
+      int daysToNextReviewDate =
+          calculateDaysToNextReview(topicCount[i], topicLastSeen[i]);
+      DateTime nextReviewDate =
+          DateTime.now().add(Duration(days: daysToNextReviewDate));
+
+      if (daysToNextReviewDate >= 0 &&
+          topicCount[i] > 0 &&
+          daysToNextReviewDate < daysUntilTest) {
+        if (generatedEvents[nextReviewDate] == null) {
+          generatedEvents[nextReviewDate] = [];
+        }
+        generatedEvents[nextReviewDate]!.add(Event(title: "Review Topic ${i + 1}"));
+      }
+
+      switch (studyMaterial) {
+        case "flashcards":
+          // Generate flashcard study sessions
+          generatedEvents[nextReviewDate]!.add(Event(title: "Flashcards for Topic ${i + 1}"));
+          break;
+        case "official-papers":
+          // Generate flashcard study sessions
+          generatedEvents[nextReviewDate]!.add(Event(title: "Flashcards for Topic ${i + 1}"));
+          break;
+        case "mini-mocks":
+          // Generate minimock paper
+          generatedEvents[DateTime.now()]!.add(Event(title: "First Mini Mock"));
+
+          DateTime halfwayDate = testDay.subtract(Duration(days: daysUntilTest ~/ 2));
+          generatedEvents[halfwayDate]!.add(Event(title: "Second Mini Mock"));
+          break;
+        case "full-sized-mocks":
+          // Generate note study sessions
+          break;
+        default:
+          break;
+      }
+    }
+    return generatedEvents;
+  }
+
+  int calculateDaysToNextReview(int topicCount, Timestamp lastSeen) {
+    Map<int, int> dateToColourMap = {0: 1, 1: 2, 2: 4, 3: 8, 4: 16, 5: 32};
+    int daysSinceLastReview = (Timestamp.now().seconds - lastSeen.seconds) ~/ (60 * 60 * 24);
+    return dateToColourMap[topicCount]! + daysSinceLastReview;
+  }
+
+  void startStudySession(List<String> selectedResources) {
+    // Implement the logic to start the study session with the selected resources
+    print('Starting study session with resources: $selectedResources');
+  }
+
+  // Save generated events to the database
+  Future<void> saveStudySessionsToDB(User user, Map<DateTime, List<Event>> events) async {
+    QuerySnapshot u = await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+    String id = u.docs.last.id;
+
+    _eventsCollectionRef = FirebaseFirestore.instance.collection('users/$id/events');
+    for (var date in events.keys) {
+      List<String> eventTitles = events[date]!.map((e) => e.title).toList();
+      await _eventsCollectionRef.add({"date": date, "events": eventTitles});
+    }
+  }
+}

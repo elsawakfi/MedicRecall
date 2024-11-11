@@ -4,11 +4,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flashcard_x/widgets/drawer_widget.dart';
 import 'package:flashcard_x/widgets/event.dart';
-//import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/screens/dashboard_screen.dart';
 import 'package:flashcard_x/screens/button_screen.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:flashcard_x/screens/study_session_manager.dart';
 
 /*
 Important note for devs
@@ -69,44 +70,32 @@ List<String> topicsList = [
 List<dynamic> topicsSeen = [];
 
 class Calendar extends StatefulWidget {
-  const Calendar({super.key});
+  const Calendar({Key? key}) : super(key: key);
 
   @override
   CalendarStateO createState() => CalendarStateO();
 }
 
 class CalendarStateO extends State<Calendar> {
-  final CollectionReference _userCollectionRef =
-      FirebaseFirestore.instance.collection('users');
-
-  late CollectionReference _eventsCollectionRef;
-
-  CollectionReference users = FirebaseFirestore.instance.collection('users');
-
+  final StudySessionManager studySessionManager = StudySessionManager();
+  final CollectionReference _userCollectionRef = FirebaseFirestore.instance.collection('users');
   final FirebaseAuth auth = FirebaseAuth.instance;
+
   late User user;
-
   late Map<DateTime?, List<Event>> selectedEvents;
-
   CalendarFormat format = CalendarFormat.month;
-  //The CalendarFormat variable format allows the user to change their view of the calendar, into weekly, biweekly and monthly.
   DateTime? testDay = DateTime.now();
-
   late String testDayString = "Test day not set";
-
   DateTime selectedDay = DateTime(1900, 1, 1);
   // what the user has tapped on
   DateTime focusedDay = DateTime.now(); // is that today?
-  final DateTime today =
-      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
-
-  // for some reason, events need to have their time as being midnight to be shown on the calendar. So need to set the today constant to be midnight today.
-  // therefore today isn't just datetime.now it is calibrated to midnight.
-
+  final DateTime today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
   int buildCount = 0;
-
   final TextEditingController _eventController = TextEditingController();
   bool testDayBool = false;
+  //The CalendarFormat variable format allows the user to change their view of the calendar, into weekly, biweekly and monthly.
+  // for some reason, events need to have their time as being midnight to be shown on the calendar. So need to set the today constant to be midnight today.
+  // therefore today isn't just datetime.now it is calibrated to midnight.
   List<String> daysOfTheWeek = [
     'Monday',
     'Tuesday',
@@ -122,6 +111,8 @@ class CalendarStateO extends State<Calendar> {
     selectedEvents = {};
   }
 
+  late CollectionReference _eventsCollectionRef;
+  CollectionReference users = FirebaseFirestore.instance.collection('users');
   //UI Functions:
 
   List<Event> _getEventsfromDay(DateTime date) {
@@ -171,6 +162,16 @@ class CalendarStateO extends State<Calendar> {
   Future<void> generateEventsUIChange(DateTime testDay) async {
     await generateEvents(testDay, user);
     setState(() {});
+  }
+
+  Future <void> generateStudySessions(DateTime testDay, User user) async {
+    var studySessions = await studySessionManager.generateStudySessions(testDay, user);
+
+    setState(() {
+      selectedEvents.addAll(studySessions);
+    });
+    // add to database
+    await studySessionManager.saveStudySessionsToDB(user, studySessions);
   }
 
   // DATABASE FUNCTIONS:
@@ -356,7 +357,26 @@ class CalendarStateO extends State<Calendar> {
       await getEventsFromDB();
     }
     getData();
+    _loadStudySessions();
   }
+   Future<void> initializeUserAndTestDay() async {
+    await getUser();
+    await getTestDay();
+    await generateEventsUIChange(testDay!);
+  }
+
+  Future<void> _loadStudySessions() async {
+   StudySessionManager studySessionManager = StudySessionManager();
+    User user = FirebaseAuth.instance.currentUser!;
+    DateTime testDay = DateTime.now().add(Duration(days: 30)); // Example test day
+
+    Map<DateTime, List<Event>> events = await studySessionManager.generateStudySessions(testDay, user);
+
+    setState(() {
+      selectedEvents = events;
+    });
+  }
+
 
   @override
   void dispose() {
@@ -377,7 +397,6 @@ Widget build(BuildContext context) {
   return Scaffold(
     drawer: const DrawMain(),
     appBar: AppBar(
-      clipBehavior: Clip.none,
       leading: Builder(
         builder: (context) => GestureDetector(
           onTap: () => Scaffold.of(context).openDrawer(),
@@ -413,7 +432,7 @@ Widget build(BuildContext context) {
           ),
         ],
       ),
-      // centerTitle: true,
+      centerTitle: true,
     ),
     body: Stack(
       children: [
@@ -423,7 +442,7 @@ Widget build(BuildContext context) {
             child: Column(
               children: [
                 TableCalendar(
-                  focusedDay: DateTime.now(),
+                  focusedDay: focusedDay,
                   firstDay: DateTime(1990),
                   lastDay: DateTime(2050),
                   calendarFormat: format,
@@ -434,14 +453,12 @@ Widget build(BuildContext context) {
                   },
                   startingDayOfWeek: StartingDayOfWeek.monday,
                   daysOfWeekVisible: true,
+                  selectedDayPredicate: (day) => isSameDay(selectedDay, day),
                   onDaySelected: (DateTime selectDay, DateTime focusDay) {
                     setState(() {
                       selectedDay = selectDay;
                       focusedDay = focusDay;
                     });
-                  },
-                  selectedDayPredicate: (DateTime date) {
-                    return isSameDay(selectedDay, date);
                   },
                   eventLoader: _getEventsfromDay,
                   calendarStyle: CalendarStyle(
