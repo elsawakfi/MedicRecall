@@ -36,7 +36,8 @@ class MiniMock1RulesState extends State<MiniMock1Rules> {
                   Container(
                     margin: const EdgeInsets.only(left: 32),
                     padding: const EdgeInsets.all(8.0),
-                    child: const Text('Mini-Mock1 Exam Rules ',
+                    child: const Text('Mini-Mock1',
+                    
                     ),
                   ),
                 ],
@@ -50,26 +51,75 @@ class MiniMock1RulesState extends State<MiniMock1Rules> {
                   child: const Icon(
                     Icons.menu,
                   ),
-                )
-            )
-
-        ),
-        body: Align(alignment: Alignment(0.9, 0.9),
-          child: ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const MiniMockExam1(),
-                  ),
-                );
-              },
-              child: Text('Start'),
+                ),
+                ),
+                
+                ),
+                body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'MedicRecall Mini-Mock 1 Exam Instructions: \n',
+              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
             ),
-          ),
+            const SizedBox(height: 10),
+            const Text(
+              'In this test, you will be presented with typical scenarios that Foundation Year Two (Y2) Doctors '
+              'encounter , and you will be asked questions about dealing with them. When answering questions, '
+              'please consider yourself to be a FY2 Doctor unless stated otherwise and answer based on what you '
+              'should do in each scenario.\n \n',
+              style: TextStyle(fontSize: 21),
+
+
+            ),
+            const Text(
+              'The paper is divided into two parts:\n',
+              style: TextStyle(fontSize: 23, fontWeight: FontWeight.bold),
+            ),
+            const Text(
+              'Part 1: Rating Questions (Q1-13).',
+              style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold, decoration: TextDecoration.underline),
+            ),
+            const Text(
+              'In this part you are presented with scenarios followed by a number of possible options. For each scenario you are required to rank each option in order from the most '
+              'appropriate to the least appropriate given the circumstances described in the scenario. \n \n ',
+              style: TextStyle(fontSize: 21),
+            ),
+            const Text(
+              'Part 2: Ranking Questions (Q14-25).',
+              style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold, decoration: TextDecoration.underline),
+            ),
+            const Text(
+              'In this part you are presented with scenarios followed by a number of possible options. For each scenario select the 3 options which together are the most '
+              'appropriate responses to the situation given the circumstances described. \n \n \n \n'
+              'The paper contains 25 questions in total. You have 45 minutes to complete the exam. This is to '
+              'simulate the amount of time you will have to complete the exam on the day. \n',
+              style: TextStyle(fontSize: 21),
+            ),
+              
+            
+        
+                ])
+                
+                )
     );
 
+              const Spacer(); //I am not sure about this is correct.
+              Center(
+                child: ElevatedButton(
+                  onPressed: (){
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const MiniMockExam1(),
+                      ),
+                    );
+                  },
+                  
+                  child: Text('Start'),  
+                ));
+              
     }
   }
-
 
