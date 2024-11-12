@@ -43,8 +43,11 @@ body:
     attributes:
       label: Checklist
       options:
-        - label: "[ ] I've linked this issue to a branch"
-        - label: "[ ] I've add in the target date"
-        - label: "[ ] I've added in the assignee"
-        - label: "[ ] I've assigned this issue to the respective PIC"
-        - label: "[ ] I've set the priority and labels for this issue"
+        - label: I've linked this issue to a branch
+          required: true
+        - label: I've add in the target date
+          required: true
+        - label: I've added in the assignee (aka. the respective PIC)
+          required: true
+        - label: I've set the priority and labels for this issue
+          required: true
