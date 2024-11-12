@@ -194,59 +194,144 @@ class _CustomFloatingButtonState extends State<CustomFloatingButton> {
   }
 
   // Show dialog to ask for number of repetitions
-  void _showRepetitionDialog(BuildContext context) {
-    final controller = TextEditingController();
+void _showRepetitionDialog(BuildContext context) {
+  final List<int> repetitionOptions = [4, 5, 6, 7, 8];
+  int? selectedRepetition;
+  bool isCustomAmount = false;
+  TextEditingController customAmountController = TextEditingController();
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return _buildAlertDialog(
-          title: 'How many repetitions of the official paper link?',
-          content: 
-          TextField(
-            controller: controller,
-            keyboardType: TextInputType.number,
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
-            ],
-            style: const TextStyle(color: Colors.black),
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              hintText: 'Enter number of repetitions',
-              hintStyle: TextStyle(color: Colors.grey),
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return AlertDialog(
+            backgroundColor: const Color(0xFFE6EDF2),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(0),
             ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-               Navigator.of(context).pop();
-                    _showExamDateDialog(context);
-              },
-              child: const Text('Previous'),
+            title: Text(
+              'How many repetitions of the official paper link?',
+              style: const TextStyle(
+                color: Color.fromRGBO(21, 58, 103, 1),
+                fontSize: 21,
+                fontWeight: FontWeight.w500,
+              ),
             ),
-            TextButton(
-              onPressed: () {
-                final int? repetitions = int.tryParse(controller.text);
-                if (repetitions != null &&
-                    repetitions > 0 &&
-                    repetitions < 10) {
-                  Navigator.of(context).pop();
-                  _showOptionsDialog(context); // Proceed to next dialog
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Please enter a number between 1 and 9'),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ...repetitionOptions.map((int value) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 5.0),
+                      child: RadioListTile<int>(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15.0),
+                        ),
+                        tileColor: const Color.fromRGBO(21, 58, 103, 1),
+                        title: Text(
+                          '$value',
+                          style: const TextStyle(
+                            color: Colors.white,
+                          ),
+                        ),
+                        value: value,
+                        groupValue: selectedRepetition,
+                        onChanged: (int? newValue) {
+                          setState(() {
+                            selectedRepetition = newValue;
+                            isCustomAmount = false;
+                          });
+                        },
+                      ),
+                    );
+                  }).toList(),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 5.0),
+                    child: RadioListTile<bool>(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15.0),
+                      ),
+                      tileColor: const Color.fromRGBO(21, 58, 103, 1),
+                      title: TextField(
+                        controller: customAmountController,
+                        decoration: InputDecoration(
+                          hintText: 'Enter the number of repetitions',
+                          hintStyle: const TextStyle(
+                            color: Colors.white70,
+                          ),
+                          border: InputBorder.none,
+                        ),
+                        keyboardType: TextInputType.number,
+                        onTap: () {
+                          setState(() {
+                            isCustomAmount = true;
+                            selectedRepetition = null;
+                          });
+                        },
+                        style: const TextStyle(
+                          color: Colors.white,
+                        ),
+                      ),
+                      value: true,
+                      groupValue: isCustomAmount,
+                      onChanged: (bool? value) {
+                        setState(() {
+                          isCustomAmount = true;
+                          selectedRepetition = null;
+                        });
+                      },
                     ),
-                  );
-                }
-              },
-              child: const Text('Submit'), // change it to 'Next' once we have more questions in
+                  ),
+                ],
+              ),
             ),
-          ],
-        );
-      },
-    );
-  }
+            actions: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _showExamDateDialog(context);
+                    },
+                    child: const Text(
+                      'Previous',
+                      style: TextStyle(color: Color.fromRGBO(21, 58, 103, 1)),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      if (selectedRepetition != null || (isCustomAmount && customAmountController.text.isNotEmpty && int.tryParse(customAmountController.text) != null)) {
+                        Navigator.of(context).pop();
+                        _showOptionsDialog(context); // Proceed to the next dialog
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              isCustomAmount && customAmountController.text.isEmpty
+                                  ? 'Please enter an amount'
+                                  : 'Please select or enter an amount',
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                    child: const Text(
+                      'Submit',
+                      style: TextStyle(color: Color.fromRGBO(21, 58, 103, 1)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+}
 
   void _showOptionsDialog(BuildContext context) {
     final checkbox1 = ValueNotifier<bool>(false);
