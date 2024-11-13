@@ -68,13 +68,13 @@ class MiniMock1RulesState extends State<MiniMock1Rules> {
               'In this test, you will be presented with typical scenarios that Foundation Year Two (Y2) Doctors '
               'encounter , and you will be asked questions about dealing with them. When answering questions, '
               'please consider yourself to be a FY2 Doctor unless stated otherwise and answer based on what you '
-              'should do in each scenario.\n \n',
+              'should do in each scenario.\n',
               style: TextStyle(fontSize: 21),
 
 
             ),
             const Text(
-              'The paper is divided into two parts: \n',
+              'The paper is divided into two parts: ',
               style: TextStyle(fontSize: 23, fontWeight: FontWeight.bold),
             ),
 
@@ -94,7 +94,7 @@ class MiniMock1RulesState extends State<MiniMock1Rules> {
                 style: TextStyle(fontSize: 21, decoration:TextDecoration.underline,),
                 children: <TextSpan>[
                   TextSpan(text:' In this part you are presented with scenarios followed by a number of possible options. For each scenario select the 3 options which together are the most '
-              'appropriate responses to the situation given the circumstances described. \n \n \n',
+              'appropriate responses to the situation given the circumstances described. \n',
                     style: TextStyle(fontSize: 21,decoration:TextDecoration.none)),
                 ],),
             ),
