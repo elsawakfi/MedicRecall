@@ -1,22 +1,23 @@
 import 'dart:core';
-
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/calendar_screen.dart';
 import 'package:flashcard_x/screens/dashboard_screen.dart';
+import 'package:intl/intl.dart';
 import 'package:flashcard_x/screens/faq.dart';
+import 'package:flutter/services.dart';
 import 'package:flashcard_x/screens/flashcard_editor_screen.dart';
 import 'package:flashcard_x/screens/button_screen.dart';
 import 'package:flashcard_x/screens/minimock_landing.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'feedback_screen.dart';
+import 'mark_scheme.dart';
+import 'package:flashcard_x/screens/settings_screen.dart' as setting;
 import 'package:table_calendar/table_calendar.dart';
 // import 'package:flashcard_x/screens/exam_guide_screen.dart';
 // import 'package:flashcard_x/screens/resources.dart';
-import 'package:flashcard_x/screens/settings_screen.dart' as setting;
 
-import 'feedback_screen.dart';
-import 'mark_scheme.dart';
 
 
 
@@ -39,54 +40,45 @@ class Landing extends StatefulWidget {
 
 class LandingState extends State<Landing> {
   bool testDayBool_ = true;
-  DateTime? someVar;
+  DateTime? hasDate;
+  DateTime? _examDate;
+  int buildCount = 0;
   final CollectionReference _userCollectionRef =
       FirebaseFirestore.instance.collection('users');
   CollectionReference users = FirebaseFirestore.instance.collection('users');
-  bool signedIn = false;
   final FirebaseAuth auth = FirebaseAuth.instance;
-  late User user;
-  
+  late String testDayString = "Test day not set";
  
 
-  Widget _buildAlertDialog({
-    required String title,
-    required Widget content,
-    required List<Widget> actions,
-  }) {
-    return AlertDialog(
-      backgroundColor: const Color(0xFFE6EDF2),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(0),
-      ),
-      title: Text(
-        title,
-        style: const TextStyle(
-          color: Color.fromRGBO(21, 58, 103, 1),
-          fontSize: 21,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-      content: content,
-      actions: actions,
-    );
-  }
+  late User user;
 
   void shouldShowDialog() async{
-      await checkTestDay();
-      NavigatorState nav = Navigator.of(context);
-      if (testDayBool_ && someVar == null){
-        nav.push(
-              PageRouteBuilder(
-                opaque:false,
-                barrierDismissible: true,
-                fullscreenDialog: true,
-                pageBuilder: (BuildContext context,_,__){
-                   return CustomFloatingButton();
-                }
-
-              ));
-        } else {}
+      await getTestDay();
+      if (testDayBool_ && _examDate == null){
+         showDialog(context: context, 
+         builder: (BuildContext context){
+          return _buildAlertDialog(
+          title: 'Do you want to start your revision plan today?',
+          content: const SizedBox(), // Empty content for this dialog
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _showExamDateDialog(context); // Call to show exam date dialog
+              },
+              child: const Text('Yes'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('No'),
+            ),
+          ],
+        );
+      },
+    ); } else {}
+      //nav.pop();
   }
 
 
@@ -115,14 +107,34 @@ class LandingState extends State<Landing> {
 
     var userFromDb = querySnapshot.docs.first;
     Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
-    //if the Test Day field isn't null and is in the database we update the UI with it. Otherwise it is displayed as being not set.
-   
     if ((data.containsKey("TestDay")||data["TestDay"] != null)) {
+      //only interested in whether the db has a date or not for our boolean values that will be used in shouldShowDialog
       testDayBool_ = false;
-      someVar = DateTime.now();
+      hasDate = DateTime.now();
     } else {
       testDayBool_ = true;
       
+    }
+    setState(() {});
+  }
+    Future<void> getTestDay() async {
+    QuerySnapshot querySnapshot =
+        await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+
+    var userFromDb = querySnapshot.docs.first;
+    Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
+    //if the Test Day field isn't null and is in the database we update the UI with it. Otherwise it is displayed as being not set.
+    if ((data.containsKey("TestDay") || data["TestDay"] != null) &&
+        (buildCount <= 2 || (_examDate != null && buildCount > 2))) {
+      testDayBool_ = false;
+      _examDate = DateTime.fromMicrosecondsSinceEpoch(userFromDb["TestDay"]
+          .microsecondsSinceEpoch); //firebase is weird. conversion from TimeStamp to DateTime object
+      String? day = _examDate?.day.toString();
+      String? month = _examDate?.month.toString();
+      String? year = _examDate?.year.toString();
+      testDayString = '$day-$month-$year';
+    } else {
+      testDayBool_ = true;
     }
     setState(() {});
   }
@@ -130,6 +142,7 @@ class LandingState extends State<Landing> {
 
   @override
   Widget build(BuildContext context) {
+    buildCount ++;
     return Scaffold(
       key: const ValueKey('Welcome bar'),
       appBar: AppBar(
@@ -581,7 +594,7 @@ class LandingState extends State<Landing> {
   @override
   void didChangeDependencies(){
     super.didChangeDependencies();
-    //waits for build function to complete and then comes back to check the condition
+    //waits for build function to complete and then calls back to call the condition checking function 
     WidgetsBinding.instance.addPostFrameCallback((_){
        shouldShowDialog();
     });
@@ -592,6 +605,7 @@ class LandingState extends State<Landing> {
   void initState() {
     super.initState();
     getUser();
+    
     setState(() {});
   }
 
@@ -601,7 +615,7 @@ class LandingState extends State<Landing> {
       var tmp = await auth
           .authStateChanges()
           .first;
-      signedIn = true;
+     
       if (tmp == null) {
         nav.push(
             MaterialPageRoute(
@@ -646,6 +660,272 @@ class LandingState extends State<Landing> {
       // );
     }
   }
+ 
+ void _showExamDateDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return _buildAlertDialog(
+          title: 'What is your exam date?',
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
 
-}
+            //if statement to check if firebase already has exam date in database
+            children: [
+              ElevatedButton(
+                onPressed: () async {
+                  final DateTime? picked = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime.now().add(const Duration(days: 365)),
+                  );
+                  if (picked != null) {
+                    setState(() {
+                      _examDate = picked;
+                      updateTestDay(picked); // Update parent state
+                      testDayBool_ = false;
+                    }); 
+                    Navigator.of(context).pop();
+                    _showRepetitionDialog(context);
+                  }
+        
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromRGBO(21, 58, 103, 1),
+                ),
+                child: const Text('Pick Date'),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                hasDate != null
+                    ? 'Selected Date: ${DateFormat('MMM d, yyyy').format(_examDate!)}'
+                    : 'No Date Selected',
+                style: TextStyle(
+                  color: _examDate != null
+                      ? Colors.black
+                      : const Color.fromRGBO(21, 58, 103, 1),
+                ),
+              ),
+            ],
+          ),
+          actions: [],
+        );
+      },
+    );
+  }
 
+  // Show dialog to ask for number of repetitions
+  void _showRepetitionDialog(BuildContext context) {
+    final controller = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return _buildAlertDialog(
+          title: 'How many repetitions of the official paper link?',
+          content: 
+          TextField(
+            controller: controller,
+            keyboardType: TextInputType.number,
+            inputFormatters: [
+              FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+            ],
+            style: const TextStyle(color: Colors.black),
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              hintText: 'Enter number of repetitions',
+              hintStyle: TextStyle(color: Colors.grey),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+               Navigator.of(context).pop();
+                    _showExamDateDialog(context);
+              },
+              child: const Text('Previous'),
+            ),
+            TextButton(
+              onPressed: () {
+                final int? repetitions = int.tryParse(controller.text);
+                if (repetitions != null &&
+                    repetitions > 0 &&
+                    repetitions < 10) {
+                  Navigator.of(context).pop();
+                  _showOptionsDialog(context); // Proceed to next dialog
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please enter a number between 1 and 9'),
+                    ),
+                  );
+                }
+              },
+              child: const Text('Submit'), // change it to 'Next' once we have more questions in
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showOptionsDialog(BuildContext context) {
+    final checkbox1 = ValueNotifier<bool>(false);
+    final checkbox2 = ValueNotifier<bool>(false);
+    final checkbox3 = ValueNotifier<bool>(false);
+    final checkbox4 = ValueNotifier<bool>(false);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return _buildAlertDialog(
+          title: 'What resources do you want to use?',
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  ValueListenableBuilder(
+                    valueListenable: checkbox1,
+                    builder: (context, value, child) {
+                      return Checkbox(
+                        value: value,
+                        onChanged: (value) {
+                          checkbox1.value = value!;
+                        },
+                      );
+                    },
+                  ),
+                  Text(
+                    'Official paper',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  ValueListenableBuilder(
+                    valueListenable: checkbox2,
+                    builder: (context, value, child) {
+                      return Checkbox(
+                        value: value,
+                        onChanged: (value) {
+                          checkbox2.value = value!;
+                        },
+                      );
+                    },
+                  ),
+                  Text(
+                    'Full-sized mock exam',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  ValueListenableBuilder(
+                    valueListenable: checkbox3,
+                    builder: (context, value, child) {
+                      return Checkbox(
+                        value: value,
+                        onChanged: (value) {
+                          checkbox3.value = value!;
+                        },
+                      );
+                    },
+                  ),
+                  Text(
+                    'Mini-mocks',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  ValueListenableBuilder(
+                    valueListenable: checkbox4,
+                    builder: (context, value, child) {
+                      return Checkbox(
+                        value: value,
+                        onChanged: (value) {
+                          checkbox4.value = value!;
+                        },
+                      );
+                    },
+                  ),
+                  Text(
+                    'Flashcards',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                if (checkbox1.value ||
+                    checkbox2.value ||
+                    checkbox3.value ||
+                    checkbox4.value) {
+                  Navigator.of(context).pop();
+                  // Add your action here after options are submitted
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please select at least one option'),
+                    ),
+                  );
+                }
+              },
+              child: const Text('Submit'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+    Widget _buildAlertDialog({
+    required String title,
+    required Widget content,
+    required List<Widget> actions,
+  }) {
+    return AlertDialog(
+      backgroundColor: const Color(0xFFE6EDF2),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(0),
+      ),
+      title: Text(
+        title,
+        style: const TextStyle(
+          color: Color.fromRGBO(21, 58, 103, 1),
+          fontSize: 21,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      content: content,
+      actions: actions,
+    );
+  }
+
+   Future<void> updateTestDay(DateTime date) async {
+    CollectionReference users = FirebaseFirestore.instance.collection('users');
+    QuerySnapshot u =
+        await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+
+    /*  FIRST update on database */
+    var id = u.docs.last.id; //id being where the user's id details
+    users.doc(id).update({
+      "TestDay": _examDate
+    }); // update field testday to what is passed as param
+    await getTestDay();
+    setState(() {});
+  
+  }
+ }
+ 
+
+
+ 
+ 
