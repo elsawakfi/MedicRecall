@@ -3,40 +3,57 @@ description: MedicRecall2 Main Issue Report Template
 title: "[Type of Issue]"
 projects: ["spe-upb/2024-MedicRecall2"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for filling out an issue form for MedicRecall 2024
+  - type: markdown
+    attributes:
+      value: |
+        Please add all relevant issue metadata to your issue. This includes all relevant: assignees, labels, milestone and relevant branches/pull requests.  
+
   - type: dropdown
-    id: type
+    id: issue-type
     attributes:
       label: Type of Issue
+      description: Please select the type of issue
+      multiple: false
       options:
-        - New Feature
-        - Enchancement/ Improvement
-        - Documentation
-        - Adhoc
-        - Bug
+        - 'New Feature'
+        - 'Enchancement/ Improvement'
+        - 'Documentation'
+        - 'Adhoc'
+        - 'Bug'
+        - 'Others'
+    validations:
       required: true
-      validation_message: Please select the type of issue      
-
+      
   - type: textarea
-    id: description
+    id: issue-description
     attributes:
       label: Is your feature request related to a problem? Please describe.
-      placeholder: Describe the feature request in detail
+      description: Please provide a description for the issue
+      placeholder: Describe the issue here.
+    validations:
       required: true
-      validation_message: Please provide a description for the issue
 
   - type: textarea
     id: solution
     attributes:
-      label: Describe the solution you'd like to add
-      placeholder: Describe the solution in detail
+      label: Additional Information
+      description: Please provide a solution for the issue
+      placeholder: Describe the solution here
+    validations:
       required: true
-      validation_message: Please provide a solution for the issue
 
   - type: textarea
-    id: additional_info
+    id: additional-information
     attributes:
-      label: Additional context
-      placeholder: Add any other context or screenshots about the feature request here
+      label: Additional Information
+      description: Add any other context about the issue here.
+      placeholder: Add any other context about the issue here.
+    validations:
+      required: false
 
   - type: checkboxes
     id: checklist
@@ -44,10 +61,9 @@ body:
       label: Checklist
       options:
         - label: I've linked this issue to a branch
-          required: true
         - label: I've add in the target date
-          required: true
         - label: I've added in the assignee (aka. the respective PIC)
-          required: true
         - label: I've set the priority and labels for this issue
-          required: true
+
+
+         
