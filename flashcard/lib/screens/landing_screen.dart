@@ -8,14 +8,18 @@ import 'package:flashcard_x/screens/faq.dart';
 import 'package:flashcard_x/screens/flashcard_editor_screen.dart';
 import 'package:flashcard_x/screens/button_screen.dart';
 import 'package:flashcard_x/screens/minimock_landing.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:table_calendar/table_calendar.dart';
 // import 'package:flashcard_x/screens/exam_guide_screen.dart';
 // import 'package:flashcard_x/screens/resources.dart';
 import 'package:flashcard_x/screens/settings_screen.dart' as setting;
-import 'package:flutter/material.dart';
 
 import 'feedback_screen.dart';
 import 'mark_scheme.dart';
+
+
+
 
 /* TO DO
 Build the new landing page that comes after logging in and before the main dashboard.
@@ -34,9 +38,95 @@ class Landing extends StatefulWidget {
 }
 
 class LandingState extends State<Landing> {
-
+  bool testDayBool_ = true;
+  DateTime? someVar;
+  final CollectionReference _userCollectionRef =
+      FirebaseFirestore.instance.collection('users');
+  CollectionReference users = FirebaseFirestore.instance.collection('users');
+  bool signedIn = false;
   final FirebaseAuth auth = FirebaseAuth.instance;
   late User user;
+  
+ 
+
+  Widget _buildAlertDialog({
+    required String title,
+    required Widget content,
+    required List<Widget> actions,
+  }) {
+    return AlertDialog(
+      backgroundColor: const Color(0xFFE6EDF2),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(0),
+      ),
+      title: Text(
+        title,
+        style: const TextStyle(
+          color: Color.fromRGBO(21, 58, 103, 1),
+          fontSize: 21,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      content: content,
+      actions: actions,
+    );
+  }
+
+  void shouldShowDialog() async{
+      await checkTestDay();
+      NavigatorState nav = Navigator.of(context);
+      if (testDayBool_ && someVar == null){
+        nav.push(
+              PageRouteBuilder(
+                opaque:false,
+                barrierDismissible: true,
+                fullscreenDialog: true,
+                pageBuilder: (BuildContext context,_,__){
+                   return CustomFloatingButton();
+                }
+
+              ));
+        } else {}
+  }
+
+
+  Future<void> getUser() async {
+    NavigatorState nav = Navigator.of(context);
+    if (auth.currentUser == null) {
+      var tmp = await auth
+          .authStateChanges()
+          .first;
+      if (tmp == null) {
+        nav.push(
+            MaterialPageRoute(
+              builder: (context) => const SignInScreen(),
+            )
+        );
+      } else {
+        user = tmp;
+      }
+    } else {
+      user = auth.currentUser!;
+    }
+  }
+  Future<void> checkTestDay() async {
+    QuerySnapshot querySnapshot =
+        await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+
+    var userFromDb = querySnapshot.docs.first;
+    Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
+    //if the Test Day field isn't null and is in the database we update the UI with it. Otherwise it is displayed as being not set.
+   
+    if ((data.containsKey("TestDay")||data["TestDay"] != null)) {
+      testDayBool_ = false;
+      someVar = DateTime.now();
+    } else {
+      testDayBool_ = true;
+      
+    }
+    setState(() {});
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -71,6 +161,7 @@ class LandingState extends State<Landing> {
         automaticallyImplyLeading: false,
         centerTitle: true,
       ),
+      
       body: SafeArea(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
@@ -482,7 +573,19 @@ class LandingState extends State<Landing> {
           )),
           floatingActionButton: const CustomFloatingButton(),
           floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
-    );
+          
+    ) ; 
+  }
+
+
+  @override
+  void didChangeDependencies(){
+    super.didChangeDependencies();
+    //waits for build function to complete and then comes back to check the condition
+    WidgetsBinding.instance.addPostFrameCallback((_){
+       shouldShowDialog();
+    });
+  
   }
 
   @override
@@ -492,32 +595,13 @@ class LandingState extends State<Landing> {
     setState(() {});
   }
 
-  Future<void> getUser() async {
-    NavigatorState nav = Navigator.of(context);
-    if (auth.currentUser == null) {
-      var tmp = await auth
-          .authStateChanges()
-          .first;
-      if (tmp == null) {
-        nav.push(
-            MaterialPageRoute(
-              builder: (context) => const SignInScreen(),
-            )
-        );
-      } else {
-        user = tmp;
-      }
-    } else {
-      user = auth.currentUser!;
-    }
-  }
-
   Future<void> triggerSignIn(String screen) async{
     NavigatorState nav = Navigator.of(context);
     if (auth.currentUser == null) {
       var tmp = await auth
           .authStateChanges()
           .first;
+      signedIn = true;
       if (tmp == null) {
         nav.push(
             MaterialPageRoute(
@@ -548,8 +632,10 @@ class LandingState extends State<Landing> {
               builder: (context) => const Calendar(),
             )
         );
-      }
+        
 
+      }
+      
       // user = auth.currentUser!;
       //     () => Navigator.push(
       //   context,
