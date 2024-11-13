@@ -2,8 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flashcard_x/widgets/pageLayout.dart';
-import 'package:flashcard_x/screens/minimock_feedback.dart';
+import 'package:flashcard_x/widgets/page_layout.dart';
 
 class MiniMockFeedBack extends StatefulWidget {
   const MiniMockFeedBack({super.key});
@@ -59,31 +58,23 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
   }
 
   Future<void> fetchAnswerKeys() async {
-    try {
-      // Fetch the question data (this simulates your Future)
-      List<Map<String, dynamic>> fetchedAnswers = await getAnswerData();
+    // Fetch the question data (this simulates your Future)
+    List<Map<String, dynamic>> fetchedAnswers = await getAnswerData();
 
-      // Initialise questions and selectedOptions based on fetched data
-      setState(() {
-        answerKeys = fetchedAnswers;
-      });
-    } catch (error) {
-      print('Error fetching questions: $error');
-    }
+    // Initialise questions and selectedOptions based on fetched data
+    setState(() {
+      answerKeys = fetchedAnswers;
+    });
   }
 
   Future<void> fetchUserAnwsers() async {
-    try {
-      // Fetch the question data (this simulates your Future)
-      List<Map<String, dynamic>> fetchedUserAnswers = await getUserAnswerData();
+    // Fetch the question data (this simulates your Future)
+    List<Map<String, dynamic>> fetchedUserAnswers = await getUserAnswerData();
 
-      // Initialise questions and selectedOptions based on fetched data
-      setState(() {
-        userAnswers = fetchedUserAnswers;
-      });
-    } catch (error) {
-      print('Error fetching questions: $error');
-    }
+    // Initialise questions and selectedOptions based on fetched data
+    setState(() {
+      userAnswers = fetchedUserAnswers;
+    });
   
 }
 

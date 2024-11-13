@@ -1,13 +1,10 @@
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/drawer_widget.dart';
 import 'package:flashcard_x/screens/minimock_exam1.dart';
 
 
 class MiniMock1Rules extends StatefulWidget {
-  const MiniMock1Rules({Key? key}) : super(key: key);
+  const MiniMock1Rules({super.key});
 
   @override
   State<MiniMock1Rules> createState() => MiniMock1RulesState();

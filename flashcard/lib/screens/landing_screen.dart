@@ -10,9 +10,6 @@ import 'package:flashcard_x/screens/button_screen.dart';
 import 'package:flashcard_x/screens/minimock_landing.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:table_calendar/table_calendar.dart';
-// import 'package:flashcard_x/screens/exam_guide_screen.dart';
-// import 'package:flashcard_x/screens/resources.dart';
 import 'package:flashcard_x/screens/settings_screen.dart' as setting;
 
 import 'feedback_screen.dart';
@@ -49,44 +46,48 @@ class LandingState extends State<Landing> {
   
  
 
-  Widget _buildAlertDialog({
-    required String title,
-    required Widget content,
-    required List<Widget> actions,
-  }) {
-    return AlertDialog(
-      backgroundColor: const Color(0xFFE6EDF2),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(0),
-      ),
-      title: Text(
-        title,
-        style: const TextStyle(
-          color: Color.fromRGBO(21, 58, 103, 1),
-          fontSize: 21,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-      content: content,
-      actions: actions,
-    );
-  }
+  // Widget _buildAlertDialog({
+  //   required String title,
+  //   required Widget content,
+  //   required List<Widget> actions,
+  // })
+  // {
+  //   return AlertDialog(
+  //     backgroundColor: const Color(0xFFE6EDF2),
+  //     shape: RoundedRectangleBorder(
+  //       borderRadius: BorderRadius.circular(0),
+  //     ),
+  //     title: Text(
+  //       title,
+  //       style: const TextStyle(
+  //         color: Color.fromRGBO(21, 58, 103, 1),
+  //         fontSize: 21,
+  //         fontWeight: FontWeight.w500,
+  //       ),
+  //     ),
+  //     content: content,
+  //     actions: actions,
+  //   );
+  // }
 
   void shouldShowDialog() async{
       await checkTestDay();
-      NavigatorState nav = Navigator.of(context);
       if (testDayBool_ && someVar == null){
-        nav.push(
-              PageRouteBuilder(
-                opaque:false,
-                barrierDismissible: true,
-                fullscreenDialog: true,
-                pageBuilder: (BuildContext context,_,__){
-                   return CustomFloatingButton();
-                }
-
-              ));
-        } else {}
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (context.mounted) {
+            Navigator.of(context).push(
+                PageRouteBuilder(
+                    opaque: false,
+                    barrierDismissible: true,
+                    fullscreenDialog: true,
+                    pageBuilder: (BuildContext context, _, __) {
+                      return CustomFloatingButton();
+                    }
+                  )
+            );
+          }
+        });
+      }else {}
   }
 
 

@@ -16,10 +16,10 @@ class CustomFloatingButton extends StatefulWidget {
   const CustomFloatingButton({super.key});
 
   @override
-  _CustomFloatingButtonState createState() => _CustomFloatingButtonState();
+  CustomFloatingButtonState createState() => CustomFloatingButtonState();
 }
 
-class _CustomFloatingButtonState extends State<CustomFloatingButton> {
+class CustomFloatingButtonState extends State<CustomFloatingButton> {
   DateTime? _examDate;
   final CollectionReference _userCollectionRef =
       FirebaseFirestore.instance.collection('users');
@@ -165,8 +165,10 @@ class _CustomFloatingButtonState extends State<CustomFloatingButton> {
                       updateTestDay(picked); // Update parent state
                       testDayBool = false;
                     });
-                    Navigator.of(context).pop();
-                    _showRepetitionDialog(context); // Proceed to next dialog
+                    if (context.mounted) {
+                      Navigator.of(context).pop();
+                      _showRepetitionDialog(context); // Proceed to next dialog
+                    }
                   }
                 },
                 style: ElevatedButton.styleFrom(
