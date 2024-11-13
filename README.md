@@ -55,15 +55,15 @@ Further information on our stakeholders can be found here:
 
 ## Project Requirements
 
+- **Learning Progress Tracking**
+  - Implement revision reminders
+  - Develop quarterly mini-exams
+
 - **Mobile Application Development**
   - Deploy the existing project as a mobile application for both Android and iOS
 
 - **UI/UX Redesign**  
   - Redesign the user interface to align with industry standards
-
-- **Learning Progress Tracking**  
-  - Implement revision reminders  
-  - Develop quarterly mini-exams
 
 ## Additional Features
 
@@ -88,12 +88,13 @@ The app is being hosted on Google Firebase [here](https://flashcard-6edc2.web.ap
 
 ### Requirements
 
-To build Medicrecall yourself, you will need the following tools:
+To build MedicRecall yourself, you will need the following tools:
 - Android Studio ([Available here](https://developer.android.com/studio/install))
 - An emulator capable of running either:
   - Android 6.0 or above, or
   - iOS 11.0 or above
-- Flutter SDK version 3.7.12 ([Available here](https://docs.flutter.dev/release/archive))
+- Flutter SDK version 3.24.3 ([Available here](https://docs.flutter.dev/release/archive))
+  - (Running Dart version 3.5.3)
 - A clone of the repository via: `git clone https://github.com/spe-uob/2024-MedicRecall2.git` or `git clone git@github.com:spe-uob/2024-MedicRecall2.git`
 
 ### Build
@@ -104,6 +105,7 @@ To build Medicrecall yourself, you will need the following tools:
    - Android: run `flutter build apk`
    - iOS: run `flutter build ios --release --no-codesign`
    - macOS: run `flutter create --platforms=macos` followed by `flutter build macos`
+   - Web browser: run `flutter build web`
 4. Run `flutter run` to start the app on a device or web browser
 
 ## Tech Stack
