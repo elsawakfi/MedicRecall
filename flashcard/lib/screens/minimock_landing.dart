@@ -1,3 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/screens/minimock_exam1.dart';
 import 'package:flashcard_x/screens/minimock_exam2.dart';
@@ -13,6 +16,60 @@ class MiniMockLanding extends StatefulWidget {
 }
 
 class MiniMockLandingState extends State<MiniMockLanding> {
+  final FirebaseAuth auth = FirebaseAuth.instance;
+  late User user;
+  int? daysUntilTest;
+
+  @override
+  void initState() {
+    super.initState();
+    getUser();
+    getTestDay();
+  }
+
+  Future<void> getUser() async {
+    NavigatorState nav = Navigator.of(context);
+    if (auth.currentUser == null) {
+      var tmp = await auth
+          .authStateChanges()
+          .first;
+      if (tmp == null) {
+        nav.push(
+            MaterialPageRoute(
+              builder: (context) => const SignInScreen(),
+            )
+        );
+      } else {
+        user = tmp;
+      }
+    } else {
+      user = auth.currentUser!;
+    }
+  }
+
+  // Function from calendar_screen
+  Future<void> getTestDay() async {
+    QuerySnapshot querySnapshot =
+    await FirebaseFirestore.instance.collection("users").where("userID", isEqualTo: user.uid).get();
+
+    var userFromDb = querySnapshot.docs.first;
+    Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
+    //if the Test Day field isn't null and is in the database we update the UI with it. Otherwise it is displayed as being not set.
+    if (data.containsKey("TestDay") || data["TestDay"] != null) {
+      var testDay = DateTime.fromMicrosecondsSinceEpoch(userFromDb["TestDay"]
+          .microsecondsSinceEpoch); //firebase is weird. conversion from TimeStamp to DateTime object
+      final DateTime today =
+      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+      setState(() {
+        daysUntilTest = (testDay.difference(today).inHours/24).round();
+      });
+    } else {
+      setState(() {
+        daysUntilTest = -1;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,7 +109,9 @@ class MiniMockLandingState extends State<MiniMockLanding> {
                     Icons.menu,
                   ),
                 ))),
-      body: Container(
+      body: daysUntilTest == null
+          ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
+          : Container(
         //color:Color.fromARGB(255, 33, 100, 159), 
         padding: const EdgeInsets.all(16.0), // Add some padding
         child: Center( // Center the column vertically and horizontally
@@ -64,20 +123,22 @@ class MiniMockLandingState extends State<MiniMockLanding> {
                 height: 50,
                 width: 1000, // Set a fixed width for the button
                 child: ElevatedButton.icon(
-                  onPressed: () {
+                  onPressed: daysUntilTest! > -1
+                    ? () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) => const MiniMock1Rules(),
                       ),
                     );
-                  },
+                  }
+                  : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     elevation: 10,
                     padding: const EdgeInsets.symmetric(vertical: 15),
                   ),
-                  icon: const Icon(
-                    Icons.lock_open_sharp,
+                  icon: Icon(
+                    daysUntilTest! > -1 ? Icons.lock_open_sharp: Icons.lock_clock_sharp,
                     size: 30,
                     color: Colors.black,
                   ),
@@ -92,24 +153,26 @@ class MiniMockLandingState extends State<MiniMockLanding> {
                 height: 50,
                 width: 1000, // Set a fixed width for the button
                 child: ElevatedButton.icon(
-                  onPressed: () {
+                  onPressed: daysUntilTest! < 7 && daysUntilTest! > -1
+                    ? () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) => const MiniMockExam2(),
                       ),
                     );
-                  },
+                  }
+                  : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     elevation: 10,
                     padding: const EdgeInsets.symmetric(vertical: 15),
                   ),
-                  icon: const Icon(
-                    Icons.lock_clock_sharp,
+                  icon: Icon(
+                    daysUntilTest! < 7 && daysUntilTest! > -1 ? Icons.lock_open_sharp: Icons.lock_clock_sharp,
                     size: 30,
                     color: Colors.black,
                   ),
-                  label: const Text(
+                  label: Text(
                     'Mini Mock 2',
                     style: TextStyle(color: Colors.black, fontSize: 20),
                   ),
