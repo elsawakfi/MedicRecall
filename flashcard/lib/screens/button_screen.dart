@@ -427,6 +427,13 @@ class _CustomFloatingButtonState extends State<CustomFloatingButton> {
           ),
           actions: [
             TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        _showRepetitionDialog(context);
+                      },
+                      child: const Text('Previous'),
+                    ),
+            TextButton(
               onPressed: () {
                 if (checkbox1.value ||
                     checkbox2.value ||
