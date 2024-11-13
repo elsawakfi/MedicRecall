@@ -1,5 +1,4 @@
 import 'dart:core';
-
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/calendar_screen.dart';
@@ -47,17 +46,19 @@ class LandingState extends State<Landing> {
   bool testDayBool_ = true;
   DateTime? hasDate;
   DateTime? _examDate;
+  int buildCount = 0;
   final CollectionReference _userCollectionRef =
       FirebaseFirestore.instance.collection('users');
   CollectionReference users = FirebaseFirestore.instance.collection('users');
   final FirebaseAuth auth = FirebaseAuth.instance;
+  late String testDayString = "Test day not set";
  
 
   late User user;
 
   void shouldShowDialog() async{
-      await checkTestDay();
-      if (testDayBool_ && hasDate == null){
+      await getTestDay();
+      if (testDayBool_ && _examDate == null){
          showDialog(context: context, 
          builder: (BuildContext context){
           return _buildAlertDialog(
@@ -120,10 +121,32 @@ class LandingState extends State<Landing> {
     }
     setState(() {});
   }
+    Future<void> getTestDay() async {
+    QuerySnapshot querySnapshot =
+        await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+
+    var userFromDb = querySnapshot.docs.first;
+    Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
+    //if the Test Day field isn't null and is in the database we update the UI with it. Otherwise it is displayed as being not set.
+    if ((data.containsKey("TestDay") || data["TestDay"] != null) &&
+        (buildCount <= 2 || (_examDate != null && buildCount > 2))) {
+      testDayBool_ = false;
+      _examDate = DateTime.fromMicrosecondsSinceEpoch(userFromDb["TestDay"]
+          .microsecondsSinceEpoch); //firebase is weird. conversion from TimeStamp to DateTime object
+      String? day = _examDate?.day.toString();
+      String? month = _examDate?.month.toString();
+      String? year = _examDate?.year.toString();
+      testDayString = '$day-$month-$year';
+    } else {
+      testDayBool_ = true;
+    }
+    setState(() {});
+  }
 
 
   @override
   Widget build(BuildContext context) {
+    buildCount ++;
     return Scaffold(
       key: const ValueKey('Welcome bar'),
       appBar: AppBar(
@@ -900,7 +923,7 @@ class LandingState extends State<Landing> {
     users.doc(id).update({
       "TestDay": _examDate
     }); // update field testday to what is passed as param
-    await checkTestDay();
+    await getTestDay();
     setState(() {});
   
   }
