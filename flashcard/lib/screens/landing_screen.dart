@@ -14,7 +14,6 @@ import 'package:flutter/material.dart';
 import 'feedback_screen.dart';
 import 'mark_scheme.dart';
 import 'package:flashcard_x/screens/settings_screen.dart' as setting;
-import 'package:table_calendar/table_calendar.dart';
 // import 'package:flashcard_x/screens/exam_guide_screen.dart';
 // import 'package:flashcard_x/screens/resources.dart';
 
@@ -49,35 +48,37 @@ class LandingState extends State<Landing> {
   final FirebaseAuth auth = FirebaseAuth.instance;
   late String testDayString = "Test day not set";
  
-
   late User user;
 
   void shouldShowDialog() async{
       await getTestDay();
-      if (testDayBool_ && _examDate == null){
-         showDialog(context: context, 
-         builder: (BuildContext context){
-          return _buildAlertDialog(
-          title: 'Do you want to start your revision plan today?',
-          content: const SizedBox(), // Empty content for this dialog
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _showExamDateDialog(context); // Call to show exam date dialog
-              },
-              child: const Text('Yes'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('No'),
-            ),
-          ],
-        );
-      },
-    ); } else {}
+      if (testDayBool_ && _examDate == null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+        showDialog(context: context,
+            builder: (BuildContext context) {
+              return _buildAlertDialog(
+                title: 'Do you want to start your revision plan today?',
+                content: const SizedBox(), // Empty content for this dialog
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _showExamDateDialog(
+                          context); // Call to show exam date dialog
+                    },
+                    child: const Text('Yes'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('No'),
+                  ),
+                ],
+              );
+            });
+      });
+      } else {}
       //nav.pop();
   }
 
@@ -685,9 +686,11 @@ class LandingState extends State<Landing> {
                       _examDate = picked;
                       updateTestDay(picked); // Update parent state
                       testDayBool_ = false;
-                    }); 
-                    Navigator.of(context).pop();
-                    _showRepetitionDialog(context);
+                    });
+                    if (context.mounted) {
+                      Navigator.of(context).pop();
+                      _showRepetitionDialog(context);
+                    }
                   }
         
                 },

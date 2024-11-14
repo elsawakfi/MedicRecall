@@ -98,7 +98,6 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
         print('Error fetching answers: $error');
       }
     }
-  
 }
 
   //need to query for the user's answers stored in firebase
