@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flashcard_x/widgets/drawer_widget.dart';
 import 'package:flashcard_x/widgets/event.dart';
-//import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/screens/dashboard_screen.dart';
 import 'package:flashcard_x/screens/button_screen.dart';
@@ -581,7 +580,9 @@ Widget build(BuildContext context) {
                                                 }
                                               });
                                             } else {
-                                              Navigator.pop(context);
+                                              if (context.mounted){
+                                                Navigator.pop(context);
+                                              }
                                             }
                                           });
                                         },
