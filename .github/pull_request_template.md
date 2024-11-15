@@ -9,7 +9,6 @@
 *Please outline the changes that you have introduced and be sure to mention if any bugs are present in your code. Additionally, mention areas of caution or areas of particular interest so other team members are aware of what to look out for when reviewing and modifying your code.*
 
 
-
 ## My PR relates to:
 - [ ] Adding a new feature 
 - [ ] Contined work on a larger feature

@@ -179,20 +179,24 @@ class Authentication {
         if (kDebugMode) {
           print('No user found for that email.');
         }
-        ScaffoldMessenger.of(context).showSnackBar(
-          Authentication.customSnackBar(
-            content: 'No user found for that email. Please create an account.',
-          ),
-        );
+        if (context.mounted){
+          ScaffoldMessenger.of(context).showSnackBar(
+            Authentication.customSnackBar(
+              content: 'No user found for that email. Please create an account.',
+            ),
+          );
+        }
       } else if (e.code == 'wrong-password') {
         if (kDebugMode) {
           print('Wrong password provided.');
         }
-        ScaffoldMessenger.of(context).showSnackBar(
-          Authentication.customSnackBar(
-            content: 'Wrong password provided.',
-          ),
-        );
+        if (context.mounted){
+          ScaffoldMessenger.of(context).showSnackBar(
+            Authentication.customSnackBar(
+              content: 'Wrong password provided.',
+            ),
+          );
+        }
       }
     }
 
@@ -340,11 +344,13 @@ class Authentication {
         if (kDebugMode) {
           print('The password provided is too weak.');
         }
-        ScaffoldMessenger.of(context).showSnackBar(
-          Authentication.customSnackBar(
-            content: 'The password provided is too weak.',
-          ),
-        );
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            Authentication.customSnackBar(
+              content: 'The password provided is too weak.',
+            ),
+          );
+        }
 
       } else if (e.code == 'email-already-in-use') {
         if (kDebugMode) {
@@ -375,11 +381,13 @@ class Authentication {
       }
       await FirebaseAuth.instance.signOut();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        Authentication.customSnackBar(
-          content: 'Error signing out. Try again.',
-        ),
-      );
+      if (context.mounted){
+        ScaffoldMessenger.of(context).showSnackBar(
+          Authentication.customSnackBar(
+            content: 'Error signing out. Try again.',
+          ),
+        );
+      }
     }
   }
 }

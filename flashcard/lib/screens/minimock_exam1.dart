@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flashcard_x/widgets/pageLayout.dart';
+import 'package:flashcard_x/widgets/page_layout.dart';
 import 'package:flashcard_x/screens/minimock_feedback.dart';
 
 
@@ -84,25 +84,20 @@ class MiniMockExam1State extends State<MiniMockExam1> {
     Map<String, List<String>> answerMap = {
       for (int i = 0; i < questions.length; i++) '${i+1}' : answers[i]
     };
+    final CollectionReference users = FirebaseFirestore.instance.collection(
+        'users');
+    QuerySnapshot u =
+    await users.where("userID", isEqualTo: user.uid).get();
+    var id = u.docs.last.id;
+    DocumentReference userDocRef = FirebaseFirestore.instance.collection(
+        'users').doc(id);
+    DocumentReference examAnswersDocRef = userDocRef.collection(
+        'Exam answers').doc("mini-mock1Answers");
 
-    try {
-      final CollectionReference users = FirebaseFirestore.instance.collection(
-          'users');
-      QuerySnapshot u =
-      await users.where("userID", isEqualTo: user.uid).get();
-      var id = u.docs.last.id;
-      DocumentReference userDocRef = FirebaseFirestore.instance.collection(
-          'users').doc(id);
-      DocumentReference examAnswersDocRef = userDocRef.collection(
-          'Exam answers').doc("mini-mock1Answers");
-
-      await examAnswersDocRef.set({
-        'answers': answerMap,
-        'timestamp': FieldValue.serverTimestamp(),
-      });
-    }catch(e){
-      print("updateExamResults error: $e");
-    }
+    await examAnswersDocRef.set({
+      'answers': answerMap,
+      'timestamp': FieldValue.serverTimestamp(),
+    });
 
   }
 

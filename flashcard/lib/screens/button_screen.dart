@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -16,10 +15,10 @@ class CustomFloatingButton extends StatefulWidget {
   const CustomFloatingButton({super.key});
 
   @override
-  _CustomFloatingButtonState createState() => _CustomFloatingButtonState();
+  CustomFloatingButtonState createState() => CustomFloatingButtonState();
 }
 
-class _CustomFloatingButtonState extends State<CustomFloatingButton> {
+class CustomFloatingButtonState extends State<CustomFloatingButton> {
   DateTime? _examDate;
   final CollectionReference _userCollectionRef =
       FirebaseFirestore.instance.collection('users');
@@ -165,8 +164,10 @@ class _CustomFloatingButtonState extends State<CustomFloatingButton> {
                       updateTestDay(picked); // Update parent state
                       testDayBool = false;
                     });
-                    Navigator.of(context).pop();
-                    _showRepetitionDialog(context); // Proceed to next dialog
+                    if (context.mounted) {
+                      Navigator.of(context).pop();
+                      _showRepetitionDialog(context); // Proceed to next dialog
+                    }
                   }
                 },
                 style: ElevatedButton.styleFrom(
@@ -246,7 +247,7 @@ class _CustomFloatingButtonState extends State<CustomFloatingButton> {
                           },
                         ),
                       );
-                    }).toList(),
+                    }),
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 5.0),
                       child: RadioListTile<bool>(

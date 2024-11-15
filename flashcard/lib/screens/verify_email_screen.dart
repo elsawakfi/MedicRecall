@@ -32,12 +32,16 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
     } catch(e) {
       Future.delayed(Duration.zero, ()
       {
-        Navigator.of(context).pop();
-        Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const SignInScreen(),
-            )
-        );
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (context.mounted) {
+            Navigator.of(context).pop();
+            Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const SignInScreen(),
+                )
+            );
+          }
+        });
       });
     }
   }
