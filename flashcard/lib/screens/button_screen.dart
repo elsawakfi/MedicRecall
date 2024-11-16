@@ -448,7 +448,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                       child: const Text('Previous'),
                     ),
             TextButton(
-              onPressed: () {
+              onPressed: () async {
                 if (checkbox1.value ||
                     checkbox2.value ||
                     checkbox3.value ||
