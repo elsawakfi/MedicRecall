@@ -3,13 +3,16 @@ import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
+import 'calendar_screen.dart';
+import 'study_session_manager.dart';
+
 /*import 'package:flashcard_x/widgets/drawer_widget.dart';
 import 'package:flashcard_x/widgets/event.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/screens/dashboard_screen.dart';
 import 'package:table_calendar/table_calendar.dart';*/
-import 'calendar_screen.dart';
+
 
 class CustomFloatingButton extends StatefulWidget {
   const CustomFloatingButton({super.key});
@@ -31,6 +34,14 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
   int buildCount = 0;
   bool testDayBool = true;
   late String testDayString = "Test day not set";
+
+  @override
+  void initState() {
+    super.initState();
+    getUser();
+    getTestDay();
+    setState(() {});
+  }
 
   // Helper method
   Widget _buildAlertDialog({
@@ -56,19 +67,19 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     );
   }
 
-//Repurposed getter from calendar_screen.dart
+  // Repurposed getter from calendar_screen.dart
   Future<void> getTestDay() async {
     QuerySnapshot querySnapshot =
         await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
 
     var userFromDb = querySnapshot.docs.first;
     Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
-    //if the Test Day field isn't null and is in the database we update the UI with it. Otherwise it is displayed as being not set.
+    // If the Test Day field isn't null and is in the database we update the UI with it. Otherwise it is displayed as being not set.
     if ((data.containsKey("TestDay") || data["TestDay"] != null) &&
         (buildCount <= 2 || (_examDate != null && buildCount > 2))) {
       testDayBool = false;
       _examDate = DateTime.fromMicrosecondsSinceEpoch(userFromDb["TestDay"]
-          .microsecondsSinceEpoch); //firebase is weird. conversion from TimeStamp to DateTime object
+          .microsecondsSinceEpoch); // Firebase is weird. Conversion from TimeStamp to DateTime object
       String? day = _examDate?.day.toString();
       String? month = _examDate?.month.toString();
       String? year = _examDate?.year.toString();
@@ -79,16 +90,15 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     setState(() {});
   }
 
-  //Repurposed setter from calendar_screen.dart
+  // Repurposed setter from calendar_screen.dart
   Future<void> updateTestDay(DateTime date) async {
-    CollectionReference users = FirebaseFirestore.instance.collection('users');
     QuerySnapshot u =
         await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
 
     /*  FIRST update on database */
-    var id = u.docs.last.id; //id being where the user's id details
-    users.doc(id).update({
-      "TestDay": _examDate
+    var id = u.docs.last.id; // id being where the user's id details
+    _userCollectionRef.doc(id).update({
+      "TestDay": _examDate,
     }); // update field testday to what is passed as param
     await getTestDay();
     setState(() {});
@@ -110,7 +120,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     }
   }
 
-  //  revision dialog
+  // Revision dialog
   void _showRevisionPlanDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -148,7 +158,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
 
-            //if statement to check if firebase already has exam date in database
+            // If statement to check if firebase already has exam date in database
             children: [
               ElevatedButton(
                 onPressed: () async {
@@ -164,7 +174,9 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                       updateTestDay(picked); // Update parent state
                       testDayBool = false;
                     });
+
                     if (context.mounted) {
+
                       Navigator.of(context).pop();
                       _showRepetitionDialog(context); // Proceed to next dialog
                     }
@@ -284,6 +296,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                           });
                         },
                       ),
+
                     ),
                   ],
                 ),
@@ -440,12 +453,30 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     checkbox2.value ||
                     checkbox3.value ||
                     checkbox4.value) {
+                  List<String> selectedResources = [];
+                  if (checkbox1.value) selectedResources.add('Official paper');
+                  if (checkbox2.value) selectedResources.add('Full-sized mock exam');
+                  if (checkbox3.value) selectedResources.add('Mini-mocks');
+                  if (checkbox4.value) selectedResources.add('Flashcards');
+
+                  QuerySnapshot u =
+                  await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+
+                  // Update the Firestore document with the selected resources
+                  var id = u.docs.last.id;
+                  _userCollectionRef.doc(id).update({
+                    'selectedResources': selectedResources,
+                  });
+
+                  // Start the study session with the selected resources
+                  StudySessionManager().startStudySession(selectedResources);
+                  
                   Navigator.of(context).pop();
                   // Add your action here after options are submitted
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Please select at least one option'),
+                      content: Text('Please select at least one resource'),
                     ),
                   );
                 }
@@ -468,8 +499,6 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
   @override
   Widget build(BuildContext context) {
     buildCount++;
-    getUser();
-    getTestDay();
     return Container(
       margin: const EdgeInsets.only(bottom: 55),
       width: 210,
@@ -528,6 +557,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     ],
                   );
                 });
+
           }
         },
         clipBehavior: Clip.none,

@@ -2,8 +2,12 @@
 
 class Event {
   late final String title;
+  final String? description;
 
-  Event({required this.title}); //@required?
+  Event({
+    required this.title,
+    this.description,
+    }); //@required?
 
   @override
   String toString() => title;
