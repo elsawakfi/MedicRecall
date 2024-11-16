@@ -4,7 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flashcard_x/widgets/drawer_widget.dart';
 import 'package:flashcard_x/widgets/event.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/screens/dashboard_screen.dart';
 import 'package:flashcard_x/screens/button_screen.dart';
@@ -70,7 +69,7 @@ List<String> topicsList = [
 List<dynamic> topicsSeen = [];
 
 class Calendar extends StatefulWidget {
-  const Calendar({Key? key}) : super(key: key);
+  const Calendar({super.key});
 
   @override
   CalendarStateO createState() => CalendarStateO();
@@ -86,9 +85,9 @@ class CalendarStateO extends State<Calendar> {
   CalendarFormat format = CalendarFormat.month;
   DateTime? testDay = DateTime.now();
   late String testDayString = "Test day not set";
-  DateTime selectedDay = DateTime(1900, 1, 1);
+  DateTime selectedDay = DateTime(2020, 1, 1);
   // what the user has tapped on
-  DateTime focusedDay = DateTime.now(); // is that today?
+  DateTime focusedDay = DateTime.now();
   final DateTime today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
   int buildCount = 0;
   final TextEditingController _eventController = TextEditingController();
@@ -164,9 +163,8 @@ class CalendarStateO extends State<Calendar> {
     setState(() {});
   }
 
-  Future <void> generateStudySessions(DateTime testDay, User user) async {
-    var studySessions = await studySessionManager.generateStudySessions(testDay, user);
-
+  Future <void> generateStudySessions(User user) async {
+    var studySessions = await studySessionManager.generateStudySessions(user);
     setState(() {
       selectedEvents.addAll(studySessions);
     });
@@ -368,12 +366,11 @@ class CalendarStateO extends State<Calendar> {
   Future<void> _loadStudySessions() async {
    StudySessionManager studySessionManager = StudySessionManager();
     User user = FirebaseAuth.instance.currentUser!;
-    DateTime testDay = DateTime.now().add(Duration(days: 30)); // Example test day
+    // DateTime testDay = DateTime.now().add(Duration(days: 30)); // Example test day
 
-    Map<DateTime, List<Event>> events = await studySessionManager.generateStudySessions(testDay, user);
-
+    Map<DateTime, List<Event>> events = await studySessionManager.generateStudySessions(user);
     setState(() {
-      selectedEvents = events;
+      selectedEvents.addAll(events);
     });
   }
 
@@ -443,7 +440,7 @@ Widget build(BuildContext context) {
               children: [
                 TableCalendar(
                   focusedDay: focusedDay,
-                  firstDay: DateTime(1990),
+                  firstDay: DateTime(2020),
                   lastDay: DateTime(2050),
                   calendarFormat: format,
                   onFormatChanged: (CalendarFormat format) {
@@ -598,7 +595,9 @@ Widget build(BuildContext context) {
                                                 }
                                               });
                                             } else {
-                                              Navigator.pop(context);
+                                              if (context.mounted){
+                                                Navigator.pop(context);
+                                              }
                                             }
                                           });
                                         },
@@ -628,6 +627,7 @@ Widget build(BuildContext context) {
       ],
     ),
     floatingActionButton: FloatingActionButton.extended(
+      heroTag: UniqueKey().toString(),
       onPressed: () => showDialog(
         context: context,
         builder: (context) => AlertDialog(

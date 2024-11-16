@@ -8,13 +8,13 @@ import 'calendar_screen.dart';
 import 'study_session_manager.dart';
 
 class CustomFloatingButton extends StatefulWidget {
-  const CustomFloatingButton({Key? key}) : super(key: key);
+  const CustomFloatingButton({super.key});
 
   @override
-  _CustomFloatingButtonState createState() => _CustomFloatingButtonState();
+  CustomFloatingButtonState createState() => CustomFloatingButtonState();
 }
 
-class _CustomFloatingButtonState extends State<CustomFloatingButton> {
+class CustomFloatingButtonState extends State<CustomFloatingButton> {
   DateTime? _examDate;
   final CollectionReference _userCollectionRef =
       FirebaseFirestore.instance.collection('users');
@@ -27,6 +27,14 @@ class _CustomFloatingButtonState extends State<CustomFloatingButton> {
   int buildCount = 0;
   bool testDayBool = true;
   late String testDayString = "Test day not set";
+
+  @override
+  void initState() {
+    super.initState();
+    getUser();
+    getTestDay();
+    setState(() {});
+  }
 
   // Helper method
   Widget _buildAlertDialog({
@@ -77,13 +85,12 @@ class _CustomFloatingButtonState extends State<CustomFloatingButton> {
 
   // Repurposed setter from calendar_screen.dart
   Future<void> updateTestDay(DateTime date) async {
-    CollectionReference users = FirebaseFirestore.instance.collection('users');
     QuerySnapshot u =
         await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
 
     /*  FIRST update on database */
     var id = u.docs.last.id; // id being where the user's id details
-    users.doc(id).update({
+    _userCollectionRef.doc(id).update({
       "TestDay": _examDate,
     }); // update field testday to what is passed as param
     await getTestDay();
@@ -160,8 +167,10 @@ class _CustomFloatingButtonState extends State<CustomFloatingButton> {
                       updateTestDay(picked); // Update parent state
                       testDayBool = false;
                     });
-                    Navigator.of(context).pop();
-                    _showRepetitionDialog(context); // Proceed to next dialog
+                    if (context.mounted){
+                      Navigator.of(context).pop();
+                      _showRepetitionDialog(context); // Proceed to next dialog
+                    }
                   }
                 },
                 style: ElevatedButton.styleFrom(
@@ -336,7 +345,7 @@ class _CustomFloatingButtonState extends State<CustomFloatingButton> {
           ),
           actions: [
             TextButton(
-              onPressed: () {
+              onPressed: () async {
                 if (checkbox1.value ||
                     checkbox2.value ||
                     checkbox3.value ||
@@ -347,10 +356,14 @@ class _CustomFloatingButtonState extends State<CustomFloatingButton> {
                   if (checkbox3.value) selectedResources.add('Mini-mocks');
                   if (checkbox4.value) selectedResources.add('Flashcards');
 
+                  QuerySnapshot u =
+                  await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+
                   // Update the Firestore document with the selected resources
-                  _userCollectionRef
-                      .doc(user.uid)
-                      .update({'selectedResources': selectedResources});
+                  var id = u.docs.last.id;
+                  _userCollectionRef.doc(id).update({
+                    'selectedResources': selectedResources,
+                  });
 
                   // Start the study session with the selected resources
                   StudySessionManager().startStudySession(selectedResources);
@@ -383,8 +396,6 @@ class _CustomFloatingButtonState extends State<CustomFloatingButton> {
   @override
   Widget build(BuildContext context) {
     buildCount++;
-    getUser();
-    getTestDay();
     return Container(
       margin: const EdgeInsets.only(bottom: 55),
       width: 210,

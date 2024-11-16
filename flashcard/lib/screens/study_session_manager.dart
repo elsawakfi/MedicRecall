@@ -1,8 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/widgets/event.dart';
-import 'calendar_screen.dart';
-import 'button_screen.dart';
+import 'package:flutter/foundation.dart';
+// import 'calendar_screen.dart';
+// import 'button_screen.dart';
 
 class StudySessionManager {
   final CollectionReference _userCollectionRef = FirebaseFirestore.instance.collection('users');
@@ -11,35 +12,40 @@ class StudySessionManager {
 
   late CollectionReference _eventsCollectionRef;
 
-  Future<void> getSelectedResources(String userId) async {
+  Future<List<String>?> getSelectedResources(String userId) async {
     try {
       DocumentSnapshot userDoc = await _userCollectionRef.doc(userId).get();
       if (userDoc.exists) {
         List<String> selectedResources = List<String>.from(userDoc['selectedResources']);
-        print('Selected resources: $selectedResources');
+        return selectedResources;
         // Use the selected resources as needed
       } else {
-        print('User document does not exist');
+        if (kDebugMode) {
+          print('User document does not exist');
+        }
       }
     } catch (e) {
-      print('Error retrieving selected resources: $e');
+      if (kDebugMode) {
+        print('Error retrieving selected resources: $e');
+      }
     }
+    return null;
   }
 
   // Generate study sessions based on user data and test day
-  Future<Map<DateTime, List<Event>>> generateStudySessions(
-      DateTime testDay, User user) async {
+  Future<Map<DateTime, List<Event>>> generateStudySessions(User user) async {
     Map<DateTime, List<Event>> generatedEvents = {};
 
     QuerySnapshot querySnapshot = await _userCollectionRef
         .where("userID", isEqualTo: user.uid)
         .get();
-
+    var userId = querySnapshot.docs.last.id;
+    DateTime testDay = querySnapshot.docs.last['TestDay'].toDate();
     // Get topics and related data from the database or pass them as arguments
     var topicCount = querySnapshot.docs.last["topicCount"];
     var topicLastSeen = querySnapshot.docs.last["topicLastSeen"];
-
-    String studyMaterial = querySnapshot.docs.last["studyMaterial"];
+    List<String>? selectedResources = await getSelectedResources(userId);
+    // String studyMaterial = querySnapshot.docs.last["studyMaterial"];
 
     int daysUntilTest =
         (testDay.difference(DateTime.now()).inHours / 24).round();
@@ -61,29 +67,44 @@ class StudySessionManager {
         generatedEvents[nextReviewDate]!.add(Event(title: "Review Topic ${i + 1}"));
       }
 
-      switch (studyMaterial) {
-        case "flashcards":
-          // Generate flashcard study sessions
-          generatedEvents[nextReviewDate]!.add(Event(title: "Flashcards for Topic ${i + 1}"));
-          break;
-        case "official-papers":
-          // Generate flashcard study sessions
-          generatedEvents[nextReviewDate]!.add(Event(title: "Flashcards for Topic ${i + 1}"));
-          break;
-        case "mini-mocks":
-          // Generate minimock paper
-          generatedEvents[DateTime.now()]!.add(Event(title: "First Mini Mock"));
-
-          DateTime halfwayDate = testDay.subtract(Duration(days: daysUntilTest ~/ 2));
-          generatedEvents[halfwayDate]!.add(Event(title: "Second Mini Mock"));
-          break;
-        case "full-sized-mocks":
-          // Generate note study sessions
-          break;
-        default:
-          break;
-      }
+      // switch (studyMaterial) {
+      //   case "flashcards":
+      //     // Generate flashcard study sessions
+      //     generatedEvents[nextReviewDate]!.add(Event(title: "Flashcards for Topic ${i + 1}"));
+      //     break;
+      //   case "official-papers":
+      //     // Generate flashcard study sessions
+      //     generatedEvents[nextReviewDate]!.add(Event(title: "Flashcards for Topic ${i + 1}"));
+      //     break;
+      //   case "mini-mocks":
+      //     // Generate minimock paper
+      //     generatedEvents[DateTime.now()]!.add(Event(title: "First Mini Mock"));
+      //
+      //     DateTime halfwayDate = testDay.subtract(Duration(days: daysUntilTest ~/ 2));
+      //     generatedEvents[halfwayDate]!.add(Event(title: "Second Mini Mock"));
+      //     break;
+      //   case "full-sized-mocks":
+      //     // Generate note study sessions
+      //     break;
+      //   default:
+      //     break;
+      // }
     }
+    if (selectedResources!.contains('Mini-mocks')){
+      DateTime now = DateTime.now();
+      DateTime today = DateTime(now.year, now.month, now.day, 0, 0, 0, 0);
+      if (generatedEvents[today] == null) {
+        generatedEvents[today] = [];
+      }
+      generatedEvents[today]!.add(Event(title: "First Mini Mock"));
+
+      DateTime halfwayDate = testDay.subtract(Duration(days: (daysUntilTest / 2).round()));
+      if (generatedEvents[halfwayDate] == null){
+        generatedEvents[halfwayDate] = [];
+      }
+      generatedEvents[halfwayDate]!.add(Event(title: "Second Mini Mock"));
+    }
+
     return generatedEvents;
   }
 
@@ -95,7 +116,6 @@ class StudySessionManager {
 
   void startStudySession(List<String> selectedResources) {
     // Implement the logic to start the study session with the selected resources
-    print('Starting study session with resources: $selectedResources');
   }
 
   // Save generated events to the database
