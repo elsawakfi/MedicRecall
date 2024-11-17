@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flashcard_x/widgets/pageLayout.dart';
+import 'package:flashcard_x/widgets/page_layout.dart';
 import 'package:collection/collection.dart';
 
 class MiniMockFeedBack extends StatefulWidget {

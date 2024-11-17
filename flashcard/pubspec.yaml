@@ -73,6 +73,7 @@ dependencies:
   table_calendar: ^3.0.8
   getwidget: ^4.0.0
   responsive_grid: ^2.2.0
+  collection: ^1.18.0
 
 dev_dependencies:
   flutter_test:
