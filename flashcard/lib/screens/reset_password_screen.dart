@@ -7,7 +7,7 @@ import '../utils/authentication.dart';
 import '../utils/string_validation.dart';
 
 class ForgotPassword extends StatefulWidget {
-  const ForgotPassword({Key? key}) : super(key: key);
+  const ForgotPassword({super.key});
 
   @override
   State<ForgotPassword> createState() => _ForgotPassword();
@@ -184,25 +184,31 @@ class _ForgotPassword extends State<ForgotPassword> {
         print(e);
       }
 
-      if(e.message == "The email address is badly formatted.") {
-        ScaffoldMessenger.of(context).showSnackBar(
-          Authentication.customSnackBar(
-            content: 'Invalid email address format',
-          ),
-        );
-      } else if (e.message == "There is no user record corresponding to this identifier. The user may have been deleted.") {
-        ScaffoldMessenger.of(context).showSnackBar(
-          Authentication.customSnackBar(
-            content: 'Account not found',
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          Authentication.customSnackBar(
-            content: '${e.message}',
-          ),
-        );
-      }
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) {
+          if (e.message == "The email address is badly formatted.") {
+            ScaffoldMessenger.of(context).showSnackBar(
+              Authentication.customSnackBar(
+                content: 'Invalid email address format',
+              ),
+            );
+          } else if (e.message ==
+              "There is no user record corresponding to this identifier. The user may have been deleted.") {
+            ScaffoldMessenger.of(context).showSnackBar(
+              Authentication.customSnackBar(
+                content: 'Account not found',
+              ),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              Authentication.customSnackBar(
+                content: '${e.message}',
+              ),
+            );
+          }
+        }
+      });
     }
   }
 }

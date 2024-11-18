@@ -4,6 +4,7 @@ import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flashcard_x/widgets/drawer_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/screens/feed_screen.dart';
+import 'package:flashcard_x/screens/button_screen.dart';
 import '../utils/page_transition.dart';
 import 'package:intl/intl.dart';
 
@@ -11,7 +12,7 @@ import 'package:intl/intl.dart';
 class HomePage extends StatefulWidget {
   static String id = 'home';
 
-  const HomePage({Key? key, required this.title}) : super(key: key);
+  const HomePage({super.key, required this.title});
   final String title;
 
   @override
@@ -150,6 +151,8 @@ class HomePageState extends State<HomePage> {
                 ),
               ),
       ),
+      floatingActionButton: const CustomFloatingButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
     );
   }
 

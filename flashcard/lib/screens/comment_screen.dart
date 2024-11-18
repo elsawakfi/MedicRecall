@@ -7,7 +7,7 @@ import 'package:flashcard_x/widgets/design_main.dart';
 import 'package:flutter/material.dart';
 
 class CommentSection extends StatefulWidget {
-  const CommentSection({Key? key, required this.cardID}) : super(key: key);
+  const CommentSection({super.key, required this.cardID});
   final String cardID;
 
   @override

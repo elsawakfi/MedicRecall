@@ -178,7 +178,7 @@ class Algo {
             } else {
               //checks if the card is ready to be revised when over the scoreToDay limit
               if (howLongAgoSeenDays >
-                  scoreToDay[flashcard[scoreToDay.length - 1]]!) {
+                  scoreToDay[flashcard[(scoreToDay.length - 1).toString()]]!) {
                 filteredCards.add(flashcard);
 
               }
@@ -209,7 +209,7 @@ class Algo {
           } else {
             //checks if the card is ready to be revised if over the scoreToDay limit
             if (howLongAgoSeenDays >
-                scoreToDay[flashcard[scoreToDay.length - 1]]!) {
+                scoreToDay[flashcard[(scoreToDay.length - 1).toString()]]!) {
               filteredCards.add(flashcard);
             }
           }

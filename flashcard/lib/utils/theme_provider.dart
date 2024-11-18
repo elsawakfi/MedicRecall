@@ -29,7 +29,7 @@ class MyTheme {
     elevatedButtonTheme: ElevatedButtonThemeData(
         style: ButtonStyle(
             // Makes all my ElevatedButton white
-            backgroundColor: MaterialStateProperty.all<Color>(Colors.white))),
+            backgroundColor: WidgetStateProperty.all<Color>(Colors.white))),
     appBarTheme: const AppBarTheme(
       color: Color(0xFFE6EDF2),
       iconTheme: IconThemeData(color: Color.fromRGBO(21, 58, 103, 1), size: 25),
@@ -90,7 +90,7 @@ class MyTheme {
     elevatedButtonTheme: ElevatedButtonThemeData(
         style: ButtonStyle(
             backgroundColor: // elevated buttons
-                MaterialStateProperty.all<Color>(Colors.blueGrey))),
+                WidgetStateProperty.all<Color>(Colors.blueGrey))),
     appBarTheme: const AppBarTheme(
       color: Color.fromARGB(255, 34, 57, 79),
       iconTheme: IconThemeData(color: Colors.white, size: 25),

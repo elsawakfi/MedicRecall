@@ -1,4 +1,5 @@
 @Skip("currently failing, to update")
+library;
 
 import 'package:flashcard_x/screens/feed_screen.dart';
 import 'package:flutter_test/flutter_test.dart';

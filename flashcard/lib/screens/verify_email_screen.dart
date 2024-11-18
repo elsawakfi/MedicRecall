@@ -11,7 +11,7 @@ import 'landing_screen.dart';
 class VerifyEmailScreen extends StatefulWidget {
   static String id = 'verifyEmail';
 
-  const VerifyEmailScreen({Key? key}) : super(key: key);
+  const VerifyEmailScreen({super.key});
 
   @override
   State<VerifyEmailScreen> createState() => _VerifyEmailScreenState();
@@ -32,12 +32,16 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
     } catch(e) {
       Future.delayed(Duration.zero, ()
       {
-        Navigator.of(context).pop();
-        Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const SignInScreen(),
-            )
-        );
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (context.mounted) {
+            Navigator.of(context).pop();
+            Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const SignInScreen(),
+                )
+            );
+          }
+        });
       });
     }
   }

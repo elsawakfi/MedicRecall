@@ -12,8 +12,8 @@ class LoginForm extends StatefulWidget {
   const LoginForm({
     required this.emailFocusNode,
     required this.passwordFocusNode,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<LoginForm> createState() => _LoginFormState();

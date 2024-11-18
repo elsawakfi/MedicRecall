@@ -4,10 +4,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flashcard_x/widgets/drawer_widget.dart';
 import 'package:flashcard_x/widgets/event.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/screens/dashboard_screen.dart';
+import 'package:flashcard_x/screens/button_screen.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:flashcard_x/screens/study_session_manager.dart';
 
 /*
 Important note for devs
@@ -68,47 +69,32 @@ List<String> topicsList = [
 List<dynamic> topicsSeen = [];
 
 class Calendar extends StatefulWidget {
-  const Calendar({Key? key}) : super(key: key);
+  const Calendar({super.key});
 
   @override
   CalendarStateO createState() => CalendarStateO();
 }
 
 class CalendarStateO extends State<Calendar> {
-  final CollectionReference _userCollectionRef =
-      FirebaseFirestore.instance.collection('users');
-
-  late CollectionReference _eventsCollectionRef;
-
-  CollectionReference users = FirebaseFirestore.instance.collection('users');
-
+  final StudySessionManager studySessionManager = StudySessionManager();
+  final CollectionReference _userCollectionRef = FirebaseFirestore.instance.collection('users');
   final FirebaseAuth auth = FirebaseAuth.instance;
+
   late User user;
-
-
   late Map<DateTime?, List<Event>> selectedEvents;
-
   CalendarFormat format = CalendarFormat.month;
-
-  //The CalendarFormat variable format allows the user to change their view of the calendar, into weekly, biweekly and monthly.
-
   DateTime? testDay = DateTime.now();
-
   late String testDayString = "Test day not set";
-
-  DateTime selectedDay = DateTime(1900, 1, 1);
+  DateTime selectedDay = DateTime(2020, 1, 1);
   // what the user has tapped on
-  DateTime focusedDay = DateTime.now(); // is that today?
-  final DateTime today =
-      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
-
-  // for some reason, events need to have their time as being midnight to be shown on the calendar. So need to set the today constant to be midnight today.
-  // therefore today isn't just datetime.now it is calibrated to midnight.
-
+  DateTime focusedDay = DateTime.now();
+  final DateTime today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
   int buildCount = 0;
-
   final TextEditingController _eventController = TextEditingController();
   bool testDayBool = false;
+  //The CalendarFormat variable format allows the user to change their view of the calendar, into weekly, biweekly and monthly.
+  // for some reason, events need to have their time as being midnight to be shown on the calendar. So need to set the today constant to be midnight today.
+  // therefore today isn't just datetime.now it is calibrated to midnight.
   List<String> daysOfTheWeek = [
     'Monday',
     'Tuesday',
@@ -124,6 +110,8 @@ class CalendarStateO extends State<Calendar> {
     selectedEvents = {};
   }
 
+  late CollectionReference _eventsCollectionRef;
+  CollectionReference users = FirebaseFirestore.instance.collection('users');
   //UI Functions:
 
   List<Event> _getEventsfromDay(DateTime date) {
@@ -173,6 +161,15 @@ class CalendarStateO extends State<Calendar> {
   Future<void> generateEventsUIChange(DateTime testDay) async {
     await generateEvents(testDay, user);
     setState(() {});
+  }
+
+  Future <void> generateStudySessions(User user) async {
+    var studySessions = await studySessionManager.generateStudySessions(user);
+    setState(() {
+      selectedEvents.addAll(studySessions);
+    });
+    // add to database
+    await studySessionManager.saveStudySessionsToDB(user, studySessions);
   }
 
   // DATABASE FUNCTIONS:
@@ -358,7 +355,25 @@ class CalendarStateO extends State<Calendar> {
       await getEventsFromDB();
     }
     getData();
+    _loadStudySessions();
   }
+   Future<void> initializeUserAndTestDay() async {
+    await getUser();
+    await getTestDay();
+    await generateEventsUIChange(testDay!);
+  }
+
+  Future<void> _loadStudySessions() async {
+   StudySessionManager studySessionManager = StudySessionManager();
+    User user = FirebaseAuth.instance.currentUser!;
+    // DateTime testDay = DateTime.now().add(Duration(days: 30)); // Example test day
+
+    Map<DateTime, List<Event>> events = await studySessionManager.generateStudySessions(user);
+    setState(() {
+      selectedEvents.addAll(events);
+    });
+  }
+
 
   @override
   void dispose() {
@@ -373,345 +388,283 @@ class CalendarStateO extends State<Calendar> {
   //maybe make testDay string be default string, then set state to be a string returned from firebase
   // so get object from databse, then .toString or as String
 
-  @override
-  Widget build(BuildContext context) {
-    buildCount++;
-    return Scaffold(
-      drawer: const DrawMain(),
-      appBar: AppBar(
-          title: Align(
-            alignment: const Alignment(-0.05,0),
-            child: Stack(
+@override
+Widget build(BuildContext context) {
+  buildCount++;
+  return Scaffold(
+    drawer: const DrawMain(),
+    appBar: AppBar(
+      leading: Builder(
+        builder: (context) => GestureDetector(
+          onTap: () => Scaffold.of(context).openDrawer(),
+          child: const Icon(Icons.menu),
+        ),
+      ),
+      title: Stack(
+        children: [
+          // Centered logo and title
+          Align(
+            alignment: Alignment.center,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Positioned(
-                  top: 2.3,
-                  child: Image.asset(
-                    'assets/newlogo.png',
-                    fit: BoxFit.cover,
-                    height: 34,
-                  ),
+                Image.asset(
+                  'assets/newlogo.png',
+                  fit: BoxFit.cover,
+                  height: 34, // Adjust logo size as needed
                 ),
-                Container(
-                  margin: const EdgeInsets.only(left: 32),
-                  padding: const EdgeInsets.all(8.0),
-                  child: const Text('Revision Calendar',
-                  ),
+                const SizedBox(width: 8), // Spacing between logo and title
+                const Text(
+                  'Revision Calendar',
+                  style: TextStyle(fontSize: 20),
                 ),
               ],
             ),
           ),
-          centerTitle: true,
-          leading: Builder(
-              builder: (context) => GestureDetector(
-                    onTap: () => Scaffold.of(context).openDrawer(),
-                    child: const Icon(
-                      Icons.menu,
-                    ),
-                  ))),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            TableCalendar(
-              // initialisation of the calendar
-              focusedDay: DateTime.now(),
-              firstDay: DateTime(1990),
-              // the bounds of the calendar
-              lastDay: DateTime(2050),
-              calendarFormat: format,
-              onFormatChanged: (CalendarFormat format) {
-                setState(() {
-                  format =
-                      format; // if the format of the calendar is changed by the user, reflect this in the app immediately
-                });
-              },
-              startingDayOfWeek: StartingDayOfWeek.monday,
-              // makes it so the calendar begins on monday.
-              daysOfWeekVisible: true,
-
-              //Change the day we are looking at currently
-              onDaySelected: (DateTime selectDay, DateTime focusDay) {
-                //allows us to change the selected day and the focus day
-                setState(() {
-                  selectedDay = selectDay;
-                  focusedDay = focusDay;
-
-                  selectedDay = DateTime(
-                      selectedDay.year, selectedDay.month, selectedDay.day);
-                  focusedDay = DateTime(
-                      focusedDay.year, focusedDay.month, focusedDay.day);
-                });
-              },
-              selectedDayPredicate: (DateTime date) {
-                // allows you to select a new date
-                return isSameDay(selectedDay, date);
-              },
-
-              eventLoader: _getEventsfromDay,
-
-              // styling the calendar
-              calendarStyle: CalendarStyle(
-                isTodayHighlighted: true,
-                //highlights the current day today.
-                selectedDecoration: BoxDecoration(
-                  //selected day is what the user taps on
-                  color: Colors.blue,
-                  shape: BoxShape.rectangle,
-                  borderRadius: BorderRadius.circular(
-                      10.0), //this creates a weird millisecond error
-                ),
-                selectedTextStyle: const TextStyle(color: Colors.white),
-                todayDecoration: BoxDecoration(
-                  //today - this is not changed by the user. Changed by the sun
-                  color: Colors.grey,
-                  shape: BoxShape.rectangle,
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-
-                // Defaults for the days, this needs to be added to prevent a weird error which flashes for a second.
-
-                defaultDecoration: BoxDecoration(
-                  // default for the days
-                  shape: BoxShape.rectangle,
-                  borderRadius: BorderRadius.circular(
-                      10.0), //this creates a weird millisecond error
-                ),
-                weekendDecoration: BoxDecoration(
-                  //weekend default
-                  shape: BoxShape.rectangle,
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-              ),
-              headerStyle: const HeaderStyle(
-                titleCentered: true,
-                formatButtonShowsNext:
-                    false, // so the button shows what view you are currently on, not what is next.
-              ),
-            ),
-            ..._getEventsfromDay(selectedDay).map((Event event) => ListTile(
-                    title: Text(
-                  event.title,
-                ))),
-            Column(
+          // Positioned custom button on the right
+          Positioned(
+            right: 0,
+            top: 0,
+            child: const CustomFloatingButton()
+          ),
+        ],
+      ),
+      centerTitle: true,
+    ),
+    body: Stack(
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 50.0),
+          child: SingleChildScrollView(
+            child: Column(
               children: [
-                const Text("Your exam is on:"),
-                Row(
-                  children: const [
-                    SizedBox(
-                      height: 30,
-                    )
-                  ],
-                ),
-
-                Text(
-                  (testDayBool) ? "Exam date has not been set" : testDayString,
-                  style: const TextStyle(fontSize: 30),
-                ),
-
-                MaterialButton(
-                  onPressed: () {
-                    testDay = null;
-                    testDayBool = true;
-                    deleteAllEvents();
-                    setState(() {});
+                TableCalendar(
+                  focusedDay: focusedDay,
+                  firstDay: DateTime(2020),
+                  lastDay: DateTime(2050),
+                  calendarFormat: format,
+                  onFormatChanged: (CalendarFormat format) {
+                    setState(() {
+                      this.format = format;
+                    });
                   },
-                  child: const Text("DELETE ALL"),
+                  startingDayOfWeek: StartingDayOfWeek.monday,
+                  daysOfWeekVisible: true,
+                  selectedDayPredicate: (day) => isSameDay(selectedDay, day),
+                  onDaySelected: (DateTime selectDay, DateTime focusDay) {
+                    setState(() {
+                      selectedDay = selectDay;
+                      focusedDay = focusDay;
+                    });
+                  },
+                  eventLoader: _getEventsfromDay,
+                  calendarStyle: CalendarStyle(
+                    isTodayHighlighted: true,
+                    selectedDecoration: BoxDecoration(
+                      color: Colors.blue,
+                      shape: BoxShape.rectangle,
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    selectedTextStyle: const TextStyle(color: Colors.white),
+                    todayDecoration: BoxDecoration(
+                      color: Colors.grey,
+                      shape: BoxShape.rectangle,
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    defaultDecoration: BoxDecoration(
+                      shape: BoxShape.rectangle,
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    weekendDecoration: BoxDecoration(
+                      shape: BoxShape.rectangle,
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                  ),
+                  headerStyle: const HeaderStyle(
+                    titleCentered: true,
+                    formatButtonShowsNext: false,
+                  ),
                 ),
-
-                Row(
-                  children: const [
-                    SizedBox(
-                      height: 30,
-                    )
+                ..._getEventsfromDay(selectedDay).map(
+                  (Event event) => ListTile(
+                    title: Text(event.title),
+                  ),
+                ),
+                Column(
+                  children: [
+                    const Text("Your exam is on:"),
+                    Text(
+                      (testDayBool)
+                          ? "Exam date has not been set"
+                          : testDayString,
+                      style: const TextStyle(fontSize: 30),
+                    ),
+                    MaterialButton(
+                      onPressed: () {
+                        testDay = null;
+                        testDayBool = true;
+                        deleteAllEvents();
+                        setState(() {});
+                      },
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      textColor: const Color.fromARGB(255, 243, 167, 162),
+                      child: const Text("DELETE ALL"),
+                    ),
+                    ElevatedButton(
+                      onPressed: () => showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text(
+                              "Would you like to generate a revision plan?"),
+                          actions: [
+                            TextButton(
+                              child: const Text("No"),
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                            TextButton(
+                              child: const Text("Yes"),
+                              onPressed: () {
+                                Navigator.pop(context);
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: const Text(
+                                        "When is your next test date? (final test)"),
+                                    actions: [
+                                      TextButton(
+                                        child: const Text("Cancel"),
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                      ),
+                                      ElevatedButton(
+                                        child: const Text(
+                                          "Pick your test date",
+                                          style: TextStyle(color: Colors.blue),
+                                        ),
+                                        onPressed: () {
+                                          showDatePicker(
+                                            context: context,
+                                            initialDate: DateTime.now(),
+                                            firstDate: DateTime.now(),
+                                            lastDate: DateTime(2050),
+                                          ).then((date) {
+                                            if (date != null) {
+                                              setState(() {
+                                                if (testDayBool == false) {
+                                                  showDialog(
+                                                    context: context,
+                                                    builder: (BuildContext
+                                                        context) {
+                                                      return AlertDialog(
+                                                        title:
+                                                            const Text('Alert'),
+                                                        content: const Text(
+                                                            'You cannot update the Test Day because it already exists.'),
+                                                        actions: <Widget>[
+                                                          TextButton(
+                                                            onPressed: () {
+                                                              Navigator.of(
+                                                                      context)
+                                                                  .pop();
+                                                              Navigator.of(
+                                                                      context)
+                                                                  .pop();
+                                                            },
+                                                            child:
+                                                                const Text('OK'),
+                                                          ),
+                                                        ],
+                                                      );
+                                                    },
+                                                  );
+                                                } else if (testDayBool ==
+                                                    true) {
+                                                  testDayBool == true;
+                                                  testDay = date;
+                                                  updateTestDay(testDay!);
+                                                  getTestDay();
+                                                  testDayString =
+                                                      "${date.day}-${date.month}-${date.year}";
+                                                  getEventsFromDB();
+                                                  generateEventsUIChange(
+                                                      testDay!);
+                                                  Navigator.pop(context);
+                                                }
+                                              });
+                                            } else {
+                                              if (context.mounted){
+                                                Navigator.pop(context);
+                                              }
+                                            }
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                      ),
+                      child: const Text(
+                        "Make a Revision Plan",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
                   ],
                 ),
-                ElevatedButton(
-                    // user wants to create a revision schedule
-                    onPressed: () => showDialog(
-                        context: context, // dialogue box appears
-                        builder: (context) => AlertDialog(
-                                title: const Text(
-                                    "Would you like to generate a revision plan?"),
-                                // informs the user that they can add an event to the calendar
-
-                                actions: [
-                                  TextButton(
-                                    child: const Text("No"),
-                                    onPressed: () => Navigator.pop(context),
-                                  ),
-                                  TextButton(
-                                    child: const Text("Yes"),
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                      showDialog(
-                                          context: context,
-                                          builder: (context) => AlertDialog(
-                                                  title: const Text(
-                                                      "When is your next test date? (final test)"),
-                                                  // informs the user that they can add an event to the calendar
-                                                  actions: [
-                                                    TextButton(
-                                                        child: const Text(
-                                                            "Cancel"),
-                                                            onPressed: () {
-                                                            Navigator.pop(
-                                                                context);
-                                                        }
-                                                    ),
-                                                    ElevatedButton(
-                                                      child: const Text(
-                                                          "Pick your test date",
-                                                          style: TextStyle(
-                                                              color:
-                                                                  Colors.blue)),
-                                                      onPressed: () {
-                                                        //pass func when result is passed by user - result of showDatePicker func
-                                                        showDatePicker(
-                                                                context:
-                                                                    context,
-                                                                initialDate:
-                                                                    DateTime
-                                                                        .now(),
-                                                                //constraints of the datepicker
-                                                                firstDate:
-                                                                    DateTime
-                                                                        .now(),
-                                                                // first date pickable is today
-                                                                lastDate:
-                                                                    DateTime(
-                                                                        2050))
-                                                            .then((date) {
-                                                              if (date != null) {
-                                                                // change the state of the app, where testDay has been changed
-                                                                setState(() {
-                                                                  //if there is already a test day on calender and user wants to set another one, show a dialogue box not allowing them to do so
-                                                                  if (testDayBool ==
-                                                                      false) {
-                                                                    showDialog(
-                                                                      context: context,
-                                                                      builder: (
-                                                                          BuildContext context) {
-                                                                        return AlertDialog(
-                                                                          title: const Text(
-                                                                              'Alert'),
-                                                                          content: const Text(
-                                                                              'You cannot update the Test Day because it already exists.'),
-                                                                          actions: <
-                                                                              Widget>[
-                                                                            TextButton(
-                                                                              onPressed: () {
-                                                                                Navigator
-                                                                                    .of(
-                                                                                    context)
-                                                                                    .pop(); // Close the alert dialog
-                                                                                Navigator
-                                                                                    .of(
-                                                                                    context)
-                                                                                    .pop();
-                                                                              },
-                                                                              child: const Text(
-                                                                                  'OK'),
-                                                                            ),
-                                                                          ],
-                                                                        );
-                                                                      },
-                                                                    );
-                                                                  } else
-                                                                  if (testDayBool ==
-                                                                      true) {
-                                                                    testDayBool ==
-                                                                        true;
-                                                                    testDay =
-                                                                    date;
-                                                                    updateTestDay(
-                                                                        testDay!);
-                                                                    getTestDay();
-                                                                    testDayString =
-                                                                    "${date
-                                                                        .day}-${date
-                                                                        .month}-${date
-                                                                        .year}";
-                                                                    getEventsFromDB();
-                                                                    generateEventsUIChange(
-                                                                        testDay!);
-                                                                    Navigator
-                                                                        .pop(
-                                                                        context); // once chosen, pop out of the date picker.
-                                                                  }
-                                                                });
-                                                              } else {
-                                                                Navigator.pop(context);
-                                                              }
-                                                        });
-                                                      },
-                                                    ),
-                                                  ]));
-                                    },
-                                  ),
-                                ])),
-                    style:
-                        ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-                    child: const Text("Make a Revision Plan"))
               ],
-            )
+            ),
+          ),
+        ),
+      ],
+    ),
+    floatingActionButton: FloatingActionButton.extended(
+      heroTag: UniqueKey().toString(),
+      onPressed: () => showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Add Event"),
+          content: TextFormField(controller: _eventController),
+          actions: [
+            TextButton(
+              child: const Text("Cancel"),
+              onPressed: () => Navigator.pop(context),
+            ),
+            TextButton(
+              child: const Text("Ok"),
+              onPressed: () {
+                if (_eventController.text.isNotEmpty) {
+                  if (selectedEvents[selectedDay] != null) {
+                    selectedEvents[selectedDay]?.add(
+                      Event(title: _eventController.text),
+                    );
+                  } else {
+                    selectedEvents[selectedDay] = [
+                      Event(title: _eventController.text),
+                    ];
+                  }
+                  updateEventsToDB(user);
+                  Navigator.pop(context);
+                  _eventController.clear();
+                  setState(() {});
+                }
+              },
+            ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-                    title: const Text("Add Event"),
-                    // informs the user that they can add an event to the calendar
-                    content: TextFormField(controller: _eventController),
-                    // every text form field needs a controller
-                    actions: [
-                      TextButton(
-                        child: const Text("Cancel"),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                      TextButton(
-                        child: const Text("Ok"),
-                        onPressed: () {
-                          // 3 cases to consider - person adds nothing, adds something when there is not events, and adds when there is already an event
-                          if (_eventController.text.isEmpty) {
-                            if (kDebugMode) {
-                              print("no text to be added");
-                            }
-                          } else {
-                            // if there is an event title given
-                            if (kDebugMode) {
-                              print(selectedDay.toUtc());
-                            }
-                            if (selectedEvents[selectedDay] != null) {
-                              // if there is an event already there
-                              selectedEvents[selectedDay]?.add(
-                                // add the new event
-                                Event(
-                                    title: _eventController
-                                        .text), // reflect in the _eventController
-                              );
-                            } else {
-                              // if there is not already an event
-                              selectedEvents[selectedDay] = [
-                                Event(
-                                    title:
-                                        _eventController.text) //input the event
-                              ];
-                            }
-                          }
-                          updateEventsToDB(user);
-                          Navigator.pop(
-                              context); //navigator.pop to exit the context we have just added on creating the pop up screen.
-                          _eventController
-                              .clear(); //clear the controller (text field), memory cleanup
-                          setState(() {});
-                          return;
-                        },
-                      ),
-                    ])),
-        label: const Text("Add event", style: TextStyle(color: Colors.black)),
-        icon: const Icon(Icons.add),
-      ),
-    );
-  }
-}
+      label: const Text("Add event", style: TextStyle(color: Colors.white)),
+      icon: const Icon(Icons.add),
+    ),
+    floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+    floatingActionButtonAnimator: FloatingActionButtonAnimator.scaling,
+  );
+}}
