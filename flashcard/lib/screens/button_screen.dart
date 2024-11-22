@@ -470,8 +470,10 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
 
                   // Start the study session with the selected resources
                   StudySessionManager().startStudySession(selectedResources);
-                  
-                  Navigator.of(context).pop();
+
+                  if(context.mounted){
+                    Navigator.of(context).pop();
+                  }
                   // Add your action here after options are submitted
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(

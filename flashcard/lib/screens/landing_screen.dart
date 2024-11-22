@@ -5,7 +5,6 @@ import 'package:flashcard_x/screens/calendar_screen.dart';
 import 'package:flashcard_x/screens/dashboard_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:flashcard_x/screens/faq.dart';
-import 'package:flutter/services.dart';
 import 'package:flashcard_x/screens/flashcard_editor_screen.dart';
 import 'package:flashcard_x/screens/button_screen.dart';
 import 'package:flashcard_x/screens/minimock_landing.dart';
@@ -49,10 +48,10 @@ class LandingState extends State<Landing> {
   late String testDayString = "Test day not set";
   late User user;
 
-  void shouldShowDialog() async{
+  Future<void> shouldShowDialog() async{
       await getTestDay();
-      if (testDayBool_ && _examDate == null){
-         showDialog(context: context, 
+      if (mounted && testDayBool_ && _examDate == null){
+         showDialog(context: context,
          builder: (BuildContext context){
           return _buildAlertDialog(
           title: 'Do you want to start your revision plan today?',
@@ -767,7 +766,7 @@ class LandingState extends State<Landing> {
                           },
                         ),
                       );
-                    }).toList(),
+                    }),
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 5.0),
                       child: RadioListTile<bool>(
