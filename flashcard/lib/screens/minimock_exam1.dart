@@ -230,7 +230,7 @@ class MiniMockExam1State extends State<MiniMockExam1> {
                       finalAnswerList.addAll(rankingAnswers);
                       finalAnswerList.addAll(multiChoiceFormatted);
                       updateExamResults(finalAnswerList);
-                      Navigator.push(
+                      Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
                           builder: (context) => const MiniMockFeedBack(),
