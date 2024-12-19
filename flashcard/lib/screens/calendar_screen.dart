@@ -422,17 +422,63 @@ Widget build(BuildContext context) {
             ),
           ),
           // Positioned custom button on the right
-          Positioned(
-            right: 0,
-            top: 0,
-            child: const CustomFloatingButton()
-          ),
+          // Positioned(
+          //   right: 0,
+          //   top: 0,
+          //   child: CustomFloatingButton()
+            
+          // ),
+          
+    
         ],
       ),
       centerTitle: true,
     ),
     body: Stack(
       children: [
+        Positioned(
+            right: 0,
+            top : 100,
+              
+            child: FloatingActionButton.extended(
+              heroTag: UniqueKey().toString(),
+              onPressed: () => showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                title: const Text("Add Event"),
+                content: TextFormField(controller: _eventController),
+                actions: [
+                    TextButton(
+                      child: const Text("Cancel"),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    TextButton(
+                      child: const Text("Ok"),
+                      onPressed: () {
+                        if (_eventController.text.isNotEmpty) {
+                          if (selectedEvents[selectedDay] != null) {
+                            selectedEvents[selectedDay]?.add(
+                              Event(title: _eventController.text),
+                            );
+                          } else {
+                            selectedEvents[selectedDay] = [
+                              Event(title: _eventController.text),
+                            ];
+                          }
+                          updateEventsToDB(user);
+                          Navigator.pop(context);
+                          _eventController.clear();
+                          setState(() {});
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              backgroundColor: Colors.blue,
+              label: const Text("Add event", style: TextStyle(color: Colors.white)),
+              icon: const Icon(Icons.add))       
+    ),
         Padding(
           padding: const EdgeInsets.only(top: 50.0),
           child: SingleChildScrollView(
@@ -504,7 +550,9 @@ Widget build(BuildContext context) {
                         testDay = null;
                         testDayBool = true;
                         deleteAllEvents();
-                        setState(() {});
+                        setState((
+                          
+                        ) {});
                       },
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -626,45 +674,48 @@ Widget build(BuildContext context) {
         ),
       ],
     ),
-    floatingActionButton: FloatingActionButton.extended(
-      heroTag: UniqueKey().toString(),
-      onPressed: () => showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text("Add Event"),
-          content: TextFormField(controller: _eventController),
-          actions: [
-            TextButton(
-              child: const Text("Cancel"),
-              onPressed: () => Navigator.pop(context),
-            ),
-            TextButton(
-              child: const Text("Ok"),
-              onPressed: () {
-                if (_eventController.text.isNotEmpty) {
-                  if (selectedEvents[selectedDay] != null) {
-                    selectedEvents[selectedDay]?.add(
-                      Event(title: _eventController.text),
-                    );
-                  } else {
-                    selectedEvents[selectedDay] = [
-                      Event(title: _eventController.text),
-                    ];
-                  }
-                  updateEventsToDB(user);
-                  Navigator.pop(context);
-                  _eventController.clear();
-                  setState(() {});
-                }
-              },
-            ),
-          ],
-        ),
-      ),
-      label: const Text("Add event", style: TextStyle(color: Colors.white)),
-      icon: const Icon(Icons.add),
-    ),
-    floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-    floatingActionButtonAnimator: FloatingActionButtonAnimator.scaling,
+    // floatingActionButton: FloatingActionButton.extended(
+    //   heroTag: UniqueKey().toString(),
+    //   onPressed: () => showDialog(
+    //     context: context,
+    //     builder: (context) => AlertDialog(
+    //       title: const Text("Add Event"),
+    //       content: TextFormField(controller: _eventController),
+    //       actions: [
+    //         TextButton(
+    //           child: const Text("Cancel"),
+    //           onPressed: () => Navigator.pop(context),
+    //         ),
+    //         TextButton(
+    //           child: const Text("Ok"),
+    //           onPressed: () {
+    //             if (_eventController.text.isNotEmpty) {
+    //               if (selectedEvents[selectedDay] != null) {
+    //                 selectedEvents[selectedDay]?.add(
+    //                   Event(title: _eventController.text),
+    //                 );
+    //               } else {
+    //                 selectedEvents[selectedDay] = [
+    //                   Event(title: _eventController.text),
+    //                 ];
+    //               }
+    //               updateEventsToDB(user);
+    //               Navigator.pop(context);
+    //               _eventController.clear();
+    //               setState(() {});
+    //             }
+    //           },
+    //         ),
+    //       ],
+    //     ),
+    //   ),
+    //   label: const Text("Add event", style: TextStyle(color: Colors.white)),
+    //   icon: const Icon(Icons.add),
+    // ),
+    // floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+    // floatingActionButtonAnimator: FloatingActionButtonAnimator.scaling,
+       floatingActionButton: const CustomFloatingButton(),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
   );
+  
 }}
