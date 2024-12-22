@@ -2,8 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flashcard_x/widgets/page_layout.dart';
+import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flashcard_x/screens/minimock_feedback.dart';
+import 'package:flashcard_x/screens/button_screen.dart';
 
 
 class MiniMockExam1 extends StatefulWidget {
@@ -119,8 +120,11 @@ class MiniMockExam1State extends State<MiniMockExam1> {
 
   @override
   Widget build(BuildContext context) {
-    return PageLayout( //Widget made to prevent necessary repetition
-      titleText: 'Mini-Mock Exam 1',
+    return Scaffold( //Widget made to prevent necessary repetition
+      key: const ValueKey('Mini-Mock Exam 1'),
+      appBar: CustomAppBar(
+        title: 'Mini-Mock Exam 1',
+      ),
       body: questions.isEmpty
           ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
           : Padding( //Else load the data
@@ -249,6 +253,37 @@ class MiniMockExam1State extends State<MiniMockExam1> {
           ],
         ),
       ),
+      floatingActionButton: Container(
+        margin: const EdgeInsets.only(bottom: 55),
+        width: 160,
+        height: 40.31,
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              spreadRadius: 0,
+              blurRadius: 5,
+              offset: const Offset(0, 3), // changes position of shadow
+            ),
+          ],
+        ),
+        child:FloatingActionButton.extended(
+          label: Text('Question ${currentQuestion+1}/${questions.length}',
+            style: const TextStyle(
+              color: Color.fromARGB(255, 98, 86, 139),
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          onPressed: () {  },
+          clipBehavior: Clip.none,
+          backgroundColor: const Color.fromARGB(255, 235, 230, 239),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        )
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
     );
   }
 }
