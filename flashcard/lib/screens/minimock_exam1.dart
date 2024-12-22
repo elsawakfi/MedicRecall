@@ -67,10 +67,14 @@ class MiniMockExam1State extends State<MiniMockExam1> {
         String type = doc['type'];
         switch (type) {
           case 'ranking':
+            String modifiedQuestion = doc['question'].replaceFirst('Rank', '\nRank');
+            doc['question'] = modifiedQuestion; // Add a newline between the question (could store a newline in the firebase itself but this allows for easier customisation)
             // Add a list of ordered letter 'A', 'B', ... based on quesiton index
             rankingAnswers.add(List<String>.generate(doc['options'].length, (index) => String.fromCharCode(65 + index)));
             break;
           case 'multiple choice':
+            String modifiedQuestion = doc['question'].replaceFirst('Choose', '\nChoose');
+            doc['question'] = modifiedQuestion;
             // Add a list of booleans
             multiChoiceAnswers.add(List<bool>.filled(doc['options'].length, false));
             break;
