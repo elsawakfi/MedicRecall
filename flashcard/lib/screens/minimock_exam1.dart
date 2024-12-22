@@ -4,8 +4,8 @@ import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flashcard_x/screens/minimock_feedback.dart';
-import 'package:flashcard_x/screens/button_screen.dart';
 
+import '../utils/timer.dart';
 
 class MiniMockExam1 extends StatefulWidget {
   const MiniMockExam1({super.key});
@@ -24,11 +24,33 @@ class MiniMockExam1State extends State<MiniMockExam1> {
   List<Map<String, dynamic>> questions = []; // Store question data with the question number as key e.g Q14
   final options = 'ABCDEFGH';
 
+  late TimerController _timerController;
+  String _displayTime = ''; // Initial time display
+
   @override
   void initState() {
     super.initState();
     getUser();
     getQuestions(); // Fetch the questions on initialisation (Needed as this is not to be called in the widget build)
+    // Below defines the exam timer and what happens on each tick / end of exam
+    _timerController = TimerController(
+      startTime: 3000, // 50 minutes
+      onTimeUpdate: (time) {
+        setState(() {
+          _displayTime = time; // Update display every second
+        });
+      },
+      onTimerComplete: () {
+        examEnd();
+      },
+    );
+    _timerController.startTimer(); // Start defined timer
+  }
+
+  @override
+  void dispose() {
+    _timerController.stopTimer(); // REQUIRED! Makes sure timer doesn't continue when page is left
+    super.dispose();
   }
 
   Future<void> getUser() async {
@@ -118,6 +140,21 @@ class MiniMockExam1State extends State<MiniMockExam1> {
     return multiChoiceLetters;
   }
 
+  void examEnd(){
+    _timerController.stopTimer();
+    List<List<String>> multiChoiceFormatted = booleanToString(multiChoiceAnswers);
+    List<List<String>> finalAnswerList = [];
+    finalAnswerList.addAll(rankingAnswers);
+    finalAnswerList.addAll(multiChoiceFormatted);
+    updateExamResults(finalAnswerList);
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const MiniMockFeedBack(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold( //Widget made to prevent necessary repetition
@@ -132,6 +169,39 @@ class MiniMockExam1State extends State<MiniMockExam1> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Display question flag and timer widgets:
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Container(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  width: 160,
+                  height: 40.31,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    color: const Color.fromARGB(255, 235, 230, 239),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        spreadRadius: 0,
+                        blurRadius: 5,
+                        offset: const Offset(0, 3), // changes position of shadow
+                      ),
+                    ],
+
+                  ),
+                  child: Center(
+                      child: Text('Time Remaining: $_displayTime',
+                        style: const TextStyle(
+                          color: Color.fromARGB(255, 98, 86, 139),
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      )),
+                )
+              ]
+            ),
+
             // Display the current question text
             Text(
               questions[currentQuestion]['question'],
@@ -233,17 +303,7 @@ class MiniMockExam1State extends State<MiniMockExam1> {
                 if (currentQuestion == questions.length - 1)
                   ElevatedButton.icon(
                     onPressed: () {
-                      List<List<String>> multiChoiceFormatted = booleanToString(multiChoiceAnswers);
-                      List<List<String>> finalAnswerList = [];
-                      finalAnswerList.addAll(rankingAnswers);
-                      finalAnswerList.addAll(multiChoiceFormatted);
-                      updateExamResults(finalAnswerList);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const MiniMockFeedBack(),
-                        ),
-                      );
+                      examEnd();
                     },
                     icon: Icon(Icons.arrow_forward, color: Colors.white),
                     label: Text('Finish', style: TextStyle(color: Colors.white, fontSize: 16)),
