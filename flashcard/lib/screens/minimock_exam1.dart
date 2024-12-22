@@ -22,6 +22,7 @@ class MiniMockExam1State extends State<MiniMockExam1> {
   List<List<bool>> multiChoiceAnswers = []; // For each question store selected options as a list of booleans
   List<List<String>> rankingAnswers = [];
   List<Map<String, dynamic>> questions = []; // Store question data with the question number as key e.g Q14
+  List<bool> flaggedQuestions = [];
   final options = 'ABCDEFGH';
 
   late TimerController _timerController;
@@ -85,6 +86,7 @@ class MiniMockExam1State extends State<MiniMockExam1> {
     // Initialise questions and answer lists based on the queried data
     setState(() {
       questions = fetchedQuestions;
+      flaggedQuestions = List<bool>.filled(questions.length, false);
 
       for (var doc in questions){
         String type = doc['type'];
@@ -171,7 +173,6 @@ class MiniMockExam1State extends State<MiniMockExam1> {
           children: [
             // Display question flag and timer widgets:
             Row(
-              mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Container(
                   margin: const EdgeInsets.only(bottom: 10),
@@ -188,7 +189,44 @@ class MiniMockExam1State extends State<MiniMockExam1> {
                         offset: const Offset(0, 3), // changes position of shadow
                       ),
                     ],
-
+                  ),
+                  child:TextButton.icon(
+                    label: Text('Flag for review',
+                      style: const TextStyle(
+                        color: Color.fromARGB(255, 98, 86, 139),
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    onPressed: () {
+                      setState((){
+                        flaggedQuestions[currentQuestion] = !flaggedQuestions[currentQuestion];
+                      });
+                    },
+                    icon: Icon(
+                      flaggedQuestions[currentQuestion]
+                        ? Icons.flag
+                        : Icons.flag_outlined,
+                      color: Color.fromARGB(255, 98, 86, 139),
+                    )
+                  ),
+                ),
+                Spacer(),
+                Container(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  width: 160,
+                  height: 40.31,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    color: const Color.fromARGB(255, 235, 230, 239),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        spreadRadius: 0,
+                        blurRadius: 5,
+                        offset: const Offset(0, 3), // changes position of shadow
+                      ),
+                    ],
                   ),
                   child: Center(
                       child: Text('Time Remaining: $_displayTime',
@@ -198,7 +236,7 @@ class MiniMockExam1State extends State<MiniMockExam1> {
                           fontWeight: FontWeight.w500,
                         ),
                       )),
-                )
+                ),
               ]
             ),
 
