@@ -634,46 +634,6 @@ Widget build(BuildContext context) {
       ],
       
     ),
-    // floatingActionButton: FloatingActionButton.extended(
-    //   heroTag: UniqueKey().toString(),
-    //   onPressed: () => showDialog(
-    //     context: context,
-    //     builder: (context) => AlertDialog(
-    //       title: const Text("Add Event"),
-    //       content: TextFormField(controller: _eventController),
-    //       actions: [
-    //         TextButton(
-    //           child: const Text("Cancel"),
-    //           onPressed: () => Navigator.pop(context),
-    //         ),
-    //         TextButton(
-    //           child: const Text("Ok"),
-    //           onPressed: () {
-    //             if (_eventController.text.isNotEmpty) {
-    //               if (selectedEvents[selectedDay] != null) {
-    //                 selectedEvents[selectedDay]?.add(
-    //                   Event(title: _eventController.text),
-    //                 );
-    //               } else {
-    //                 selectedEvents[selectedDay] = [
-    //                   Event(title: _eventController.text),
-    //                 ];
-    //               }
-    //               updateEventsToDB(user);
-    //               Navigator.pop(context);
-    //               _eventController.clear();
-    //               setState(() {});
-    //             }
-    //           },
-    //         ),
-    //       ],
-    //     ),
-    //   ),
-    //   label: const Text("Add event", style: TextStyle(color: Colors.white)),
-    //   icon: const Icon(Icons.add),
-    // ),
-    // floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-    // floatingActionButtonAnimator: FloatingActionButtonAnimator.scaling,
        floatingActionButton: const CustomFloatingButton(),
         floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
         bottomNavigationBar:  Container (
