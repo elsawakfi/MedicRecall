@@ -49,7 +49,6 @@ class StudySessionManager {
 
     int daysUntilTest =
         (testDay.difference(DateTime.now()).inHours / 24).round();
-
     // Loop through topics to generate study sessions
     for (var i = 0; i < topicCount.length; i++) {
       // Calculate when the topic should be revised next
@@ -59,12 +58,16 @@ class StudySessionManager {
           DateTime.now().add(Duration(days: daysToNextReviewDate));
 
       if (daysToNextReviewDate >= 0 &&
-          topicCount[i] > 0 &&
-          daysToNextReviewDate < daysUntilTest) {
-        if (generatedEvents[nextReviewDate] == null) {
-          generatedEvents[nextReviewDate] = [];
-        }
-        generatedEvents[nextReviewDate]!.add(Event(title: "Review Topic ${i + 1}"));
+          testDay.isAfter(nextReviewDate)) {
+
+       DateTime nextReview = DateTime(nextReviewDate.year, nextReviewDate.month, nextReviewDate.day, 0, 0, 0, 0);
+        if (selectedResources!.contains("Flashcards")){
+       if (generatedEvents[nextReview] == null){
+        generatedEvents[nextReview] = [];
+       }
+       generatedEvents[nextReview]!.add(Event(title: "Flashcards for Topic ${i + 1}"));
+    }
+        //generatedEvents[nextReviewDate]!.add(Event(title: "Review Topic ${i + 1}"));
       }
 
       // switch (studyMaterial) {
@@ -90,6 +93,7 @@ class StudySessionManager {
       //     break;
       // }
     }
+    
     if (selectedResources!.contains('Mini-mocks')){
       DateTime now = DateTime.now();
       DateTime today = DateTime(now.year, now.month, now.day, 0, 0, 0, 0);
