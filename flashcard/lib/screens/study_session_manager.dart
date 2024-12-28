@@ -61,37 +61,24 @@ class StudySessionManager {
           testDay.isAfter(nextReviewDate)) {
 
        DateTime nextReview = DateTime(nextReviewDate.year, nextReviewDate.month, nextReviewDate.day, 0, 0, 0, 0);
+      //If the user wants to use flashcards and the next review date is in the future but before the exam
+      //the following code executes 
         if (selectedResources!.contains("Flashcards")){
-       if (generatedEvents[nextReview] == null){
-        generatedEvents[nextReview] = [];
+       
+       //This while loop searches for a day where the user has nothing else in their schedule
+       // Idea: "I want to do flashcards on the weekends"
+       while(generatedEvents[nextReview]!=null){
+          nextReview = DateTime(nextReview.year, nextReview.month, nextReview.day+1, 0, 0, 0, 0);
        }
-       generatedEvents[nextReview]!.add(Event(title: "Flashcards for Topic ${i + 1}"));
-    }
-        //generatedEvents[nextReviewDate]!.add(Event(title: "Review Topic ${i + 1}"));
-      }
 
-      // switch (studyMaterial) {
-      //   case "flashcards":
-      //     // Generate flashcard study sessions
-      //     generatedEvents[nextReviewDate]!.add(Event(title: "Flashcards for Topic ${i + 1}"));
-      //     break;
-      //   case "official-papers":
-      //     // Generate flashcard study sessions
-      //     generatedEvents[nextReviewDate]!.add(Event(title: "Flashcards for Topic ${i + 1}"));
-      //     break;
-      //   case "mini-mocks":
-      //     // Generate minimock paper
-      //     generatedEvents[DateTime.now()]!.add(Event(title: "First Mini Mock"));
-      //
-      //     DateTime halfwayDate = testDay.subtract(Duration(days: daysUntilTest ~/ 2));
-      //     generatedEvents[halfwayDate]!.add(Event(title: "Second Mini Mock"));
-      //     break;
-      //   case "full-sized-mocks":
-      //     // Generate note study sessions
-      //     break;
-      //   default:
-      //     break;
-      // }
+        //Once a free day is used, the corresponding flashcard topic is added
+        generatedEvents[nextReview] = [];
+        generatedEvents[nextReview]!.add(Event(title: "Flashcards for Topic ${i + 1}"));
+        //Need to push the last seen to the database? Or do we wait for the user 
+        //to actually do the flashcards before we add another study session?
+       }    
+      
+    }
     }
     
     if (selectedResources!.contains('Mini-mocks')){
@@ -115,7 +102,11 @@ class StudySessionManager {
   int calculateDaysToNextReview(int topicCount, Timestamp lastSeen) {
     Map<int, int> dateToColourMap = {0: 1, 1: 2, 2: 4, 3: 8, 4: 16, 5: 32};
     int daysSinceLastReview = (Timestamp.now().seconds - lastSeen.seconds) ~/ (60 * 60 * 24);
+    if (daysSinceLastReview > 30){
+      return dateToColourMap[topicCount]! + 1;
+    }
     return dateToColourMap[topicCount]! + daysSinceLastReview;
+
   }
 
   void startStudySession(List<String> selectedResources) {
