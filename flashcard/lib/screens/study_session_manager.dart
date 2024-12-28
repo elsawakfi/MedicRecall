@@ -101,11 +101,12 @@ class StudySessionManager {
 
   int calculateDaysToNextReview(int topicCount, Timestamp lastSeen) {
     Map<int, int> dateToColourMap = {0: 1, 1: 2, 2: 4, 3: 8, 4: 16, 5: 32};
-    int daysSinceLastReview = (Timestamp.now().seconds - lastSeen.seconds) ~/ (60 * 60 * 24);
-    if (daysSinceLastReview > 30){
-      return dateToColourMap[topicCount]! + 1;
+    //var daysSinceLastReview = (Timestamp.now().seconds - lastSeen.seconds) / (60 * 60 * 24);
+    int daysToNextReviewDate = (((dateToColourMap[topicCount]!) + (lastSeen.seconds/86400)).toInt()) - Timestamp.now().seconds~/86400;
+    if (daysToNextReviewDate < 0){
+      daysToNextReviewDate = 1;
     }
-    return dateToColourMap[topicCount]! + daysSinceLastReview;
+    return daysToNextReviewDate;
 
   }
 
