@@ -107,7 +107,9 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
   @override
   Widget build(BuildContext context) {
     final listEquality = ListEquality();
-    return Scaffold( //Widget made to prevent necessary repetition
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
       appBar: CustomAppBar(
         title: 'Mini-Mock Exam 1',
       ),
@@ -190,6 +192,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
           ],
         ),
       ),
+    )
     );
   }      
   }
