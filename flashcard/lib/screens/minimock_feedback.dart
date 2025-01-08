@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:collection/collection.dart';
 
+import 'minimock_landing.dart';
+
 class MiniMockFeedBack extends StatefulWidget {
   const MiniMockFeedBack({super.key});
 
@@ -170,6 +172,18 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                     },
                     icon: Icon(Icons.arrow_forward, color: Colors.white),
                     label: Text('Next', style: TextStyle(color: Colors.white)),
+                  ),
+                if (currentQuestion == answerKeys.length - 1)
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const MiniMockLanding(),
+                        ),
+                      );
+                    },
+                    icon: Icon(Icons.arrow_forward, color: Colors.white),
+                    label: Text('Mini-Mock Menu', style: TextStyle(color: Colors.white)),
                   ),
               ],
             ),
