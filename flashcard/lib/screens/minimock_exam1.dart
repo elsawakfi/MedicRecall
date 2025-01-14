@@ -148,7 +148,7 @@ class MiniMockExam1State extends State<MiniMockExam1> {
     finalAnswerList.addAll(rankingAnswers);
     finalAnswerList.addAll(multiChoiceFormatted);
     updateExamResults(finalAnswerList);
-    Navigator.of(context).push(
+    Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) => const MiniMockFeedBack(),
       ),
@@ -157,9 +157,12 @@ class MiniMockExam1State extends State<MiniMockExam1> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold( //Widget made to prevent necessary repetition
+    return PopScope(
+        canPop: false,
+        child: Scaffold( //Widget made to prevent necessary repetition
           key: const ValueKey('Mini-Mock Exam 1'),
           appBar: AppBar(
+            automaticallyImplyLeading: false,
             elevation: 0,
             title: Align(
               alignment: const Alignment(-0.05, 0),
@@ -398,6 +401,7 @@ class MiniMockExam1State extends State<MiniMockExam1> {
               ],
             ),
           ),
-        );
+        )
+    );
   }
 }
