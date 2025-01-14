@@ -13,7 +13,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
         elevation: 0,
         title: Align(
-          alignment: const Alignment(-1.0, 0),
+          alignment: const Alignment(-0.05, 0),
           child: Stack(
             children: [
               Positioned(
@@ -27,14 +27,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               Container(
                 margin: const EdgeInsets.only(left: 32),
                 padding: const EdgeInsets.all(8.0),
-                child: Text(title,  // Use the variable for the title text
-                textAlign: TextAlign.left
-                )
+                child: Text(title)
               ),
             ],
           ),
         ),
-        centerTitle: false,
+        centerTitle: true,
         leading: Builder(
           builder: (context) => GestureDetector(
             onTap: () => Scaffold.of(context).openDrawer(),
