@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flashcard_x/main.dart';
+import 'package:flashcard_x/utils/algo.dart';
 import 'package:flashcard_x/widgets/event.dart';
 import 'package:flutter/foundation.dart';
 // import 'calendar_screen.dart';
@@ -42,55 +44,51 @@ class StudySessionManager {
     var userId = querySnapshot.docs.last.id;
     DateTime testDay = querySnapshot.docs.last['TestDay'].toDate();
     // Get topics and related data from the database or pass them as arguments
-    var topicCount = querySnapshot.docs.last["topicCount"];
-    var topicLastSeen = querySnapshot.docs.last["topicLastSeen"];
     List<String>? selectedResources = await getSelectedResources(userId);
-    // String studyMaterial = querySnapshot.docs.last["studyMaterial"];
-    print(selectedResources);
-    print("\n");
+   
     int daysUntilTest =
         (testDay.difference(DateTime.now()).inHours / 24).round();
     // Loop through topics to generate study sessions
-    print("Topic Count\n");
-    print(topicCount);
-    print("\n");
-    for (var i = 0; i < topicCount.length; i++) {
-      // Calculate when the topic should be revised next
-      int daysToNextReviewDate =
-          calculateDaysToNextReview(topicCount[i], topicLastSeen[i]);
-      DateTime nextReviewDate =
+    
+    var databaseFlashcards = await Algo().getFlashcards(user.uid);
+    
+      int topicCount = 0;
+      List<String> containsTopic = [];
+      for (var flashcard in databaseFlashcards){
+        if (containsTopic.contains(flashcard["topic"])){}
+        else{
+        containsTopic.add(flashcard["topic"]);
+        int daysToNextReviewDate = calculateDaysToNextReview(topicCount, flashcard["lastSeen"]);
+        print(flashcard["topic"]);
+        print(daysToNextReviewDate);
+        print("\n");
+         DateTime nextReviewDate =
           DateTime.now().add(Duration(days: daysToNextReviewDate));
-
-      if (testDay.isAfter(nextReviewDate)) {
-
-       DateTime nextReview = DateTime(nextReviewDate.year, nextReviewDate.month, nextReviewDate.day, 0, 0, 0, 0);
-      //If the user wants to use flashcards and the next review date is in the future but before the exam
-      //the following code executes 
-        if (selectedResources!.contains("Flashcards")){
-          
-       
-       //This while loop searches for a day where the user has nothing else in their schedule
-       // Idea: "I want to do flashcards on the weekends" 
-       
        
        //For now will seperate events by at least one day, need to clarify with Dr. Harris how he wants flashcards to work 
-       if (daysToNextReviewDate == 1){
+       if (daysToNextReviewDate == 1 ){
               DateTime now = DateTime.now();
-              nextReview = DateTime(now.year, now.month, now.day+2, 0, 0, 0, 0);
-              while(generatedEvents[nextReview]!=null){
-                  nextReview = DateTime(nextReview.year, nextReview.month, nextReview.day+2, 0, 0, 0, 0);
+              nextReviewDate = DateTime(now.year, now.month, now.day+2, 0, 0, 0, 0);
+              while(generatedEvents[nextReviewDate]!=null){
+                  nextReviewDate = DateTime(nextReviewDate.year, nextReviewDate.month, nextReviewDate.day+2, 0, 0, 0, 0);
        }
        }
-
-      
+       if (daysToNextReviewDate == 14 ){
+              DateTime now = DateTime.now();
+              nextReviewDate = DateTime(now.year, now.month, now.day+14, 0, 0, 0, 0);
+              while(generatedEvents[nextReviewDate]!=null){
+                  nextReviewDate = DateTime(nextReviewDate.year, nextReviewDate.month, nextReviewDate.day+2, 0, 0, 0, 0);
+       }
+       }
         //Once a free day is used, the corresponding flashcard topic is added
-        generatedEvents[nextReview] = [];
-        generatedEvents[nextReview]!.add(Event(title: "Flashcards for Topic ${i + 1}"));
+        generatedEvents[nextReviewDate] = [];
+        generatedEvents[nextReviewDate]!.add(Event(title: flashcard["topic"]));
+        
       
-       }    
+       }   }
       
-    }
-    }
+    
+    
     
     if (selectedResources!.contains('Mini-mocks')){
       DateTime now = DateTime.now();
@@ -112,16 +110,16 @@ class StudySessionManager {
 
   int calculateDaysToNextReview(int topicCount, Timestamp lastSeen) {
     Map<int, int> dateToColourMap = {0: 1, 1: 2, 2: 4, 3: 8, 4: 16, 5: 32};
-    //var daysSinceLastReview = (Timestamp.now().seconds - lastSeen.seconds) / (60 * 60 * 24);
+    int daysSinceLastReview = (Timestamp.now().seconds - lastSeen.seconds) ~/ (60 * 60 * 24);
     int daysToNextReviewDate = (((dateToColourMap[topicCount]!) + (lastSeen.seconds/86400)).toInt()) - Timestamp.now().seconds~/86400;
-    if (daysToNextReviewDate <= 0){
+    if (daysSinceLastReview > 14){
       daysToNextReviewDate = 1;
+      return daysToNextReviewDate;
     }
-    print("Days to next Review\n");
-    print(daysToNextReviewDate);
-    print("\n");
-    return daysToNextReviewDate;
-
+    else{
+      return 14 - daysSinceLastReview;
+    }
+  
   }
 
   void startStudySession(List<String> selectedResources) {
