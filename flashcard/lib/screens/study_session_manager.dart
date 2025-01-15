@@ -55,18 +55,24 @@ class StudySessionManager {
       int topicCount = 0;
       List<String> containsTopic = [];
       for (var flashcard in databaseFlashcards){
+        print(flashcard["topic"]);
+        print(flashcard["lastSeen"]);
+        print("\n");
         if (containsTopic.contains(flashcard["topic"])){}
         else{
+        Timestamp now = Timestamp.now();
         containsTopic.add(flashcard["topic"]);
         int daysToNextReviewDate = calculateDaysToNextReview(topicCount, flashcard["lastSeen"]);
-        print(flashcard["topic"]);
-        print(daysToNextReviewDate);
-        print("\n");
+        if (flashcard["lastSeen"]== null){
+          daysToNextReviewDate = calculateDaysToNextReview(topicCount, now);
+        }
+       
+        
          DateTime nextReviewDate =
           DateTime.now().add(Duration(days: daysToNextReviewDate));
        
        //For now will seperate events by at least one day, need to clarify with Dr. Harris how he wants flashcards to work 
-       if (daysToNextReviewDate == 1 ){
+       if (daysToNextReviewDate <= 1 ){
               DateTime now = DateTime.now();
               nextReviewDate = DateTime(now.year, now.month, now.day+2, 0, 0, 0, 0);
               while(generatedEvents[nextReviewDate]!=null){
@@ -82,14 +88,11 @@ class StudySessionManager {
        }
         //Once a free day is used, the corresponding flashcard topic is added
         generatedEvents[nextReviewDate] = [];
-        generatedEvents[nextReviewDate]!.add(Event(title: flashcard["topic"]));
-        
+        generatedEvents[nextReviewDate]!.add(Event(title: flashcard["topic"]+" Flashcards"));
       
-       }   }
+       } 
+       }
       
-    
-    
-    
     if (selectedResources!.contains('Mini-mocks')){
       DateTime now = DateTime.now();
       DateTime today = DateTime(now.year, now.month, now.day, 0, 0, 0, 0);
