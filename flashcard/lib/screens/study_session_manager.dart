@@ -46,10 +46,14 @@ class StudySessionManager {
     var topicLastSeen = querySnapshot.docs.last["topicLastSeen"];
     List<String>? selectedResources = await getSelectedResources(userId);
     // String studyMaterial = querySnapshot.docs.last["studyMaterial"];
-
+    print(selectedResources);
+    print("\n");
     int daysUntilTest =
         (testDay.difference(DateTime.now()).inHours / 24).round();
     // Loop through topics to generate study sessions
+    print("Topic Count\n");
+    print(topicCount);
+    print("\n");
     for (var i = 0; i < topicCount.length; i++) {
       // Calculate when the topic should be revised next
       int daysToNextReviewDate =
@@ -57,25 +61,32 @@ class StudySessionManager {
       DateTime nextReviewDate =
           DateTime.now().add(Duration(days: daysToNextReviewDate));
 
-      if (daysToNextReviewDate >= 0 &&
-          testDay.isAfter(nextReviewDate)) {
+      if (testDay.isAfter(nextReviewDate)) {
 
        DateTime nextReview = DateTime(nextReviewDate.year, nextReviewDate.month, nextReviewDate.day, 0, 0, 0, 0);
       //If the user wants to use flashcards and the next review date is in the future but before the exam
       //the following code executes 
         if (selectedResources!.contains("Flashcards")){
+          
        
        //This while loop searches for a day where the user has nothing else in their schedule
-       // Idea: "I want to do flashcards on the weekends"
-       while(generatedEvents[nextReview]!=null){
-          nextReview = DateTime(nextReview.year, nextReview.month, nextReview.day+1, 0, 0, 0, 0);
+       // Idea: "I want to do flashcards on the weekends" 
+       
+       
+       //For now will seperate events by at least one day, need to clarify with Dr. Harris how he wants flashcards to work 
+       if (daysToNextReviewDate == 1){
+              DateTime now = DateTime.now();
+              nextReview = DateTime(now.year, now.month, now.day+2, 0, 0, 0, 0);
+              while(generatedEvents[nextReview]!=null){
+                  nextReview = DateTime(nextReview.year, nextReview.month, nextReview.day+2, 0, 0, 0, 0);
+       }
        }
 
+      
         //Once a free day is used, the corresponding flashcard topic is added
         generatedEvents[nextReview] = [];
         generatedEvents[nextReview]!.add(Event(title: "Flashcards for Topic ${i + 1}"));
-        //Need to push the last seen to the database? Or do we wait for the user 
-        //to actually do the flashcards before we add another study session?
+      
        }    
       
     }
@@ -103,9 +114,12 @@ class StudySessionManager {
     Map<int, int> dateToColourMap = {0: 1, 1: 2, 2: 4, 3: 8, 4: 16, 5: 32};
     //var daysSinceLastReview = (Timestamp.now().seconds - lastSeen.seconds) / (60 * 60 * 24);
     int daysToNextReviewDate = (((dateToColourMap[topicCount]!) + (lastSeen.seconds/86400)).toInt()) - Timestamp.now().seconds~/86400;
-    if (daysToNextReviewDate < 0){
+    if (daysToNextReviewDate <= 0){
       daysToNextReviewDate = 1;
     }
+    print("Days to next Review\n");
+    print(daysToNextReviewDate);
+    print("\n");
     return daysToNextReviewDate;
 
   }
