@@ -46,11 +46,14 @@ class StudySessionManager {
     var topicLastSeen = querySnapshot.docs.last["topicLastSeen"];
     List<String>? selectedResources = await getSelectedResources(userId);
     // String studyMaterial = querySnapshot.docs.last["studyMaterial"];
-
+    print(selectedResources);
+    print("\n");
     int daysUntilTest =
         (testDay.difference(DateTime.now()).inHours / 24).round();
-
     // Loop through topics to generate study sessions
+    print("Topic Count\n");
+    print(topicCount);
+    print("\n");
     for (var i = 0; i < topicCount.length; i++) {
       // Calculate when the topic should be revised next
       int daysToNextReviewDate =
@@ -58,38 +61,37 @@ class StudySessionManager {
       DateTime nextReviewDate =
           DateTime.now().add(Duration(days: daysToNextReviewDate));
 
-      if (daysToNextReviewDate >= 0 &&
-          topicCount[i] > 0 &&
-          daysToNextReviewDate < daysUntilTest) {
-        if (generatedEvents[nextReviewDate] == null) {
-          generatedEvents[nextReviewDate] = [];
-        }
-        generatedEvents[nextReviewDate]!.add(Event(title: "Review Topic ${i + 1}"));
-      }
+      if (testDay.isAfter(nextReviewDate)) {
 
-      // switch (studyMaterial) {
-      //   case "flashcards":
-      //     // Generate flashcard study sessions
-      //     generatedEvents[nextReviewDate]!.add(Event(title: "Flashcards for Topic ${i + 1}"));
-      //     break;
-      //   case "official-papers":
-      //     // Generate flashcard study sessions
-      //     generatedEvents[nextReviewDate]!.add(Event(title: "Flashcards for Topic ${i + 1}"));
-      //     break;
-      //   case "mini-mocks":
-      //     // Generate minimock paper
-      //     generatedEvents[DateTime.now()]!.add(Event(title: "First Mini Mock"));
-      //
-      //     DateTime halfwayDate = testDay.subtract(Duration(days: daysUntilTest ~/ 2));
-      //     generatedEvents[halfwayDate]!.add(Event(title: "Second Mini Mock"));
-      //     break;
-      //   case "full-sized-mocks":
-      //     // Generate note study sessions
-      //     break;
-      //   default:
-      //     break;
-      // }
+       DateTime nextReview = DateTime(nextReviewDate.year, nextReviewDate.month, nextReviewDate.day, 0, 0, 0, 0);
+      //If the user wants to use flashcards and the next review date is in the future but before the exam
+      //the following code executes 
+        if (selectedResources!.contains("Flashcards")){
+          
+       
+       //This while loop searches for a day where the user has nothing else in their schedule
+       // Idea: "I want to do flashcards on the weekends" 
+       
+       
+       //For now will seperate events by at least one day, need to clarify with Dr. Harris how he wants flashcards to work 
+       if (daysToNextReviewDate == 1){
+              DateTime now = DateTime.now();
+              nextReview = DateTime(now.year, now.month, now.day+2, 0, 0, 0, 0);
+              while(generatedEvents[nextReview]!=null){
+                  nextReview = DateTime(nextReview.year, nextReview.month, nextReview.day+2, 0, 0, 0, 0);
+       }
+       }
+
+      
+        //Once a free day is used, the corresponding flashcard topic is added
+        generatedEvents[nextReview] = [];
+        generatedEvents[nextReview]!.add(Event(title: "Flashcards for Topic ${i + 1}"));
+      
+       }    
+      
     }
+    }
+    
     if (selectedResources!.contains('Mini-mocks')){
       DateTime now = DateTime.now();
       DateTime today = DateTime(now.year, now.month, now.day, 0, 0, 0, 0);
@@ -110,8 +112,16 @@ class StudySessionManager {
 
   int calculateDaysToNextReview(int topicCount, Timestamp lastSeen) {
     Map<int, int> dateToColourMap = {0: 1, 1: 2, 2: 4, 3: 8, 4: 16, 5: 32};
-    int daysSinceLastReview = (Timestamp.now().seconds - lastSeen.seconds) ~/ (60 * 60 * 24);
-    return dateToColourMap[topicCount]! + daysSinceLastReview;
+    //var daysSinceLastReview = (Timestamp.now().seconds - lastSeen.seconds) / (60 * 60 * 24);
+    int daysToNextReviewDate = (((dateToColourMap[topicCount]!) + (lastSeen.seconds/86400)).toInt()) - Timestamp.now().seconds~/86400;
+    if (daysToNextReviewDate <= 0){
+      daysToNextReviewDate = 1;
+    }
+    print("Days to next Review\n");
+    print(daysToNextReviewDate);
+    print("\n");
+    return daysToNextReviewDate;
+
   }
 
   void startStudySession(List<String> selectedResources) {
