@@ -33,7 +33,7 @@ class MiniMock1RulesState extends State<MiniMock1Rules> {
                   Container(
                     margin: const EdgeInsets.only(left: 32),
                     padding: const EdgeInsets.all(8.0),
-                    child: const Text('Mini-Mock1',
+                    child: const Text('Mini-Mock 1',
                     
                     ),
                   ),
@@ -65,7 +65,7 @@ class MiniMock1RulesState extends State<MiniMock1Rules> {
             ),
             const SizedBox(height: 10),
             const Text(
-              'In this test, you will be presented with typical scenarios that Foundation Year Two (Y2) Doctors '
+              'In this test, you will be presented with typical scenarios that Foundation Year Two (FY2) Doctors '
               'encounter , and you will be asked questions about dealing with them. When answering questions, '
               'please consider yourself to be a FY2 Doctor unless stated otherwise and answer based on what you '
               'should do in each scenario.\n',

@@ -3,8 +3,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flashcard_x/widgets/page_layout.dart';
+import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:collection/collection.dart';
+
+import 'minimock_landing.dart';
 
 class MiniMockFeedBack extends StatefulWidget {
   const MiniMockFeedBack({super.key});
@@ -105,8 +107,12 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
   @override
   Widget build(BuildContext context) {
     final listEquality = ListEquality();
-    return PageLayout( //Widget made to prevent necessary repetition
-      titleText: 'Mini-Mock Exam 1',
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+      appBar: CustomAppBar(
+        title: 'Mini-Mock Exam 1',
+      ),
       body: answerKeys.isEmpty && userAnswers.isEmpty
           ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
           : Padding( //Else load the data
@@ -169,11 +175,24 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                     icon: Icon(Icons.arrow_forward, color: Colors.white),
                     label: Text('Next', style: TextStyle(color: Colors.white)),
                   ),
+                if (currentQuestion == answerKeys.length - 1)
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const MiniMockLanding(),
+                        ),
+                      );
+                    },
+                    icon: Icon(Icons.arrow_forward, color: Colors.white),
+                    label: Text('Mini-Mock Menu', style: TextStyle(color: Colors.white)),
+                  ),
               ],
             ),
           ],
         ),
       ),
+    )
     );
   }      
   }
