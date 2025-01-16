@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flashcard_x/screens/minimock_review.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/page_layout.dart';
@@ -233,7 +234,7 @@ class MiniMockExam1State extends State<MiniMockExam1> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const MiniMockFeedBack(),
+                          builder: (context) => const MiniMock1Review(),
                         ),
                       );
                     },
