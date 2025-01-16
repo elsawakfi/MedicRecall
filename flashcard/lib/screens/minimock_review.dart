@@ -114,6 +114,15 @@ class MiniMock1ReviewState extends State<MiniMock1Review> {
           ],
         ),
       ),
-    );
+      bottomNavigationBar: Container(
+          child: ElevatedButton(
+            onPressed:() {Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => const MiniMockExam1(),
+                ),
+              );
+            },
+          child: const Text('Next')),
+
+    ));
   }
 }
