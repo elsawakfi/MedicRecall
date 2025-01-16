@@ -716,7 +716,7 @@ class LandingState extends State<Landing> {
 
   // Show dialog to ask for number of repetitions
   void _showRepetitionDialog(BuildContext context) {
-    final List<int> repetitionOptions = [4, 5, 6, 7, 8];
+    final List<int> repetitionOptions = [2, 3, 4, 5, 6];
     int? selectedRepetition;
     bool isCustomAmount = false;
     TextEditingController customAmountController = TextEditingController();
@@ -731,13 +731,27 @@ class LandingState extends State<Landing> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(0),
               ),
-              title: Text(
-                'How many repetitions of the official paper link?',
-                style: const TextStyle(
-                  color: Color.fromRGBO(21, 58, 103, 1),
-                  fontSize: 21,
-                  fontWeight: FontWeight.w500,
-                ),
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'How many repetitions of the official past paper would you like to schedule?',
+                    style: const TextStyle(
+                      color: Color.fromRGBO(21, 58, 103, 1),
+                      fontSize: 21,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 8), // Add spacing between lines
+                  Text(
+                    'We recommend at least 3 repetitions.',
+                    style: const TextStyle(
+                      color: Color.fromRGBO(21, 58, 103, 1),
+                      fontSize: 16, // Slightly smaller font size
+                      fontWeight: FontWeight.w400, // Regular font weight
+                    ),
+                  ),
+                ],
               ),
               content: SingleChildScrollView(
                 child: Column(
@@ -768,7 +782,8 @@ class LandingState extends State<Landing> {
                         ),
                       );
                     }).toList(),
-                    Padding(
+                    // Client mentioned to remove this part
+                    /*Padding(
                       padding: const EdgeInsets.symmetric(vertical: 5.0),
                       child: RadioListTile<bool>(
                         shape: RoundedRectangleBorder(
@@ -804,7 +819,7 @@ class LandingState extends State<Landing> {
                           });
                         },
                       ),
-                    ),
+                    ),*/
                   ],
                 ),
               ),
@@ -835,14 +850,14 @@ class LandingState extends State<Landing> {
                               content: Text(
                                 isCustomAmount &&
                                         customAmountController.text.isEmpty
-                                    ? 'Please enter an amount'
-                                    : 'Please select or enter an amount',
+                                    ? 'Enter number of repetitions'
+                                    : 'Please select number of repetitions',
                               ),
                             ),
                           );
                         }
                       },
-                      child: const Text('Submit'),
+                      child: const Text('Next'),
                     ),
                   ],
                 ),
