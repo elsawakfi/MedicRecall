@@ -57,7 +57,26 @@ class MiniMock1ReviewState extends State<MiniMock1Review> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-          ])
+            GridView.count(crossAxisCount: 5,
+            children: List.generate(10, (index) {
+          return Center(
+            child: ElevatedButton.icon(
+            //should lead to the appropraite question on the minimock ideally
+            onPressed: () {
+              Navigator.of(context).push(
+              MaterialPageRoute(
+             builder: (context) => const MiniMockExam1(),
+                ),
+              );
+            },
+            label:  Text(
+                    'Question $index',
+                    style: TextStyle(color: Colors.black, fontSize: 20),
+                  ),)
+            );}
+            )
+            
+        )])
         )
     );
   }
