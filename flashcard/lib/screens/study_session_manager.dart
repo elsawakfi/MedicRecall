@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/main.dart';
+import 'package:flashcard_x/screens/minimock_feedback.dart';
 import 'package:flashcard_x/utils/algo.dart';
 import 'feed_screen.dart';
 import 'package:flashcard_x/widgets/event.dart';
@@ -14,6 +15,27 @@ class StudySessionManager {
   late User user;
 
   late CollectionReference _eventsCollectionRef;
+  
+  Future<List<Timestamp>?> getTimestamps(String userId) async {
+    try {
+      DocumentSnapshot userDoc = await _userCollectionRef.doc(userId).get();
+      if (userDoc.exists) {
+        List<Timestamp> times = List<Timestamp>.from(userDoc['topicLastSeen']);
+        return times;
+        // Use the selected resources as needed
+      } else {
+        if (kDebugMode) {
+          print('User document does not exist');
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error retrieving selected resources: $e');
+      }
+    }
+    return null;
+  }
+
 
   Future<List<String>?> getSelectedResources(String userId) async {
     try {
@@ -52,52 +74,84 @@ class StudySessionManager {
         (testDay.difference(DateTime.now()).inHours / 24).round();
     // Loop through topics to generate study sessions
     
-   CollectionReference<Map<String, dynamic>> flashcards =
-      FirebaseFirestore.instance.collection('flashcards');
 
+
+    if (selectedResources!.contains("Flashcards")){
+    try{
+      CollectionReference<Map<String, dynamic>> flashcards =
+      FirebaseFirestore.instance.collection('flashcards');
+    List <Timestamp>? timestamps = await getTimestamps(userId);
+
+
+    List <String> contains = [];
+      
     // Get all documents in the collection
     QuerySnapshot<Map<String, dynamic>> flashcardDeck = await flashcards.get();
-    // Iterate over each document
+    int topicCount = 0;
     
-    for (QueryDocumentSnapshot<Map<String, dynamic>> doc in flashcardDeck.docs) {
-        Map<String, dynamic> flashcard = doc.data();
-        print(flashcard["topic"]);
-        int topicCount = 0;
-        List<String> containsTopic = [];
-        if (containsTopic.contains(flashcard["topic"])){}
-        else{
-          
-          print("\n");
-        containsTopic.add(flashcard["topic"]);
-        int daysToNextReviewDate = calculateDaysToNextReview(topicCount, flashcard["lastSeen"]);
-         DateTime nextReviewDate =
-          DateTime.now().add(Duration(days: daysToNextReviewDate));
-       
-       //For now will seperate events by at least one day, need to clarify with Dr. Harris how he wants flashcards to work 
-       if (daysToNextReviewDate <= 1 ){
-              DateTime now = DateTime.now();
-              nextReviewDate = DateTime(now.year, now.month, now.day+2, 0, 0, 0, 0);
-              while(generatedEvents[nextReviewDate]!=null){
-                  nextReviewDate = DateTime(nextReviewDate.year, nextReviewDate.month, nextReviewDate.day+2, 0, 0, 0, 0);
-       }
-       }
-       if (daysToNextReviewDate == 14 ){
-              DateTime now = DateTime.now();
-              nextReviewDate = DateTime(now.year, now.month, now.day+14, 0, 0, 0, 0);
-              while(generatedEvents[nextReviewDate]!=null){
-                  nextReviewDate = DateTime(nextReviewDate.year, nextReviewDate.month, nextReviewDate.day+2, 0, 0, 0, 0);
-       }
-       }
-       else{
-        while(generatedEvents[nextReviewDate]!=null){
-                  nextReviewDate = DateTime(nextReviewDate.year, nextReviewDate.month, nextReviewDate.day+2, 0, 0, 0, 0);
-       }}
+    
+    
+    for (var doc in flashcardDeck.docs) {
+      Map<String, dynamic> flashcard = doc.data();
+      if (!contains.contains(flashcard["topic"]) ){
+        print("flashing");
+        print("\n");
+        contains.add(flashcard["topic"]);
+        int daysToNextReviewDate = calculateDaysToNextReview(topicCount, timestamps![topicCount]);
+        
+        print(daysToNextReviewDate);
+        print("Days to next review\n");
 
-       if (testDay.isAfter(nextReviewDate)){
-        //Once a free day is used, the corresponding flashcard topic is added
-        generatedEvents[nextReviewDate] = [];
-        generatedEvents[nextReviewDate]!.add(Event(title: flashcard["topic"]+" Flashcards"));
-       }   
+        topicCount ++;
+
+      
+        }
+      
+      
+      
+      // This prints the actual document data as a Map
+    }
+    // Iterate over each document
+  
+    // for (QueryDocumentSnapshot<Map<String, dynamic>> doc in flashcardDeck.docs) {
+    //     Map<String, dynamic> flashcard = doc.data();
+    //     int topicCount = 0;
+        
+    //     print(flashcard["topicSeen"]);
+    //     int daysToNextReviewDate = calculateDaysToNextReview(topicCount, flashcard["topicLastSeen"]);
+    //      DateTime nextReviewDate =
+    //       DateTime.now().add(Duration(days: daysToNextReviewDate));
+    //       print("And it gets this far as well \n");
+       
+    //    //For now will seperate events by at least one day, need to clarify with Dr. Harris how he wants flashcards to work 
+    //    if (daysToNextReviewDate <= 1 ){
+    //           DateTime now = DateTime.now();
+    //           nextReviewDate = DateTime(now.year, now.month, now.day+2, 0, 0, 0, 0);
+    //           while(generatedEvents[nextReviewDate]!=null){
+    //               nextReviewDate = DateTime(nextReviewDate.year, nextReviewDate.month, nextReviewDate.day+2, 0, 0, 0, 0);
+    //    }
+    //    }
+    //    if (daysToNextReviewDate == 14 ){
+    //           DateTime now = DateTime.now();
+    //           nextReviewDate = DateTime(now.year, now.month, now.day+14, 0, 0, 0, 0);
+    //           while(generatedEvents[nextReviewDate]!=null){
+    //               nextReviewDate = DateTime(nextReviewDate.year, nextReviewDate.month, nextReviewDate.day+2, 0, 0, 0, 0);
+    //    }
+    //    }
+    //    else{
+    //     while(generatedEvents[nextReviewDate]!=null){
+    //               nextReviewDate = DateTime(nextReviewDate.year, nextReviewDate.month, nextReviewDate.day+2, 0, 0, 0, 0);
+    //    }}
+
+    //    if (testDay.isAfter(nextReviewDate)){
+    //     //Once a free day is used, the corresponding flashcard topic is added
+    //     generatedEvents[nextReviewDate] = [];
+    //     generatedEvents[nextReviewDate]!.add(Event(title: flashcard["topic"]+" Flashcards"));
+    //    }   
+    // }
+    }
+    catch(e){
+      print("Error\n");
     }}
       
       
