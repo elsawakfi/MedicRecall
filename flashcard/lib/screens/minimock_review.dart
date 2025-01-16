@@ -3,14 +3,14 @@ import 'package:flashcard_x/widgets/drawer_widget.dart';
 import 'package:flashcard_x/screens/minimock_exam1.dart';
 
 
-class MiniMock1Rules extends StatefulWidget {
-  const MiniMock1Rules({super.key});
+class MiniMock1Review extends StatefulWidget {
+  const MiniMock1Review({super.key});
 
   @override
-  State<MiniMock1Rules> createState() => MiniMock1RulesState();
+  State<MiniMock1Review> createState() => MiniMock1ReviewState();
 }
 
-class MiniMock1RulesState extends State<MiniMock1Rules> {
+class MiniMock1ReviewState extends State<MiniMock1Review> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,7 +33,7 @@ class MiniMock1RulesState extends State<MiniMock1Rules> {
                   Container(
                     margin: const EdgeInsets.only(left: 32),
                     padding: const EdgeInsets.all(8.0),
-                    child: const Text('Mini-Mock 1',
+                    child: const Text('Review',
                     
                     ),
                   ),
