@@ -3,14 +3,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/screens/minimock_feedback.dart';
-
 import '../utils/timer.dart';
 
 abstract class MiniMockExam extends StatefulWidget {
   final String title;
   final String questionDirectory;
   final String answerDirectory;
-  const MiniMockExam({super.key, required this.title, required this.questionDirectory, required this.answerDirectory});
+  final int time;
+  const MiniMockExam({super.key, required this.title, required this.questionDirectory, required this.answerDirectory, required this.time});
 
   @override
   State<MiniMockExam> createState() => MiniMockExamState();
@@ -37,7 +37,7 @@ class MiniMockExamState extends State<MiniMockExam> {
     getQuestions(); // Fetch the questions on initialisation (Needed as this is not to be called in the widget build)
     // Below defines the exam timer and what happens on each tick / end of exam
     _timerController = TimerController(
-      startTime: 3000, // 50 minutes
+      startTime: widget.time, //measured in seconds
       onTimeUpdate: (time) {
         setState(() {
           _displayTime = time; // Update display every second
@@ -75,7 +75,7 @@ class MiniMockExamState extends State<MiniMockExam> {
       user = auth.currentUser!;
     }
   }
-  // Fetch mini-mock-1 questions from firestore and store as a list of maps
+  // Fetch mini-mock questions from firestore and store as a list of maps
   Future<List<Map<String, dynamic>>> queryQuestionData() async {
     //questions are not properly stored in order on firestore so order via a field instead
     QuerySnapshot snapshot = await FirebaseFirestore.instance.collection(widget.questionDirectory).orderBy('questionNumber').get();
@@ -125,6 +125,7 @@ class MiniMockExamState extends State<MiniMockExam> {
     DocumentReference examAnswersDocRef = userDocRef.collection(
         'Exam answers').doc(widget.answerDirectory);
 
+    // Add user's answers to user answer document
     await examAnswersDocRef.set({
       'answers': answerMap,
       'timestamp': FieldValue.serverTimestamp(),
@@ -153,7 +154,7 @@ class MiniMockExamState extends State<MiniMockExam> {
     updateExamResults(finalAnswerList);
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => const MiniMockFeedBack(),
+        builder: (context) => MiniMockFeedBack(title: widget.title, questionDirectory: widget.questionDirectory, answerDirectory: widget.answerDirectory),
       ),
     );
   }
