@@ -767,7 +767,7 @@ class LandingState extends State<Landing> {
                           },
                         ),
                       );
-                    }).toList(),
+                    }),
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 5.0),
                       child: RadioListTile<bool>(
