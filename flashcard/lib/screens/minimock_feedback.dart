@@ -137,6 +137,37 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Row(
+              children: [
+                Spacer(),
+                Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    width: 160,
+                    height: 40.31,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      color: const Color.fromARGB(255, 235, 230, 239),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          spreadRadius: 0,
+                          blurRadius: 5,
+                          offset: const Offset(0, 3), // changes position of shadow
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Text('Question ${currentQuestion+1}/${questions.length}',
+                        style: const TextStyle(
+                          color: Color.fromARGB(255, 98, 86, 139),
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    )
+                )
+              ]
+            ),
             // Display the current question text
             Text(
               questions[currentQuestion]['question'],
