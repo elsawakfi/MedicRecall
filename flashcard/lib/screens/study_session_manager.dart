@@ -80,82 +80,60 @@ class StudySessionManager {
     try{
       CollectionReference<Map<String, dynamic>> flashcards =
       FirebaseFirestore.instance.collection('flashcards');
-    List <Timestamp>? timestamps = await getTimestamps(userId);
-
-
     List <String> contains = [];
       
     // Get all documents in the collection
     QuerySnapshot<Map<String, dynamic>> flashcardDeck = await flashcards.get();
     int topicCount = 0;
     
-    
-    
+    //the get flashcards method retrieves flashcards that the user 
+    //HAS looked at
+    //These flashcards will be ones that the user has never looked at, 
+    //so we will prioritise these in the calendar
     for (var doc in flashcardDeck.docs) {
       Map<String, dynamic> flashcard = doc.data();
+     
       if (!contains.contains(flashcard["topic"]) ){
-        print("flashing");
-        print("\n");
         contains.add(flashcard["topic"]);
-        int daysToNextReviewDate = calculateDaysToNextReview(topicCount, timestamps![topicCount]);
         
-        print(daysToNextReviewDate);
-        print("Days to next review\n");
-
-        topicCount ++;
-
-      
+        int daysToNextReviewDate = 1;
+        DateTime now = DateTime.now();
+        DateTime nextReviewDate = DateTime(now.year, now.month, now.day+daysToNextReviewDate, 0, 0, 0, 0);
+        while(generatedEvents[nextReviewDate]!=null){
+          nextReviewDate = DateTime(nextReviewDate.year, nextReviewDate.month, nextReviewDate.day+2, 0, 0, 0, 0);
+      }
+      if (testDay.isAfter(nextReviewDate)){
+        generatedEvents[nextReviewDate] = [];
+        generatedEvents[nextReviewDate]!.add(Event(title: flashcard["topic"]+" Flashcards"));
+       }   
         }
-      
-      
-      
-      // This prints the actual document data as a Map
-    }
-    // Iterate over each document
   
-    // for (QueryDocumentSnapshot<Map<String, dynamic>> doc in flashcardDeck.docs) {
-    //     Map<String, dynamic> flashcard = doc.data();
-    //     int topicCount = 0;
-        
-    //     print(flashcard["topicSeen"]);
-    //     int daysToNextReviewDate = calculateDaysToNextReview(topicCount, flashcard["topicLastSeen"]);
-    //      DateTime nextReviewDate =
-    //       DateTime.now().add(Duration(days: daysToNextReviewDate));
-    //       print("And it gets this far as well \n");
-       
-    //    //For now will seperate events by at least one day, need to clarify with Dr. Harris how he wants flashcards to work 
-    //    if (daysToNextReviewDate <= 1 ){
-    //           DateTime now = DateTime.now();
-    //           nextReviewDate = DateTime(now.year, now.month, now.day+2, 0, 0, 0, 0);
-    //           while(generatedEvents[nextReviewDate]!=null){
-    //               nextReviewDate = DateTime(nextReviewDate.year, nextReviewDate.month, nextReviewDate.day+2, 0, 0, 0, 0);
-    //    }
-    //    }
-    //    if (daysToNextReviewDate == 14 ){
-    //           DateTime now = DateTime.now();
-    //           nextReviewDate = DateTime(now.year, now.month, now.day+14, 0, 0, 0, 0);
-    //           while(generatedEvents[nextReviewDate]!=null){
-    //               nextReviewDate = DateTime(nextReviewDate.year, nextReviewDate.month, nextReviewDate.day+2, 0, 0, 0, 0);
-    //    }
-    //    }
-    //    else{
-    //     while(generatedEvents[nextReviewDate]!=null){
-    //               nextReviewDate = DateTime(nextReviewDate.year, nextReviewDate.month, nextReviewDate.day+2, 0, 0, 0, 0);
-    //    }}
+    }
+    var seenFlashcards = await Algo().getFlashcards(user.uid);
+    for (var flashcard in seenFlashcards){
+      if (!contains.contains(flashcard["topic"]) ){
+        contains.add(flashcard["topic"]);
+        int daysToNextReviewDate = calculateDaysToNextReview(topicCount, flashcard["lastSeen"]);
 
-    //    if (testDay.isAfter(nextReviewDate)){
-    //     //Once a free day is used, the corresponding flashcard topic is added
-    //     generatedEvents[nextReviewDate] = [];
-    //     generatedEvents[nextReviewDate]!.add(Event(title: flashcard["topic"]+" Flashcards"));
-    //    }   
-    // }
+        DateTime now = DateTime.now();
+        DateTime nextReviewDate = DateTime(now.year, now.month, now.day+daysToNextReviewDate, 0, 0, 0, 0);
+        while(generatedEvents[nextReviewDate]!=null){
+          nextReviewDate = DateTime(nextReviewDate.year, nextReviewDate.month, nextReviewDate.day+2, 0, 0, 0, 0);
+      }
+      if (testDay.isAfter(nextReviewDate)){
+        //Once a free day is used, the corresponding flashcard topic is added
+        generatedEvents[nextReviewDate] = [];
+        generatedEvents[nextReviewDate]!.add(Event(title: flashcard["topic"]+" Flashcards"));
+       }   
+    }}
     }
     catch(e){
       print("Error\n");
+       print(e);
     }}
       
       
-    if (selectedResources!.contains('Mini-mocks')){
+    if (selectedResources.contains('Mini-mocks')){
       DateTime now = DateTime.now();
       DateTime today = DateTime(now.year, now.month, now.day, 0, 0, 0, 0);
       if (generatedEvents[today] == null) {
