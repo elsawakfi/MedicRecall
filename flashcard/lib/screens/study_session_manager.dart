@@ -74,9 +74,25 @@ class StudySessionManager {
         (testDay.difference(DateTime.now()).inHours / 24).round();
     // Loop through topics to generate study sessions
     
+    if (selectedResources!.contains('Mini-mocks')){
+      DateTime now = DateTime.now();
+      DateTime today = DateTime(now.year, now.month, now.day, 0, 0, 0, 0);
+      DateTime halfwayDate = DateTime(now.year, now.month, now.day+(daysUntilTest~/2), 0, 0, 0, 0);
+      
+      if (generatedEvents[halfwayDate] == null){
+        generatedEvents[halfwayDate] = [];
+      }
+      generatedEvents[halfwayDate]!.add(Event(title: "Second Mini Mock"));
+      
+      if (generatedEvents[today] == null) {
+        generatedEvents[today] = [];
+      }
+      generatedEvents[today]!.add(Event(title: "First Mini Mock"));
 
+      
+    }
 
-    if (selectedResources!.contains("Flashcards")){
+    if (selectedResources.contains("Flashcards")){
     try{
       CollectionReference<Map<String, dynamic>> flashcards =
       FirebaseFirestore.instance.collection('flashcards');
@@ -85,9 +101,7 @@ class StudySessionManager {
     // Get all documents in the collection
     QuerySnapshot<Map<String, dynamic>> flashcardDeck = await flashcards.get();
     int topicCount = 0;
-    
-    //the get flashcards method retrieves flashcards that the user 
-    //HAS looked at
+
     //These flashcards will be ones that the user has never looked at, 
     //so we will prioritise these in the calendar
     for (var doc in flashcardDeck.docs) {
@@ -109,6 +123,8 @@ class StudySessionManager {
         }
   
     }
+    //the getFlashcards method retrieves flashcards that the user 
+    //HAS looked at
     var seenFlashcards = await Algo().getFlashcards(user.uid);
     for (var flashcard in seenFlashcards){
       if (!contains.contains(flashcard["topic"]) ){
@@ -131,23 +147,6 @@ class StudySessionManager {
       print("Error\n");
        print(e);
     }}
-      
-      
-    if (selectedResources.contains('Mini-mocks')){
-      DateTime now = DateTime.now();
-      DateTime today = DateTime(now.year, now.month, now.day, 0, 0, 0, 0);
-      if (generatedEvents[today] == null) {
-        generatedEvents[today] = [];
-      }
-      generatedEvents[today]!.add(Event(title: "First Mini Mock"));
-
-      DateTime halfwayDate = testDay.subtract(Duration(days: (daysUntilTest / 2).round()));
-      if (generatedEvents[halfwayDate] == null){
-        generatedEvents[halfwayDate] = [];
-      }
-      generatedEvents[halfwayDate]!.add(Event(title: "Second Mini Mock"));
-    }
-
     return generatedEvents;
   }
 
