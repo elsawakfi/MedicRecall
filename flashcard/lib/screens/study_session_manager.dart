@@ -101,28 +101,6 @@ class StudySessionManager {
     // Get all documents in the collection
     QuerySnapshot<Map<String, dynamic>> flashcardDeck = await flashcards.get();
     int topicCount = 0;
-
-    //These flashcards will be ones that the user has never looked at, 
-    //so we will prioritise these in the calendar
-    for (var doc in flashcardDeck.docs) {
-      Map<String, dynamic> flashcard = doc.data();
-     
-      if (!contains.contains(flashcard["topic"]) ){
-        contains.add(flashcard["topic"]);
-        
-        int daysToNextReviewDate = 1;
-        DateTime now = DateTime.now();
-        DateTime nextReviewDate = DateTime(now.year, now.month, now.day+daysToNextReviewDate, 0, 0, 0, 0);
-        while(generatedEvents[nextReviewDate]!=null){
-          nextReviewDate = DateTime(nextReviewDate.year, nextReviewDate.month, nextReviewDate.day+2, 0, 0, 0, 0);
-      }
-      if (testDay.isAfter(nextReviewDate)){
-        generatedEvents[nextReviewDate] = [];
-        generatedEvents[nextReviewDate]!.add(Event(title: flashcard["topic"]+" Flashcards"));
-       }   
-        }
-  
-    }
     //the getFlashcards method retrieves flashcards that the user 
     //HAS looked at
     var seenFlashcards = await Algo().getFlashcards(user.uid);
@@ -130,7 +108,11 @@ class StudySessionManager {
       if (!contains.contains(flashcard["topic"]) ){
         contains.add(flashcard["topic"]);
         int daysToNextReviewDate = calculateDaysToNextReview(topicCount, flashcard["lastSeen"]);
-
+        print("Seen");
+        print(flashcard["topic"]);
+        print(flashcard["lastSeen"]);
+        print(daysToNextReviewDate);
+        print("\n");
         DateTime now = DateTime.now();
         DateTime nextReviewDate = DateTime(now.year, now.month, now.day+daysToNextReviewDate, 0, 0, 0, 0);
         while(generatedEvents[nextReviewDate]!=null){
@@ -142,6 +124,33 @@ class StudySessionManager {
         generatedEvents[nextReviewDate]!.add(Event(title: flashcard["topic"]+" Flashcards"));
        }   
     }}
+
+    //These flashcards will be ones that the user has never looked at, 
+    //so we will prioritise these in the calendar
+    for (var doc in flashcardDeck.docs) {
+      Map<String, dynamic> flashcard = doc.data();
+     
+      if (!contains.contains(flashcard["topic"]) ){
+        contains.add(flashcard["topic"]);
+        
+        int daysToNextReviewDate = 1;
+        DateTime now = DateTime.now();
+        print("Unseen");
+        print(flashcard["topic"]);
+        print(daysToNextReviewDate);
+        print("\n");
+        DateTime nextReviewDate = DateTime(now.year, now.month, now.day+daysToNextReviewDate, 0, 0, 0, 0);
+        while(generatedEvents[nextReviewDate]!=null){
+          nextReviewDate = DateTime(nextReviewDate.year, nextReviewDate.month, nextReviewDate.day+2, 0, 0, 0, 0);
+      }
+      if (testDay.isAfter(nextReviewDate)){
+        generatedEvents[nextReviewDate] = [];
+        generatedEvents[nextReviewDate]!.add(Event(title: flashcard["topic"]+" Flashcards"));
+       }   
+        }
+  
+    }
+    
     }
     catch(e){
       print("Error\n");
