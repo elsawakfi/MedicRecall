@@ -108,11 +108,11 @@ class StudySessionManager {
       if (!contains.contains(flashcard["topic"]) ){
         contains.add(flashcard["topic"]);
         int daysToNextReviewDate = calculateDaysToNextReview(topicCount, flashcard["lastSeen"]);
-        print("Seen");
-        print(flashcard["topic"]);
-        print(flashcard["lastSeen"]);
-        print(daysToNextReviewDate);
-        print("\n");
+        // print("Seen");
+        // print(flashcard["topic"]);
+        // print(flashcard["lastSeen"]);
+        // print(daysToNextReviewDate);
+        // print("\n");
         DateTime now = DateTime.now();
         DateTime nextReviewDate = DateTime(now.year, now.month, now.day+daysToNextReviewDate, 0, 0, 0, 0);
         while(generatedEvents[nextReviewDate]!=null){
@@ -135,10 +135,10 @@ class StudySessionManager {
         
         int daysToNextReviewDate = 1;
         DateTime now = DateTime.now();
-        print("Unseen");
-        print(flashcard["topic"]);
-        print(daysToNextReviewDate);
-        print("\n");
+        // print("Unseen");
+        // print(flashcard["topic"]);
+        // print(daysToNextReviewDate);
+        // print("\n");
         DateTime nextReviewDate = DateTime(now.year, now.month, now.day+daysToNextReviewDate, 0, 0, 0, 0);
         while(generatedEvents[nextReviewDate]!=null){
           nextReviewDate = DateTime(nextReviewDate.year, nextReviewDate.month, nextReviewDate.day+2, 0, 0, 0, 0);
