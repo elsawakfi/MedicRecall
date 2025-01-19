@@ -1,544 +1,127 @@
+import 'package:flashcard_x/screens/button_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:flashcard_x/main.dart' as app;
 
+Future<void> loginTest(WidgetTester tester) async{
+  await tester.pump(const Duration(seconds: 1));
+  tester.printToConsole('Starting app');
+  // Run App
+  app.main();
 
+  await tester.pumpAndSettle();
+
+  await tester.enterText(find.byKey(
+      const ValueKey('emailSignUpField')),
+      'xecovop602@deligy.com');
+  tester.printToConsole('Entered email text');
+
+  await tester.enterText(
+      find.byKey(
+          const ValueKey('passwordSignUpField')), 'password');
+  tester.printToConsole('entered password');
+  await tester.tap(find.byKey(
+    const ValueKey('Log In Button'),
+  ));
+  await tester.pumpAndSettle();
+
+  //CLOSE POP UP
+  expect(find.text('No'), findsOneWidget, reason: '"No" button should be visible');
+  await tester.tap(find.text('No'));
+  await tester.pumpAndSettle();
+}
 
 void main() {
 
   group('Whole App Test:', () {
     IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-    testWidgets("Pick a topic and revise",
+    testWidgets("Log into the app",
             (WidgetTester tester) async {
-              await tester.pump(const Duration(seconds: 1));
-              tester.printToConsole('Begin testing');
-              // Run App
-              app.main();
-              tester.printToConsole('opened app');
-              await tester.pumpAndSettle();
-              tester.printToConsole('pumped & settled');
-              await tester.pump(const Duration(seconds: 4));
-              // await tester.tap(find.byKey(const ValueKey('Flashcard Tutor')));
-              await tester.tapAt(const Offset(100,100));
-              await tester.pumpAndSettle();
-              await tester.enterText(find.byKey(
-                  const ValueKey('emailSignUpField')),
-                  'xecovop602@deligy.com');
-              tester.printToConsole('Entered email text');
-              await tester.pump(const Duration(seconds: 4));
-              tester.printToConsole('waited 4s');
-
-              await tester.enterText(
-                  find.byKey(
-                      const ValueKey('passwordSignUpField')), 'password');
-              tester.printToConsole('entered password');
-              await tester.pump(const Duration(seconds: 4));
-              tester.printToConsole('waited 4s');
-              await tester.tap(find.byKey(
-                const ValueKey('Log In Button'),
-              ));
-              await tester.pumpAndSettle();
-
-              //CLOSE POP UP
-              final noButtonFinder = find.text('No');
-              expect(noButtonFinder, findsOneWidget, reason: 'No button should be visible');
-              await tester.tap(noButtonFinder);
-              await tester.pumpAndSettle();
-
-              expect(find.byKey(
-                  const ValueKey('Welcome bar')), findsOneWidget);
-              tester.printToConsole('HomePage screen opens');
-              // Dashboard
-              expect(find.byKey(
-                  const ValueKey('Settings')), findsNothing);
-              await tester.pumpAndSettle();
-              await tester.pump(const Duration(seconds: 4));
-              await tester.tap(find.byKey(const ValueKey('Flashcards')));
-              await tester.pumpAndSettle();
-              expect(find.byKey(
-                  const ValueKey('Settings')), findsNothing);
-              expect(find.byKey(
-                  const ValueKey('Revise')), findsOneWidget);
-              tester.printToConsole('Dashboard opens');
-
-                  // Flashcard Tutor Topic
-              await tester.tap(find.byKey(
-                const ValueKey('Checkbox'),
-              ));
-              await tester.pumpAndSettle();
-              await tester.tap(find.byKey(
-                const ValueKey('Revise'),
-              ));
-              await tester.pumpAndSettle();
-              expect(find.byKey(
-              const ValueKey('Settings')), findsNothing);
-
-              expect(find.byType(FloatingActionButton), findsOneWidget);
-              // expect(find.byIcon(Icons.messenger), findsOneWidget);
-              // expect(find.byTooltip('Mastered'), findsOneWidget);
-              // expect(find.byIcon(
-              // Icons.check), findsOneWidget);
-              tester.printToConsole('Flashcard opens');
-
-              // Back to the topic choice
-              // print('Widget tree printed');
-              // tester.printToConsole(tester.allWidgets.map((widget) => widget.toString()).join('\n'));
-
-              // expect(find.byIcon(
-              //     Icons.arrow_back), findsOneWidget);
-              // await tester.tap(find.byIcon(
-              //     Icons.arrow_back));
-              // await tester.pumpAndSettle();
-              // expect(find.byKey(
-              //     const ValueKey('Settings')), findsNothing);
-              // expect(find.byIcon(
-              //     Icons.menu), findsOneWidget);
-              // tester.printToConsole('Back to the topic choice');
-              // // Menu
-              // expect(find.byKey(
-              //     const ValueKey('Settings')), findsNothing);
-              // await tester.tap(find.byIcon(
-              //     Icons.menu));
-              // await tester.pumpAndSettle();
-              // expect(find.byKey(
-              //     const ValueKey('Settings')), findsOneWidget);
-              // tester.printToConsole('Menu opens');
-              // // Logging out
-              // await tester.tap(find.byKey(
-              //   const ValueKey('Log Out Button'),
-              // ));
-              // await tester.pumpAndSettle();
-              // tester.printToConsole('Back to SignUp screen');
-              // expect(find.byKey(
-              //     const ValueKey('Settings')), findsNothing);
+              tester.printToConsole('Testing login');
+              await loginTest(tester);
             });
 
-    // testWidgets("Tick button",
+    testWidgets("Set Exam Date",
+            (WidgetTester tester) async {
+              tester.printToConsole('Testing exam date feature');
+              await loginTest(tester);
+              await tester.pump(const Duration(seconds: 2));
+              expect(find.byType(FloatingActionButton), findsOneWidget);
+              await tester.tap(find.byType(
+                  FloatingActionButton));
+              tester.printToConsole('Loading popup');
+              await tester.pump(const Duration(seconds: 2));
+              expect(find.text('Yes'), findsOneWidget);
+              await tester.tap(find.text('Yes'));
+              await tester.pump(const Duration(seconds: 2));
+              expect(find.text('Pick Date'), findsOneWidget);
+              await tester.tap(find.text('Pick Date'));
+              await tester.pumpAndSettle();
+              expect(find.text('OK'), findsOneWidget);
+              await tester.tap(find.text('OK'));
+              await tester.pumpAndSettle();
+              expect(find.text('How many repetitions of the official paper link?'), findsOneWidget);
+              await tester.tap(find.byType(TextField));
+              await tester.pump(const Duration(seconds: 2));
+              await tester.enterText(find.byType(TextField),
+                  '8');
+              tester.printToConsole('Entered number of repetitions');
+              await tester.pump(const Duration(seconds: 2));
+              expect(find.text('Submit'), findsOneWidget);
+              await tester.tap(find.text('Submit'));
+              await tester.pump(const Duration(seconds: 2));
+              await tester.tap(find.byType(Checkbox).at(2));
+              await tester.tap(find.text('Submit'));
+              tester.printToConsole('Exam date set');
+              await tester.pumpAndSettle();
+
+              expect(find.byType(FloatingActionButton), findsOneWidget);
+              await tester.tap(find.byType(
+                  FloatingActionButton));
+              tester.printToConsole('Loading popup again');
+              await tester.pumpAndSettle();
+              expect(find.text('Change Exam Date'), findsOneWidget);
+              await tester.tap(find.text('Change Exam Date'));
+              await tester.pumpAndSettle();
+              await tester.pump(const Duration(seconds: 2));
+              expect(find.text('DELETE ALL'), findsOneWidget);
+              await tester.tap(find.text('DELETE ALL'));
+              tester.printToConsole('Exam date deleted');
+              await tester.pump(const Duration(seconds: 2));
+
+              await tester.tap(find.byIcon(
+                  Icons.menu));
+              await tester.pumpAndSettle();
+              expect(find.byKey(
+                  const ValueKey('Settings')), findsOneWidget);
+              tester.printToConsole('Menu opens');
+              // Logging out
+              await tester.tap(find.byKey(
+                const ValueKey('Log Out Button'),
+              ));
+              await tester.pumpAndSettle();
+              tester.printToConsole('Logged out');
+
+
+
+            });
+
+    // testWidgets("Access and complete a mini-mock",
     //         (WidgetTester tester) async {
-    //           await tester.pump(const Duration(seconds: 4));
-    //           // Run App
-    //           app.main();
     //           await tester.pumpAndSettle();
-    //           await tester.enterText(find.byKey(
-    //               const ValueKey('emailSignUpField')),
-    //               'xecovop602@deligy.com');
-    //           await tester.pump(const Duration(seconds: 4));
     //
-    //           await tester.enterText(
-    //               find.byKey(
-    //                   const ValueKey('passwordSignUpField')), 'password');
-    //           await tester.pump(const Duration(seconds: 4));
-    //
+    //           expect(find.byKey(
+    //               const ValueKey('Mini-mock')), findsOneWidget);
     //           await tester.tap(find.byKey(
-    //             const ValueKey('Log In Button'),
-    //           ));
+    //               const ValueKey('Mini-mock')));
+    //           tester.printToConsole('Loading mini-mock landing');
     //           await tester.pumpAndSettle();
-    //           expect(find.byKey(
-    //               const ValueKey('Welcome bar')), findsOneWidget);
-    //           tester.printToConsole('HomePage screen opens');
-    //           // Dashboard
-    //           expect(find.byKey(
-    //               const ValueKey('Settings')), findsNothing);
-    //           await tester.pumpAndSettle();
-    //           await tester.tap(find.byKey(
-    //             const ValueKey('Flashcard Tutor'),
-    //           ));
-    //           await tester.pumpAndSettle();
-    //           expect(find.byKey(
-    //               const ValueKey('Settings')), findsNothing);
-    //           expect(find.byKey(
-    //               const ValueKey('Revise')), findsOneWidget);
-    //           tester.printToConsole('Dashboard opens');
-    //           // Flashcard Tutor Topic
-    //           await tester.tap(find.byKey(
-    //             const ValueKey('Checkbox'),
-    //           ));
-    //           await tester.pumpAndSettle();
-    //           await tester.tap(find.byKey(
-    //             const ValueKey('Revise'),
-    //           ));
-    //           await tester.pumpAndSettle();
-    //           await tester.pump(const Duration(seconds:6));
-    //           expect(find.byKey(
-    //               const ValueKey('Settings')), findsNothing);
-    //           expect(find.byIcon(
-    //               Icons.check), findsOneWidget);
-    //           tester.printToConsole('Flashcard opens');
     //
-    //       // Click tick button
-    //           expect(find.byKey(
-    //           const ValueKey('Settings')), findsNothing);
-    //       await tester.tap(find.byIcon(
-    //           Icons.check),
-    //       );
-    //       await tester.pumpAndSettle();
-    //       expect(find.text(
-    //           'Correct!'), findsOneWidget);
-    //       tester.printToConsole('Tick button clicked');
     //
-    //           //Back to the topic choice
-    //           await tester.tap(find.byIcon(
-    //               Icons.arrow_back));
-    //           await tester.pumpAndSettle();
-    //           expect(find.byKey(
-    //               const ValueKey('Settings')), findsNothing);
-    //           expect(find.byIcon(
-    //               Icons.menu), findsOneWidget);
-    //           tester.printToConsole('Back to the topic choice');
-    //
-    //           // Menu
-    //           expect(find.byKey(
-    //               const ValueKey('Settings')), findsNothing);
-    //           await tester.tap(find.byIcon(
-    //               Icons.menu));
-    //           await tester.pumpAndSettle();
-    //           expect(find.byKey(
-    //               const ValueKey('Settings')), findsOneWidget);
-    //           tester.printToConsole('Menu opens');
-    //
-    //           // Logging out
-    //           await tester.tap(find.byKey(
-    //             const ValueKey('Log Out Button'),
-    //           ));
-    //           await tester.pumpAndSettle();
-    //           tester.printToConsole('Back to SignUp screen');
-    //           expect(find.byKey(
-    //               const ValueKey('Settings')), findsNothing);
     //         });
-    //
-    // testWidgets("Cross button",
-    //         (WidgetTester tester) async {
-    //           await tester.pump(const Duration(seconds: 4));
-    //           // Run App
-    //           app.main();
-    //           await tester.pumpAndSettle();
-    //           // expect(find.byKey(
-    //           //     const ValueKey('Welcome bar')), findsOneWidget);
-    //           // tester.printToConsole('landing screen opens');
-    //           //
-    //           // // Trigger signing in
-    //           // expect(find.byKey(
-    //           //     const ValueKey('Settings')), findsNothing);
-    //           // await tester.tap(find.byKey(
-    //           //   const ValueKey('Flashcard Tutor'),
-    //           // ));
-    //           // await tester.pumpAndSettle();
-    //           // expect(find.byKey(
-    //           //     const ValueKey('emailSignUpField')), findsOneWidget);
-    //           // tester.printToConsole('SignUp screen opens');
-    //
-    //           // Signing In
-    //           // expect(find.byKey(
-    //           //     const ValueKey('Welcome bar')), findsNothing);
-    //           await tester.enterText(find.byKey(
-    //               const ValueKey('emailSignUpField')),
-    //               'xecovop602@deligy.com');
-    //           await tester.pump(const Duration(seconds: 4));
-    //
-    //           await tester.enterText(
-    //               find.byKey(
-    //                   const ValueKey('passwordSignUpField')), 'password');
-    //           await tester.pump(const Duration(seconds: 4));
-    //
-    //           await tester.tap(find.byKey(
-    //             const ValueKey('Log In Button'),
-    //           ));
-    //           await tester.pumpAndSettle();
-    //           expect(find.byKey(
-    //               const ValueKey('Welcome bar')), findsOneWidget);
-    //           tester.printToConsole('HomePage screen opens');
-    //
-    //
-    //           // Dashboard
-    //           expect(find.byKey(
-    //               const ValueKey('Settings')), findsNothing);
-    //           await tester.pumpAndSettle();
-    //           await tester.tap(find.byKey(
-    //             const ValueKey('Flashcard Tutor'),
-    //           ));
-    //           await tester.pumpAndSettle();
-    //           expect(find.byKey(
-    //               const ValueKey('Settings')), findsNothing);
-    //           expect(find.byKey(
-    //               const ValueKey('Revise')), findsOneWidget);
-    //           tester.printToConsole('Dashboard opens');
-    //
-    //           // Flashcard Tutor Topic
-    //           await tester.tap(find.byKey(
-    //             const ValueKey('Checkbox'),
-    //           ));
-    //           await tester.pumpAndSettle();
-    //           await tester.tap(find.byKey(
-    //             const ValueKey('Revise'),
-    //           ));
-    //           await tester.pumpAndSettle();
-    //           await tester.pump(const Duration(seconds:6));
-    //
-    //           expect(find.byKey(
-    //               const ValueKey('Settings')), findsNothing);
-    //           expect(find.byIcon(
-    //               Icons.check), findsOneWidget);
-    //           tester.printToConsole('Flashcard opens');
-    //
-    //           // Click cross button
-    //           expect(find.byKey(
-    //               const ValueKey('Settings')), findsNothing);
-    //           await tester.tap(find.byIcon(
-    //               Icons.close),
-    //           );
-    //           await tester.pumpAndSettle();
-    //           expect(find.text(
-    //               'Wrong!'), findsOneWidget);
-    //           tester.printToConsole('Tick button clicked');
-    //
-    //           //Back to the topic choice
-    //           await tester.tap(find.byIcon(
-    //               Icons.arrow_back));
-    //           await tester.pumpAndSettle();
-    //           expect(find.byKey(
-    //               const ValueKey('Settings')), findsNothing);
-    //           expect(find.byIcon(
-    //               Icons.menu), findsOneWidget);
-    //           tester.printToConsole('Back to the topic choice');
-    //
-    //
-    //           // Menu
-    //           expect(find.byKey(
-    //               const ValueKey('Settings')), findsNothing);
-    //           await tester.tap(find.byIcon(
-    //               Icons.menu));
-    //           await tester.pumpAndSettle();
-    //           expect(find.byKey(
-    //               const ValueKey('Settings')), findsOneWidget);
-    //           tester.printToConsole('Menu opens');
-    //
-    //           // Logging out
-    //           await tester.tap(find.byKey(
-    //             const ValueKey('Log Out Button'),
-    //           ));
-    //           await tester.pumpAndSettle();
-    //           tester.printToConsole('Back to SignUp screen');
-    //           expect(find.byKey(
-    //               const ValueKey('Settings')), findsNothing);
-    //         });
-    //
-    // testWidgets("Open markscheme and comments",
-    //         (WidgetTester tester) async {
-    //           // Run App
-    //           app.main();
-    //           await tester.pumpAndSettle();
-    //           // expect(find.byKey(
-    //           //     const ValueKey('Welcome bar')), findsOneWidget);
-    //           // tester.printToConsole('landing screen opens');
-    //           //
-    //           // // Trigger signing in
-    //           // expect(find.byKey(
-    //           //     const ValueKey('Settings')), findsNothing);
-    //           // await tester.tap(find.byKey(
-    //           //   const ValueKey('Flashcard Tutor'),
-    //           // ));
-    //           // await tester.pumpAndSettle();
-    //           // expect(find.byKey(
-    //           //     const ValueKey('emailSignUpField')), findsOneWidget);
-    //           // tester.printToConsole('SignUp screen opens');
-    //
-    //           // Signing In
-    //           // expect(find.byKey(
-    //           //     const ValueKey('Welcome bar')), findsNothing);
-    //           await tester.enterText(find.byKey(
-    //               const ValueKey('emailSignUpField')),
-    //               'xecovop602@deligy.com');
-    //           await tester.pump(const Duration(seconds: 4));
-    //
-    //           await tester.enterText(
-    //               find.byKey(
-    //                   const ValueKey('passwordSignUpField')), 'password');
-    //           await tester.pump(const Duration(seconds: 4));
-    //
-    //           await tester.tap(find.byKey(
-    //             const ValueKey('Log In Button'),
-    //           ));
-    //           await tester.pumpAndSettle();
-    //           expect(find.byKey(
-    //               const ValueKey('Welcome bar')), findsOneWidget);
-    //           tester.printToConsole('HomePage screen opens');
-    //
-    //       // Mark Scheme
-    //       await tester.tap(find.byKey(
-    //         const ValueKey('Mark Scheme'),
-    //       ));
-    //       await tester.pump(const Duration(seconds: 2));
-    //       expect(find.byKey(
-    //           const ValueKey('Rating Questions')), findsOneWidget);
-    //       tester.printToConsole('Mark scheme opens');
-    //
-    //       // Question Type
-    //       expect(find.byKey(const ValueKey('Settings')), findsNothing);
-    //       await tester.tap(find.byKey(
-    //         const ValueKey('Rating Questions'),
-    //       ));
-    //       await tester.pumpAndSettle();
-    //       expect(find.byKey(
-    //           const ValueKey('Question 1')), findsOneWidget);
-    //       tester.printToConsole('Rating Questions opens');
-    //
-    //       // Choose Question
-    //       await tester.tap(find.byKey(
-    //         const ValueKey('Question 1'),
-    //       ));
-    //       await tester.pumpAndSettle();
-    //       expect(find.byKey(
-    //           const ValueKey('Comments')), findsOneWidget);
-    //       tester.printToConsole('Question opens');
-    //
-    //       await tester.tap(find.byKey(
-    //         const ValueKey('Comments'),
-    //       ));
-    //       await tester.pump(const Duration(seconds: 2));
-    //       expect(find.byIcon(
-    //           Icons.arrow_upward), findsOneWidget);
-    //       tester.printToConsole('Comments open');
-    //
-    //           //Back to the topic choice
-    //           await tester.tap(find.byIcon(
-    //               Icons.arrow_back));
-    //           await tester.pumpAndSettle();
-    //           await tester.tap(find.byIcon(
-    //               Icons.arrow_back));
-    //           await tester.pumpAndSettle();
-    //           await tester.tap(find.byIcon(
-    //               Icons.arrow_back));
-    //           await tester.pumpAndSettle();
-    //           expect(find.byKey(
-    //               const ValueKey('Settings')), findsNothing);
-    //           expect(find.byIcon(
-    //               Icons.menu), findsOneWidget);
-    //           tester.printToConsole('Back to the topic choice');
-    //
-    //           // Menu
-    //           expect(find.byKey(
-    //               const ValueKey('Settings')), findsNothing);
-    //           await tester.tap(find.byIcon(
-    //               Icons.menu));
-    //           await tester.pumpAndSettle();
-    //           expect(find.byKey(
-    //               const ValueKey('Settings')), findsOneWidget);
-    //           tester.printToConsole('Menu opens');
-    //
-    //
-    //           // Logging out
-    //           await tester.tap(find.byKey(
-    //             const ValueKey('Log Out Button'),
-    //           ));
-    //           await tester.pumpAndSettle();
-    //           tester.printToConsole('Back to SignUp screen');
-    //           expect(find.byKey(
-    //               const ValueKey('Settings')), findsNothing);
-    //
-    //       //   // Reviewing Flashcard Tutor
-    //       //   for (var i = 100; i >= 1; i--) {
-    //       //     await Future.delayed(const Duration(seconds: 1));
-    //       //     await tester.drag(find.byKey(const ValueKey('flashcard center')),
-    //       //         const Offset(-700, 0));
-    //       //     await tester.pump(const Duration(seconds: 1));
-    //       //   }
-    //       //   await tester.pumpAndSettle();
-    //       //
-    //       //   // Completed Flashcard Tutor Screen
-    //       //   expect(find.byKey(const ValueKey('HomePage/CompleteCardsChecker')),
-    //       //       findsOneWidget);
-    //     });
-    // //
-    // testWidgets('Logging in and reset data', (WidgetTester tester) async {
-    //   await tester.pump(const Duration(seconds: 4));
-    //   // Run App
-    //   app.main();
-    //   await tester.pumpAndSettle();
-    //   // expect(find.byKey(
-    //   //     const ValueKey('Welcome bar')), findsOneWidget);
-    //   // tester.printToConsole('landing screen opens');
-    //   //
-    //   // // Trigger signing in
-    //   // expect(find.byKey(
-    //   //     const ValueKey('Settings')), findsNothing);
-    //   // await tester.tap(find.byKey(
-    //   //   const ValueKey('Flashcard Tutor'),
-    //   // ));
-    //   // await tester.pumpAndSettle();
-    //   // expect(find.byKey(
-    //   //     const ValueKey('emailSignUpField')), findsOneWidget);
-    //   // tester.printToConsole('SignUp screen opens');
-    //
-    //   // Signing In
-    //   // expect(find.byKey(
-    //   //     const ValueKey('Welcome bar')), findsNothing);
-    //   await tester.enterText(find.byKey(const ValueKey('emailSignUpField')),
-    //       'xecovop602@deligy.com');
-    //   await tester.pump(const Duration(seconds: 4));
-    //
-    //   await tester.enterText(
-    //       find.byKey(
-    //           const ValueKey('passwordSignUpField')), 'password');
-    //   await tester.pump(const Duration(seconds: 4));
-    //
-    //   await tester.tap(find.byKey(
-    //     const ValueKey('Log In Button'),
-    //   ));
-    //   await tester.pumpAndSettle();
-    //
-    //   // expect(find.byKey(
-    //       // const ValueKey('Welcome bar')), findsOneWidget);
-    //   tester.printToConsole('HomePage screen opens');
-    //   tester.printToConsole('broken test passed');
-    //
-    //   // Dashboard
-    //   expect(find.byKey(
-    //       const ValueKey('Settings')), findsNothing);
-    //   await tester.tap(find.byKey(
-    //     const ValueKey('Flashcard Tutor'),
-    //   ));
-    //   await tester.pumpAndSettle();
-    //   expect(find.byKey(
-    //       const ValueKey('Settings')), findsNothing);
-    //   expect(find.byKey(
-    //       const ValueKey('Revise')), findsOneWidget);
-    //   tester.printToConsole('Dashboard opens');
-    //
-    //   // Menu
-    //   expect(find.byKey(
-    //       const ValueKey('Settings')), findsNothing);
-    //   await tester.tap(find.byIcon(
-    //       Icons.menu));
-    //   await tester.pumpAndSettle();
-    //   expect(find.byKey(
-    //       const ValueKey('Settings')), findsOneWidget);
-    //   tester.printToConsole('Menu opens');
-    //
-    //   // User Details
-    //   await tester.tap(find.byKey(
-    //     const ValueKey('Settings'),
-    //   ));
-    //   await tester.pumpAndSettle();
-    //   expect(find.byKey(
-    //       const ValueKey('User Details')), findsOneWidget);
-    //   tester.printToConsole('Settings opens');
-    //   await tester.tap(find.byKey(
-    //     const ValueKey('User Details'),
-    //   ));
-    //   await tester.pumpAndSettle();
-    //   expect(find.byKey(
-    //       const ValueKey('Reset Userdata')), findsOneWidget);
-    //   tester.printToConsole('User Details opens');
-    //
-    //   // Reset User Data
-    //   await tester.tap(find.byKey(
-    //     const ValueKey('Reset Userdata'),
-    //   ));
-    //   await tester.pumpAndSettle();
-    //   tester.printToConsole('Userdata reset');
-    // });
+
 
   });
 }
