@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flashcard_x/main.dart';
-import 'package:flashcard_x/screens/minimock_feedback.dart';
+//import 'package:flashcard_x/main.dart';
+//import 'package:flashcard_x/screens/minimock_feedback.dart';
 import 'package:flashcard_x/utils/algo.dart';
-import 'feed_screen.dart';
+//import 'feed_screen.dart';
 import 'package:flashcard_x/widgets/event.dart';
 import 'package:flutter/foundation.dart';
 // import 'calendar_screen.dart';
@@ -100,24 +100,36 @@ class StudySessionManager {
       
     // Get all documents in the collection
     QuerySnapshot<Map<String, dynamic>> flashcardDeck = await flashcards.get();
-    int topicCount = 0;
+    //int topicCount = 0;
     //the getFlashcards method retrieves flashcards that the user 
     //HAS looked at
     var seenFlashcards = await Algo().getFlashcards(user.uid);
     for (var flashcard in seenFlashcards){
       if (!contains.contains(flashcard["topic"]) ){
         contains.add(flashcard["topic"]);
-        int daysToNextReviewDate = calculateDaysToNextReview(topicCount, flashcard["lastSeen"]);
+        //int daysToNextReviewDate = calculateDaysToNextReview(topicCount, flashcard["lastSeen"]);
         // print("Seen");
         // print(flashcard["topic"]);
         // print(flashcard["lastSeen"]);
-        // print(daysToNextReviewDate);
+        //print(daysToNextReviewDate);
         // print("\n");
         DateTime now = DateTime.now();
-        DateTime nextReviewDate = DateTime(now.year, now.month, now.day+daysToNextReviewDate, 0, 0, 0, 0);
-        while(generatedEvents[nextReviewDate]!=null){
-          nextReviewDate = DateTime(nextReviewDate.year, nextReviewDate.month, nextReviewDate.day+2, 0, 0, 0, 0);
+        DateTime nextReviewDate = DateTime(now.year, now.month, now.day+0, 0, 0, 0, 0);
+        if(daysUntilTest > 31 && daysUntilTest < 60){
+          while(generatedEvents[nextReviewDate]!=null){
+                    nextReviewDate = DateTime(nextReviewDate.year, nextReviewDate.month, nextReviewDate.day+2, 0, 0, 0, 0);
       }
+        }
+        if(daysUntilTest > 60){
+          while(generatedEvents[nextReviewDate]!=null){
+                    nextReviewDate = DateTime(nextReviewDate.year, nextReviewDate.month, nextReviewDate.day+3, 0, 0, 0, 0);
+        }}
+        if(daysUntilTest < 30 ){
+          while(generatedEvents[nextReviewDate]!=null){
+                    nextReviewDate = DateTime(nextReviewDate.year, nextReviewDate.month, nextReviewDate.day+1, 0, 0, 0, 0);
+        }
+        }
+        
       if (testDay.isAfter(nextReviewDate)){
         //Once a free day is used, the corresponding flashcard topic is added
         generatedEvents[nextReviewDate] = [];
@@ -133,16 +145,30 @@ class StudySessionManager {
       if (!contains.contains(flashcard["topic"]) ){
         contains.add(flashcard["topic"]);
         
-        int daysToNextReviewDate = 1;
+        //int daysToNextReviewDate = 1;
+        //print(daysToNextReviewDate);
         DateTime now = DateTime.now();
         // print("Unseen");
         // print(flashcard["topic"]);
         // print(daysToNextReviewDate);
         // print("\n");
-        DateTime nextReviewDate = DateTime(now.year, now.month, now.day+daysToNextReviewDate, 0, 0, 0, 0);
-        while(generatedEvents[nextReviewDate]!=null){
-          nextReviewDate = DateTime(nextReviewDate.year, nextReviewDate.month, nextReviewDate.day+2, 0, 0, 0, 0);
+        
+        
+        DateTime nextReviewDate = DateTime(now.year, now.month, now.day+0, 0, 0, 0, 0);
+       if(daysUntilTest >= 30 && daysUntilTest < 60){
+          while(generatedEvents[nextReviewDate]!=null){
+                    nextReviewDate = DateTime(nextReviewDate.year, nextReviewDate.month, nextReviewDate.day+2, 0, 0, 0, 0);
       }
+        }
+        if(daysUntilTest > 60){
+          while(generatedEvents[nextReviewDate]!=null){
+                    nextReviewDate = DateTime(nextReviewDate.year, nextReviewDate.month, nextReviewDate.day+3, 0, 0, 0, 0);
+        }}
+        if(daysUntilTest < 30 ){
+          while(generatedEvents[nextReviewDate]!=null){
+                    nextReviewDate = DateTime(nextReviewDate.year, nextReviewDate.month, nextReviewDate.day+1, 0, 0, 0, 0);
+        }
+        }
       if (testDay.isAfter(nextReviewDate)){
         generatedEvents[nextReviewDate] = [];
         generatedEvents[nextReviewDate]!.add(Event(title: flashcard["topic"]+" Flashcards"));
@@ -159,6 +185,8 @@ class StudySessionManager {
     return generatedEvents;
   }
 
+
+//IS THIS FUNCTION NEEDED IF WE USE THE CLIENTS FORMULA
   int calculateDaysToNextReview(int topicCount, Timestamp lastSeen) {
     Map<int, int> dateToColourMap = {0: 1, 1: 2, 2: 4, 3: 8, 4: 16, 5: 32};
     int daysSinceLastReview = (Timestamp.now().seconds - lastSeen.seconds) ~/ (60 * 60 * 24);
