@@ -59,7 +59,7 @@ class Flashcard extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           // Remove the debug banner
           // home: const SignInScreen(),
-          initialRoute: Landing.id,
+          initialRoute: SignInScreen.id,
           routes: {
             VerifyEmailScreen.id: (context) => const VerifyEmailScreen(),
             SignInScreen.id: (context) => const SignInScreen(),
