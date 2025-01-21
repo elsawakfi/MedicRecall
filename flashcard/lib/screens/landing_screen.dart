@@ -5,7 +5,6 @@ import 'package:flashcard_x/screens/calendar_screen.dart';
 import 'package:flashcard_x/screens/dashboard_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:flashcard_x/screens/faq.dart';
-import 'package:flutter/services.dart';
 import 'package:flashcard_x/screens/flashcard_editor_screen.dart';
 import 'package:flashcard_x/screens/button_screen.dart';
 import 'package:flashcard_x/screens/minimock_landing.dart';
@@ -47,12 +46,20 @@ class LandingState extends State<Landing> {
   CollectionReference users = FirebaseFirestore.instance.collection('users');
   final FirebaseAuth auth = FirebaseAuth.instance;
   late String testDayString = "Test day not set";
-  late User user;
+  User? user;
 
-  void shouldShowDialog() async{
+  @override
+  void initState() {
+    super.initState();
+    getUser();
+
+    setState(() {});
+  }
+
+  Future<void> shouldShowDialog() async{
       await getTestDay();
-      if (testDayBool_ && _examDate == null){
-         showDialog(context: context, 
+      if (mounted && testDayBool_ && _examDate == null){
+         showDialog(context: context,
          builder: (BuildContext context){
           return _buildAlertDialog(
           title: 'Do you want to start your revision plan today?',
@@ -100,7 +107,7 @@ class LandingState extends State<Landing> {
   }
   Future<void> checkTestDay() async {
     QuerySnapshot querySnapshot =
-        await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+        await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
 
     var userFromDb = querySnapshot.docs.first;
     Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
@@ -110,30 +117,35 @@ class LandingState extends State<Landing> {
       hasDate = DateTime.now();
     } else {
       testDayBool_ = true;
-      
+
     }
     setState(() {});
   }
-    Future<void> getTestDay() async {
-    QuerySnapshot querySnapshot =
-        await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+  Future<void> getTestDay() async {
+    if(user != null){
+      final user = this.user;
+      if (user != null){
+        QuerySnapshot querySnapshot =
+            await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
 
-    var userFromDb = querySnapshot.docs.first;
-    Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
-    //if the Test Day field isn't null and is in the database we update the UI with it. Otherwise it is displayed as being not set.
-    if ((data.containsKey("TestDay") || data["TestDay"] != null) &&
-        (buildCount <= 2 || (_examDate != null && buildCount > 2))) {
-      testDayBool_ = false;
-      _examDate = DateTime.fromMicrosecondsSinceEpoch(userFromDb["TestDay"]
-          .microsecondsSinceEpoch); //firebase is weird. conversion from TimeStamp to DateTime object
-      String? day = _examDate?.day.toString();
-      String? month = _examDate?.month.toString();
-      String? year = _examDate?.year.toString();
-      testDayString = '$day-$month-$year';
-    } else {
-      testDayBool_ = true;
+        var userFromDb = querySnapshot.docs.first;
+        Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
+        //if the Test Day field isn't null and is in the database we update the UI with it. Otherwise it is displayed as being not set.
+        if ((data.containsKey("TestDay") || data["TestDay"] != null) &&
+            (buildCount <= 2 || (_examDate != null && buildCount > 2))) {
+          testDayBool_ = false;
+          _examDate = DateTime.fromMicrosecondsSinceEpoch(userFromDb["TestDay"]
+              .microsecondsSinceEpoch); //firebase is weird. conversion from TimeStamp to DateTime object
+          String? day = _examDate?.day.toString();
+          String? month = _examDate?.month.toString();
+          String? year = _examDate?.year.toString();
+          testDayString = '$day-$month-$year';
+        } else {
+          testDayBool_ = true;
+        }
+        setState(() {});
+      }
     }
-    setState(() {});
   }
 
 
@@ -598,14 +610,6 @@ class LandingState extends State<Landing> {
   
   }
 
-  @override
-  void initState() {
-    super.initState();
-    getUser();
-    
-    setState(() {});
-  }
-
   Future<void> triggerSignIn(String screen) async{
     NavigatorState nav = Navigator.of(context);
     if (auth.currentUser == null) {
@@ -714,7 +718,7 @@ class LandingState extends State<Landing> {
     );
   }
 
-  // Show dialog to ask for number of repetitions
+ // Show dialog to ask for number of repetitions
   void _showRepetitionDialog(BuildContext context) {
     final List<int> repetitionOptions = [2, 3, 4, 5, 6];
     int? selectedRepetition;
@@ -1011,7 +1015,7 @@ class LandingState extends State<Landing> {
    Future<void> updateTestDay(DateTime date) async {
     CollectionReference users = FirebaseFirestore.instance.collection('users');
     QuerySnapshot u =
-        await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+        await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
 
     /*  FIRST update on database */
     var id = u.docs.last.id; //id being where the user's id details
@@ -1023,8 +1027,4 @@ class LandingState extends State<Landing> {
   
   }
  }
- 
-
-
- 
  

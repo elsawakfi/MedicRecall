@@ -29,7 +29,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
   CollectionReference users = FirebaseFirestore.instance.collection('users');
 
   final FirebaseAuth auth = FirebaseAuth.instance;
-  late User user;
+  User? user;
 
   int buildCount = 0;
   bool testDayBool = true;
@@ -69,31 +69,33 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
 
   // Repurposed getter from calendar_screen.dart
   Future<void> getTestDay() async {
-    QuerySnapshot querySnapshot =
-        await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+    if (user != null){
+      QuerySnapshot querySnapshot =
+          await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
 
-    var userFromDb = querySnapshot.docs.first;
-    Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
-    // If the Test Day field isn't null and is in the database we update the UI with it. Otherwise it is displayed as being not set.
-    if ((data.containsKey("TestDay") || data["TestDay"] != null) &&
-        (buildCount <= 2 || (_examDate != null && buildCount > 2))) {
-      testDayBool = false;
-      _examDate = DateTime.fromMicrosecondsSinceEpoch(userFromDb["TestDay"]
-          .microsecondsSinceEpoch); // Firebase is weird. Conversion from TimeStamp to DateTime object
-      String? day = _examDate?.day.toString();
-      String? month = _examDate?.month.toString();
-      String? year = _examDate?.year.toString();
-      testDayString = '$day-$month-$year';
-    } else {
-      testDayBool = true;
+      var userFromDb = querySnapshot.docs.first;
+      Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
+      // If the Test Day field isn't null and is in the database we update the UI with it. Otherwise it is displayed as being not set.
+      if ((data.containsKey("TestDay") || data["TestDay"] != null) &&
+          (buildCount <= 2 || (_examDate != null && buildCount > 2))) {
+        testDayBool = false;
+        _examDate = DateTime.fromMicrosecondsSinceEpoch(userFromDb["TestDay"]
+            .microsecondsSinceEpoch); // Firebase is weird. Conversion from TimeStamp to DateTime object
+        String? day = _examDate?.day.toString();
+        String? month = _examDate?.month.toString();
+        String? year = _examDate?.year.toString();
+        testDayString = '$day-$month-$year';
+      } else {
+        testDayBool = true;
+      }
+      setState(() {});
     }
-    setState(() {});
   }
 
   // Repurposed setter from calendar_screen.dart
   Future<void> updateTestDay(DateTime date) async {
     QuerySnapshot u =
-        await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+        await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
 
     /*  FIRST update on database */
     var id = u.docs.last.id; // id being where the user's id details
@@ -474,7 +476,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                   if (checkbox4.value) selectedResources.add('Flashcards');
 
                   QuerySnapshot u =
-                  await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+                  await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
 
                   // Update the Firestore document with the selected resources
                   var id = u.docs.last.id;
@@ -484,8 +486,10 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
 
                   // Start the study session with the selected resources
                   StudySessionManager().startStudySession(selectedResources);
-                  
-                  Navigator.of(context).pop();
+
+                  if(context.mounted){
+                    Navigator.of(context).pop();
+                  }
                   // Add your action here after options are submitted
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -587,3 +591,4 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     );
   }
 }
+

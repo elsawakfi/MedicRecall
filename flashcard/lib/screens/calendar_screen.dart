@@ -7,6 +7,7 @@ import 'package:flashcard_x/widgets/event.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/screens/dashboard_screen.dart';
 import 'package:flashcard_x/screens/button_screen.dart';
+import 'package:reviews_slider/reviews_slider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:flashcard_x/screens/study_session_manager.dart';
 
@@ -422,11 +423,14 @@ Widget build(BuildContext context) {
             ),
           ),
           // Positioned custom button on the right
-          Positioned(
-            right: 0,
-            top: 0,
-            child: const CustomFloatingButton()
-          ),
+          // Positioned(
+          //   right: 0,
+          //   top: 0,
+          //   child: CustomFloatingButton()
+            
+          // ),
+          
+    
         ],
       ),
       centerTitle: true,
@@ -504,7 +508,9 @@ Widget build(BuildContext context) {
                         testDay = null;
                         testDayBool = true;
                         deleteAllEvents();
-                        setState(() {});
+                        setState((
+                          
+                        ) {});
                       },
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -624,47 +630,55 @@ Widget build(BuildContext context) {
             ),
           ),
         ),
+     
       ],
+      
     ),
-    floatingActionButton: FloatingActionButton.extended(
-      heroTag: UniqueKey().toString(),
-      onPressed: () => showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text("Add Event"),
-          content: TextFormField(controller: _eventController),
-          actions: [
-            TextButton(
-              child: const Text("Cancel"),
-              onPressed: () => Navigator.pop(context),
-            ),
-            TextButton(
-              child: const Text("Ok"),
-              onPressed: () {
-                if (_eventController.text.isNotEmpty) {
-                  if (selectedEvents[selectedDay] != null) {
-                    selectedEvents[selectedDay]?.add(
-                      Event(title: _eventController.text),
-                    );
-                  } else {
-                    selectedEvents[selectedDay] = [
-                      Event(title: _eventController.text),
-                    ];
-                  }
-                  updateEventsToDB(user);
-                  Navigator.pop(context);
-                  _eventController.clear();
-                  setState(() {});
-                }
-              },
-            ),
-          ],
-        ),
-      ),
-      label: const Text("Add event", style: TextStyle(color: Colors.white)),
-      icon: const Icon(Icons.add),
-    ),
-    floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-    floatingActionButtonAnimator: FloatingActionButtonAnimator.scaling,
+       floatingActionButton: const CustomFloatingButton(),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
+        bottomNavigationBar:  Container (
+                height: 90,
+                child: Align(alignment: Alignment.bottomRight,
+                    child : Padding(
+                      padding: EdgeInsets.all(20),
+                      child: FloatingActionButton.extended(
+                      heroTag: UniqueKey().toString(),
+                      onPressed: () => showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                        title: const Text("Add Event"),
+                        content: TextFormField(controller: _eventController),
+                        actions: [
+                            TextButton(
+                              child: const Text("Cancel"),
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                            TextButton(
+                              child: const Text("Ok"),
+                              onPressed: () {
+                                if (_eventController.text.isNotEmpty) {
+                                  if (selectedEvents[selectedDay] != null) {
+                                    selectedEvents[selectedDay]?.add(
+                                      Event(title: _eventController.text),
+                                    );
+                                  } else {
+                                    selectedEvents[selectedDay] = [
+                                      Event(title: _eventController.text),
+                                    ];
+                                  }
+                                  updateEventsToDB(user);
+                                  Navigator.pop(context);
+                                  _eventController.clear();
+                                  setState(() {});
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    
+                    label: const Text("Add event", style: TextStyle(color: Colors.white)),
+                    icon: const Icon(Icons.add))))),
   );
+  
 }}
