@@ -636,7 +636,7 @@ Widget build(BuildContext context) {
     ),
        floatingActionButton: const CustomFloatingButton(),
         floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
-        bottomNavigationBar:  Container (
+        bottomNavigationBar:  SizedBox (
                 height: 90,
                 child: Align(alignment: Alignment.bottomRight,
                     child : Padding(
