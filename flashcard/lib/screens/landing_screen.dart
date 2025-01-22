@@ -3,6 +3,7 @@ import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/calendar_screen.dart';
 import 'package:flashcard_x/screens/dashboard_screen.dart';
+import 'package:flashcard_x/screens/study_session_manager.dart';
 import 'package:intl/intl.dart';
 import 'package:flashcard_x/screens/faq.dart';
 import 'package:flashcard_x/screens/flashcard_editor_screen.dart';
@@ -873,7 +874,31 @@ class LandingState extends State<Landing> {
     );
   }
 
-  void _showOptionsDialog(BuildContext context) {
+  // Helper method
+  Widget _buildAlertDialog({
+    required String title,
+    required Widget content,
+    required List<Widget> actions,
+  }) {
+    return AlertDialog(
+      backgroundColor: const Color(0xFFE6EDF2),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(0),
+      ),
+      title: Text(
+        title,
+        style: const TextStyle(
+          color: Color.fromRGBO(21, 58, 103, 1),
+          fontSize: 21,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      content: content,
+      actions: actions,
+    );
+  }
+
+void _showOptionsDialog(BuildContext context) {
     final checkbox1 = ValueNotifier<bool>(false);
     final checkbox2 = ValueNotifier<bool>(false);
     final checkbox3 = ValueNotifier<bool>(false);
@@ -967,17 +992,47 @@ class LandingState extends State<Landing> {
           ),
           actions: [
             TextButton(
-              onPressed: () {
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        _showRepetitionDialog(context);
+                      },
+                      child: const Text('Previous'),
+                    ),
+            TextButton(
+              onPressed: () async {
                 if (checkbox1.value ||
                     checkbox2.value ||
                     checkbox3.value ||
                     checkbox4.value) {
-                  Navigator.of(context).pop();
+                  List<String> selectedResources = [];
+                  if (checkbox1.value) selectedResources.add('Official paper');
+                  if (checkbox2.value) selectedResources.add('Full-sized mock exam');
+                  if (checkbox3.value) selectedResources.add('Mini-mocks');
+                  if (checkbox4.value) selectedResources.add('Flashcards');
+
+                  QuerySnapshot u =
+                  await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
+
+                  // Update the Firestore document with the selected resources
+                  var id = u.docs.last.id;
+                  _userCollectionRef.doc(id).update({
+                    'selectedResources': selectedResources,
+                  });
+                  print("Are these my resources?");
+                  print(selectedResources);
+                  print("\n");
+
+                  // Start the study session with the selected resources
+                  StudySessionManager().startStudySession(selectedResources);
+
+                  if(context.mounted){
+                    Navigator.of(context).pop();
+                  }
                   // Add your action here after options are submitted
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Please select at least one option'),
+                      content: Text('Please select at least one resource'),
                     ),
                   );
                 }
@@ -988,28 +1043,7 @@ class LandingState extends State<Landing> {
         );
       },
     );
-  }
-    Widget _buildAlertDialog({
-    required String title,
-    required Widget content,
-    required List<Widget> actions,
-  }) {
-    return AlertDialog(
-      backgroundColor: const Color(0xFFE6EDF2),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(0),
-      ),
-      title: Text(
-        title,
-        style: const TextStyle(
-          color: Color.fromRGBO(21, 58, 103, 1),
-          fontSize: 21,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-      content: content,
-      actions: actions,
-    );
+    
   }
 
    Future<void> updateTestDay(DateTime date) async {
