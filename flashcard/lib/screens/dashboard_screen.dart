@@ -270,6 +270,7 @@ class HomePageState extends State<HomePage> {
       if (topicCount![i]>(dateToColourMap.length-1)){
         topicCount![i]=dateToColourMap.length-1;
       }
+      //Does this help
 
       // int nextReviewDateMilliseconds = (((dateToColourMap[topicCount![i]]! * 24 * 60 * 60) + topicLastSeen![i].seconds) * 1000).toInt();
       // DateTime nextReviewDate = DateTime.fromMillisecondsSinceEpoch(nextReviewDateMilliseconds, isUtc: true).toLocal();
