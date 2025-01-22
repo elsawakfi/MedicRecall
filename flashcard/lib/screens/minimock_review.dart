@@ -114,15 +114,32 @@ class MiniMock1ReviewState extends State<MiniMock1Review> {
           ],
         ),
       ),
-      bottomNavigationBar: Container(
+      bottomNavigationBar: Align(
+        alignment: Alignment.bottomRight,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
           child: ElevatedButton(
-            onPressed:() {Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => const MiniMockExam1(),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const MiniMockExam1(),
                 ),
               );
             },
-          child: const Text('Next')),
+            child: const Text('Next'),
+          ),
+        ))
 
-    ));
+      // bottomNavigationBar: Container(
+          // child: ElevatedButton(
+          //   onPressed:() {Navigator.of(context).push(MaterialPageRoute(
+          //                   builder: (context) => const MiniMockExam1(),
+          //       ),
+          //     );
+          //   },
+          // child: const Text('Next')),
+
+    // )
+    );
   }
 }
