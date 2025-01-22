@@ -14,8 +14,7 @@ class StudySessionManager {
   final FirebaseAuth auth = FirebaseAuth.instance;
   late User user;
 
-  late CollectionReference _eventsCollectionRef;
-  
+  late CollectionReference _eventsCollectionRef;  
   Future<List<Timestamp>?> getTimestamps(String userId) async {
     try {
       DocumentSnapshot userDoc = await _userCollectionRef.doc(userId).get();
@@ -90,6 +89,25 @@ class StudySessionManager {
       generatedEvents[today]!.add(Event(title: "First Mini Mock"));
 
       
+    }
+
+    if (selectedResources.contains('Official paper')) {
+      DateTime now = DateTime.now();
+      int selectedRepetition = 3;
+
+      // get the days until the test + intervals 
+      List<int> intervals = [];
+      for (int i = 0; i < selectedRepetition; i++) {
+        intervals.add((daysUntilTest * i / selectedRepetition).round());
+      }
+
+      for (int interval in intervals) {
+        DateTime officialPaperDate = DateTime(now.year, now.month, now.day + interval, 0, 0, 0, 0);
+        if (generatedEvents[officialPaperDate] == null) {
+          generatedEvents[officialPaperDate] = [];
+        }
+        generatedEvents[officialPaperDate]!.add(Event(title: "Official Paper"));
+      }
     }
 
     if (selectedResources.contains("Flashcards")){

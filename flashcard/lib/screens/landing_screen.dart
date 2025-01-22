@@ -786,44 +786,6 @@ class LandingState extends State<Landing> {
                         ),
                       );
                     }).toList(),
-                    // Client mentioned to remove this part
-                    /*Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 5.0),
-                      child: RadioListTile<bool>(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15.0),
-                        ),
-                        tileColor: const Color.fromRGBO(21, 58, 103, 1),
-                        title: TextField(
-                          controller: customAmountController,
-                          decoration: InputDecoration(
-                            hintText: 'Enter the number of repetitions',
-                            hintStyle: const TextStyle(
-                              color: Colors.white70,
-                            ),
-                            border: InputBorder.none,
-                          ),
-                          keyboardType: TextInputType.number,
-                          onTap: () {
-                            setState(() {
-                              isCustomAmount = true;
-                              selectedRepetition = null;
-                            });
-                          },
-                          style: const TextStyle(
-                            color: Colors.white,
-                          ),
-                        ),
-                        value: true,
-                        groupValue: isCustomAmount,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            isCustomAmount = true;
-                            selectedRepetition = null;
-                          });
-                        },
-                      ),
-                    ),*/
                   ],
                 ),
               ),
