@@ -121,7 +121,7 @@ class MiniMock1ReviewState extends State<MiniMock1Review> {
                 ),
               );
             },
-          child: const Text('Next')),
+          child: const Text('Complete Exam')),
 
     ));
   }
