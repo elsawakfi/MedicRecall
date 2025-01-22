@@ -11,7 +11,7 @@ class MiniMock1Review extends StatefulWidget {
 }
 
 class MiniMock1ReviewState extends State<MiniMock1Review> {
-  List<bool> _isOpen = [];
+  List<bool> _isOpen = [false];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -115,10 +115,43 @@ class MiniMock1ReviewState extends State<MiniMock1Review> {
             ExpansionPanelList(
               expansionCallback: (i, isOpen){
               setState(() {
-                _isOpen[i] = !isOpen;
+                _isOpen[i] = isOpen;
               });},
               children: [
-                ExpansionPanel(headerBuilder: , body: body)
+                ExpansionPanel(headerBuilder: (context, isOpen){
+                  return Row(
+                    children: [
+                      Icon(Icons.add,
+                      color: Colors.black,),
+                      Text('Multiple Choice Questions (Question 1 -20)')]);
+                }, body: GridView.count(
+                crossAxisCount: 5,
+                crossAxisSpacing: 4.0,
+                mainAxisSpacing: 1.0,
+                physics: NeverScrollableScrollPhysics(),
+                children: List.generate(10, (index) {
+                  return Center(
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const MiniMockExam1(),
+                          ),
+                        );
+                      },
+                      label: Text(
+                        'Question ${index + 1}',
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+              ),
+              isExpanded: _isOpen[0],
+            ), 
               ],
             )
           ],
