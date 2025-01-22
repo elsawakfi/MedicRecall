@@ -194,9 +194,8 @@ class HomePageState extends State<HomePage> {
       loading = false;
       testDay = querySnapshot.docs.last['TestDay'].toDate();
     });
-    print("TEST DAY: ");
-    print(testDay);
-    print("\n");
+
+    //This is how we sync the calendar screen and the flashcard tutor screen over these events
     events = await studySessionManager.generateStudySessions(user);
     
   }
@@ -271,8 +270,8 @@ class HomePageState extends State<HomePage> {
         topicCount![i]=dateToColourMap.length-1;
       }
 
-      int nextReviewDateMilliseconds = (((dateToColourMap[topicCount![i]]! * 24 * 60 * 60) + topicLastSeen![i].seconds) * 1000).toInt();
-      DateTime nextReviewDate = DateTime.fromMillisecondsSinceEpoch(nextReviewDateMilliseconds, isUtc: true).toLocal();
+      //int nextReviewDateMilliseconds = (((dateToColourMap[topicCount![i]]! * 24 * 60 * 60) + topicLastSeen![i].seconds) * 1000).toInt();
+      //DateTime nextReviewDate = DateTime.fromMillisecondsSinceEpoch(nextReviewDateMilliseconds, isUtc: true).toLocal();
       DateTime now = DateTime.now();
       String formattedDate = DateFormat('dd/MM/yyy').format(DateTime.now());
       int increment = 0; 
@@ -281,14 +280,21 @@ class HomePageState extends State<HomePage> {
       increment++;
       targetDate = DateTime(now.year, now.month, now.day+increment, 0, 0, 0, 0);
       List<Event>? eventsForDate = events[targetDate];
-      int index = 0; 
+      //int index = 0; 
       if (eventsForDate != null) {
         for (Event event in eventsForDate) {
          if (event.toString().contains(map["topic"])){
           formattedDate = DateFormat('dd/MM/yyy').format(targetDate);
          
           if ( text != "0" ){
-            topicColour = Colors.green;
+            int shade = (int.parse(text) ~/ (totalCards[map["topic"]]?? 1))*100;
+            if (shade < 60){
+              topicColour = Colors.lightGreen;
+            }
+            else{
+              topicColour = Colors.green;
+            }
+
             targetDate = testDay;
             break;
           }else{
@@ -297,7 +303,7 @@ class HomePageState extends State<HomePage> {
             break;
           }
          } 
-         index++;  
+         //index++;  
          //Need to implement red 
         //  if (index == eventsForDate.length ){
         //     topicColour = Colors.red;
