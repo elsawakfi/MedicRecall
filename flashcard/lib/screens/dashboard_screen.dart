@@ -270,14 +270,16 @@ class HomePageState extends State<HomePage> {
       if (topicCount![i]>(dateToColourMap.length-1)){
         topicCount![i]=dateToColourMap.length-1;
       }
-      //Does this help
-
       // int nextReviewDateMilliseconds = (((dateToColourMap[topicCount![i]]! * 24 * 60 * 60) + topicLastSeen![i].seconds) * 1000).toInt();
       // DateTime nextReviewDate = DateTime.fromMillisecondsSinceEpoch(nextReviewDateMilliseconds, isUtc: true).toLocal();
       DateTime now = DateTime.now();
       String formattedDate = DateFormat('dd/MM/yyy').format(DateTime.now());
       int increment = 0; 
       DateTime targetDate = DateTime(now.year, now.month, now.day, 0, 0, 0, 0);
+      //  DateTime condition = DateTime(now.year, now.month, now.day+30, 0, 0, 0, 0);
+       //Have to zero out time of dates so that we can compare them
+      //  Timestamp lastSeen = topicLastSeen![i];
+      //  DateTime dateSeen = DateTime(lastSeen.toDate().year,lastSeen.toDate().month,lastSeen.toDate().day,0,0,0,0);
       while (targetDate.isBefore(testDay)){
       increment++;
       targetDate = DateTime(now.year, now.month, now.day+increment, 0, 0, 0, 0);
@@ -286,15 +288,22 @@ class HomePageState extends State<HomePage> {
         for (Event event in eventsForDate) {
          if (event.toString().contains(map["topic"])){
           formattedDate = DateFormat('dd/MM/yyy').format(targetDate);
-          topicColour = Colors.green;
-           break;
+         
+          if ( text != "0" ){
+            topicColour = Colors.green;
+            targetDate = testDay;
+            break;
+          }else{
+            topicColour = Colors.grey;
+            targetDate = testDay;
+            break;
+          }
          } 
          
       }
 }     else { 
-          
-          // topicColour = Colors.grey;
-          // formattedDate = "N/A";
+          topicColour = Colors.grey;
+          formattedDate = "N/A";
 }
   
 }
