@@ -270,20 +270,18 @@ class HomePageState extends State<HomePage> {
       if (topicCount![i]>(dateToColourMap.length-1)){
         topicCount![i]=dateToColourMap.length-1;
       }
-      // int nextReviewDateMilliseconds = (((dateToColourMap[topicCount![i]]! * 24 * 60 * 60) + topicLastSeen![i].seconds) * 1000).toInt();
-      // DateTime nextReviewDate = DateTime.fromMillisecondsSinceEpoch(nextReviewDateMilliseconds, isUtc: true).toLocal();
+
+      int nextReviewDateMilliseconds = (((dateToColourMap[topicCount![i]]! * 24 * 60 * 60) + topicLastSeen![i].seconds) * 1000).toInt();
+      DateTime nextReviewDate = DateTime.fromMillisecondsSinceEpoch(nextReviewDateMilliseconds, isUtc: true).toLocal();
       DateTime now = DateTime.now();
       String formattedDate = DateFormat('dd/MM/yyy').format(DateTime.now());
       int increment = 0; 
       DateTime targetDate = DateTime(now.year, now.month, now.day, 0, 0, 0, 0);
-      //  DateTime condition = DateTime(now.year, now.month, now.day+30, 0, 0, 0, 0);
-       //Have to zero out time of dates so that we can compare them
-      //  Timestamp lastSeen = topicLastSeen![i];
-      //  DateTime dateSeen = DateTime(lastSeen.toDate().year,lastSeen.toDate().month,lastSeen.toDate().day,0,0,0,0);
       while (targetDate.isBefore(testDay)){
       increment++;
       targetDate = DateTime(now.year, now.month, now.day+increment, 0, 0, 0, 0);
       List<Event>? eventsForDate = events[targetDate];
+      int index = 0; 
       if (eventsForDate != null) {
         for (Event event in eventsForDate) {
          if (event.toString().contains(map["topic"])){
@@ -299,7 +297,14 @@ class HomePageState extends State<HomePage> {
             break;
           }
          } 
-         
+         index++;  
+         //Need to implement red 
+        //  if (index == eventsForDate.length ){
+        //     topicColour = Colors.red;
+        //     formattedDate = DateFormat('dd/MM/yyy').format(nextReviewDate);
+        //     targetDate = testDay;
+        //     break;
+        //  }  
       }
 }     else { 
           topicColour = Colors.grey;
@@ -307,18 +312,6 @@ class HomePageState extends State<HomePage> {
 }
   
 }
-        
-      // Section is grey if it hasn't been seen at all, Green if next review date isn't gone past and Red if next review date has none past
-      // if (dateToColourMap[topicCount![i]]! > howLongAgoRevisedDays) {
-      //   topicColour = Colors.green;
-      // } else {
-      //   topicColour = Colors.red;
-      // }
-      // if (topicCount![i] == 0) {
-      //   topicColour = Colors.grey;
-      //   // formattedDate = "N/A";
-      // }
-
       value.add(
           ExpansionTile(
           trailing: Text(
