@@ -11,7 +11,7 @@ class MiniMock1Review extends StatefulWidget {
 }
 
 class MiniMock1ReviewState extends State<MiniMock1Review> {
-  List<bool> _isOpen = [false];
+  List<bool> _isOpen = [false, false];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -113,48 +113,43 @@ class MiniMock1ReviewState extends State<MiniMock1Review> {
               ),
             ),**/
             ExpansionPanelList(
-              expansionCallback: (i, isOpen){
-              setState(() {
-                _isOpen[i] = isOpen;
-              });},
-              children: [
-                ExpansionPanel(headerBuilder: (context, isOpen){
-                  return Row(
-                    children: [
-                      Icon(Icons.add,
-                      color: Colors.black,),
-                      Text('Multiple Choice Questions (Question 1 -20)')]);
-                }, body: GridView.count(
-                crossAxisCount: 5,
-                crossAxisSpacing: 4.0,
-                mainAxisSpacing: 1.0,
-                physics: NeverScrollableScrollPhysics(),
-                children: List.generate(10, (index) {
-                  return Center(
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const MiniMockExam1(),
-                          ),
-                        );
-                      },
-                      label: Text(
-                        'Question ${index + 1}',
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 20,
-                        ),
-                      ),
-                    ),
-                  );
-                }),
-              ),
-              isExpanded: _isOpen[0],
-            ), 
-              ],
-            )
-          ],
+  expansionCallback: (i, isOpen) {
+    setState(() {
+      _isOpen[i] = !_isOpen[i];
+    });
+  },
+  children: [
+    ExpansionPanel(
+      canTapOnHeader: true,
+      headerBuilder: (context, isOpen) {
+        return Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text('Multiple Choice Questions (Question 1 - 20)'),
+        );
+      },
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Text('Content for multiple choice questions.'),
+      ),
+      isExpanded: _isOpen[0],
+    ),
+    ExpansionPanel(
+      canTapOnHeader: true,
+      headerBuilder: (context, isOpen) {
+        return Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text('Ranking Questions (Question 21 - 50)'),
+        );
+      },
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Text('Content for ranking questions.'),
+      ),
+      isExpanded: _isOpen[1],
+    ),
+  ],
+)
+],
         ),
       ),
       bottomNavigationBar: Container(
