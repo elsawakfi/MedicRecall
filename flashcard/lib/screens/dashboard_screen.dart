@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
+import 'package:flashcard_x/screens/study_session_manager.dart';
 import 'package:flashcard_x/widgets/drawer_widget.dart';
+import 'package:flashcard_x/widgets/event.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/screens/feed_screen.dart';
 import 'package:flashcard_x/screens/button_screen.dart';
@@ -33,6 +35,9 @@ class HomePageState extends State<HomePage> {
   Map<String, bool> checked = {};
   Map<String, int> seenCards = {};
   Map<String, int> totalCards = {};
+  late DateTime testDay; 
+  StudySessionManager studySessionManager = StudySessionManager();
+  Map<DateTime, List<Event>> events =  {};
 
   double spacing = 16;
 
@@ -187,7 +192,13 @@ class HomePageState extends State<HomePage> {
       topicCount = querySnapshot.docs.last["topicCount"];
       topicLastSeen = querySnapshot.docs.last["topicLastSeen"];
       loading = false;
+      testDay = querySnapshot.docs.last['TestDay'].toDate();
     });
+    print("TEST DAY: ");
+    print(testDay);
+    print("\n");
+    events = await studySessionManager.generateStudySessions(user);
+    
   }
 
   Future<void> getStats() async {
@@ -260,20 +271,43 @@ class HomePageState extends State<HomePage> {
         topicCount![i]=dateToColourMap.length-1;
       }
 
-      int nextReviewDateMilliseconds = (((dateToColourMap[topicCount![i]]! * 24 * 60 * 60) + topicLastSeen![i].seconds) * 1000).toInt();
-      DateTime nextReviewDate = DateTime.fromMillisecondsSinceEpoch(nextReviewDateMilliseconds, isUtc: true).toLocal();
-      String formattedDate = DateFormat('dd/MM/yyy').format(nextReviewDate);
-
+      // int nextReviewDateMilliseconds = (((dateToColourMap[topicCount![i]]! * 24 * 60 * 60) + topicLastSeen![i].seconds) * 1000).toInt();
+      // DateTime nextReviewDate = DateTime.fromMillisecondsSinceEpoch(nextReviewDateMilliseconds, isUtc: true).toLocal();
+      DateTime now = DateTime.now();
+      String formattedDate = DateFormat('dd/MM/yyy').format(DateTime.now());
+      int increment = 0; 
+      DateTime targetDate = DateTime(now.year, now.month, now.day, 0, 0, 0, 0);
+      while (targetDate.isBefore(testDay)){
+      increment++;
+      targetDate = DateTime(now.year, now.month, now.day+increment, 0, 0, 0, 0);
+      List<Event>? eventsForDate = events[targetDate];
+      if (eventsForDate != null) {
+        for (Event event in eventsForDate) {
+         if (event.toString().contains(map["topic"])){
+          formattedDate = DateFormat('dd/MM/yyy').format(targetDate);
+          topicColour = Colors.green;
+           break;
+         } 
+         
+      }
+}     else { 
+          
+          // topicColour = Colors.grey;
+          // formattedDate = "N/A";
+}
+  
+}
+        
       // Section is grey if it hasn't been seen at all, Green if next review date isn't gone past and Red if next review date has none past
-      if (dateToColourMap[topicCount![i]]! > howLongAgoRevisedDays) {
-        topicColour = Colors.green;
-      } else {
-        topicColour = Colors.red;
-      }
-      if (topicCount![i] == 0) {
-        topicColour = Colors.grey;
-        formattedDate = "N/A";
-      }
+      // if (dateToColourMap[topicCount![i]]! > howLongAgoRevisedDays) {
+      //   topicColour = Colors.green;
+      // } else {
+      //   topicColour = Colors.red;
+      // }
+      // if (topicCount![i] == 0) {
+      //   topicColour = Colors.grey;
+      //   // formattedDate = "N/A";
+      // }
 
       value.add(
           ExpansionTile(
