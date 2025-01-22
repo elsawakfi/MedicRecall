@@ -270,8 +270,7 @@ class HomePageState extends State<HomePage> {
         topicCount![i]=dateToColourMap.length-1;
       }
 
-      //int nextReviewDateMilliseconds = (((dateToColourMap[topicCount![i]]! * 24 * 60 * 60) + topicLastSeen![i].seconds) * 1000).toInt();
-      //DateTime nextReviewDate = DateTime.fromMillisecondsSinceEpoch(nextReviewDateMilliseconds, isUtc: true).toLocal();
+      
       DateTime now = DateTime.now();
       String formattedDate = DateFormat('dd/MM/yyy').format(DateTime.now());
       int increment = 0; 
@@ -287,13 +286,13 @@ class HomePageState extends State<HomePage> {
           formattedDate = DateFormat('dd/MM/yyy').format(targetDate);
          
           if ( text != "0" ){
-            int shade = (int.parse(text) ~/ (totalCards[map["topic"]]?? 1))*100;
-            if (shade < 60){
-              topicColour = Colors.lightGreen;
-            }
-            else{
+            // int shade = (int.parse(text) ~/ (totalCards[map["topic"]]?? 1))*100;
+            // if (shade < 60){
+            //   topicColour = Colors.yellow;
+            // }
+            // else{
               topicColour = Colors.green;
-            }
+            //}
 
             targetDate = testDay;
             break;
@@ -303,21 +302,24 @@ class HomePageState extends State<HomePage> {
             break;
           }
          } 
-         //index++;  
-         //Need to implement red 
-        //  if (index == eventsForDate.length ){
-        //     topicColour = Colors.red;
-        //     formattedDate = DateFormat('dd/MM/yyy').format(nextReviewDate);
-        //     targetDate = testDay;
-        //     break;
-        //  }  
       }
 }     else { 
-          topicColour = Colors.grey;
+          if (text!='0'){
+            topicColour = Colors.green;}
+          else{
+           topicColour = Colors.grey;
+          }    
           formattedDate = "N/A";
 }
   
 }
+
+    int nextReviewDateMilliseconds = (((dateToColourMap[topicCount![i]]! * 24 * 60 * 60) + topicLastSeen![i].seconds) * 1000).toInt();
+    DateTime nextReviewDate = DateTime.fromMillisecondsSinceEpoch(nextReviewDateMilliseconds, isUtc: true).toLocal();
+      if (dateToColourMap[topicCount![i]]! < howLongAgoRevisedDays) {
+        topicColour = Colors.red;
+        formattedDate = DateFormat('dd/MM/yyy').format(nextReviewDate);
+      }
       value.add(
           ExpansionTile(
           trailing: Text(
