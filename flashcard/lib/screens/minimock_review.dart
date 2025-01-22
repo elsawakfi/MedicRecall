@@ -11,6 +11,7 @@ class MiniMock1Review extends StatefulWidget {
 }
 
 class MiniMock1ReviewState extends State<MiniMock1Review> {
+  List<bool> _isOpen = [];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,7 +58,7 @@ class MiniMock1ReviewState extends State<MiniMock1Review> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
+            /**Expanded(
               child: GridView.count(
                 crossAxisCount: 5,
                 crossAxisSpacing: 4.0,
@@ -110,7 +111,16 @@ class MiniMock1ReviewState extends State<MiniMock1Review> {
                   );
                 }),
               ),
-            ),
+            ),**/
+            ExpansionPanelList(
+              expansionCallback: (i, isOpen){
+              setState(() {
+                _isOpen[i] = !isOpen;
+              });},
+              children: [
+                ExpansionPanel(headerBuilder: , body: body)
+              ],
+            )
           ],
         ),
       ),
