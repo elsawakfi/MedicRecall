@@ -533,9 +533,13 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       ),
       child: FloatingActionButton.extended(
         label: Text(
-          _examDate != null
-              ? '${_calculateDaysUntilExam(_examDate!)} Days to Your Exam'
-              : 'Set Your Exam Date',
+          _examDate == null
+              ? 'Set Your Exam Date'
+              : _calculateDaysUntilExam(_examDate!) < 0
+               ? 'Exam has already passed'
+               : _calculateDaysUntilExam(_examDate!) == 0
+                  ? "Exam is Today"
+                  : '${_calculateDaysUntilExam(_examDate!)} Days to Your Exam',
           style: const TextStyle(
             color: Color.fromARGB(255, 98, 86, 139),
             fontSize: 14,
