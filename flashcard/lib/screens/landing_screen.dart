@@ -722,8 +722,6 @@ class LandingState extends State<Landing> {
   void _showRepetitionDialog(BuildContext context) {
     final List<int> repetitionOptions = [2, 3, 4, 5, 6];
     int? selectedRepetition;
-    bool isCustomAmount = false;
-    TextEditingController customAmountController = TextEditingController();
 
     showDialog(
       context: context,
@@ -780,12 +778,11 @@ class LandingState extends State<Landing> {
                           onChanged: (int? newValue) {
                             setState(() {
                               selectedRepetition = newValue;
-                              isCustomAmount = false;
                             });
                           },
                         ),
                       );
-                    }).toList(),
+                    }),
                   ],
                 ),
               ),
@@ -801,24 +798,27 @@ class LandingState extends State<Landing> {
                       child: const Text('Previous'),
                     ),
                     TextButton(
-                      onPressed: () {
-                        if (selectedRepetition != null ||
-                            (isCustomAmount &&
-                                customAmountController.text.isNotEmpty &&
-                                int.tryParse(customAmountController.text) !=
-                                    null)) {
+                      onPressed: () async {
+                        if (selectedRepetition != null) {
+                          // Save selectedRepetition to the database
+                          // code taken from below resources option dialog
+                          QuerySnapshot u = await _userCollectionRef
+                              .where("userID", isEqualTo: user?.uid)
+                              .get();
+
+                          var id = u.docs.last.id;
+                          // updates the selectedRepetition field in the user's document
+                          await _userCollectionRef.doc(id).update({
+                          'selectedRepetition': selectedRepetition,
+                          });
+
                           Navigator.of(context).pop();
                           _showOptionsDialog(
                               context); // Proceed to the next dialog
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text(
-                                isCustomAmount &&
-                                        customAmountController.text.isEmpty
-                                    ? 'Enter number of repetitions'
-                                    : 'Please select number of repetitions',
-                              ),
+                              content: Text('Please enter number of repetitions'),
                             ),
                           );
                         }

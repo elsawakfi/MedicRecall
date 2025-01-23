@@ -93,7 +93,8 @@ class StudySessionManager {
 
     if (selectedResources.contains('Official paper')) {
       DateTime now = DateTime.now();
-      int repetitions = querySnapshot.docs.last['SelectedRepetition'];
+      // int repetitions = 3;
+      int repetitions = querySnapshot.docs.last['selectedRepetition'];
 
       // get the days until the test + intervals 
       List<int> intervals = [];
