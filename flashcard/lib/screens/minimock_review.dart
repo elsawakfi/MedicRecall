@@ -1,3 +1,4 @@
+import 'package:flashcard_x/screens/minimock_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/drawer_widget.dart';
 import 'package:flashcard_x/screens/minimock_exam1.dart';
@@ -100,11 +101,20 @@ Widget build(BuildContext context) {
                   ],
                 ),
               ],
-            ),
+            ),   
         ],
       ),
     ),
-    bottomNavigationBar: Container(
+    floatingActionButton: FloatingActionButton.extended(onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const MiniMockFeedBack(),
+          ),
+        );
+      }, label: Text('Complete Exam',  style: TextStyle(color: Colors.white, fontSize: 16))),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+    /**bottomNavigationBar: Container(
       margin: const EdgeInsets.symmetric(horizontal: 650.0, vertical: 10.0),
       child: ElevatedButton(
         onPressed: () {
@@ -117,7 +127,8 @@ Widget build(BuildContext context) {
         
         child: const Text('Complete Exam'),
       ),
-    ),
+    ),**/
+    
   );
 }
 }
