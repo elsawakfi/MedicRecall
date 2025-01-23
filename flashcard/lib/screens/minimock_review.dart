@@ -64,29 +64,36 @@ Widget build(BuildContext context) {
                 children: [
                     ExpansionPanel(
                       canTapOnHeader: true,
+                      backgroundColor: Colors.white,
                       headerBuilder: (context, isOpen) {
                         return Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: Text('Multiple Choice Questions (Question 1 - 20)'),
+                          child: Text('Multiple Choice Questions (Question 1 - 20)',
+                          style: TextStyle(color: Colors.black)),
                         );
                       },
                       body: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text('Content for multiple choice questions.'),
+                        child: Text('Content for multiple choice questions.',
+                        style: TextStyle(color: Colors.black)),
                       ),
                       isExpanded: _isOpen[0],
                     ),
                     ExpansionPanel(
                       canTapOnHeader: true,
+                      backgroundColor: Colors.white,
                       headerBuilder: (context, isOpen) {
                         return Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: Text('Ranking Questions (Question 21 - 50)'),
+                          child: Text('Ranking Questions (Question 21 - 50)',
+                          style: TextStyle(color: Colors.black)),
+                          
                         );
                       },
                       body: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text('Content for ranking questions.'),
+                        child: Text('Content for ranking questions.',
+                        style: TextStyle(color: Colors.black)),
                       ),
                       isExpanded: _isOpen[1],
                     ),
@@ -98,6 +105,7 @@ Widget build(BuildContext context) {
       ),
     ),
     bottomNavigationBar: Container(
+      margin: const EdgeInsets.symmetric(horizontal: 650.0, vertical: 10.0),
       child: ElevatedButton(
         onPressed: () {
           Navigator.of(context).push(
@@ -106,6 +114,7 @@ Widget build(BuildContext context) {
             ),
           );
         },
+        
         child: const Text('Complete Exam'),
       ),
     ),
