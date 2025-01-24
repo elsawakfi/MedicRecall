@@ -105,14 +105,18 @@ Widget build(BuildContext context) {
         ],
       ),
     ),
-    floatingActionButton: FloatingActionButton.extended(onPressed: () {
+    floatingActionButton:SizedBox(
+      height: 50,
+      width: 200,
+      child: 
+        FloatingActionButton.extended(onPressed: () {
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => const MiniMockFeedBack(),
           ),
         );
-      }, label: Text('Complete Exam',  style: TextStyle(color: Colors.white, fontSize: 16))),
+      }, label: Text('Complete Exam',  style: TextStyle(color: Colors.white, fontSize: 16)))),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     /**bottomNavigationBar: Container(
       margin: const EdgeInsets.symmetric(horizontal: 650.0, vertical: 10.0),
