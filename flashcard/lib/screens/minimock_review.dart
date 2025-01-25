@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/drawer_widget.dart';
-import 'package:flashcard_x/screens/minimock_exam1.dart';
 
 
 class MiniMock1Review extends StatefulWidget {
@@ -66,11 +65,11 @@ class MiniMock1ReviewState extends State<MiniMock1Review> {
                   return Center(
                     child: ElevatedButton.icon(
                       onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const MiniMockExam1(),
-                          ),
-                        );
+                        // Navigator.of(context).push(
+                        //   MaterialPageRoute(
+                        //     builder: (context) => const MiniMockExam1(),
+                        //   ),
+                        // );
                       },
                       label: Text(
                         'Question ${index + 1}',
@@ -93,11 +92,11 @@ class MiniMock1ReviewState extends State<MiniMock1Review> {
                   return Center(
                     child: ElevatedButton.icon(
                       onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const MiniMockExam1(),
-                          ),
-                        );
+                        // Navigator.of(context).push(
+                        //   MaterialPageRoute(
+                        //     builder: (context) => const MiniMockExam1(),
+                        //   ),
+                        // );
                       },
                       label: Text(
                         'Question ${index + 1}',
@@ -120,11 +119,11 @@ class MiniMock1ReviewState extends State<MiniMock1Review> {
           padding: const EdgeInsets.all(16.0),
           child: ElevatedButton(
             onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const MiniMockExam1(),
-                ),
-              );
+              // Navigator.of(context).push(
+              //   MaterialPageRoute(
+              //     builder: (context) => const MiniMockExam1(),
+              //   ),
+              // );
             },
             child: const Text('Next'),
           ),

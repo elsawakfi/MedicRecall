@@ -65,7 +65,9 @@ class StudySessionManager {
         .where("userID", isEqualTo: user.uid)
         .get();
     var userId = querySnapshot.docs.last.id;
-    //var databaseFlashcards = await Algo().getFlashcards(user.uid); 
+    //var databaseFlashcards = await Algo().getFlashcards(user.uid);
+    final data = querySnapshot.docs.last.data() as Map<String, dynamic>; // Turn snapshot into a data type that can be searched to see if testDay exists
+    if (!data.containsKey('TestDay')) return generatedEvents;
     DateTime testDay = querySnapshot.docs.last['TestDay'].toDate();
     // Get topics and related data from the database or pass them as arguments
     List<String>? selectedResources = await getSelectedResources(userId);

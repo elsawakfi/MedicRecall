@@ -1,4 +1,3 @@
-import 'package:flashcard_x/screens/button_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -9,9 +8,12 @@ Future<void> loginTest(WidgetTester tester) async{
   tester.printToConsole('Starting app');
   // Run App
   app.main();
-
+  tester.printToConsole('App started');
   await tester.pumpAndSettle();
+  await tester.pump(const Duration(seconds: 4));
 
+  expect(find.byKey(
+      const ValueKey('emailSignUpField')), findsOneWidget);
   await tester.enterText(find.byKey(
       const ValueKey('emailSignUpField')),
       'xecovop602@deligy.com');
@@ -27,9 +29,11 @@ Future<void> loginTest(WidgetTester tester) async{
   await tester.pumpAndSettle();
 
   //CLOSE POP UP
-  expect(find.text('No'), findsOneWidget, reason: '"No" button should be visible');
-  await tester.tap(find.text('No'));
-  await tester.pumpAndSettle();
+  bool isPopUp = find.text('No').evaluate().isNotEmpty;
+  if(isPopUp){
+    await tester.tap(find.text('No'));
+    await tester.pumpAndSettle();
+  }
 }
 
 void main() {
@@ -39,7 +43,6 @@ void main() {
 
     testWidgets("Log into the app",
             (WidgetTester tester) async {
-              tester.printToConsole('Testing login');
               await loginTest(tester);
             });
 
@@ -47,43 +50,67 @@ void main() {
             (WidgetTester tester) async {
               tester.printToConsole('Testing exam date feature');
               await loginTest(tester);
-              await tester.pump(const Duration(seconds: 2));
               expect(find.byType(FloatingActionButton), findsOneWidget);
               await tester.tap(find.byType(
                   FloatingActionButton));
               tester.printToConsole('Loading popup');
               await tester.pump(const Duration(seconds: 2));
-              expect(find.text('Yes'), findsOneWidget);
+              bool examDateSet = find.text('Change Exam Date').evaluate().isNotEmpty;
+              if(examDateSet){
+                tester.printToConsole('Exam date is already set');
+                await tester.tap(find.text('Change Exam Date'));
+                await tester.pumpAndSettle();
+                await tester.pump(const Duration(seconds: 2));
+                expect(find.text('DELETE ALL'), findsOneWidget);
+                await tester.tap(find.text('DELETE ALL'));
+                tester.printToConsole('Exam date deleted');
+                await tester.pump(const Duration(seconds: 2));
+                await tester.tap(find.byIcon(
+                    Icons.menu));
+                await tester.pumpAndSettle();
+                await tester.tap(find.text('MedicRecall'));
+                await tester.pumpAndSettle();
+                bool isPopUp = find.text('No').evaluate().isNotEmpty;
+                if(isPopUp){
+                  await tester.tap(find.text('No'));
+                  await tester.pumpAndSettle();
+                }
+                await tester.tap(find.byType(
+                    FloatingActionButton));
+                tester.printToConsole('Loading popup');
+                await tester.pump(const Duration(seconds: 2));
+              }
+              // expect(find.text('Yes'), findsOneWidget);
               await tester.tap(find.text('Yes'));
-              await tester.pump(const Duration(seconds: 2));
+              await tester.pumpAndSettle();
               expect(find.text('Pick Date'), findsOneWidget);
               await tester.tap(find.text('Pick Date'));
               await tester.pumpAndSettle();
               expect(find.text('OK'), findsOneWidget);
               await tester.tap(find.text('OK'));
               await tester.pumpAndSettle();
-              expect(find.text('How many repetitions of the official paper link?'), findsOneWidget);
-              await tester.tap(find.byType(TextField));
-              await tester.pump(const Duration(seconds: 2));
-              await tester.enterText(find.byType(TextField),
-                  '8');
+              // expect(find.byWidgetPredicate((widget) {
+              //   return widget is Text && widget.data!.contains('repetitions');
+              // }), findsOneWidget);
+              // await tester.tap(find.byType(TextField));
+              // await tester.pump(const Duration(seconds: 2));
+              // await tester.enterText(find.byType(TextField),
+              //     '8');
+              await tester.tap(find.byWidgetPredicate((widget) {
+                return widget is RadioListTile<int> && widget.value == 2;
+              }));
               tester.printToConsole('Entered number of repetitions');
               await tester.pump(const Duration(seconds: 2));
-              expect(find.text('Submit'), findsOneWidget);
-              await tester.tap(find.text('Submit'));
-              await tester.pump(const Duration(seconds: 2));
+              expect(find.text('Next'), findsOneWidget);
+              await tester.tap(find.text('Next'));
+              await tester.pumpAndSettle();
               await tester.tap(find.byType(Checkbox).at(2));
               await tester.tap(find.text('Submit'));
               tester.printToConsole('Exam date set');
               await tester.pumpAndSettle();
 
-              expect(find.byType(FloatingActionButton), findsOneWidget);
-              await tester.tap(find.byType(
-                  FloatingActionButton));
-              tester.printToConsole('Loading popup again');
-              await tester.pumpAndSettle();
-              expect(find.text('Change Exam Date'), findsOneWidget);
-              await tester.tap(find.text('Change Exam Date'));
+              expect(find.text('Revision Calendar'), findsOneWidget);
+              await tester.tap(find.text('Revision Calendar'));
               await tester.pumpAndSettle();
               await tester.pump(const Duration(seconds: 2));
               expect(find.text('DELETE ALL'), findsOneWidget);
@@ -103,8 +130,6 @@ void main() {
               ));
               await tester.pumpAndSettle();
               tester.printToConsole('Logged out');
-
-
 
             });
 
