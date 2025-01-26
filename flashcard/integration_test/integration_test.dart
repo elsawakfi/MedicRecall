@@ -12,7 +12,7 @@ Future<void> loginTest(WidgetTester tester) async{
   await tester.pumpAndSettle();
 
   // Finding the email is really on and off for some reason
-  await tester.pump(const Duration(seconds: 20));
+  await tester.pump(const Duration(seconds: 10));
   var emailFinder = find.byKey(const ValueKey('emailSignUpField'));
   if(emailFinder.evaluate().isNotEmpty) tester.printToConsole('Found email field');
   else tester.printToConsole("No email field found");
@@ -40,8 +40,13 @@ Future<void> loginTest(WidgetTester tester) async{
 
 void main() {
 
+  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
+  tearDownAll(
+        () async {},
+  );
+
   group('Whole App Test:', () {
-    IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
     testWidgets("Log into the app",
             (WidgetTester tester) async {
