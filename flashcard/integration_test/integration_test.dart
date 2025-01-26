@@ -10,12 +10,14 @@ Future<void> loginTest(WidgetTester tester) async{
   app.main();
   tester.printToConsole('App started');
   await tester.pumpAndSettle();
-  await tester.pump(const Duration(seconds: 4));
 
-  expect(find.byKey(
-      const ValueKey('emailSignUpField')), findsOneWidget);
-  await tester.enterText(find.byKey(
-      const ValueKey('emailSignUpField')),
+  // Finding the email is really on and off for some reason
+  await tester.pump(const Duration(seconds: 20));
+  var emailFinder = find.byKey(const ValueKey('emailSignUpField'));
+  if(emailFinder.evaluate().isNotEmpty) tester.printToConsole('Found email field');
+  else tester.printToConsole("No email field found");
+  expect(emailFinder, findsOneWidget);
+  await tester.enterText(emailFinder,
       'xecovop602@deligy.com');
   tester.printToConsole('Entered email text');
 
@@ -43,7 +45,24 @@ void main() {
 
     testWidgets("Log into the app",
             (WidgetTester tester) async {
+              tester.printToConsole('Testing login');
               await loginTest(tester);
+              await tester.tap(find.byKey(const ValueKey('Flashcards')));
+              await tester.pumpAndSettle();
+
+              // Log out
+              await tester.tap(find.byIcon(
+                  Icons.menu));
+              await tester.pumpAndSettle();
+              expect(find.byKey(
+                  const ValueKey('Settings')), findsOneWidget);
+              tester.printToConsole('Menu opens');
+              await tester.tap(find.byKey(
+                const ValueKey('Log Out Button'),
+              ));
+              await tester.pumpAndSettle();
+              tester.printToConsole('Logged out');
+
             });
 
     testWidgets("Set Exam Date",
@@ -118,6 +137,7 @@ void main() {
               tester.printToConsole('Exam date deleted');
               await tester.pump(const Duration(seconds: 2));
 
+              // Log out
               await tester.tap(find.byIcon(
                   Icons.menu));
               await tester.pumpAndSettle();
@@ -130,6 +150,8 @@ void main() {
               ));
               await tester.pumpAndSettle();
               tester.printToConsole('Logged out');
+
+
 
             });
 
