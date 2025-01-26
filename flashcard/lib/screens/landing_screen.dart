@@ -723,8 +723,6 @@ class LandingState extends State<Landing> {
   void _showRepetitionDialog(BuildContext context) {
     final List<int> repetitionOptions = [2, 3, 4, 5, 6];
     int? selectedRepetition;
-    bool isCustomAmount = false;
-    TextEditingController customAmountController = TextEditingController();
 
     showDialog(
       context: context,
@@ -781,50 +779,11 @@ class LandingState extends State<Landing> {
                           onChanged: (int? newValue) {
                             setState(() {
                               selectedRepetition = newValue;
-                              isCustomAmount = false;
                             });
                           },
                         ),
                       );
-                    }).toList(),
-                    // Client mentioned to remove this part
-                    /*Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 5.0),
-                      child: RadioListTile<bool>(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15.0),
-                        ),
-                        tileColor: const Color.fromRGBO(21, 58, 103, 1),
-                        title: TextField(
-                          controller: customAmountController,
-                          decoration: InputDecoration(
-                            hintText: 'Enter the number of repetitions',
-                            hintStyle: const TextStyle(
-                              color: Colors.white70,
-                            ),
-                            border: InputBorder.none,
-                          ),
-                          keyboardType: TextInputType.number,
-                          onTap: () {
-                            setState(() {
-                              isCustomAmount = true;
-                              selectedRepetition = null;
-                            });
-                          },
-                          style: const TextStyle(
-                            color: Colors.white,
-                          ),
-                        ),
-                        value: true,
-                        groupValue: isCustomAmount,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            isCustomAmount = true;
-                            selectedRepetition = null;
-                          });
-                        },
-                      ),
-                    ),*/
+                    }),
                   ],
                 ),
               ),
@@ -840,24 +799,27 @@ class LandingState extends State<Landing> {
                       child: const Text('Previous'),
                     ),
                     TextButton(
-                      onPressed: () {
-                        if (selectedRepetition != null ||
-                            (isCustomAmount &&
-                                customAmountController.text.isNotEmpty &&
-                                int.tryParse(customAmountController.text) !=
-                                    null)) {
+                      onPressed: () async {
+                        if (selectedRepetition != null) {
+                          // Save selectedRepetition to the database
+                          // code taken from below resources option dialog
+                          QuerySnapshot u = await _userCollectionRef
+                              .where("userID", isEqualTo: user?.uid)
+                              .get();
+
+                          var id = u.docs.last.id;
+                          // updates the selectedRepetition field in the user's document
+                          await _userCollectionRef.doc(id).update({
+                          'selectedRepetition': selectedRepetition,
+                          });
+
                           Navigator.of(context).pop();
                           _showOptionsDialog(
                               context); // Proceed to the next dialog
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text(
-                                isCustomAmount &&
-                                        customAmountController.text.isEmpty
-                                    ? 'Enter number of repetitions'
-                                    : 'Please select number of repetitions',
-                              ),
+                              content: Text('Please enter number of repetitions'),
                             ),
                           );
                         }

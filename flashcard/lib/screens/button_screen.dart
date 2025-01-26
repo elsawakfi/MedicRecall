@@ -13,7 +13,6 @@ import 'package:flutter/material.dart';
 import 'package:flashcard_x/screens/dashboard_screen.dart';
 import 'package:table_calendar/table_calendar.dart';*/
 
-
 class CustomFloatingButton extends StatefulWidget {
   const CustomFloatingButton({super.key});
 
@@ -69,7 +68,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
 
   // Repurposed getter from calendar_screen.dart
   Future<void> getTestDay() async {
-    if (user != null){
+    if (user != null) {
       QuerySnapshot querySnapshot =
           await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
 
@@ -178,7 +177,6 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     });
 
                     if (context.mounted) {
-
                       Navigator.of(context).pop();
                       _showRepetitionDialog(context); // Proceed to next dialog
                     }
@@ -212,8 +210,6 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
   void _showRepetitionDialog(BuildContext context) {
     final List<int> repetitionOptions = [2, 3, 4, 5, 6];
     int? selectedRepetition;
-    bool isCustomAmount = false;
-    TextEditingController customAmountController = TextEditingController();
 
     showDialog(
       context: context,
@@ -270,50 +266,11 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                           onChanged: (int? newValue) {
                             setState(() {
                               selectedRepetition = newValue;
-                              isCustomAmount = false;
                             });
                           },
                         ),
                       );
                     }),
-                    /*Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 5.0),
-                      child: RadioListTile<bool>(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15.0),
-                        ),
-                        tileColor: const Color.fromRGBO(21, 58, 103, 1),
-                        title: TextField(
-                          controller: customAmountController,
-                          decoration: InputDecoration(
-                            hintText: 'Enter the number of repetitions',
-                            hintStyle: const TextStyle(
-                              color: Colors.white70,
-                            ),
-                            border: InputBorder.none,
-                          ),
-                          keyboardType: TextInputType.number,
-                          onTap: () {
-                            setState(() {
-                              isCustomAmount = true;
-                              selectedRepetition = null;
-                            });
-                          },
-                          style: const TextStyle(
-                            color: Colors.white,
-                          ),
-                        ),
-                        value: true,
-                        groupValue: isCustomAmount,
-                        onChanged: (bool? value) {
-                          setState(() {
-                            isCustomAmount = true;
-                            selectedRepetition = null;
-                          });
-                        },
-                      ),
-
-                    ),*/
                   ],
                 ),
               ),
@@ -329,24 +286,27 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                       child: const Text('Previous'),
                     ),
                     TextButton(
-                      onPressed: () {
-                        if (selectedRepetition != null ||
-                            (isCustomAmount &&
-                                customAmountController.text.isNotEmpty &&
-                                int.tryParse(customAmountController.text) !=
-                                    null)) {
+                      onPressed: () async {
+                        if (selectedRepetition != null) {
+                          // Save selectedRepetition to the database
+                          // code taken from below resources option dialog
+                          QuerySnapshot u = await _userCollectionRef
+                              .where("userID", isEqualTo: user?.uid)
+                              .get();
+
+                          var id = u.docs.last.id;
+                          // updates the selectedRepetition field in the user's document
+                          await _userCollectionRef.doc(id).update({
+                          'selectedRepetition': selectedRepetition,
+                          });
+
                           Navigator.of(context).pop();
                           _showOptionsDialog(
                               context); // Proceed to the next dialog
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text(
-                                isCustomAmount &&
-                                        customAmountController.text.isEmpty
-                                    ? 'Enter number of repetitions'
-                                    : 'Please enter number of repetitions',
-                              ),
+                              content: Text('Please enter number of repetitions'),
                             ),
                           );
                         }
@@ -457,12 +417,12 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
           ),
           actions: [
             TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        _showRepetitionDialog(context);
-                      },
-                      child: const Text('Previous'),
-                    ),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _showRepetitionDialog(context);
+              },
+              child: const Text('Previous'),
+            ),
             TextButton(
               onPressed: () async {
                 if (checkbox1.value ||
@@ -471,12 +431,14 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     checkbox4.value) {
                   List<String> selectedResources = [];
                   if (checkbox1.value) selectedResources.add('Official paper');
-                  if (checkbox2.value) selectedResources.add('Full-sized mock exam');
+                  if (checkbox2.value)
+                    selectedResources.add('Full-sized mock exam');
                   if (checkbox3.value) selectedResources.add('Mini-mocks');
                   if (checkbox4.value) selectedResources.add('Flashcards');
 
-                  QuerySnapshot u =
-                  await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
+                  QuerySnapshot u = await _userCollectionRef
+                      .where("userID", isEqualTo: user?.uid)
+                      .get();
 
                   // Update the Firestore document with the selected resources
                   var id = u.docs.last.id;
@@ -487,7 +449,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                   // Start the study session with the selected resources
                   StudySessionManager().startStudySession(selectedResources);
 
-                  if(context.mounted){
+                  if (context.mounted) {
                     Navigator.of(context).pop();
                   }
                   // Add your action here after options are submitted
@@ -579,7 +541,6 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     ],
                   );
                 });
-
           }
         },
         clipBehavior: Clip.none,
@@ -595,4 +556,3 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     );
   }
 }
-
