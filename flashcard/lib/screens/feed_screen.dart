@@ -457,6 +457,10 @@ class _FeedState extends State<Feed> {
   void goHome(List<String> subtopics, int count) {
     if (flashcards.isEmpty) {
       debugPrint("Card deck empty.\n Your score is $score");
+      
+      //NEED TO UPDATE "topicLastSeen"  HERE???
+
+
     } else {
       count++;
       Navigator.push(
