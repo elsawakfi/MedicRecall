@@ -399,7 +399,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => MiniMockReview(miniMockWidget: this),
+                              builder: (context) => MiniMockReview(miniMockWidget: this, rankingLength: rankingAnswers.length, multiChoiceLength: multiChoiceAnswers.length),
                             ),
                           );
                         },

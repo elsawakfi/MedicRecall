@@ -3,11 +3,12 @@ import 'package:flashcard_x/widgets/drawer_widget.dart';
 
 class MiniMockReview extends StatefulWidget {
   // final String title;
-  // final List<Map<String, dynamic>> questions;
+  final int rankingLength;
+  final int multiChoiceLength;
   // final int time;
   // const MiniMockReview({super.key, required this.title, required this.questions, required this.time});
   final dynamic miniMockWidget;
-  const MiniMockReview({super.key, required this.miniMockWidget});
+  const MiniMockReview({super.key, required this.miniMockWidget, required this.rankingLength, required this.multiChoiceLength});
 
   @override
   State<MiniMockReview> createState() => MiniMockReviewState();
@@ -71,13 +72,13 @@ Widget build(BuildContext context) {
                       headerBuilder: (context, isOpen) {
                         return Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: Text('Multiple Choice Questions (Question 1 - 20)',
+                          child: Text('Ranking Questions (Question 1 - ${widget.rankingLength})',
                           style: TextStyle(color: Colors.black)),
                         );
                       },
                       body: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text('Content for multiple choice questions.',
+                        child: Text('Content for ranking questions.',
                         style: TextStyle(color: Colors.black)),
                       ),
                       isExpanded: _isOpen[0],
@@ -88,14 +89,14 @@ Widget build(BuildContext context) {
                       headerBuilder: (context, isOpen) {
                         return Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: Text('Ranking Questions (Question 21 - 50)',
+                          child: Text('Multiple Choice Questions (Question ${widget.rankingLength + 1} - ${widget.multiChoiceLength + widget.rankingLength})',
                           style: TextStyle(color: Colors.black)),
                           
                         );
                       },
                       body: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text('Content for ranking questions.',
+                        child: Text('Content for multiple choice questions.',
                         style: TextStyle(color: Colors.black)),
                       ),
                       isExpanded: _isOpen[1],
