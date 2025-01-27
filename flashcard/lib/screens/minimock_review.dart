@@ -1,17 +1,19 @@
-import 'package:flashcard_x/screens/minimock_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/drawer_widget.dart';
-import 'package:flashcard_x/screens/minimock_exam1.dart';
 
-
-class MiniMock1Review extends StatefulWidget {
-  const MiniMock1Review({super.key});
+class MiniMockReview extends StatefulWidget {
+  // final String title;
+  // final List<Map<String, dynamic>> questions;
+  // final int time;
+  // const MiniMockReview({super.key, required this.title, required this.questions, required this.time});
+  final dynamic miniMockWidget;
+  const MiniMockReview({super.key, required this.miniMockWidget});
 
   @override
-  State<MiniMock1Review> createState() => MiniMock1ReviewState();
+  State<MiniMockReview> createState() => MiniMockReviewState();
 }
 
-class MiniMock1ReviewState extends State<MiniMock1Review> {
+class MiniMockReviewState extends State<MiniMockReview> {
   List<bool> _isOpen = [false, false];
   @override
 Widget build(BuildContext context) {
@@ -110,12 +112,7 @@ Widget build(BuildContext context) {
       width: 200,
       child: 
         FloatingActionButton.extended(onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const MiniMockFeedBack(),
-          ),
-        );
+          widget.miniMockWidget.examEnd();
       }, label: Text('Complete Exam',  style: TextStyle(color: Colors.white, fontSize: 16)))),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     /**bottomNavigationBar: Container(
