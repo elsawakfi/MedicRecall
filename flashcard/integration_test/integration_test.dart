@@ -52,6 +52,7 @@ void main() {
             (WidgetTester tester) async {
               tester.printToConsole('Testing login');
               await loginTest(tester);
+              await tester.pumpAndSettle();
               await tester.tap(find.byKey(const ValueKey('Flashcards')));
               await tester.pumpAndSettle();
 
@@ -74,6 +75,7 @@ void main() {
             (WidgetTester tester) async {
               tester.printToConsole('Testing exam date feature');
               await loginTest(tester);
+              await tester.pumpAndSettle();
               expect(find.byType(FloatingActionButton), findsOneWidget);
               await tester.tap(find.byType(
                   FloatingActionButton));
@@ -102,9 +104,10 @@ void main() {
                 await tester.tap(find.byType(
                     FloatingActionButton));
                 tester.printToConsole('Loading popup');
-                await tester.pump(const Duration(seconds: 2));
+                await tester.pumpAndSettle();
+                // await tester.pump(const Duration(seconds: 2));
               }
-              // expect(find.text('Yes'), findsOneWidget);
+              expect(find.text('Yes'), findsOneWidget);
               await tester.tap(find.text('Yes'));
               await tester.pumpAndSettle();
               expect(find.text('Pick Date'), findsOneWidget);
