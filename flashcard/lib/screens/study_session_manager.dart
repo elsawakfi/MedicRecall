@@ -79,12 +79,12 @@ class StudySessionManager {
     print('TestDay: $testDay');
 
     if (selectedResources!.contains('Mini-mocks')) {
-      // DateTime now = DateTime.now();
-      // DateTime today = DateTime(now.year, now.month, now.day, 0, 0, 0, 0);
-      DateTime halfwayDate = firstStudyDay.add(Duration(days: daysUntilTest ~/ 2));
-      print('halfwayDate: $halfwayDate');
-      // DateTime halfwayDate = DateTime(
-      //     now.year, now.month, now.day + (daysUntilTest ~/ 2), 0, 0, 0, 0);
+      DateTime now = DateTime.now();
+      DateTime today = DateTime(now.year, now.month, now.day, 0, 0, 0, 0);
+      // DateTime halfwayDate = firstStudyDay.add(Duration(days: daysUntilTest ~/ 2));
+      // print('halfwayDate: $halfwayDate');
+      DateTime halfwayDate = DateTime(
+          now.year, now.month, now.day + (daysUntilTest ~/ 2), 0, 0, 0, 0);
 
       if (generatedEvents[halfwayDate] == null) {
         generatedEvents[halfwayDate] = [];
@@ -92,10 +92,10 @@ class StudySessionManager {
       generatedEvents[halfwayDate]!.add(Event(title: "Second Mini Mock"));
       print('Event added on halfwayDate: ${generatedEvents[halfwayDate]}');
 
-      if (generatedEvents[firstStudyDay] == null) {
-        generatedEvents[firstStudyDay] = [];
+      if (generatedEvents[today] == null) {
+        generatedEvents[today] = [];
       }
-      generatedEvents[firstStudyDay]!.add(Event(title: "First Mini Mock"));
+      generatedEvents[today]!.add(Event(title: "First Mini Mock"));
       print('Event added on firstStudyDay: ${generatedEvents[firstStudyDay]}');
     }
 
@@ -240,6 +240,7 @@ class StudySessionManager {
         print(e);
       }
     }
+    print('Generated Events: $generatedEvents');
     return generatedEvents;
   }
 

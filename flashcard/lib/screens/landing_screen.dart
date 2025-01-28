@@ -41,6 +41,7 @@ class LandingState extends State<Landing> {
   bool testDayBool_ = true;
   DateTime? hasDate;
   DateTime? _examDate;
+  DateTime? _firstStudyDate;
   int buildCount = 0;
   final CollectionReference _userCollectionRef =
       FirebaseFirestore.instance.collection('users');
@@ -147,6 +148,22 @@ class LandingState extends State<Landing> {
         setState(() {});
       }
     }
+  }
+
+  Future<void> getFirstStudyDay() async {
+    if (user != null) {
+      QuerySnapshot u = await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
+
+      var userFromDb = u.docs.first;
+      Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
+      // If the Test Day field isn't null and is in the database we update the UI with it. Otherwise it is displayed as being not set.
+      if (data.containsKey("firstStudyDay") && data["firstStudyDay"] != null) {
+        // firstDayBool = false;
+        _firstStudyDate = (data["firstStudyDay"] as Timestamp).toDate();
+      }
+
+      setState(() {});
+    } 
   }
 
 

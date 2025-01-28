@@ -141,7 +141,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       // If the Test Day field isn't null and is in the database we update the UI with it. Otherwise it is displayed as being not set.
       if (data.containsKey("firstStudyDay") && data["firstStudyDay"] != null) {
         // firstDayBool = false;
-        _firstStudyDate = (data["firstStudyDay"] as Timestamp).toDate();
+        _firstStudyDate = DateTime.fromMicrosecondsSinceEpoch(userFromDb["firstStudyDay"]
+            .microsecondsSinceEpoch);
       }
 
       setState(() {});
