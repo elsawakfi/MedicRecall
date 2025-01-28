@@ -69,25 +69,34 @@ class StudySessionManager {
     // Get topics and related data from the database or pass them as arguments
     List<String>? selectedResources = await getSelectedResources(userId);
 
+    DateTime firstStudyDay = querySnapshot.docs.last['firstStudyDay'].toDate(); // Start study sessions from today (aka. the day u start study session)
     int daysUntilTest =
-        (testDay.difference(DateTime.now()).inHours / 24).round();
+        (testDay.difference(firstStudyDay).inHours / 24).round();
     // Loop through topics to generate study sessions
 
+    print('firstStudyDay: $firstStudyDay');
+    print('daysUntilTest: $daysUntilTest');
+    print('TestDay: $testDay');
+
     if (selectedResources!.contains('Mini-mocks')) {
-      DateTime now = DateTime.now();
-      DateTime today = DateTime(now.year, now.month, now.day, 0, 0, 0, 0);
-      DateTime halfwayDate = DateTime(
-          now.year, now.month, now.day + (daysUntilTest ~/ 2), 0, 0, 0, 0);
+      // DateTime now = DateTime.now();
+      // DateTime today = DateTime(now.year, now.month, now.day, 0, 0, 0, 0);
+      DateTime halfwayDate = firstStudyDay.add(Duration(days: daysUntilTest ~/ 2));
+      print('halfwayDate: $halfwayDate');
+      // DateTime halfwayDate = DateTime(
+      //     now.year, now.month, now.day + (daysUntilTest ~/ 2), 0, 0, 0, 0);
 
       if (generatedEvents[halfwayDate] == null) {
         generatedEvents[halfwayDate] = [];
       }
       generatedEvents[halfwayDate]!.add(Event(title: "Second Mini Mock"));
+      print('Event added on halfwayDate: ${generatedEvents[halfwayDate]}');
 
-      if (generatedEvents[today] == null) {
-        generatedEvents[today] = [];
+      if (generatedEvents[firstStudyDay] == null) {
+        generatedEvents[firstStudyDay] = [];
       }
-      generatedEvents[today]!.add(Event(title: "First Mini Mock"));
+      generatedEvents[firstStudyDay]!.add(Event(title: "First Mini Mock"));
+      print('Event added on firstStudyDay: ${generatedEvents[firstStudyDay]}');
     }
 
     if (selectedResources.contains('Full-sized mock exam')) {
@@ -126,7 +135,7 @@ class StudySessionManager {
         if (generatedEvents[officialPaperDate] == null) {
           generatedEvents[officialPaperDate] = [];
         }
-        generatedEvents[officialPaperDate]!.add(Event(title: "Official Paper"));
+        generatedEvents[officialPaperDate]!.add(Event(title: "Official Paper ${intervals.indexOf(interval) + 1}"));
       }
     }
 
