@@ -1,11 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
+import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:flashcard_x/screens/minimock_exam2.dart';
 import 'package:flashcard_x/widgets/drawer_widget.dart';
 import 'package:flashcard_x/screens/minimock1_rules_page.dart';
 import 'package:flashcard_x/screens/button_screen.dart';
+
+import 'minimock_exams.dart';
 
 
 class MiniMockLanding extends StatefulWidget {
@@ -74,41 +76,7 @@ class MiniMockLandingState extends State<MiniMockLanding> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: const DrawMain(),
-        appBar: AppBar(
-          // backgroundColor: Colors.blue,
-            elevation: 0,
-            title:  Align(
-              alignment: const Alignment(-1.0,0),
-              child: Stack(
-                children: [
-                  Positioned(
-                    top: 2.3,
-                    child: Image.asset(
-                      'assets/newlogo.png',
-                      fit: BoxFit.cover,
-                      height: 34,
-                    ),
-                  ),
-            
-                  Container(
-                    margin: const EdgeInsets.only(left: 32),
-                    padding: const EdgeInsets.all(8.0),
-                    child: const Text('Mini-Mocks',
-                    textAlign: TextAlign.left,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            centerTitle: false,
-            leading: Builder(
-                builder: (context) => GestureDetector(
-                  onTap: () => Scaffold.of(context).openDrawer(),
-                  child: const Icon(
-                    Icons.menu,
-                  ),
-                ))),
+      appBar: CustomAppBar(title: "Mini-Mocks"),
       body: daysUntilTest == null
           ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
           : Container(

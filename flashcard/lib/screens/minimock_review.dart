@@ -1,20 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/drawer_widget.dart';
-import 'package:flashcard_x/screens/minimock_exam1.dart';
+import 'package:flashcard_x/screens/minimock_exams.dart';
 
+class MiniMockReview extends StatefulWidget {
+  final int rankingLength;
+  final int multiChoiceLength;
+  final dynamic miniMockWidget;
 
-class MiniMock1Review extends StatefulWidget {
-  const MiniMock1Review({super.key});
+  const MiniMockReview({
+    super.key,
+    required this.miniMockWidget,
+    required this.rankingLength,
+    required this.multiChoiceLength,
+  });
 
   @override
-  State<MiniMock1Review> createState() => MiniMock1ReviewState();
+  State<MiniMockReview> createState() => MiniMockReviewState();
 }
 
-class MiniMock1ReviewState extends State<MiniMock1Review> {
+class MiniMockReviewState extends State<MiniMockReview> {
   List<bool> _isOpen = [false, false];
+  late int questionLength;
+
+  @override
+  void initState(){
+    super.initState();
+    questionLength = widget.rankingLength + widget.multiChoiceLength;
+
+  }
+
+  // Function to pop this screen and return the value (reduces dry code)
+  void _returnToMiniMock(BuildContext context, int questionNumber){
+    Navigator.pop(
+        context,
+        questionNumber // As the question list is an array (starts at index 0), 2 = Q3
+    );
+  }
+
   @override
 Widget build(BuildContext context) {
-  return Scaffold(
+  return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result){
+    if (!didPop){
+      _returnToMiniMock(context, questionLength-1);
+    }
+  },
+    child:Scaffold(
     drawer: const DrawMain(),
     appBar: AppBar(
       elevation: 0,
@@ -68,14 +100,78 @@ Widget build(BuildContext context) {
                       headerBuilder: (context, isOpen) {
                         return Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: Text('Multiple Choice Questions (Question 1 - 20)',
+                          child: Text('Ranking Questions (Question 1 - ${widget.rankingLength})',
                           style: TextStyle(color: Colors.black)),
                         );
                       },
                       body: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text('Content for multiple choice questions.',
-                        style: TextStyle(color: Colors.black)),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(5, (index) => Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                child: SizedBox(
+                                  width: 100, // Set the desired width
+                                  height: 50, // Set the desired height
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      _returnToMiniMock(context, index);
+                                    },
+                                    child: Text(
+                                      '${index + 1}',
+                                      style: TextStyle(color: Colors.white,
+                                      fontSize: 20),
+                                    ),
+                                  ),
+                                ),
+                              )),
+                            ),
+                            SizedBox(height: 10),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(5, (index) => Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                child: SizedBox(
+                                  width: 100, // Set the desired width
+                                  height: 50, // Set the desired height
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      _returnToMiniMock(context, index+5);
+                                    },
+                                    child: Text(
+                                      '${index + 6}',
+                                      style: TextStyle(color: Colors.white,
+                                      fontSize: 20),
+                                    ),
+                                  ),
+                                ),
+                              )),
+                            ),
+                            SizedBox(height: 10),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(3, (index) => Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                child: SizedBox(
+                                  width: 100, // Set the desired width
+                                  height: 50, // Set the desired height
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      _returnToMiniMock(context, index+10);
+                                    },
+                                    child: Text(
+                                      '${index + 11}',
+                                      style: TextStyle(color: Colors.white,
+                                      fontSize: 20),
+                                    ),
+                                  ),
+                                ),
+                              )),
+                            ),
+                          ],
+                        ),
                       ),
                       isExpanded: _isOpen[0],
                     ),
@@ -85,15 +181,79 @@ Widget build(BuildContext context) {
                       headerBuilder: (context, isOpen) {
                         return Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: Text('Ranking Questions (Question 21 - 50)',
+                          child: Text('Multiple Choice Questions (Question ${widget.rankingLength + 1} - $questionLength)',
                           style: TextStyle(color: Colors.black)),
                           
                         );
                       },
                       body: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text('Content for ranking questions.',
-                        style: TextStyle(color: Colors.black)),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(5, (index) => Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                child: SizedBox(
+                                  width: 100, // Set the desired width
+                                  height: 50, // Set the desired height
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      _returnToMiniMock(context, index+13);
+                                    },
+                                    child: Text(
+                                      '${index + 14}',
+                                      style: TextStyle(color: Colors.white,
+                                      fontSize: 20),
+                                    ),
+                                  ),
+                                ),
+                              )),
+                            ),
+                            SizedBox(height: 10),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(5, (index) => Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                child: SizedBox(
+                                  width: 100, // Set the desired width
+                                  height: 50, // Set the desired height
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      _returnToMiniMock(context, index+19);
+                                    },
+                                    child: Text(
+                                      '${index + 20}',
+                                      style: TextStyle(color: Colors.white,
+                                      fontSize: 20),
+                                    ),
+                                  ),
+                                ),
+                              )),
+                            ),
+                            SizedBox(height: 10),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(1, (index) => Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                child: SizedBox(
+                                  width: 100, // Set the desired width
+                                  height: 50, // Set the desired height
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      _returnToMiniMock(context, index+24);
+                                    },
+                                    child: Text(
+                                      '${index + 25}',
+                                      style: TextStyle(color: Colors.white,
+                                      fontSize: 20),
+                                    ),
+                                  ),
+                                ),
+                              )),
+                            ),
+                          ],
+                        ),
                       ),
                       isExpanded: _isOpen[1],
                     ),
@@ -104,19 +264,14 @@ Widget build(BuildContext context) {
         ],
       ),
     ),
-    bottomNavigationBar: Container(
-      margin: const EdgeInsets.symmetric(horizontal: 650.0, vertical: 10.0),
-      child: ElevatedButton(
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const MiniMockExam1(),
-            ),
-          );
-        },
-        
-        child: const Text('Complete Exam'),
-      ),
+    floatingActionButton:SizedBox(
+      height: 50,
+      width: 200,
+      child: 
+        FloatingActionButton.extended(onPressed: () {
+          widget.miniMockWidget.examEnd();
+      }, label: Text('Complete Exam',  style: TextStyle(color: Colors.white, fontSize: 16)))),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     ),
   );
 }

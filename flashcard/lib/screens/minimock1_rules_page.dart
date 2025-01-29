@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/drawer_widget.dart';
-import 'package:flashcard_x/screens/minimock_exam1.dart';
+import 'package:flashcard_x/screens/minimock_exams.dart';
 
 
 class MiniMock1Rules extends StatefulWidget {
@@ -65,7 +65,7 @@ class MiniMock1RulesState extends State<MiniMock1Rules> {
             ),
             const SizedBox(height: 10),
             const Text(
-              'In this test, you will be presented with typical scenarios that Foundation Year Two (Y2) Doctors '
+              'In this test, you will be presented with typical scenarios that Foundation Year Two (FY2) Doctors '
               'encounter , and you will be asked questions about dealing with them. When answering questions, '
               'please consider yourself to be a FY2 Doctor unless stated otherwise and answer based on what you '
               'should do in each scenario.\n',
