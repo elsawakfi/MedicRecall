@@ -20,9 +20,33 @@ class MiniMockReview extends StatefulWidget {
 
 class MiniMockReviewState extends State<MiniMockReview> {
   List<bool> _isOpen = [false, false];
+  late int questionLength;
+
+  @override
+  void initState(){
+    super.initState();
+    questionLength = widget.rankingLength + widget.multiChoiceLength;
+
+  }
+
+  // Function to pop this screen and return the value (reduces dry code)
+  void _returnToMiniMock(BuildContext context, int questionNumber){
+    Navigator.pop(
+        context,
+        questionNumber // As the question list is an array (starts at index 0), 2 = Q3
+    );
+  }
+
   @override
 Widget build(BuildContext context) {
-  return Scaffold(
+  return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result){
+    if (!didPop){
+      _returnToMiniMock(context, questionLength-1);
+    }
+  },
+    child:Scaffold(
     drawer: const DrawMain(),
     appBar: AppBar(
       elevation: 0,
@@ -93,11 +117,7 @@ Widget build(BuildContext context) {
                                   height: 50, // Set the desired height
                                   child: ElevatedButton(
                                     onPressed: () {
-                                      Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                          builder: (context) => const MiniMockExam1(),
-                                        ),
-                                      );
+                                      _returnToMiniMock(context, index);
                                     },
                                     child: Text(
                                       '${index + 1}',
@@ -118,11 +138,7 @@ Widget build(BuildContext context) {
                                   height: 50, // Set the desired height
                                   child: ElevatedButton(
                                     onPressed: () {
-                                      Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                          builder: (context) => const MiniMockExam1(),
-                                        ),
-                                      );
+                                      _returnToMiniMock(context, index+5);
                                     },
                                     child: Text(
                                       '${index + 6}',
@@ -143,11 +159,7 @@ Widget build(BuildContext context) {
                                   height: 50, // Set the desired height
                                   child: ElevatedButton(
                                     onPressed: () {
-                                      Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                          builder: (context) => const MiniMockExam1(),
-                                        ),
-                                      );
+                                      _returnToMiniMock(context, index+10);
                                     },
                                     child: Text(
                                       '${index + 11}',
@@ -169,7 +181,7 @@ Widget build(BuildContext context) {
                       headerBuilder: (context, isOpen) {
                         return Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: Text('Multiple Choice Questions (Question ${widget.rankingLength + 1} - ${widget.multiChoiceLength + widget.rankingLength})',
+                          child: Text('Multiple Choice Questions (Question ${widget.rankingLength + 1} - $questionLength)',
                           style: TextStyle(color: Colors.black)),
                           
                         );
@@ -187,11 +199,7 @@ Widget build(BuildContext context) {
                                   height: 50, // Set the desired height
                                   child: ElevatedButton(
                                     onPressed: () {
-                                      Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                          builder: (context) => const MiniMockExam1(),
-                                        ),
-                                      );
+                                      _returnToMiniMock(context, index+13);
                                     },
                                     child: Text(
                                       '${index + 14}',
@@ -212,11 +220,7 @@ Widget build(BuildContext context) {
                                   height: 50, // Set the desired height
                                   child: ElevatedButton(
                                     onPressed: () {
-                                      Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                          builder: (context) => const MiniMockExam1(),
-                                        ),
-                                      );
+                                      _returnToMiniMock(context, index+19);
                                     },
                                     child: Text(
                                       '${index + 20}',
@@ -237,11 +241,7 @@ Widget build(BuildContext context) {
                                   height: 50, // Set the desired height
                                   child: ElevatedButton(
                                     onPressed: () {
-                                      Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                          builder: (context) => const MiniMockExam1(),
-                                        ),
-                                      );
+                                      _returnToMiniMock(context, index+24);
                                     },
                                     child: Text(
                                       '${index + 25}',
@@ -260,7 +260,7 @@ Widget build(BuildContext context) {
                   ],
                 ),
               ],
-            ),   
+            ),
         ],
       ),
     ),
@@ -272,6 +272,7 @@ Widget build(BuildContext context) {
           widget.miniMockWidget.examEnd();
       }, label: Text('Complete Exam',  style: TextStyle(color: Colors.white, fontSize: 16)))),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-    );
+    ),
+  );
 }
 }
