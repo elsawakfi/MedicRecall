@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/drawer_widget.dart';
+import 'package:flashcard_x/screens/minimock_exams.dart';
 
 class MiniMockReview extends StatefulWidget {
   // final String title;
@@ -78,8 +79,84 @@ Widget build(BuildContext context) {
                       },
                       body: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text('Content for ranking questions.',
-                        style: TextStyle(color: Colors.black)),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(5, (index) => Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                child: SizedBox(
+                                  width: 100, // Set the desired width
+                                  height: 50, // Set the desired height
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) => const MiniMockExam1(),
+                                        ),
+                                      );
+                                    },
+                                    child: Text(
+                                      '${index + 1}',
+                                      style: TextStyle(color: Colors.white,
+                                      fontSize: 20),
+                                    ),
+                                  ),
+                                ),
+                              )),
+                            ),
+                            SizedBox(height: 10),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(5, (index) => Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                child: SizedBox(
+                                  width: 100, // Set the desired width
+                                  height: 50, // Set the desired height
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) => const MiniMockExam1(),
+                                        ),
+                                      );
+                                    },
+                                    child: Text(
+                                      '${index + 6}',
+                                      style: TextStyle(color: Colors.white,
+                                      fontSize: 20),
+                                    ),
+                                  ),
+                                ),
+                              )),
+                            ),
+                            SizedBox(height: 10),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(3, (index) => Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                child: SizedBox(
+                                  width: 100, // Set the desired width
+                                  height: 50, // Set the desired height
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) => const MiniMockExam1(),
+                                        ),
+                                      );
+                                    },
+                                    child: Text(
+                                      '${index + 11}',
+                                      style: TextStyle(color: Colors.white,
+                                      fontSize: 20),
+                                    ),
+                                  ),
+                                ),
+                              )),
+                            ),
+                          ],
+                        ),
                       ),
                       isExpanded: _isOpen[0],
                     ),
@@ -116,21 +193,6 @@ Widget build(BuildContext context) {
           widget.miniMockWidget.examEnd();
       }, label: Text('Complete Exam',  style: TextStyle(color: Colors.white, fontSize: 16)))),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-    /**bottomNavigationBar: Container(
-      margin: const EdgeInsets.symmetric(horizontal: 650.0, vertical: 10.0),
-      child: ElevatedButton(
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const MiniMockExam1(),
-            ),
-          );
-        },
-        
-        child: const Text('Complete Exam'),
-      ),
-    ),**/
-    
-  );
+    );
 }
 }
