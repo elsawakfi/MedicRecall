@@ -106,7 +106,7 @@ class StudySessionManager {
         if (generatedEvents[mockExamDate] == null) {
           generatedEvents[mockExamDate] = [];
         }
-        generatedEvents[mockExamDate]!.add(Event(title: "Full-sized Mock Exam ${intervals.indexOf(interval) + 1}", color: Color.fromARGB(255, 25, 130, 196)));
+        generatedEvents[mockExamDate]!.add(Event(title: "Full-sized Mock Exam ${intervals.indexOf(interval) + 1}", color: Color.fromARGB(255, 120, 202, 210)));
       }
     }
 
@@ -127,7 +127,7 @@ class StudySessionManager {
         if (generatedEvents[officialPaperDate] == null) {
           generatedEvents[officialPaperDate] = [];
         }
-        generatedEvents[officialPaperDate]!.add(Event(title: "Official Paper", color: Color.fromARGB(255, 106, 76, 147)));
+        generatedEvents[officialPaperDate]!.add(Event(title: "Official Paper", color: Color.fromARGB(255, 163, 68, 174)));
       }
     }
 
