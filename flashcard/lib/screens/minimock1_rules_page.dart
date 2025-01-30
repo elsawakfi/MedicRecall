@@ -33,7 +33,7 @@ class MiniMock1RulesState extends State<MiniMock1Rules> {
                   Container(
                     margin: const EdgeInsets.only(left: 32),
                     padding: const EdgeInsets.all(8.0),
-                    child: const Text('Mini-Mock 1',
+                    child: const Text('Mini-Mock Exam 1',
                     
                     ),
                   ),
