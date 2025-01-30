@@ -146,10 +146,10 @@ class CalendarStateO extends State<Calendar> {
 
       if (daysToNextReviewDate >= 0 && topicCount[i] > 0 && daysToNextReviewDate < daysUntilTest) {
         if (selectedEvents[standardisedDate] != null) {
-          selectedEvents[standardisedDate]?.add(Event(title: topics[i]["topic"].toString()));// add to the selected items list - this is then added to the calendar
+          selectedEvents[standardisedDate]?.add(Event(title: topics[i]["topic"].toString(), color: Color.fromARGB(255, 255, 202, 58)));// add to the selected items list - this is then added to the calendar
         } else {
           selectedEvents[standardisedDate] ??= [];
-          selectedEvents[standardisedDate]?.add(Event(title: topics[i]["topic"].toString()));// add to the selected items list - this is then added to the calendar
+          selectedEvents[standardisedDate]?.add(Event(title: topics[i]["topic"].toString(), color: Color.fromARGB(255, 255, 202, 58)));// add to the selected items list - this is then added to the calendar
         }
 
       }
@@ -229,7 +229,7 @@ class CalendarStateO extends State<Calendar> {
       users.doc(id).update(
           {"TestDay": date}); // update field testday to what is passed as param
 
-      selectedEvents[testDay]?.remove(Event(title: "Test Day"));
+      selectedEvents[testDay]?.remove(Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
       await getTestDay();
       setState(() {});
   }
@@ -249,16 +249,16 @@ class CalendarStateO extends State<Calendar> {
           .microsecondsSinceEpoch)); //convert timestamp to datetime
       List<Event> events = []; //events is an empty list to hold all events.
       for (var e in event["events"]) {
-        events.add(Event(title: e)); // adds each
+        events.add(Event(title: e, color: Colors.white)); // adds each
       }
 
       selectedEvents[date] = events;
 
     }
     if (selectedEvents[testDay] == null) {
-      selectedEvents[testDay] = [Event(title: "Test Day")];
+      selectedEvents[testDay] = [Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94))];
     } else {
-      selectedEvents[testDay]?.add(Event(title: "Test Day"));
+      selectedEvents[testDay]?.add(Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
     }
 
     setState(() {});
@@ -334,7 +334,7 @@ class CalendarStateO extends State<Calendar> {
       users.doc(id).update({"TestDay": FieldValue.delete()}); // update field TestDay to be removed from database
     }
 
-    selectedEvents[testDay]?.remove(Event(title: "Test Day"));
+    selectedEvents[testDay]?.remove(Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
     getTestDay();
   }
 
@@ -462,6 +462,11 @@ Widget build(BuildContext context) {
                     });
                   },
                   eventLoader: _getEventsfromDay,
+                  // calendarBuilders: CalendarBuilders(
+                  //   markerBuilder: (context, day, events) {
+                      
+                  //   },
+                  // ),
                   calendarStyle: CalendarStyle(
                     isTodayHighlighted: true,
                     selectedDecoration: BoxDecoration(
@@ -659,11 +664,11 @@ Widget build(BuildContext context) {
                                 if (_eventController.text.isNotEmpty) {
                                   if (selectedEvents[selectedDay] != null) {
                                     selectedEvents[selectedDay]?.add(
-                                      Event(title: _eventController.text),
+                                      Event(title: _eventController.text, color: const Color.fromARGB(255, 253, 252, 220)),
                                     );
                                   } else {
                                     selectedEvents[selectedDay] = [
-                                      Event(title: _eventController.text),
+                                      Event(title: _eventController.text, color: const Color.fromARGB(255, 253, 252, 220)),
                                     ];
                                   }
                                   updateEventsToDB(user);
