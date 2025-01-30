@@ -109,15 +109,15 @@ class StudySessionManager {
       for (int interval in intervals) {
         DateTime mockExamDate = DateTime(firstStudyDay.year, firstStudyDay.month, firstStudyDay.day + interval, 0, 0, 0, 0);
         
-        if (generatedEvents[mockExamDate] == null) {
-          generatedEvents[mockExamDate] = [];
+        while (generatedEvents[mockExamDate] != null) {
+          mockExamDate = mockExamDate.add(Duration(days: 1));
         }
+        generatedEvents[mockExamDate] = [];
         generatedEvents[mockExamDate]!.add(Event(title: "Full-sized Mock Exam ${intervals.indexOf(interval) + 1}"));
       }
     }
 
     if (selectedResources.contains('Official paper')) {
-      // int repetitions = 3;
       int repetitions = querySnapshot.docs.last['selectedRepetition'];
 
       // get the days until the test + intervals
@@ -128,10 +128,12 @@ class StudySessionManager {
 
       for (int interval in intervals) {
         DateTime officialPaperDate =
-            DateTime(firstStudyDay.year, firstStudyDay.month, firstStudyDay.day + interval+1, 0, 0, 0, 0);
-        if (generatedEvents[officialPaperDate] == null) {
-          generatedEvents[officialPaperDate] = [];
+            DateTime(firstStudyDay.year, firstStudyDay.month, firstStudyDay.day + interval, 0, 0, 0, 0);
+        while (generatedEvents[officialPaperDate] != null) {
+          officialPaperDate = officialPaperDate.add(Duration(days:1));
+          
         }
+        generatedEvents[officialPaperDate] = [];
         generatedEvents[officialPaperDate]!.add(Event(title: "Official Paper ${intervals.indexOf(interval) + 1}"));
       }
     }
@@ -142,7 +144,6 @@ class StudySessionManager {
             FirebaseFirestore.instance.collection('flashcards');
         List<String> contains = [];
 
-        // Get all documents in the collection
         QuerySnapshot<Map<String, dynamic>> flashcardDeck =
             await flashcards.get();
        
@@ -222,11 +223,10 @@ class StudySessionManager {
         print(e);
       }
     }
-    print('Generated Events: $generatedEvents');
     return generatedEvents;
   }
 
-//IS THIS FUNCTION NEEDED IF WE USE THE CLIENTS FORMULA
+//IS THIS FUNCTION NEEDED IF WE USE THE CLIENTS FORMULA?????
   int calculateDaysToNextReview(int topicCount, Timestamp lastSeen) {
     Map<int, int> dateToColourMap = {0: 1, 1: 2, 2: 4, 3: 8, 4: 16, 5: 32};
     int daysSinceLastReview =
