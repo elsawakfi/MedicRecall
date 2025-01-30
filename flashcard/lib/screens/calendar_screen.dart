@@ -453,22 +453,46 @@ Widget build(BuildContext context) {
                     });
                   },
                   eventLoader: _getEventsfromDay,
+                  // calendarBuilders: CalendarBuilders(
+                  //   markerBuilder: (context, day, events) {
+                  //     if (events.isNotEmpty) {
+                  //       return Positioned(
+                  //         bottom: 1,
+                  //         child: Row(
+                  //           mainAxisSize: MainAxisSize.min,
+                  //           children: events.map((event) {
+                  //             Event ev = event as Event;
+                  //             return Container(
+                  //               margin: const EdgeInsets.symmetric(horizontal: 1.5),
+                  //               width: 8,
+                  //               height: 8,
+                  //               decoration: BoxDecoration(
+                  //                 color: ev.color, // Set color based on event color
+                  //                 shape: BoxShape.circle,
+                  //               ),
+                  //             );
+                  //           }).toList(),
+                  //         ),
+                  //       );
+                  //     }
+                  //     return null;
+                  //   },
+                  // ),
                   calendarBuilders: CalendarBuilders(
                     markerBuilder: (context, day, events) {
                       if (events.isNotEmpty) {
                         return Positioned(
-                          bottom: 1,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
+                          bottom: 4, // Adjust the position under the day number
+                          child: Column(
                             children: events.map((event) {
                               Event ev = event as Event;
                               return Container(
-                                margin: const EdgeInsets.symmetric(horizontal: 1.5),
-                                width: 8,
-                                height: 8,
+                                margin: const EdgeInsets.symmetric(vertical: 1), // Space between lines
+                                width: 40, // Fixed width for uniformity
+                                height: 3, // Line's height
                                 decoration: BoxDecoration(
-                                  color: ev.color, // Set color based on event color
-                                  shape: BoxShape.circle,
+                                  color: ev.color, // Retrieve event colour
+                                  borderRadius: BorderRadius.circular(2),
                                 ),
                               );
                             }).toList(),
@@ -478,7 +502,6 @@ Widget build(BuildContext context) {
                       return null;
                     },
                   ),
-
                   calendarStyle: CalendarStyle(
                     isTodayHighlighted: true,
                     selectedDecoration: BoxDecoration(
