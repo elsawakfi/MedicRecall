@@ -75,33 +75,10 @@ class StudySessionManager {
         (testDay.difference(firstStudyDay).inHours / 24).round();
     // Loop through topics to generate study sessions
 
-    print('firstStudyDay: $firstStudyDay');
-    print('daysUntilTest: $daysUntilTest');
-    print('TestDay: $testDay');
 
-    if (selectedResources!.contains('Mini-mocks')) {
-      // DateTime now = DateTime.now();
-      // DateTime today = DateTime(now.year, now.month, now.day, 0, 0, 0, 0);
-      DateTime halfwayDate = firstStudyDay.add(Duration(days: daysUntilTest ~/ 2));
-      print('halfwayDate: $halfwayDate');
-      // DateTime halfwayDate = DateTime(
-      //     now.year, now.month, now.day + (daysUntilTest ~/ 2), 0, 0, 0, 0);
+    
 
-      if (generatedEvents[halfwayDate] == null) {
-        generatedEvents[halfwayDate] = [];
-      }
-      generatedEvents[halfwayDate]!.add(Event(title: "Second Mini Mock"));
-      print('Event added on halfwayDate: ${generatedEvents[halfwayDate]}');
-
-      if (generatedEvents[firstStudyDay] == null) {
-        generatedEvents[firstStudyDay] = [];
-      }
-      generatedEvents[firstStudyDay]!.add(Event(title: "First Mini Mock"));
-      print('Event added on firstStudyDay: ${generatedEvents[firstStudyDay]}');
-    }
-
-    if (selectedResources.contains('Full-sized mock exam')) {
-      DateTime now = DateTime.now();
+    if (selectedResources!.contains('Full-sized mock exam')) {
       int repetitions = querySnapshot.docs.last['selectedRepetition'];
 
       List<int> intervals = [];
@@ -110,7 +87,7 @@ class StudySessionManager {
       }
 
       for (int interval in intervals) {
-        DateTime mockExamDate = DateTime(now.year, now.month, now.day + interval, 0, 0, 0, 0);
+        DateTime mockExamDate = DateTime(firstStudyDay.year, firstStudyDay.month, firstStudyDay.day + interval, 0, 0, 0, 0);
         
         if (generatedEvents[mockExamDate] == null) {
           generatedEvents[mockExamDate] = [];
@@ -120,7 +97,6 @@ class StudySessionManager {
     }
 
     if (selectedResources.contains('Official paper')) {
-      DateTime now = DateTime.now();
       // int repetitions = 3;
       int repetitions = querySnapshot.docs.last['selectedRepetition'];
 
@@ -132,7 +108,7 @@ class StudySessionManager {
 
       for (int interval in intervals) {
         DateTime officialPaperDate =
-            DateTime(now.year, now.month, now.day + interval, 0, 0, 0, 0);
+            DateTime(firstStudyDay.year, firstStudyDay.month, firstStudyDay.day + interval, 0, 0, 0, 0);
         if (generatedEvents[officialPaperDate] == null) {
           generatedEvents[officialPaperDate] = [];
         }
@@ -149,22 +125,51 @@ class StudySessionManager {
         // Get all documents in the collection
         QuerySnapshot<Map<String, dynamic>> flashcardDeck =
             await flashcards.get();
-        //int topicCount = 0;
+       
+        //These flashcards will be ones that the user has never looked at,
+        //so we will prioritise these in the calendar
+        for (var doc in flashcardDeck.docs) {
+          Map<String, dynamic> flashcard = doc.data();
+
+          if (!contains.contains(flashcard["topic"])) {
+            contains.add(flashcard["topic"]);
+            DateTime nextReviewDate =
+                DateTime(firstStudyDay.year, firstStudyDay.month, firstStudyDay.day + 2, 0, 0, 0, 0);
+            if (daysUntilTest >= 30 && daysUntilTest < 60) {
+              while (generatedEvents[nextReviewDate] != null) {
+                nextReviewDate = DateTime(nextReviewDate.year,
+                    nextReviewDate.month, nextReviewDate.day + 2, 0, 0, 0, 0);
+              }
+            }
+            if (daysUntilTest > 60) {
+              while (generatedEvents[nextReviewDate] != null) {
+                nextReviewDate = DateTime(nextReviewDate.year,
+                    nextReviewDate.month, nextReviewDate.day + 3, 0, 0, 0, 0);
+              }
+            }
+            if (daysUntilTest < 30) {
+              while (generatedEvents[nextReviewDate] != null) {
+                nextReviewDate = DateTime(nextReviewDate.year,
+                    nextReviewDate.month, nextReviewDate.day + 1, 0, 0, 0, 0);
+              }
+            }
+            if (testDay.isAfter(nextReviewDate)) {
+              generatedEvents[nextReviewDate] = [];
+              generatedEvents[nextReviewDate]!
+                  .add(Event(title: flashcard["topic"] + " Flashcards"));
+            }
+          }
+        }
+
         //the getFlashcards method retrieves flashcards that the user
         //HAS looked at
         var seenFlashcards = await Algo().getFlashcards(user.uid);
         for (var flashcard in seenFlashcards) {
           if (!contains.contains(flashcard["topic"])) {
             contains.add(flashcard["topic"]);
-            //int daysToNextReviewDate = calculateDaysToNextReview(topicCount, flashcard["lastSeen"]);
-            // print("Seen");
-            // print(flashcard["topic"]);
-            // print(flashcard["lastSeen"]);
-            //print(daysToNextReviewDate);
-            // print("\n");
-            DateTime now = DateTime.now();
+
             DateTime nextReviewDate =
-                DateTime(now.year, now.month, now.day + 0, 0, 0, 0, 0);
+                DateTime(firstStudyDay.year, firstStudyDay.month, firstStudyDay.day + 0, 0, 0, 0, 0);
             if (daysUntilTest > 31 && daysUntilTest < 60) {
               while (generatedEvents[nextReviewDate] != null) {
                 nextReviewDate = DateTime(nextReviewDate.year,
@@ -192,54 +197,28 @@ class StudySessionManager {
             }
           }
         }
-
-        //These flashcards will be ones that the user has never looked at,
-        //so we will prioritise these in the calendar
-        for (var doc in flashcardDeck.docs) {
-          Map<String, dynamic> flashcard = doc.data();
-
-          if (!contains.contains(flashcard["topic"])) {
-            contains.add(flashcard["topic"]);
-
-            //int daysToNextReviewDate = 1;
-            //print(daysToNextReviewDate);
-            DateTime now = DateTime.now();
-            // print("Unseen");
-            // print(flashcard["topic"]);
-            // print(daysToNextReviewDate);
-            // print("\n");
-
-            DateTime nextReviewDate =
-                DateTime(now.year, now.month, now.day + 0, 0, 0, 0, 0);
-            if (daysUntilTest >= 30 && daysUntilTest < 60) {
-              while (generatedEvents[nextReviewDate] != null) {
-                nextReviewDate = DateTime(nextReviewDate.year,
-                    nextReviewDate.month, nextReviewDate.day + 2, 0, 0, 0, 0);
-              }
-            }
-            if (daysUntilTest > 60) {
-              while (generatedEvents[nextReviewDate] != null) {
-                nextReviewDate = DateTime(nextReviewDate.year,
-                    nextReviewDate.month, nextReviewDate.day + 3, 0, 0, 0, 0);
-              }
-            }
-            if (daysUntilTest < 30) {
-              while (generatedEvents[nextReviewDate] != null) {
-                nextReviewDate = DateTime(nextReviewDate.year,
-                    nextReviewDate.month, nextReviewDate.day + 1, 0, 0, 0, 0);
-              }
-            }
-            if (testDay.isAfter(nextReviewDate)) {
-              generatedEvents[nextReviewDate] = [];
-              generatedEvents[nextReviewDate]!
-                  .add(Event(title: flashcard["topic"] + " Flashcards"));
-            }
-          }
-        }
       } catch (e) {
         print("Error\n");
         print(e);
       }
+    }
+
+    if (selectedResources.contains('Mini-mocks')) {
+      DateTime halfwayDate = firstStudyDay.add(Duration(days: daysUntilTest ~/ 2));
+      print('halfwayDate: $halfwayDate');
+
+      while (generatedEvents[halfwayDate] != null) {
+       halfwayDate = halfwayDate.add(Duration(days:1));
+      }
+      generatedEvents[halfwayDate] = [];
+      generatedEvents[halfwayDate]!.add(Event(title: "Second Mini Mock"));
+      print('Event added on halfwayDate: ${generatedEvents[halfwayDate]}');
+
+      if (generatedEvents[firstStudyDay] == null) {
+        generatedEvents[firstStudyDay] = [];
+      }
+      generatedEvents[firstStudyDay]!.add(Event(title: "First Mini Mock"));
+      print('Event added on firstStudyDay: ${generatedEvents[firstStudyDay]}');
     }
     print('Generated Events: $generatedEvents');
     return generatedEvents;
