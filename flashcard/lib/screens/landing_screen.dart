@@ -54,26 +54,10 @@ class LandingState extends State<Landing> {
   void initState() {
     super.initState();
     getUser();
-
+    getFirstStudyDay();
     setState(() {});
   }
 
-  Future<void> getFirstStudyDay() async {
-    if (user != null) {
-      QuerySnapshot u = await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
-
-      var userFromDb = u.docs.first;
-      Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
-      // If the Test Day field isn't null and is in the database we update the UI with it. Otherwise it is displayed as being not set.
-      if (data.containsKey("firstStudyDay") && data["firstStudyDay"] != null) {
-        // firstDayBool = false;
-        _firstStudyDate = DateTime.fromMicrosecondsSinceEpoch(userFromDb["firstStudyDay"]
-            .microsecondsSinceEpoch);
-      }
-
-      setState(() {});
-    } 
-  }
 
   Future<void> _setFirstStudyDay() async {
     QuerySnapshot u = await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
@@ -102,6 +86,7 @@ class LandingState extends State<Landing> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
+                 _setFirstStudyDay();
                 _showExamDateDialog(context); // Call to show exam date dialog
               },
               child: const Text('Yes'),
