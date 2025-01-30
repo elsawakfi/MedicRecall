@@ -111,6 +111,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
         : DateTime.now(), // Otherwise, set it to now
       });
 
+      print('Added firstStudyDay to Document:');
+      print(_firstStudyDate);
     // update field testday to what is passed as param
     await getTestDay();
     setState(() {});
@@ -187,6 +189,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     await _userCollectionRef.doc(id).update({
       "firstStudyDay": DateTime.now(), // Save the current date as first study day
     });
+
+    print('WE BEEN ADDING IT THO \n');
 
     // Optionally, retrieve the first study day
     await getFirstStudyDay();
