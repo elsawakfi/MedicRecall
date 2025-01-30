@@ -146,10 +146,10 @@ class CalendarStateO extends State<Calendar> {
 
       if (daysToNextReviewDate >= 0 && topicCount[i] > 0 && daysToNextReviewDate < daysUntilTest) {
         if (selectedEvents[standardisedDate] != null) {
-          selectedEvents[standardisedDate]?.add(Event(title: topics[i]["topic"].toString()));// add to the selected items list - this is then added to the calendar
+          selectedEvents[standardisedDate]?.add(Event(title: topics[i]["topic"].toString(), color: Color.fromARGB(255, 255, 202, 58)));// add to the selected items list - this is then added to the calendar
         } else {
           selectedEvents[standardisedDate] ??= [];
-          selectedEvents[standardisedDate]?.add(Event(title: topics[i]["topic"].toString()));// add to the selected items list - this is then added to the calendar
+          selectedEvents[standardisedDate]?.add(Event(title: topics[i]["topic"].toString(), color: Color.fromARGB(255, 255, 202, 58)));// add to the selected items list - this is then added to the calendar
         }
 
       }
@@ -229,7 +229,7 @@ class CalendarStateO extends State<Calendar> {
       users.doc(id).update(
           {"TestDay": date}); // update field testday to what is passed as param
 
-      selectedEvents[testDay]?.remove(Event(title: "Test Day"));
+      selectedEvents[testDay]?.remove(Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
       await getTestDay();
       setState(() {});
   }
@@ -249,16 +249,16 @@ class CalendarStateO extends State<Calendar> {
           .microsecondsSinceEpoch)); //convert timestamp to datetime
       List<Event> events = []; //events is an empty list to hold all events.
       for (var e in event["events"]) {
-        events.add(Event(title: e)); // adds each
+        events.add(Event(title: e, color: Colors.white)); // adds each
       }
 
       selectedEvents[date] = events;
 
     }
     if (selectedEvents[testDay] == null) {
-      selectedEvents[testDay] = [Event(title: "Test Day")];
+      selectedEvents[testDay] = [Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94))];
     } else {
-      selectedEvents[testDay]?.add(Event(title: "Test Day"));
+      selectedEvents[testDay]?.add(Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
     }
 
     setState(() {});
@@ -334,7 +334,7 @@ class CalendarStateO extends State<Calendar> {
       users.doc(id).update({"TestDay": FieldValue.delete()}); // update field TestDay to be removed from database
     }
 
-    selectedEvents[testDay]?.remove(Event(title: "Test Day"));
+    selectedEvents[testDay]?.remove(Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
     getTestDay();
   }
 
@@ -422,15 +422,6 @@ Widget build(BuildContext context) {
               ],
             ),
           ),
-          // Positioned custom button on the right
-          // Positioned(
-          //   right: 0,
-          //   top: 0,
-          //   child: CustomFloatingButton()
-            
-          // ),
-          
-    
         ],
       ),
       centerTitle: true,
@@ -462,6 +453,55 @@ Widget build(BuildContext context) {
                     });
                   },
                   eventLoader: _getEventsfromDay,
+                  // calendarBuilders: CalendarBuilders(
+                  //   markerBuilder: (context, day, events) {
+                  //     if (events.isNotEmpty) {
+                  //       return Positioned(
+                  //         bottom: 1,
+                  //         child: Row(
+                  //           mainAxisSize: MainAxisSize.min,
+                  //           children: events.map((event) {
+                  //             Event ev = event as Event;
+                  //             return Container(
+                  //               margin: const EdgeInsets.symmetric(horizontal: 1.5),
+                  //               width: 8,
+                  //               height: 8,
+                  //               decoration: BoxDecoration(
+                  //                 color: ev.color, // Set color based on event color
+                  //                 shape: BoxShape.circle,
+                  //               ),
+                  //             );
+                  //           }).toList(),
+                  //         ),
+                  //       );
+                  //     }
+                  //     return null;
+                  //   },
+                  // ),
+                  calendarBuilders: CalendarBuilders(
+                    markerBuilder: (context, day, events) {
+                      if (events.isNotEmpty) {
+                        return Positioned(
+                          bottom: 4, // Adjust the position under the day number
+                          child: Column(
+                            children: events.map((event) {
+                              Event ev = event as Event;
+                              return Container(
+                                margin: const EdgeInsets.symmetric(vertical: 1), // Space between lines
+                                width: 40, // Fixed width for uniformity
+                                height: 3, // Line's height
+                                decoration: BoxDecoration(
+                                  color: ev.color, // Retrieve event colour
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        );
+                      }
+                      return null;
+                    },
+                  ),
                   calendarStyle: CalendarStyle(
                     isTodayHighlighted: true,
                     selectedDecoration: BoxDecoration(
@@ -620,7 +660,7 @@ Widget build(BuildContext context) {
                         backgroundColor: Colors.blue,
                       ),
                       child: const Text(
-                        "Make a Revision Plan",
+                        "Generate Revision Plan",
                         style: TextStyle(color: Colors.white),
                       ),
                     ),
@@ -659,11 +699,11 @@ Widget build(BuildContext context) {
                                 if (_eventController.text.isNotEmpty) {
                                   if (selectedEvents[selectedDay] != null) {
                                     selectedEvents[selectedDay]?.add(
-                                      Event(title: _eventController.text),
+                                      Event(title: _eventController.text, color: const Color.fromARGB(255, 253, 252, 220)),
                                     );
                                   } else {
                                     selectedEvents[selectedDay] = [
-                                      Event(title: _eventController.text),
+                                      Event(title: _eventController.text, color: const Color.fromARGB(255, 253, 252, 220)),
                                     ];
                                   }
                                   updateEventsToDB(user);
