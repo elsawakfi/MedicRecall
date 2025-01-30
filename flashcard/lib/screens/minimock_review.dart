@@ -6,12 +6,14 @@ class MiniMockReview extends StatefulWidget {
   final int rankingLength;
   final int multiChoiceLength;
   final dynamic miniMockWidget;
+  final List<dynamic> flaggedQuestions; 
 
   const MiniMockReview({
     super.key,
     required this.miniMockWidget,
     required this.rankingLength,
     required this.multiChoiceLength,
+    required this.flaggedQuestions,
   });
 
   @override
@@ -115,11 +117,13 @@ Widget build(BuildContext context) {
                                 child: SizedBox(
                                   width: 100, // Set the desired width
                                   height: 50, // Set the desired height
-                                  child: ElevatedButton(
+                                  child: ElevatedButton.icon(
                                     onPressed: () {
                                       _returnToMiniMock(context, index);
                                     },
-                                    child: Text(
+                                    icon: Visibility( visible: widget.flaggedQuestions[index],
+                                      child: Icon(Icons.flag, color: Colors.black),),
+                                    label: Text(
                                       '${index + 1}',
                                       style: TextStyle(color: Colors.white,
                                       fontSize: 20),
@@ -136,11 +140,13 @@ Widget build(BuildContext context) {
                                 child: SizedBox(
                                   width: 100, // Set the desired width
                                   height: 50, // Set the desired height
-                                  child: ElevatedButton(
+                                  child: ElevatedButton.icon(
                                     onPressed: () {
                                       _returnToMiniMock(context, index+5);
                                     },
-                                    child: Text(
+                                    icon: Visibility( visible: widget.flaggedQuestions[index+5],
+                                      child: Icon(Icons.flag, color: Colors.black),),
+                                    label: Text(
                                       '${index + 6}',
                                       style: TextStyle(color: Colors.white,
                                       fontSize: 20),
@@ -157,11 +163,13 @@ Widget build(BuildContext context) {
                                 child: SizedBox(
                                   width: 100, // Set the desired width
                                   height: 50, // Set the desired height
-                                  child: ElevatedButton(
+                                  child: ElevatedButton.icon(
                                     onPressed: () {
                                       _returnToMiniMock(context, index+10);
                                     },
-                                    child: Text(
+                                    icon: Visibility( visible: widget.flaggedQuestions[index+10],
+                                      child: Icon(Icons.flag, color: Colors.black),),
+                                    label: Text(
                                       '${index + 11}',
                                       style: TextStyle(color: Colors.white,
                                       fontSize: 20),
@@ -197,11 +205,13 @@ Widget build(BuildContext context) {
                                 child: SizedBox(
                                   width: 100, // Set the desired width
                                   height: 50, // Set the desired height
-                                  child: ElevatedButton(
+                                  child: ElevatedButton.icon(
                                     onPressed: () {
                                       _returnToMiniMock(context, index+13);
                                     },
-                                    child: Text(
+                                     icon: Visibility( visible: widget.flaggedQuestions[index+13],
+                                      child: Icon(Icons.flag, color: Colors.black),),
+                                    label: Text(
                                       '${index + 14}',
                                       style: TextStyle(color: Colors.white,
                                       fontSize: 20),
@@ -218,11 +228,14 @@ Widget build(BuildContext context) {
                                 child: SizedBox(
                                   width: 100, // Set the desired width
                                   height: 50, // Set the desired height
-                                  child: ElevatedButton(
+                                  child: ElevatedButton.icon(
                                     onPressed: () {
                                       _returnToMiniMock(context, index+19);
                                     },
-                                    child: Text(
+          
+                                    icon: Visibility( visible: widget.flaggedQuestions[index+19],
+                                      child: Icon(Icons.flag, color: Colors.black),),
+                                    label: Text(
                                       '${index + 20}',
                                       style: TextStyle(color: Colors.white,
                                       fontSize: 20),
@@ -239,11 +252,13 @@ Widget build(BuildContext context) {
                                 child: SizedBox(
                                   width: 100, // Set the desired width
                                   height: 50, // Set the desired height
-                                  child: ElevatedButton(
+                                  child: ElevatedButton.icon(
                                     onPressed: () {
                                       _returnToMiniMock(context, index+24);
                                     },
-                                    child: Text(
+                                     icon: Visibility( visible: widget.flaggedQuestions[index+24],
+                                      child: Icon(Icons.flag, color: Colors.black),),
+                                    label: Text(
                                       '${index + 25}',
                                       style: TextStyle(color: Colors.white,
                                       fontSize: 20),
