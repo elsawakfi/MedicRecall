@@ -80,10 +80,11 @@ class StudySessionManager {
 
 
       if (selectedResources!.contains('Mini-mocks')) {
-      DateTime halfwayDate =  DateTime(firstStudyDay.year, firstStudyDay.month, firstStudyDay.day + (daysUntilTest~/2), 0, 0, 0, 0);
-      print('halfwayDate: $halfwayDate');
-
+      //The dates need to be zeroed out in the time field otherwise they
+      //can't be added to the calendar
       
+      DateTime halfwayDate =  DateTime(firstStudyDay.year, firstStudyDay.month, firstStudyDay.day + (daysUntilTest~/2), 0, 0, 0, 0);
+    
       if(generatedEvents[halfwayDate] == null ){
           generatedEvents[halfwayDate] = [];
       }
