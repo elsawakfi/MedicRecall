@@ -6,6 +6,7 @@ import 'package:flashcard_x/utils/algo.dart';
 //import 'feed_screen.dart';
 import 'package:flashcard_x/widgets/event.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 // import 'calendar_screen.dart';
 // import 'button_screen.dart';
 
@@ -88,15 +89,16 @@ class StudySessionManager {
       if(generatedEvents[halfwayDate] == null ){
           generatedEvents[halfwayDate] = [];
       }
-      generatedEvents[halfwayDate]!.add(Event(title: "Second Mini Mock"));
+      generatedEvents[halfwayDate]!.add(Event(title: "Second Mini Mock", color: Color.fromARGB(255, 138, 201, 38)));
 
       //Need to 0 out the time part of the DateTime variable
       DateTime studyDay = DateTime(firstStudyDay.year, firstStudyDay.month, firstStudyDay.day, 0, 0, 0, 0);
       if (generatedEvents[studyDay] == null) {
         generatedEvents[studyDay] = [];
       }
-      generatedEvents[studyDay]!.add(Event(title: "First Mini Mock"));
-     
+
+      generatedEvents[studyDay]!.add(Event(title: "First Mini Mock", color: Color.fromARGB(255, 138, 201, 38)));
+
     }
 
     if (selectedResources.contains('Full-sized mock exam')) {
@@ -114,7 +116,7 @@ class StudySessionManager {
           mockExamDate = mockExamDate.add(Duration(days: 1));
         }
         generatedEvents[mockExamDate] = [];
-        generatedEvents[mockExamDate]!.add(Event(title: "Full-sized Mock Exam ${intervals.indexOf(interval) + 1}"));
+        generatedEvents[mockExamDate]!.add(Event(title: "Full-sized Mock Exam ${intervals.indexOf(interval) + 1}", color: Color.fromARGB(255, 120, 202, 210)));
       }
     }
 
@@ -134,8 +136,10 @@ class StudySessionManager {
           officialPaperDate = officialPaperDate.add(Duration(days:1));
           
         }
+
         generatedEvents[officialPaperDate] = [];
-        generatedEvents[officialPaperDate]!.add(Event(title: "Official Paper ${intervals.indexOf(interval) + 1}"));
+        generatedEvents[officialPaperDate]!.add(Event(title: "Official Paper ${intervals.indexOf(interval) + 1}", color: Color.fromARGB(255, 163, 68, 174)));
+
       }
     }
 
@@ -178,7 +182,7 @@ class StudySessionManager {
             if (testDay.isAfter(nextReviewDate)) {
               generatedEvents[nextReviewDate] = [];
               generatedEvents[nextReviewDate]!
-                  .add(Event(title: flashcard["topic"] + " Flashcards"));
+                  .add(Event(title: flashcard["topic"] + " Flashcards",color: Color.fromARGB(255, 255, 202, 58)));
             }
           }
         }
@@ -215,7 +219,7 @@ class StudySessionManager {
               //Once a free day is used, the corresponding flashcard topic is added
               generatedEvents[nextReviewDate] = [];
               generatedEvents[nextReviewDate]!
-                  .add(Event(title: flashcard["topic"] + " Flashcards"));
+                  .add(Event(title: flashcard["topic"] + " Flashcards", color: Color.fromARGB(255, 255, 202, 58)));
             }
           }
         }

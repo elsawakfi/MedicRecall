@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/screens/minimock_feedback.dart';
+import '../screens/minimock_review.dart';
 import '../utils/timer.dart';
 
 abstract class MiniMockExam extends StatefulWidget {
@@ -394,11 +395,25 @@ class MiniMockExamState extends State<MiniMockExam> {
                       ),
                     if (currentQuestion == questions.length - 1)
                       ElevatedButton.icon(
-                        onPressed: () {
-                          examEnd();
+                        onPressed: () async {
+                          // On pressed load new page and wait for a returned value
+                          int? newIndex = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MiniMockReview(miniMockWidget: this, rankingLength: rankingAnswers.length, multiChoiceLength: multiChoiceAnswers.length, flaggedQuestions: flaggedQuestions,),
+                            ),
+                          );
+                          // statement bellow allows for faster page update
+                          // Must check for null in case user finishes exam and no value is returned
+                          if (newIndex != null && newIndex != currentQuestion){
+                            setState(() {
+                              currentQuestion = newIndex;
+                            });
+                          }
+
                         },
                         icon: Icon(Icons.arrow_forward, color: Colors.white),
-                        label: Text('Finish', style: TextStyle(color: Colors.white, fontSize: 16)),
+                        label: Text('Review', style: TextStyle(color: Colors.white, fontSize: 16)),
                       ),
                   ],
                 ),
