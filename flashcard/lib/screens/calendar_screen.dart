@@ -400,6 +400,7 @@ class CalendarStateO extends State<Calendar> {
 @override
 Widget build(BuildContext context) {
   buildCount++;
+  
   return Scaffold(
     drawer: const DrawMain(),
     appBar: AppBar(

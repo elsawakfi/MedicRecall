@@ -69,16 +69,36 @@ class StudySessionManager {
     // Get topics and related data from the database or pass them as arguments
     List<String>? selectedResources = await getSelectedResources(userId);
 
-    DateTime firstStudyDay = querySnapshot.docs.last['firstStudyDay'].toDate(); 
+    DateTime firstStudyDay = querySnapshot.docs.last['firstStudyDay'].toDate();
+
+    
+  
     // Start study sessions from today (aka. the day u start study session)
     int daysUntilTest =
         (testDay.difference(firstStudyDay).inHours / 24).round();
     // Loop through topics to generate study sessions
 
 
-    
+      if (selectedResources!.contains('Mini-mocks')) {
+      DateTime halfwayDate =  DateTime(firstStudyDay.year, firstStudyDay.month, firstStudyDay.day + (daysUntilTest~/2), 0, 0, 0, 0);
+      print('halfwayDate: $halfwayDate');
 
-    if (selectedResources!.contains('Full-sized mock exam')) {
+      
+      if(generatedEvents[halfwayDate] == null ){
+          generatedEvents[halfwayDate] = [];
+      }
+      generatedEvents[halfwayDate]!.add(Event(title: "Second Mini Mock"));
+
+      //Need to 0 out the time part of the DateTime variable
+      DateTime studyDay = DateTime(firstStudyDay.year, firstStudyDay.month, firstStudyDay.day, 0, 0, 0, 0);
+      if (generatedEvents[studyDay] == null) {
+        generatedEvents[studyDay] = [];
+      }
+      generatedEvents[studyDay]!.add(Event(title: "First Mini Mock"));
+     
+    }
+
+    if (selectedResources.contains('Full-sized mock exam')) {
       int repetitions = querySnapshot.docs.last['selectedRepetition'];
 
       List<int> intervals = [];
@@ -108,7 +128,7 @@ class StudySessionManager {
 
       for (int interval in intervals) {
         DateTime officialPaperDate =
-            DateTime(firstStudyDay.year, firstStudyDay.month, firstStudyDay.day + interval, 0, 0, 0, 0);
+            DateTime(firstStudyDay.year, firstStudyDay.month, firstStudyDay.day + interval+1, 0, 0, 0, 0);
         if (generatedEvents[officialPaperDate] == null) {
           generatedEvents[officialPaperDate] = [];
         }
@@ -201,24 +221,6 @@ class StudySessionManager {
         print("Error\n");
         print(e);
       }
-    }
-
-    if (selectedResources.contains('Mini-mocks')) {
-      DateTime halfwayDate = firstStudyDay.add(Duration(days: daysUntilTest ~/ 2));
-      print('halfwayDate: $halfwayDate');
-
-      while (generatedEvents[halfwayDate] != null) {
-       halfwayDate = halfwayDate.add(Duration(days:1));
-      }
-      generatedEvents[halfwayDate] = [];
-      generatedEvents[halfwayDate]!.add(Event(title: "Second Mini Mock"));
-      print('Event added on halfwayDate: ${generatedEvents[halfwayDate]}');
-
-      if (generatedEvents[firstStudyDay] == null) {
-        generatedEvents[firstStudyDay] = [];
-      }
-      generatedEvents[firstStudyDay]!.add(Event(title: "First Mini Mock"));
-      print('Event added on firstStudyDay: ${generatedEvents[firstStudyDay]}');
     }
     print('Generated Events: $generatedEvents');
     return generatedEvents;
