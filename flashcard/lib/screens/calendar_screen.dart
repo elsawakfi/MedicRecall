@@ -422,15 +422,6 @@ Widget build(BuildContext context) {
               ],
             ),
           ),
-          // Positioned custom button on the right
-          // Positioned(
-          //   right: 0,
-          //   top: 0,
-          //   child: CustomFloatingButton()
-            
-          // ),
-          
-    
         ],
       ),
       centerTitle: true,
@@ -462,11 +453,32 @@ Widget build(BuildContext context) {
                     });
                   },
                   eventLoader: _getEventsfromDay,
-                  // calendarBuilders: CalendarBuilders(
-                  //   markerBuilder: (context, day, events) {
-                      
-                  //   },
-                  // ),
+                  calendarBuilders: CalendarBuilders(
+                    markerBuilder: (context, day, events) {
+                      if (events.isNotEmpty) {
+                        return Positioned(
+                          bottom: 1,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: events.map((event) {
+                              Event ev = event as Event;
+                              return Container(
+                                margin: const EdgeInsets.symmetric(horizontal: 1.5),
+                                width: 8,
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  color: ev.color, // Set color based on event color
+                                  shape: BoxShape.circle,
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        );
+                      }
+                      return null;
+                    },
+                  ),
+
                   calendarStyle: CalendarStyle(
                     isTodayHighlighted: true,
                     selectedDecoration: BoxDecoration(
@@ -625,7 +637,7 @@ Widget build(BuildContext context) {
                         backgroundColor: Colors.blue,
                       ),
                       child: const Text(
-                        "Make a Revision Plan",
+                        "Generate Revision Plan",
                         style: TextStyle(color: Colors.white),
                       ),
                     ),
