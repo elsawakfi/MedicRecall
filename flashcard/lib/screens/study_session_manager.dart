@@ -110,7 +110,6 @@ class StudySessionManager {
     }
 
     if (selectedResources.contains('Full-sized mock exam')) {
-      DateTime now = DateTime.now();
       int repetitions = querySnapshot.docs.last['selectedRepetition'];
 
       List<int> intervals = [];
@@ -119,12 +118,16 @@ class StudySessionManager {
       }
 
       for (int interval in intervals) {
-        DateTime mockExamDate = DateTime(now.year, now.month, now.day + interval, 0, 0, 0, 0);
+        DateTime mockExamDate = DateTime(
+            now.year, now.month, now.day + interval, 0, 0, 0, 0);
+        mockExamDate = findNearestFreeDate(mockExamDate, 2); // Allow up to 2 days movement
         
         if (generatedEvents[mockExamDate] == null) {
           generatedEvents[mockExamDate] = [];
         }
-        generatedEvents[mockExamDate]!.add(Event(title: "Full-sized Mock Exam ${intervals.indexOf(interval) + 1}", color: Color.fromARGB(255, 120, 202, 210)));
+        generatedEvents[mockExamDate]!.add(
+            Event(title: "Full-sized Mock Exam ${intervals.indexOf(interval) + 1}",
+                color: Color.fromARGB(255, 120, 202, 210)));
       }
     }
 
