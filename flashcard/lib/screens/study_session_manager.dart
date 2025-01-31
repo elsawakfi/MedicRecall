@@ -89,26 +89,26 @@ class StudySessionManager {
     if (selectedResources!.contains('Mini-mocks')) {
       // First mini mock on today
       DateTime firstMockDate = today;
-      firstMockDate = findNearestFreeDate(firstMockDate, 1); // Try to keep it close to today
+      firstMockDate = findNearestFreeDate(firstMockDate, 1);
       
       if (generatedEvents[firstMockDate] == null) {
-        generatedEvents[firstMockDate] = [];
-      }
-      generatedEvents[firstMockDate]!.add(
+        generatedEvents[firstMockDate] = [
           Event(title: "First Mini Mock", 
-              color: Color.fromARGB(255, 138, 201, 38)));
+              color: const Color.fromARGB(255, 138, 201, 38))
+        ];
+      }
 
       // Second mini mock halfway to test
       DateTime halfwayDate = DateTime(
           now.year, now.month, now.day + (daysUntilTest ~/ 2), 0, 0, 0, 0);
-      halfwayDate = findNearestFreeDate(halfwayDate, 4); // More flexible with the halfway date
+      halfwayDate = findNearestFreeDate(halfwayDate, 4);
       
       if (generatedEvents[halfwayDate] == null) {
-        generatedEvents[halfwayDate] = [];
-      }
-      generatedEvents[halfwayDate]!.add(
+        generatedEvents[halfwayDate] = [
           Event(title: "Second Mini Mock", 
-              color: Color.fromARGB(255, 138, 201, 38)));
+              color: const Color.fromARGB(255, 138, 201, 38))
+        ];
+      }
     }
 
     if (selectedResources.contains('Full-sized mock exam')) {
@@ -122,22 +122,20 @@ class StudySessionManager {
       for (int interval in intervals) {
         DateTime mockExamDate = DateTime(
             now.year, now.month, now.day + interval, 0, 0, 0, 0);
-        mockExamDate = findNearestFreeDate(mockExamDate, 2); // Allow up to 2 days movement
+        mockExamDate = findNearestFreeDate(mockExamDate, 2);
         
         if (generatedEvents[mockExamDate] == null) {
-          generatedEvents[mockExamDate] = [];
-        }
-        generatedEvents[mockExamDate]!.add(
+          generatedEvents[mockExamDate] = [
             Event(title: "Full-sized Mock Exam ${intervals.indexOf(interval) + 1}",
-                color: Color.fromARGB(255, 120, 202, 210)));
+                color: const Color.fromARGB(255, 120, 202, 210))
+          ];
+        }
       }
     }
 
     if (selectedResources.contains('Official paper')) {
-      // int repetitions = 3;
       int repetitions = querySnapshot.docs.last['selectedRepetition'];
 
-      // get the days until the test + intervals
       List<int> intervals = [];
       for (int i = 0; i < repetitions; i++) {
         intervals.add((daysUntilTest * i / repetitions).round());
@@ -146,14 +144,14 @@ class StudySessionManager {
       for (int interval in intervals) {
         DateTime officialPaperDate = DateTime(
             now.year, now.month, now.day + interval, 0, 0, 0, 0);
-        officialPaperDate = findNearestFreeDate(officialPaperDate, 3); // Allow up to 3 days movement
+        officialPaperDate = findNearestFreeDate(officialPaperDate, 3);
         
         if (generatedEvents[officialPaperDate] == null) {
-          generatedEvents[officialPaperDate] = [];
-        }
-        generatedEvents[officialPaperDate]!.add(
+          generatedEvents[officialPaperDate] = [
             Event(title: "Official Paper ${intervals.indexOf(interval) + 1}",
-                color: Color.fromARGB(255, 163, 68, 174)));
+                color: const Color.fromARGB(255, 163, 68, 174))
+          ];
+        }
       }
     }
 
@@ -161,70 +159,51 @@ class StudySessionManager {
       try {
         final CollectionReference<Map<String, dynamic>> flashcards =
             FirebaseFirestore.instance.collection('flashcards');
-        final List<String> contains = [];
+        final List<String> topics = [];
+        List<String> unscheduledTopics = [];
 
-        // Get all documents in the collection
-        final QuerySnapshot<Map<String, dynamic>> flashcardDeck =
-            await flashcards.get();
-        
-        // Handle previously seen flashcards first
+        // Collect all unique topics first
         final seenFlashcards = await Algo().getFlashcards(user.uid);
         for (final flashcard in seenFlashcards) {
-          if (!contains.contains(flashcard["topic"])) {
-            contains.add(flashcard["topic"]);
-            
-            // Calculate initial review date
-            DateTime nextReviewDate = DateTime(
-                now.year, now.month, now.day, 0, 0, 0, 0);
-            
-            // Determine flexibility based on days until test
-            int maxDaysToMove = 1; // Default to 1 day
-            if (daysUntilTest > 60) {
-              maxDaysToMove = 3;
-            } else if (daysUntilTest > 31) {
-              maxDaysToMove = 2;
-            }
-            
-            // Find a free date within the allowed range
-            nextReviewDate = findNearestFreeDate(nextReviewDate, maxDaysToMove);
-            
-            if (testDay.isAfter(nextReviewDate)) {
-              generatedEvents[nextReviewDate] = [];
-              generatedEvents[nextReviewDate]!.add(
-                  Event(title: "${flashcard["topic"]} Flashcards",
-                      color: Color.fromARGB(255, 255, 202, 58)));
-            }
+          String topic = flashcard["topic"] as String? ?? "";
+          if (topic.isNotEmpty && !topics.contains(topic)) {
+            topics.add(topic);
+            unscheduledTopics.add(topic);
           }
         }
 
-        // Handle unseen flashcards next
+        final QuerySnapshot<Map<String, dynamic>> flashcardDeck = await flashcards.get();
         for (final doc in flashcardDeck.docs) {
           final Map<String, dynamic> flashcard = doc.data();
+          String topic = flashcard["topic"] as String? ?? "";
+          if (topic.isNotEmpty && !topics.contains(topic)) {
+            topics.add(topic);
+            unscheduledTopics.add(topic);
+          }
+        }
 
-          if (!contains.contains(flashcard["topic"])) {
-            contains.add(flashcard["topic"]);
-            
-            // Calculate initial review date
-            DateTime nextReviewDate = DateTime(
-                now.year, now.month, now.day, 0, 0, 0, 0);
-            
-            // Determine flexibility based on days until test
-            int maxDaysToMove = 1; // Default to 1 day
-            if (daysUntilTest > 60) {
-              maxDaysToMove = 3;
-            } else if (daysUntilTest >= 30) {
-              maxDaysToMove = 2;
-            }
-            
-            // Find a free date within the allowed range
-            nextReviewDate = findNearestFreeDate(nextReviewDate, maxDaysToMove);
-            
-            if (testDay.isAfter(nextReviewDate)) {
-              generatedEvents[nextReviewDate] = [];
-              generatedEvents[nextReviewDate]!.add(
-                  Event(title: "${flashcard["topic"]} Flashcards",
-                      color: Color.fromARGB(255, 255, 202, 58)));
-            }
+        // Create a list of all available days (days without events)
+        List<DateTime> availableDays = [];
+        for (int i = 0; i <= daysUntilTest; i++) {
+          DateTime day = DateTime(now.year, now.month, now.day + i, 0, 0, 0, 0);
+          if (day.isBefore(testDay) && generatedEvents[day] == null) {
+            availableDays.add(day);
+          }
+        }
+
+        // Distribute topics across available days
+        for (DateTime day in availableDays) {
+          if (unscheduledTopics.isEmpty && topics.isNotEmpty) {
+            // If all topics have been scheduled once, start recycling them
+            unscheduledTopics = List.from(topics);
+          }
+          
+          if (unscheduledTopics.isNotEmpty) {
+            String topic = unscheduledTopics.removeAt(0);
+            generatedEvents[day] = [
+              Event(title: "$topic Flashcards",
+                  color: const Color.fromARGB(255, 255, 202, 58))
+            ];
           }
         }
       } catch (e) {
