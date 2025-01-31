@@ -5,24 +5,38 @@ import 'package:flashcard_x/widgets/event.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+/// Manages the generation and scheduling of study sessions
 class StudySessionManager {
+  // Constants for event colors
+  static const Color kMiniMockColor = Color.fromARGB(255, 138, 201, 38);
+  static const Color kFullMockColor = Color.fromARGB(255, 120, 202, 210);
+  static const Color kOfficialPaperColor = Color.fromARGB(255, 163, 68, 174);
+  static const Color kFlashcardColor = Color.fromARGB(255, 255, 202, 58);
+
+  // Firebase references
   final CollectionReference _userCollectionRef =
       FirebaseFirestore.instance.collection('users');
   final FirebaseAuth auth = FirebaseAuth.instance;
   late User user;
   late CollectionReference _eventsCollectionRef;
 
+  /// Retrieves timestamps of last seen topics for a user
   Future<List<Timestamp>?> getTimestamps(String userId) async {
     try {
       DocumentSnapshot userDoc = await _userCollectionRef.doc(userId).get();
-      if (userDoc.exists) {
-        return List<Timestamp>.from(userDoc['topicLastSeen']);
-      } else {
+      if (!userDoc.exists) {
         if (kDebugMode) {
           print('User document does not exist');
         }
         return null;
       }
+
+      final data = userDoc.data() as Map<String, dynamic>?;
+      if (data == null || !data.containsKey('topicLastSeen')) {
+        return null;
+      }
+
+      return List<Timestamp>.from(data['topicLastSeen']);
     } catch (e) {
       if (kDebugMode) {
         print('Error retrieving timestamps: $e');
@@ -31,17 +45,23 @@ class StudySessionManager {
     }
   }
 
+  /// Retrieves selected study resources for a user
   Future<List<String>?> getSelectedResources(String userId) async {
     try {
       DocumentSnapshot userDoc = await _userCollectionRef.doc(userId).get();
-      if (userDoc.exists) {
-        return List<String>.from(userDoc['selectedResources']);
-      } else {
+      if (!userDoc.exists) {
         if (kDebugMode) {
           print('User document does not exist');
         }
         return null;
       }
+
+      final data = userDoc.data() as Map<String, dynamic>?;
+      if (data == null || !data.containsKey('selectedResources')) {
+        return null;
+      }
+
+      return List<String>.from(data['selectedResources']);
     } catch (e) {
       if (kDebugMode) {
         print('Error retrieving selected resources: $e');
@@ -50,184 +70,272 @@ class StudySessionManager {
     }
   }
 
-  // Generate study sessions based on user data and test day
-  Future<Map<DateTime, List<Event>>> generateStudySessions(User user) async {
-    Map<DateTime, List<Event>> generatedEvents = {};
+  /// Helper function to find the nearest available date for an event
+  DateTime findNearestFreeDate(
+      DateTime targetDate,
+      int maxDaysToMove,
+      DateTime testDay,
+      DateTime today,
+      Map<DateTime, List<Event>> generatedEvents) {
+    if (generatedEvents[targetDate] == null) return targetDate;
 
-    QuerySnapshot querySnapshot =
-        await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
-    var userId = querySnapshot.docs.last.id;
-    DateTime testDay = querySnapshot.docs.last['TestDay'].toDate();
-    List<String>? selectedResources = await getSelectedResources(userId);
-
-    int daysUntilTest = (testDay.difference(DateTime.now()).inHours / 24).round();
-    DateTime now = DateTime.now();
-    DateTime today = DateTime(now.year, now.month, now.day, 0, 0, 0, 0);
-
-    // Helper function to find the nearest free date
-    DateTime findNearestFreeDate(DateTime targetDate, int maxDaysToMove) {
-      if (generatedEvents[targetDate] == null) return targetDate;
-      
-      for (int i = 1; i <= maxDaysToMove; i++) {
-        // Try future date first
-        DateTime futureDate = DateTime(
-            targetDate.year, targetDate.month, targetDate.day + i, 0, 0, 0, 0);
-        if (generatedEvents[futureDate] == null && futureDate.isBefore(testDay)) {
-          return futureDate;
-        }
-        
-        // Then try past date
-        DateTime pastDate = DateTime(
-            targetDate.year, targetDate.month, targetDate.day - i, 0, 0, 0, 0);
-        if (generatedEvents[pastDate] == null && pastDate.isAfter(today)) {
-          return pastDate;
-        }
-      }
-      return targetDate; // Return original if no free date found
-    }
-
-    if (selectedResources!.contains('Mini-mocks')) {
-      // First mini mock on today
-      DateTime firstMockDate = today;
-      firstMockDate = findNearestFreeDate(firstMockDate, 1);
-      
-      if (generatedEvents[firstMockDate] == null) {
-        generatedEvents[firstMockDate] = [
-          Event(title: "First Mini Mock", 
-              color: const Color.fromARGB(255, 138, 201, 38))
-        ];
+    for (int i = 1; i <= maxDaysToMove; i++) {
+      // Try future date first
+      DateTime futureDate = DateTime(
+          targetDate.year, targetDate.month, targetDate.day + i, 0, 0, 0, 0);
+      if (generatedEvents[futureDate] == null && futureDate.isBefore(testDay)) {
+        return futureDate;
       }
 
-      // Second mini mock halfway to test
-      DateTime halfwayDate = DateTime(
-          now.year, now.month, now.day + (daysUntilTest ~/ 2), 0, 0, 0, 0);
-      halfwayDate = findNearestFreeDate(halfwayDate, 4);
-      
-      if (generatedEvents[halfwayDate] == null) {
-        generatedEvents[halfwayDate] = [
-          Event(title: "Second Mini Mock", 
-              color: const Color.fromARGB(255, 138, 201, 38))
-        ];
+      // Then try past date
+      DateTime pastDate = DateTime(
+          targetDate.year, targetDate.month, targetDate.day - i, 0, 0, 0, 0);
+      if (generatedEvents[pastDate] == null && pastDate.isAfter(today)) {
+        return pastDate;
       }
     }
-
-    if (selectedResources.contains('Full-sized mock exam')) {
-      int repetitions = querySnapshot.docs.last['selectedRepetition'];
-
-      List<int> intervals = [];
-      for (int i = 0; i < repetitions; i++) {
-        intervals.add(((daysUntilTest / 3) - 2 + (i * 4)).round());
-      }
-
-      for (int interval in intervals) {
-        DateTime mockExamDate = DateTime(
-            now.year, now.month, now.day + interval, 0, 0, 0, 0);
-        mockExamDate = findNearestFreeDate(mockExamDate, 2);
-        
-        if (generatedEvents[mockExamDate] == null) {
-          generatedEvents[mockExamDate] = [
-            Event(title: "Full-sized Mock Exam ${intervals.indexOf(interval) + 1}",
-                color: const Color.fromARGB(255, 120, 202, 210))
-          ];
-        }
-      }
-    }
-
-    if (selectedResources.contains('Official paper')) {
-      int repetitions = querySnapshot.docs.last['selectedRepetition'];
-
-      List<int> intervals = [];
-      for (int i = 0; i < repetitions; i++) {
-        intervals.add((daysUntilTest * i / repetitions).round());
-      }
-
-      for (int interval in intervals) {
-        DateTime officialPaperDate = DateTime(
-            now.year, now.month, now.day + interval, 0, 0, 0, 0);
-        officialPaperDate = findNearestFreeDate(officialPaperDate, 3);
-        
-        if (generatedEvents[officialPaperDate] == null) {
-          generatedEvents[officialPaperDate] = [
-            Event(title: "Official Paper ${intervals.indexOf(interval) + 1}",
-                color: const Color.fromARGB(255, 163, 68, 174))
-          ];
-        }
-      }
-    }
-
-    if (selectedResources.contains("Flashcards")) {
-      try {
-        final CollectionReference<Map<String, dynamic>> flashcards =
-            FirebaseFirestore.instance.collection('flashcards');
-        final List<String> topics = [];
-        List<String> unscheduledTopics = [];
-
-        // Collect all unique topics first
-        final seenFlashcards = await Algo().getFlashcards(user.uid);
-        for (final flashcard in seenFlashcards) {
-          String topic = flashcard["topic"] as String? ?? "";
-          if (topic.isNotEmpty && !topics.contains(topic)) {
-            topics.add(topic);
-            unscheduledTopics.add(topic);
-          }
-        }
-
-        final QuerySnapshot<Map<String, dynamic>> flashcardDeck = await flashcards.get();
-        for (final doc in flashcardDeck.docs) {
-          final Map<String, dynamic> flashcard = doc.data();
-          String topic = flashcard["topic"] as String? ?? "";
-          if (topic.isNotEmpty && !topics.contains(topic)) {
-            topics.add(topic);
-            unscheduledTopics.add(topic);
-          }
-        }
-
-        // Create a list of all available days (days without events)
-        List<DateTime> availableDays = [];
-        for (int i = 0; i <= daysUntilTest; i++) {
-          DateTime day = DateTime(now.year, now.month, now.day + i, 0, 0, 0, 0);
-          if (day.isBefore(testDay) && generatedEvents[day] == null) {
-            availableDays.add(day);
-          }
-        }
-
-        // Distribute topics across available days
-        for (DateTime day in availableDays) {
-          if (unscheduledTopics.isEmpty && topics.isNotEmpty) {
-            // If all topics have been scheduled once, start recycling them
-            unscheduledTopics = List.from(topics);
-          }
-          
-          if (unscheduledTopics.isNotEmpty) {
-            String topic = unscheduledTopics.removeAt(0);
-            generatedEvents[day] = [
-              Event(title: "$topic Flashcards",
-                  color: const Color.fromARGB(255, 255, 202, 58))
-            ];
-          }
-        }
-      } catch (e) {
-        if (kDebugMode) {
-          print('Error processing flashcards: $e');
-        }
-      }
-    }
-    return generatedEvents;
+    return targetDate;
   }
 
-  // Save generated events to the database
+  /// Generates study sessions based on user preferences and test date
+  Future<Map<DateTime, List<Event>>> generateStudySessions(User user) async {
+    try {
+      Map<DateTime, List<Event>> generatedEvents = {};
+
+      // Get user data and validate
+      QuerySnapshot querySnapshot =
+          await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+      if (querySnapshot.docs.isEmpty) {
+        if (kDebugMode) {
+          print('No user document found');
+        }
+        return {};
+      }
+
+      final userDoc = querySnapshot.docs.last;
+      final userData = userDoc.data() as Map<String, dynamic>;
+
+      final userId = userDoc.id;
+      final testDay = (userData['TestDay'] as Timestamp).toDate();
+      final selectedResources = await getSelectedResources(userId);
+
+      if (selectedResources == null || selectedResources.isEmpty) {
+        if (kDebugMode) {
+          print('No resources selected');
+        }
+        return {};
+      }
+
+      // Initialize dates
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day, 0, 0, 0, 0);
+      final normalizedTestDay =
+          DateTime(testDay.year, testDay.month, testDay.day, 0, 0, 0, 0);
+
+      if (!normalizedTestDay.isAfter(today)) {
+        if (kDebugMode) {
+          print('Test day must be in the future');
+        }
+        return {};
+      }
+
+      final daysUntilTest = normalizedTestDay.difference(today).inDays;
+
+      // Schedule Mini-mocks
+      if (selectedResources.contains('Mini-mocks')) {
+        await _scheduleMiniMocks(
+            today, normalizedTestDay, daysUntilTest, generatedEvents);
+      }
+
+      // Schedule Full-sized mock exams
+      if (selectedResources.contains('Full-sized mock exam')) {
+        final repetitions =
+            (userData['selectedRepetition'] as num?)?.toInt() ?? 1;
+        await _scheduleFullMocks(today, normalizedTestDay, daysUntilTest,
+            repetitions, generatedEvents);
+      }
+
+      // Schedule Official papers
+      if (selectedResources.contains('Official paper')) {
+        final repetitions =
+            (userData['selectedRepetition'] as num?)?.toInt() ?? 1;
+        await _scheduleOfficialPapers(today, normalizedTestDay, daysUntilTest,
+            repetitions, generatedEvents);
+      }
+
+      // Schedule Flashcards
+      if (selectedResources.contains('Flashcards')) {
+        await _scheduleFlashcards(
+            user.uid, today, normalizedTestDay, daysUntilTest, generatedEvents);
+      }
+
+      return generatedEvents;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error generating study sessions: $e');
+      }
+      return {};
+    }
+  }
+
+  /// Schedule mini-mock events
+  Future<void> _scheduleMiniMocks(DateTime today, DateTime testDay,
+      int daysUntilTest, Map<DateTime, List<Event>> generatedEvents) async {
+    // First mini mock
+    DateTime firstMockDate =
+        findNearestFreeDate(today, 1, testDay, today, generatedEvents);
+    if (generatedEvents[firstMockDate] == null) {
+      generatedEvents[firstMockDate] = [
+        Event(title: "First Mini Mock", color: kMiniMockColor)
+      ];
+    }
+
+    // Second mini mock halfway
+    if (daysUntilTest > 1) {
+      DateTime halfwayDate = today.add(Duration(days: daysUntilTest ~/ 2));
+      halfwayDate =
+          findNearestFreeDate(halfwayDate, 4, testDay, today, generatedEvents);
+      if (generatedEvents[halfwayDate] == null) {
+        generatedEvents[halfwayDate] = [
+          Event(title: "Second Mini Mock", color: kMiniMockColor)
+        ];
+      }
+    }
+  }
+
+  /// Schedule full mock exam events
+  Future<void> _scheduleFullMocks(
+      DateTime today,
+      DateTime testDay,
+      int daysUntilTest,
+      int repetitions,
+      Map<DateTime, List<Event>> generatedEvents) async {
+    repetitions = repetitions.clamp(1, 6);
+    for (int i = 0; i < repetitions; i++) {
+      int interval = ((daysUntilTest / 3) - 2 + (i * 4)).round();
+      if (interval >= daysUntilTest) continue;
+
+      DateTime mockExamDate = today.add(Duration(days: interval));
+      mockExamDate =
+          findNearestFreeDate(mockExamDate, 2, testDay, today, generatedEvents);
+
+      if (generatedEvents[mockExamDate] == null) {
+        generatedEvents[mockExamDate] = [
+          Event(title: "Full-sized Mock Exam ${i + 1}", color: kFullMockColor)
+        ];
+      }
+    }
+  }
+
+  /// Schedule official paper events
+  Future<void> _scheduleOfficialPapers(
+      DateTime today,
+      DateTime testDay,
+      int daysUntilTest,
+      int repetitions,
+      Map<DateTime, List<Event>> generatedEvents) async {
+    repetitions = repetitions.clamp(1, 6);
+    for (int i = 0; i < repetitions; i++) {
+      int interval = (daysUntilTest * i / repetitions).round();
+      if (interval >= daysUntilTest) continue;
+
+      DateTime officialPaperDate = today.add(Duration(days: interval));
+      officialPaperDate = findNearestFreeDate(
+          officialPaperDate, 3, testDay, today, generatedEvents);
+
+      if (generatedEvents[officialPaperDate] == null) {
+        generatedEvents[officialPaperDate] = [
+          Event(title: "Official Paper ${i + 1}", color: kOfficialPaperColor)
+        ];
+      }
+    }
+  }
+
+  /// Schedule flashcard events
+  Future<void> _scheduleFlashcards(
+      String userId,
+      DateTime today,
+      DateTime testDay,
+      int daysUntilTest,
+      Map<DateTime, List<Event>> generatedEvents) async {
+    try {
+      final CollectionReference<Map<String, dynamic>> flashcards =
+          FirebaseFirestore.instance.collection('flashcards');
+      final List<String> topics = [];
+      List<String> unscheduledTopics = [];
+
+      // Collect seen flashcard topics
+      final seenFlashcards = await Algo().getFlashcards(userId);
+      for (final flashcard in seenFlashcards) {
+        String topic = flashcard["topic"] as String? ?? "";
+        if (topic.isNotEmpty && !topics.contains(topic)) {
+          topics.add(topic);
+          unscheduledTopics.add(topic);
+        }
+      }
+
+      // Collect unseen flashcard topics
+      final QuerySnapshot<Map<String, dynamic>> flashcardDeck =
+          await flashcards.get();
+      for (final doc in flashcardDeck.docs) {
+        final Map<String, dynamic> flashcard = doc.data();
+        String topic = flashcard["topic"] as String? ?? "";
+        if (topic.isNotEmpty && !topics.contains(topic)) {
+          topics.add(topic);
+          unscheduledTopics.add(topic);
+        }
+      }
+
+      // Find available days
+      List<DateTime> availableDays = [];
+      for (int i = 0; i <= daysUntilTest; i++) {
+        DateTime day =
+            DateTime(today.year, today.month, today.day + i, 0, 0, 0, 0);
+        if (day.isBefore(testDay) && generatedEvents[day] == null) {
+          availableDays.add(day);
+        }
+      }
+
+      // Schedule topics
+      for (DateTime day in availableDays) {
+        if (unscheduledTopics.isEmpty && topics.isNotEmpty) {
+          unscheduledTopics = List.from(topics);
+        }
+
+        if (unscheduledTopics.isNotEmpty) {
+          String topic = unscheduledTopics.removeAt(0);
+          generatedEvents[day] = [
+            Event(title: "$topic Flashcards", color: kFlashcardColor)
+          ];
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error processing flashcards: $e');
+      }
+    }
+  }
+
+  /// Save generated events to the database
   Future<void> saveStudySessionsToDB(
       User user, Map<DateTime, List<Event>> events) async {
     try {
       final QuerySnapshot u =
           await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
-      final String id = u.docs.last.id;
+      if (u.docs.isEmpty) {
+        if (kDebugMode) {
+          print('No user document found');
+        }
+        return;
+      }
 
+      final String id = u.docs.last.id;
       _eventsCollectionRef =
           FirebaseFirestore.instance.collection('users/$id/events');
-          
+
       for (final date in events.keys) {
-        final List<String> eventTitles = events[date]!.map((e) => e.title).toList();
+        final List<String> eventTitles =
+            events[date]!.map((e) => e.title).toList();
         await _eventsCollectionRef.add({
           "date": date,
           "events": eventTitles,
@@ -240,10 +348,9 @@ class StudySessionManager {
     }
   }
 
-  // Start a study session with selected resources
+  /// Start a study session with selected resources
   void startStudySession(List<String> selectedResources) {
     try {
-      // Validate selected resources
       if (selectedResources.isEmpty) {
         if (kDebugMode) {
           print('No resources selected for study session');
@@ -251,14 +358,11 @@ class StudySessionManager {
         return;
       }
 
-      // Log the start of the session
       if (kDebugMode) {
         print('Starting study session with resources: $selectedResources');
       }
 
       // TODO: Implement the study session logic
-      // This will be implemented based on the specific requirements
-      // for handling different types of study resources
     } catch (e) {
       if (kDebugMode) {
         print('Error starting study session: $e');
