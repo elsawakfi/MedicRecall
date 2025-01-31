@@ -65,18 +65,36 @@ class StudySessionManager {
     QuerySnapshot querySnapshot =
         await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
     var userId = querySnapshot.docs.last.id;
-    //var databaseFlashcards = await Algo().getFlashcards(user.uid);
     DateTime testDay = querySnapshot.docs.last['TestDay'].toDate();
-    // Get topics and related data from the database or pass them as arguments
     List<String>? selectedResources = await getSelectedResources(userId);
 
-    int daysUntilTest =
-        (testDay.difference(DateTime.now()).inHours / 24).round();
-    // Loop through topics to generate study sessions
+    int daysUntilTest = (testDay.difference(DateTime.now()).inHours / 24).round();
+    DateTime now = DateTime.now();
+    DateTime today = DateTime(now.year, now.month, now.day, 0, 0, 0, 0);
+
+    // Helper function to find the nearest free date
+    DateTime findNearestFreeDate(DateTime targetDate, int maxDaysToMove) {
+      if (generatedEvents[targetDate] == null) return targetDate;
+      
+      for (int i = 1; i <= maxDaysToMove; i++) {
+        // Try future date first
+        DateTime futureDate = DateTime(
+            targetDate.year, targetDate.month, targetDate.day + i, 0, 0, 0, 0);
+        if (generatedEvents[futureDate] == null && futureDate.isBefore(testDay)) {
+          return futureDate;
+        }
+        
+        // Then try past date
+        DateTime pastDate = DateTime(
+            targetDate.year, targetDate.month, targetDate.day - i, 0, 0, 0, 0);
+        if (generatedEvents[pastDate] == null && pastDate.isAfter(today)) {
+          return pastDate;
+        }
+      }
+      return targetDate; // Return original if no free date found
+    }
 
     if (selectedResources!.contains('Mini-mocks')) {
-      DateTime now = DateTime.now();
-      DateTime today = DateTime(now.year, now.month, now.day, 0, 0, 0, 0);
       DateTime halfwayDate = DateTime(
           now.year, now.month, now.day + (daysUntilTest ~/ 2), 0, 0, 0, 0);
 
