@@ -1,61 +1,53 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-//import 'package:flashcard_x/main.dart';
-//import 'package:flashcard_x/screens/minimock_feedback.dart';
 import 'package:flashcard_x/utils/algo.dart';
-//import 'feed_screen.dart';
 import 'package:flashcard_x/widgets/event.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-// import 'calendar_screen.dart';
-// import 'button_screen.dart';
 
 class StudySessionManager {
   final CollectionReference _userCollectionRef =
       FirebaseFirestore.instance.collection('users');
   final FirebaseAuth auth = FirebaseAuth.instance;
   late User user;
-
   late CollectionReference _eventsCollectionRef;
+
   Future<List<Timestamp>?> getTimestamps(String userId) async {
     try {
       DocumentSnapshot userDoc = await _userCollectionRef.doc(userId).get();
       if (userDoc.exists) {
-        List<Timestamp> times = List<Timestamp>.from(userDoc['topicLastSeen']);
-        return times;
-        // Use the selected resources as needed
+        return List<Timestamp>.from(userDoc['topicLastSeen']);
       } else {
         if (kDebugMode) {
           print('User document does not exist');
         }
+        return null;
       }
     } catch (e) {
       if (kDebugMode) {
-        print('Error retrieving selected resources: $e');
+        print('Error retrieving timestamps: $e');
       }
+      return null;
     }
-    return null;
   }
 
   Future<List<String>?> getSelectedResources(String userId) async {
     try {
       DocumentSnapshot userDoc = await _userCollectionRef.doc(userId).get();
       if (userDoc.exists) {
-        List<String> selectedResources =
-            List<String>.from(userDoc['selectedResources']);
-        return selectedResources;
-        // Use the selected resources as needed
+        return List<String>.from(userDoc['selectedResources']);
       } else {
         if (kDebugMode) {
           print('User document does not exist');
         }
+        return null;
       }
     } catch (e) {
       if (kDebugMode) {
         print('Error retrieving selected resources: $e');
       }
+      return null;
     }
-    return null;
   }
 
   // Generate study sessions based on user data and test day
@@ -167,17 +159,17 @@ class StudySessionManager {
 
     if (selectedResources.contains("Flashcards")) {
       try {
-        CollectionReference<Map<String, dynamic>> flashcards =
+        final CollectionReference<Map<String, dynamic>> flashcards =
             FirebaseFirestore.instance.collection('flashcards');
-        List<String> contains = [];
+        final List<String> contains = [];
 
         // Get all documents in the collection
-        QuerySnapshot<Map<String, dynamic>> flashcardDeck =
+        final QuerySnapshot<Map<String, dynamic>> flashcardDeck =
             await flashcards.get();
         
         // Handle previously seen flashcards first
-        var seenFlashcards = await Algo().getFlashcards(user.uid);
-        for (var flashcard in seenFlashcards) {
+        final seenFlashcards = await Algo().getFlashcards(user.uid);
+        for (final flashcard in seenFlashcards) {
           if (!contains.contains(flashcard["topic"])) {
             contains.add(flashcard["topic"]);
             
@@ -206,8 +198,8 @@ class StudySessionManager {
         }
 
         // Handle unseen flashcards next
-        for (var doc in flashcardDeck.docs) {
-          Map<String, dynamic> flashcard = doc.data();
+        for (final doc in flashcardDeck.docs) {
+          final Map<String, dynamic> flashcard = doc.data();
 
           if (!contains.contains(flashcard["topic"])) {
             contains.add(flashcard["topic"]);
@@ -236,46 +228,36 @@ class StudySessionManager {
           }
         }
       } catch (e) {
-        print("Error\n");
-        print(e);
+        if (kDebugMode) {
+          print('Error processing flashcards: $e');
+        }
       }
     }
     return generatedEvents;
   }
 
-//IS THIS FUNCTION NEEDED IF WE USE THE CLIENTS FORMULA
-  int calculateDaysToNextReview(int topicCount, Timestamp lastSeen) {
-    Map<int, int> dateToColourMap = {0: 1, 1: 2, 2: 4, 3: 8, 4: 16, 5: 32};
-    int daysSinceLastReview =
-        (Timestamp.now().seconds - lastSeen.seconds) ~/ (60 * 60 * 24);
-    int daysToNextReviewDate =
-        (((dateToColourMap[topicCount]!) + (lastSeen.seconds / 86400))
-                .toInt()) -
-            Timestamp.now().seconds ~/ 86400;
-    if (daysSinceLastReview > 14) {
-      daysToNextReviewDate = 1;
-      return daysToNextReviewDate;
-    } else {
-      return 14 - daysSinceLastReview;
-    }
-  }
-
-  void startStudySession(List<String> selectedResources) {
-    // Implement the logic to start the study session with the selected resources
-  }
-
   // Save generated events to the database
   Future<void> saveStudySessionsToDB(
       User user, Map<DateTime, List<Event>> events) async {
-    QuerySnapshot u =
-        await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
-    String id = u.docs.last.id;
+    try {
+      final QuerySnapshot u =
+          await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+      final String id = u.docs.last.id;
 
-    _eventsCollectionRef =
-        FirebaseFirestore.instance.collection('users/$id/events');
-    for (var date in events.keys) {
-      List<String> eventTitles = events[date]!.map((e) => e.title).toList();
-      await _eventsCollectionRef.add({"date": date, "events": eventTitles});
+      _eventsCollectionRef =
+          FirebaseFirestore.instance.collection('users/$id/events');
+          
+      for (final date in events.keys) {
+        final List<String> eventTitles = events[date]!.map((e) => e.title).toList();
+        await _eventsCollectionRef.add({
+          "date": date,
+          "events": eventTitles,
+        });
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error saving study sessions: $e');
+      }
     }
   }
 }
