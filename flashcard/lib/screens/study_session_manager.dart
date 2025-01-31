@@ -174,90 +174,64 @@ class StudySessionManager {
         // Get all documents in the collection
         QuerySnapshot<Map<String, dynamic>> flashcardDeck =
             await flashcards.get();
-        //int topicCount = 0;
-        //the getFlashcards method retrieves flashcards that the user
-        //HAS looked at
+        
+        // Handle previously seen flashcards first
         var seenFlashcards = await Algo().getFlashcards(user.uid);
         for (var flashcard in seenFlashcards) {
           if (!contains.contains(flashcard["topic"])) {
             contains.add(flashcard["topic"]);
-            //int daysToNextReviewDate = calculateDaysToNextReview(topicCount, flashcard["lastSeen"]);
-            // print("Seen");
-            // print(flashcard["topic"]);
-            // print(flashcard["lastSeen"]);
-            //print(daysToNextReviewDate);
-            // print("\n");
-            DateTime now = DateTime.now();
-            DateTime nextReviewDate =
-                DateTime(now.year, now.month, now.day + 0, 0, 0, 0, 0);
-            if (daysUntilTest > 31 && daysUntilTest < 60) {
-              while (generatedEvents[nextReviewDate] != null) {
-                nextReviewDate = DateTime(nextReviewDate.year,
-                    nextReviewDate.month, nextReviewDate.day + 2, 0, 0, 0, 0);
-              }
-            }
+            
+            // Calculate initial review date
+            DateTime nextReviewDate = DateTime(
+                now.year, now.month, now.day, 0, 0, 0, 0);
+            
+            // Determine flexibility based on days until test
+            int maxDaysToMove = 1; // Default to 1 day
             if (daysUntilTest > 60) {
-              while (generatedEvents[nextReviewDate] != null) {
-                nextReviewDate = DateTime(nextReviewDate.year,
-                    nextReviewDate.month, nextReviewDate.day + 3, 0, 0, 0, 0);
-              }
+              maxDaysToMove = 3;
+            } else if (daysUntilTest > 31) {
+              maxDaysToMove = 2;
             }
-            if (daysUntilTest < 30) {
-              while (generatedEvents[nextReviewDate] != null) {
-                nextReviewDate = DateTime(nextReviewDate.year,
-                    nextReviewDate.month, nextReviewDate.day + 1, 0, 0, 0, 0);
-              }
-            }
-
+            
+            // Find a free date within the allowed range
+            nextReviewDate = findNearestFreeDate(nextReviewDate, maxDaysToMove);
+            
             if (testDay.isAfter(nextReviewDate)) {
-              //Once a free day is used, the corresponding flashcard topic is added
               generatedEvents[nextReviewDate] = [];
-              generatedEvents[nextReviewDate]!
-                  .add(Event(title: flashcard["topic"] + " Flashcards",color: Color.fromARGB(255, 255, 202, 58)));
+              generatedEvents[nextReviewDate]!.add(
+                  Event(title: "${flashcard["topic"]} Flashcards",
+                      color: Color.fromARGB(255, 255, 202, 58)));
             }
           }
         }
 
-        //These flashcards will be ones that the user has never looked at,
-        //so we will prioritise these in the calendar
+        // Handle unseen flashcards next
         for (var doc in flashcardDeck.docs) {
           Map<String, dynamic> flashcard = doc.data();
 
           if (!contains.contains(flashcard["topic"])) {
             contains.add(flashcard["topic"]);
-
-            //int daysToNextReviewDate = 1;
-            //print(daysToNextReviewDate);
-            DateTime now = DateTime.now();
-            // print("Unseen");
-            // print(flashcard["topic"]);
-            // print(daysToNextReviewDate);
-            // print("\n");
-
-            DateTime nextReviewDate =
-                DateTime(now.year, now.month, now.day + 0, 0, 0, 0, 0);
-            if (daysUntilTest >= 30 && daysUntilTest < 60) {
-              while (generatedEvents[nextReviewDate] != null) {
-                nextReviewDate = DateTime(nextReviewDate.year,
-                    nextReviewDate.month, nextReviewDate.day + 2, 0, 0, 0, 0);
-              }
-            }
+            
+            // Calculate initial review date
+            DateTime nextReviewDate = DateTime(
+                now.year, now.month, now.day, 0, 0, 0, 0);
+            
+            // Determine flexibility based on days until test
+            int maxDaysToMove = 1; // Default to 1 day
             if (daysUntilTest > 60) {
-              while (generatedEvents[nextReviewDate] != null) {
-                nextReviewDate = DateTime(nextReviewDate.year,
-                    nextReviewDate.month, nextReviewDate.day + 3, 0, 0, 0, 0);
-              }
+              maxDaysToMove = 3;
+            } else if (daysUntilTest >= 30) {
+              maxDaysToMove = 2;
             }
-            if (daysUntilTest < 30) {
-              while (generatedEvents[nextReviewDate] != null) {
-                nextReviewDate = DateTime(nextReviewDate.year,
-                    nextReviewDate.month, nextReviewDate.day + 1, 0, 0, 0, 0);
-              }
-            }
+            
+            // Find a free date within the allowed range
+            nextReviewDate = findNearestFreeDate(nextReviewDate, maxDaysToMove);
+            
             if (testDay.isAfter(nextReviewDate)) {
               generatedEvents[nextReviewDate] = [];
-              generatedEvents[nextReviewDate]!
-                  .add(Event(title: flashcard["topic"] + " Flashcards", color: Color.fromARGB(255, 255, 202, 58)));
+              generatedEvents[nextReviewDate]!.add(
+                  Event(title: "${flashcard["topic"]} Flashcards",
+                      color: Color.fromARGB(255, 255, 202, 58)));
             }
           }
         }
