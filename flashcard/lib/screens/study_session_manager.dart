@@ -95,18 +95,28 @@ class StudySessionManager {
     }
 
     if (selectedResources!.contains('Mini-mocks')) {
+      // First mini mock on today
+      DateTime firstMockDate = today;
+      firstMockDate = findNearestFreeDate(firstMockDate, 1); // Try to keep it close to today
+      
+      if (generatedEvents[firstMockDate] == null) {
+        generatedEvents[firstMockDate] = [];
+      }
+      generatedEvents[firstMockDate]!.add(
+          Event(title: "First Mini Mock", 
+              color: Color.fromARGB(255, 138, 201, 38)));
+
+      // Second mini mock halfway to test
       DateTime halfwayDate = DateTime(
           now.year, now.month, now.day + (daysUntilTest ~/ 2), 0, 0, 0, 0);
-
+      halfwayDate = findNearestFreeDate(halfwayDate, 4); // More flexible with the halfway date
+      
       if (generatedEvents[halfwayDate] == null) {
         generatedEvents[halfwayDate] = [];
       }
-      generatedEvents[halfwayDate]!.add(Event(title: "Second Mini Mock", color: Color.fromARGB(255, 138, 201, 38)));
-
-      if (generatedEvents[today] == null) {
-        generatedEvents[today] = [];
-      }
-      generatedEvents[today]!.add(Event(title: "First Mini Mock", color: Color.fromARGB(255, 138, 201, 38)));
+      generatedEvents[halfwayDate]!.add(
+          Event(title: "Second Mini Mock", 
+              color: Color.fromARGB(255, 138, 201, 38)));
     }
 
     if (selectedResources.contains('Full-sized mock exam')) {
