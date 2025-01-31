@@ -132,7 +132,6 @@ class StudySessionManager {
     }
 
     if (selectedResources.contains('Official paper')) {
-      DateTime now = DateTime.now();
       // int repetitions = 3;
       int repetitions = querySnapshot.docs.last['selectedRepetition'];
 
@@ -143,12 +142,16 @@ class StudySessionManager {
       }
 
       for (int interval in intervals) {
-        DateTime officialPaperDate =
-            DateTime(now.year, now.month, now.day + interval, 0, 0, 0, 0);
+        DateTime officialPaperDate = DateTime(
+            now.year, now.month, now.day + interval, 0, 0, 0, 0);
+        officialPaperDate = findNearestFreeDate(officialPaperDate, 3); // Allow up to 3 days movement
+        
         if (generatedEvents[officialPaperDate] == null) {
           generatedEvents[officialPaperDate] = [];
         }
-        generatedEvents[officialPaperDate]!.add(Event(title: "Official Paper", color: Color.fromARGB(255, 163, 68, 174)));
+        generatedEvents[officialPaperDate]!.add(
+            Event(title: "Official Paper ${intervals.indexOf(interval) + 1}",
+                color: Color.fromARGB(255, 163, 68, 174)));
       }
     }
 
