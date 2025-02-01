@@ -1,4 +1,5 @@
 import 'package:flashcard_x/screens/minimock_feedback.dart';
+import 'package:flashcard_x/screens/minimock_review.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/minimock_exam.dart';
 class MiniMock1Scoring extends StatefulWidget {
@@ -64,9 +65,11 @@ class MiniMock1ScoringState extends State<MiniMock1Scoring> {
                     children: [
                       Align(
                         alignment: Alignment.bottomRight,
-                        child: ElevatedButton(
+                        child: ElevatedButton.icon(
                           onPressed: () => endExam(context),
-                          child: const Text('Complete Scoring')),),]
+                          // icon:Icon(Icons.arrow_forward, color: Colors.white),
+                          label: const Text('Complete Scoring', style:TextStyle(color: Colors.white, fontSize: 16)),
+                          ),),]
                           )
                           )
                           );
@@ -79,64 +82,6 @@ class MiniMock1ScoringState extends State<MiniMock1Scoring> {
           answerDirectory: widget.answerDirectory,),
                               ),
       );
+                          }
+                            
   }
-}
-
-
-
-
-
-
-
-//             centerTitle: true,
-//             leading: Builder(
-//                 builder: (context) => GestureDetector(
-//                   onTap: () => Scaffold.of(context).openDrawer(),
-//                   child: const Icon(
-//                     Icons.menu,
-//                   ),
-//                 ),
-//                 ),
-//                 ),
-//         body: Padding(
-//         padding: const EdgeInsets.all(16.0),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//           ElevatedButton(
-//             onPressed: () => completeScoring(context),
-//             child: const Text('Complete Scoring'),
-//             ),],
-//           ),
-//         ),
-//     );
-//   }
-
-//   void completeScoring(BuildContext context) {
-//     Navigator.of(context).push(
-//       MaterialPageRoute(
-//         builder: (context) => endExam(context),
-//         child:)),
-//     );
-//   }
-// }
-
-
-
-
-
-
-  // void completeScoring(BuildContext context) {
-
-  //   Navigator.of(context).push(
-  //     MaterialPageRoute(
-  //       builder: (context) => MiniMock1Scoring()),
-  //   );
-  //     style: ElevatedButton.styleFrom(
-  //       shape: RoundedRectangleBorder(
-  //         borderRadius: BorderRadius.circular(5),
-  //       ),
-  //     );
-  //     child: Text('Review Answers', style: TextStyle(color:Colors.white));
-  // }
-  // }

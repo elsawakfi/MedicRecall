@@ -105,7 +105,7 @@ class MiniMock1RulesState extends State<MiniMock1Rules> {
               style: TextStyle(fontSize: 21),
             ),
               Center(
-                child: ElevatedButton(
+                child: ElevatedButton.icon(
                   onPressed: (){
                     Navigator.of(context).push(
                       MaterialPageRoute(
@@ -113,12 +113,8 @@ class MiniMock1RulesState extends State<MiniMock1Rules> {
                       ),
                     );
                   },
-                    style: ElevatedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                    ),
-                    child: Text('Begin Exam', style: TextStyle(color:Colors.white))
+                  // icon: Icon(Icons.arrow_forward, color: Colors.white),
+                  label: Text('Begin', style: TextStyle(color: Colors.white, fontSize: 18)),
                 ))
           ])
         )

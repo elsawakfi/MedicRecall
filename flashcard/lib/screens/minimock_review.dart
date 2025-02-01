@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/drawer_widget.dart';
-import 'package:flashcard_x/screens/minimock_exam1.dart';
+import 'package:flashcard_x/screens/minimock_exams.dart';
 
 
 class MiniMock1Review extends StatefulWidget {
