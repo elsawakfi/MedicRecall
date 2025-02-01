@@ -1,4 +1,3 @@
-import 'package:flashcard_x/questions/score_page.dart';
 import 'package:flashcard_x/screens/minimock_feedback.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/minimock_exam.dart';
@@ -54,22 +53,34 @@ class MiniMock1ScoringState extends State<MiniMock1Scoring> {
                       ),
                     ),
                   ),
+          
                 ),
+                
                 body: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      ElevatedButton(
-                        onPressed: () => MiniMockFeedBack(title: widget.title, questionDirectory: widget.questionDirectory, answerDirectory: widget.answerDirectory), // Call the endExam function
-                        child: const Text('Complete Scoring'),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }
-          }
+                      Align(
+                        alignment: Alignment.bottomRight,
+                        child: ElevatedButton(
+                          onPressed: () => endExam(context),
+                          child: const Text('Complete Scoring')),),]
+                          )
+                          )
+                          );
+                          }
+                          void endExam(BuildContext context) {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => MiniMockFeedBack(title: widget.title,
+          questionDirectory: widget.questionDirectory,
+          answerDirectory: widget.answerDirectory,),
+                              ),
+      );
+  }
+}
 
 
 
