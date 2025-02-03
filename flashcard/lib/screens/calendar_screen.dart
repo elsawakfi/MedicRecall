@@ -220,18 +220,28 @@ class CalendarStateO extends State<Calendar> {
 
   //with UTD we want to update the date on the calendar, and change in firebase
   Future<void> updateTestDay(DateTime date) async {
-    CollectionReference users = FirebaseFirestore.instance.collection('users');
     QuerySnapshot u =
-        await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+        await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
+      
+    /*  FIRST update on database */
+    var id = u.docs.last.id; // id being where the user's id details
 
-      /*  FIRST update on database */
-      var id = u.docs.last.id; //id being where the user's id details
-      users.doc(id).update(
-          {"TestDay": date}); // update field testday to what is passed as param
+    var userFromDb = u.docs.first;
+    Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
+
+    _userCollectionRef.doc(id).update({
+      "TestDay": date,
+      // "firstStudyDay": data.containsKey("firstStudyDay") && data["firstStudyDay"] != null
+      //   ? data["firstStudyDay"] // Keep existing firstStudyDay if it exists
+      //   : DateTime.now(), // Otherwise, set it to now
+      });
+
 
       selectedEvents[testDay]?.remove(Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
+      // update field testday to what is passed as param
       await getTestDay();
       setState(() {});
+
   }
 
   //updates the UI with the events collected from firebase
@@ -392,6 +402,7 @@ class CalendarStateO extends State<Calendar> {
 @override
 Widget build(BuildContext context) {
   buildCount++;
+  
   return Scaffold(
     drawer: const DrawMain(),
     appBar: AppBar(

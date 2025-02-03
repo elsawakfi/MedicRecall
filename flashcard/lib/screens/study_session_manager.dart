@@ -102,22 +102,23 @@ class StudySessionManager {
     try {
       Map<DateTime, List<Event>> generatedEvents = {};
 
-      // Get user data and validate
-      QuerySnapshot querySnapshot =
-          await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
-      if (querySnapshot.docs.isEmpty) {
-        if (kDebugMode) {
-          print('No user document found');
-        }
-        return {};
-      }
+    QuerySnapshot querySnapshot =
+        await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+    var userId = querySnapshot.docs.last.id;
+    //var databaseFlashcards = await Algo().getFlashcards(user.uid);
+    DateTime testDay = querySnapshot.docs.last['TestDay'].toDate();
+    // Get topics and related data from the database or pass them as arguments
+    List<String>? selectedResources = await getSelectedResources(userId);
+
+    DateTime firstStudyDay = querySnapshot.docs.last['firstStudyDay'].toDate();
+
+    // Start study sessions from today (aka. the day u start study session)
+    int daysUntilTest =
+        (testDay.difference(firstStudyDay).inHours / 24).round();
+    // Loop through topics to generate study sessions
 
       final userDoc = querySnapshot.docs.last;
       final userData = userDoc.data() as Map<String, dynamic>;
-
-      final userId = userDoc.id;
-      final testDay = (userData['TestDay'] as Timestamp).toDate();
-      final selectedResources = await getSelectedResources(userId);
 
       if (selectedResources == null || selectedResources.isEmpty) {
         if (kDebugMode) {
@@ -136,37 +137,37 @@ class StudySessionManager {
         if (kDebugMode) {
           print('Test day must be in the future');
         }
-        return {};
-      }
+        return{};
+        }
 
-      final daysUntilTest = normalizedTestDay.difference(today).inDays;
 
       // Schedule Mini-mocks
       if (selectedResources.contains('Mini-mocks')) {
         await _scheduleMiniMocks(
-            today, normalizedTestDay, daysUntilTest, generatedEvents);
-      }
-
-      // Schedule Full-sized mock exams
-      if (selectedResources.contains('Full-sized mock exam')) {
-        final repetitions =
-            (userData['selectedRepetition'] as num?)?.toInt() ?? 1;
-        await _scheduleFullMocks(today, normalizedTestDay, daysUntilTest,
-            repetitions, generatedEvents);
+            firstStudyDay, normalizedTestDay, daysUntilTest, generatedEvents);
       }
 
       // Schedule Official papers
       if (selectedResources.contains('Official paper')) {
         final repetitions =
             (userData['selectedRepetition'] as num?)?.toInt() ?? 1;
-        await _scheduleOfficialPapers(today, normalizedTestDay, daysUntilTest,
+        await _scheduleOfficialPapers(firstStudyDay, normalizedTestDay, daysUntilTest,
             repetitions, generatedEvents);
       }
 
       // Schedule Flashcards
       if (selectedResources.contains('Flashcards')) {
+        
         await _scheduleFlashcards(
-            user.uid, today, normalizedTestDay, daysUntilTest, generatedEvents);
+            user.uid, firstStudyDay, normalizedTestDay, daysUntilTest, generatedEvents);
+      }
+
+      if (selectedResources.contains("Full-sized mock exam")){
+        final repetitions =
+            (userData['selectedRepetition'] as num?)?.toInt() ?? 1;
+            
+        await _scheduleFullMocks( firstStudyDay, normalizedTestDay, daysUntilTest,
+         repetitions, generatedEvents);
       }
 
       return generatedEvents;
@@ -179,11 +180,10 @@ class StudySessionManager {
   }
 
   /// Schedule mini-mock events
-  Future<void> _scheduleMiniMocks(DateTime today, DateTime testDay,
+  Future<void> _scheduleMiniMocks(DateTime firstStudyDay, DateTime testDay,
       int daysUntilTest, Map<DateTime, List<Event>> generatedEvents) async {
     // First mini mock
-    DateTime firstMockDate =
-        findNearestFreeDate(today, 1, testDay, today, generatedEvents);
+    DateTime firstMockDate = DateTime(firstStudyDay.year,firstStudyDay.month,firstStudyDay.day,0,0,0,0);
     if (generatedEvents[firstMockDate] == null) {
       generatedEvents[firstMockDate] = [
         Event(title: "First Mini Mock", color: kMiniMockColor)
@@ -191,10 +191,9 @@ class StudySessionManager {
     }
 
     // Second mini mock halfway
-    if (daysUntilTest > 1) {
-      DateTime halfwayDate = today.add(Duration(days: daysUntilTest ~/ 2));
-      halfwayDate =
-          findNearestFreeDate(halfwayDate, 4, testDay, today, generatedEvents);
+    if (daysUntilTest > 3) {
+      DateTime halfwayDate = firstStudyDay.add(Duration(days: daysUntilTest ~/ 2));
+      halfwayDate = DateTime(halfwayDate.year,halfwayDate.month,halfwayDate.day,0,0,0,0);
       if (generatedEvents[halfwayDate] == null) {
         generatedEvents[halfwayDate] = [
           Event(title: "Second Mini Mock", color: kMiniMockColor)
@@ -205,7 +204,7 @@ class StudySessionManager {
 
   /// Schedule full mock exam events
   Future<void> _scheduleFullMocks(
-      DateTime today,
+      DateTime firstStudyDay,
       DateTime testDay,
       int daysUntilTest,
       int repetitions,
@@ -215,16 +214,20 @@ class StudySessionManager {
       int interval = ((daysUntilTest / 3) - 2 + (i * 4)).round();
       if (interval >= daysUntilTest) continue;
 
-      DateTime mockExamDate = today.add(Duration(days: interval));
-      mockExamDate =
-          findNearestFreeDate(mockExamDate, 2, testDay, today, generatedEvents);
+      DateTime mockExamDate = firstStudyDay.add(Duration(days: interval));
+      mockExamDate = DateTime(mockExamDate.year,mockExamDate.month,mockExamDate.day,0,0,0,0);
+     
 
-      if (generatedEvents[mockExamDate] == null) {
-        generatedEvents[mockExamDate] = [
+      while (generatedEvents[mockExamDate] != null) {
+         
+        mockExamDate =  DateTime(mockExamDate.year,mockExamDate.month,mockExamDate.day+1,0,0,0,0);
+      }
+      if (testDay.isAfter(mockExamDate)){
+      generatedEvents[mockExamDate] = [
           Event(title: "Full-sized Mock Exam ${i + 1}", color: kFullMockColor)
         ];
-      }
-    }
+      
+    }}
   }
 
   /// Schedule official paper events
@@ -240,11 +243,13 @@ class StudySessionManager {
       if (interval >= daysUntilTest) continue;
 
       DateTime officialPaperDate = today.add(Duration(days: interval));
-      officialPaperDate = findNearestFreeDate(
-          officialPaperDate, 3, testDay, today, generatedEvents);
+      officialPaperDate = DateTime(officialPaperDate.year,officialPaperDate.month,officialPaperDate.day,0,0,0,0);
 
-      if (generatedEvents[officialPaperDate] == null) {
-        generatedEvents[officialPaperDate] = [
+      while (generatedEvents[officialPaperDate] != null) {
+         officialPaperDate = DateTime(officialPaperDate.year,officialPaperDate.month,officialPaperDate.day+1,0,0,0,0);
+      }
+      if(testDay.isAfter(officialPaperDate)){
+          generatedEvents[officialPaperDate] = [
           Event(title: "Official Paper ${i + 1}", color: kOfficialPaperColor)
         ];
       }
@@ -267,48 +272,77 @@ class StudySessionManager {
       // Collect seen flashcard topics
       final seenFlashcards = await Algo().getFlashcards(userId);
       for (final flashcard in seenFlashcards) {
-        String topic = flashcard["topic"] as String? ?? "";
-        if (topic.isNotEmpty && !topics.contains(topic)) {
-          topics.add(topic);
-          unscheduledTopics.add(topic);
-        }
-      }
+       if(!unscheduledTopics.contains(flashcard["topic"])){
+       unscheduledTopics.add(flashcard["topic"]);
+            
+            DateTime nextReviewDate =
+                DateTime(today.year, today.month, today.day + 1, 0, 0, 0, 0);
+            if (daysUntilTest >= 30 && daysUntilTest < 60) {
+              while (generatedEvents[nextReviewDate] != null) {
+                nextReviewDate = DateTime(nextReviewDate.year,
+                    nextReviewDate.month, nextReviewDate.day + 2, 0, 0, 0, 0);
+              }
+            }
+            if (daysUntilTest > 60) {
+              while (generatedEvents[nextReviewDate] != null) {
+                nextReviewDate = DateTime(nextReviewDate.year,
+                    nextReviewDate.month, nextReviewDate.day + 3, 0, 0, 0, 0);
+              }
+            }
+            if (daysUntilTest < 30) {
+              while (generatedEvents[nextReviewDate] != null) {
+                nextReviewDate = DateTime(nextReviewDate.year,
+                    nextReviewDate.month, nextReviewDate.day + 1, 0, 0, 0, 0);
+              }
+            }
+            if (testDay.isAfter(nextReviewDate)) {
+              generatedEvents[nextReviewDate] = [];
+              generatedEvents[nextReviewDate]!
+                  .add(Event(title: flashcard["topic"] + " Flashcards",color: Color.fromARGB(255, 255, 202, 58)));
+            }
+          }}
+        
 
       // Collect unseen flashcard topics
       final QuerySnapshot<Map<String, dynamic>> flashcardDeck =
           await flashcards.get();
       for (final doc in flashcardDeck.docs) {
         final Map<String, dynamic> flashcard = doc.data();
-        String topic = flashcard["topic"] as String? ?? "";
-        if (topic.isNotEmpty && !topics.contains(topic)) {
-          topics.add(topic);
-          unscheduledTopics.add(topic);
-        }
-      }
+         if(!unscheduledTopics.contains(flashcard["topic"])){
+         unscheduledTopics.add(flashcard["topic"]);
 
-      // Find available days
-      List<DateTime> availableDays = [];
-      for (int i = 0; i <= daysUntilTest; i++) {
-        DateTime day =
-            DateTime(today.year, today.month, today.day + i, 0, 0, 0, 0);
-        if (day.isBefore(testDay) && generatedEvents[day] == null) {
-          availableDays.add(day);
-        }
-      }
+            DateTime nextReviewDate =
+                DateTime(today.year, today.month, today.day + 1, 0, 0, 0, 0);
+            if (daysUntilTest > 31 && daysUntilTest < 60) {
+              while (generatedEvents[nextReviewDate] != null) {
+                nextReviewDate = DateTime(nextReviewDate.year,
+                    nextReviewDate.month, nextReviewDate.day + 1, 0, 0, 0, 0);
+              }
+            }
+            if (daysUntilTest > 60) {
+              while (generatedEvents[nextReviewDate] != null) {
+                nextReviewDate = DateTime(nextReviewDate.year,
+                    nextReviewDate.month, nextReviewDate.day + 3, 0, 0, 0, 0);
+              }
+            }
+            if (daysUntilTest < 30) {
+              while (generatedEvents[nextReviewDate] != null) {
+                nextReviewDate = DateTime(nextReviewDate.year,
+                    nextReviewDate.month, nextReviewDate.day + 1, 0, 0, 0, 0);
+              }
+            }
 
-      // Schedule topics
-      for (DateTime day in availableDays) {
-        if (unscheduledTopics.isEmpty && topics.isNotEmpty) {
-          unscheduledTopics = List.from(topics);
-        }
+            if (testDay.isAfter(nextReviewDate)) {
+              //Once a free day is used, the corresponding flashcard topic is added
+              generatedEvents[nextReviewDate] = [];
+              generatedEvents[nextReviewDate]!
+                  .add(Event(title: flashcard["topic"] + " Flashcards", color: Color.fromARGB(255, 255, 202, 58)));
+            }
+      }}
 
-        if (unscheduledTopics.isNotEmpty) {
-          String topic = unscheduledTopics.removeAt(0);
-          generatedEvents[day] = [
-            Event(title: "$topic Flashcards", color: kFlashcardColor)
-          ];
-        }
-      }
+      
+
+  
     } catch (e) {
       if (kDebugMode) {
         print('Error processing flashcards: $e');
