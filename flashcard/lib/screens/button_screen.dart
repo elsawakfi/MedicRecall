@@ -22,6 +22,7 @@ class CustomFloatingButton extends StatefulWidget {
 
 class CustomFloatingButtonState extends State<CustomFloatingButton> {
   DateTime? _examDate;
+  DateTime? _firstStudyDate;
   final CollectionReference _userCollectionRef =
       FirebaseFirestore.instance.collection('users');
 
@@ -39,6 +40,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     super.initState();
     getUser();
     getTestDay();
+    getFirstStudyDay();
     setState(() {});
   }
 
@@ -95,12 +97,23 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
   Future<void> updateTestDay(DateTime date) async {
     QuerySnapshot u =
         await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
-
+      
     /*  FIRST update on database */
     var id = u.docs.last.id; // id being where the user's id details
+
+    var userFromDb = u.docs.first;
+    Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
+
     _userCollectionRef.doc(id).update({
       "TestDay": _examDate,
-    }); // update field testday to what is passed as param
+      "firstStudyDay": data.containsKey("firstStudyDay") && data["firstStudyDay"] != null
+        ? data["firstStudyDay"] // Keep existing firstStudyDay if it exists
+        : DateTime.now(), // Otherwise, set it to now
+      });
+
+      print('Added firstStudyDay to Document:');
+      print(_firstStudyDate);
+    // update field testday to what is passed as param
     await getTestDay();
     setState(() {});
   }
@@ -121,6 +134,23 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     }
   }
 
+  Future<void> getFirstStudyDay() async {
+    if (user != null) {
+      QuerySnapshot u = await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
+
+      var userFromDb = u.docs.first;
+      Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
+      // If the Test Day field isn't null and is in the database we update the UI with it. Otherwise it is displayed as being not set.
+      if (data.containsKey("firstStudyDay") && data["firstStudyDay"] != null) {
+        // firstDayBool = false;
+        _firstStudyDate = DateTime.fromMicrosecondsSinceEpoch(userFromDb["firstStudyDay"]
+            .microsecondsSinceEpoch);
+      }
+
+      setState(() {});
+    } 
+  }
+
   // Revision dialog
   void _showRevisionPlanDialog(BuildContext context) {
     showDialog(
@@ -133,6 +163,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
+                _setFirstStudyDay();
                 _showExamDateDialog(context); // Call to show exam date dialog
               },
               child: const Text('Yes'),
@@ -147,6 +178,22 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
         );
       },
     );
+  }
+
+  // Method to save firstStudyDay
+  Future<void> _setFirstStudyDay() async {
+    QuerySnapshot u = await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
+    var id = u.docs.last.id;
+    
+    // Save the first study day only once when the revision plan starts
+    await _userCollectionRef.doc(id).update({
+      "firstStudyDay": DateTime.now(), // Save the current date as first study day
+    });
+
+    print('WE BEEN ADDING IT THO \n');
+
+    // Optionally, retrieve the first study day
+    await getFirstStudyDay();
   }
 
   // Show the date picker dialog to select exam date
