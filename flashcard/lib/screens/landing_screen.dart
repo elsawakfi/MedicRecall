@@ -41,6 +41,7 @@ class LandingState extends State<Landing> {
   bool testDayBool_ = true;
   DateTime? hasDate;
   DateTime? _examDate;
+  DateTime? _firstStudyDate;
   int buildCount = 0;
   final CollectionReference _userCollectionRef =
       FirebaseFirestore.instance.collection('users');
@@ -53,8 +54,24 @@ class LandingState extends State<Landing> {
   void initState() {
     super.initState();
     getUser();
-
+    getFirstStudyDay();
     setState(() {});
+  }
+
+
+  Future<void> _setFirstStudyDay() async {
+    QuerySnapshot u = await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
+    var id = u.docs.last.id;
+    
+    // Save the first study day only once when the revision plan starts
+    await _userCollectionRef.doc(id).update({
+      "firstStudyDay": DateTime.now(), // Save the current date as first study day
+    });
+
+    print('WE BEEN ADDING IT THO \n');
+
+    // Optionally, retrieve the first study day
+    await getFirstStudyDay();
   }
 
   Future<void> shouldShowDialog() async{
@@ -69,6 +86,7 @@ class LandingState extends State<Landing> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
+                 _setFirstStudyDay();
                 _showExamDateDialog(context); // Call to show exam date dialog
               },
               child: const Text('Yes'),
@@ -147,6 +165,22 @@ class LandingState extends State<Landing> {
         setState(() {});
       }
     }
+  }
+
+  Future<void> getFirstStudyDay() async {
+    if (user != null) {
+      QuerySnapshot u = await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
+
+      var userFromDb = u.docs.first;
+      Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
+      // If the Test Day field isn't null and is in the database we update the UI with it. Otherwise it is displayed as being not set.
+      if (data.containsKey("firstStudyDay") && data["firstStudyDay"] != null) {
+        // firstDayBool = false;
+        _firstStudyDate = (data["firstStudyDay"] as Timestamp).toDate();
+      }
+
+      setState(() {});
+    } 
   }
 
 
@@ -1015,9 +1049,17 @@ void _showOptionsDialog(BuildContext context) {
 
     /*  FIRST update on database */
     var id = u.docs.last.id; //id being where the user's id details
+    var userFromDb = u.docs.first;
+    Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
+
     users.doc(id).update({
-      "TestDay": _examDate
-    }); // update field testday to what is passed as param
+      "TestDay": _examDate,
+      "firstStudyDay": data.containsKey("firstStudyDay") && data["firstStudyDay"] != null
+        ? data["firstStudyDay"] // Keep existing firstStudyDay if it exists
+        : DateTime.now(), // Otherwise, set it to now
+      });
+      print('Added firstStudyDay to Document:');
+      print(_firstStudyDate);// update field testday to what is passed as param
     await getTestDay();
     setState(() {});
   
