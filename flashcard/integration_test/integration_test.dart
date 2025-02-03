@@ -41,6 +41,7 @@ Future<void> loginTest(WidgetTester tester) async{
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
+
   tearDownAll(
         () async {},
   );
@@ -75,12 +76,11 @@ void main() {
         await tester.tap(find.byType(
             FloatingActionButton));
         tester.printToConsole('Loading popup');
+        await tester.pumpAndSettle();
         await tester.pump(const Duration(seconds: 2));
-        bool examDateSet = find
-            .text('Change Exam Date')
-            .evaluate()
-            .isNotEmpty;
+        bool examDateSet = find.text('Change Exam Date').evaluate().isNotEmpty;
         if (examDateSet) {
+          // DELETE CURRENT DATE TO PROCEED WITH TEST
           tester.printToConsole('Exam date is already set');
           await tester.tap(find.text('Change Exam Date'));
           await tester.pumpAndSettle();
@@ -94,23 +94,18 @@ void main() {
           await tester.pumpAndSettle();
           await tester.tap(find.text('MedicRecall'));
           await tester.pumpAndSettle();
-          bool isPopUp = find.text('No').evaluate().isNotEmpty;
-          // if(isPopUp){
-          //   await tester.tap(find.text('No'));
-          //   await tester.pumpAndSettle();
-          // }
+          await tester.pump(const Duration(seconds: 2));
+          bool isPopUp = find.text('Yes').evaluate().isNotEmpty;
           if (!isPopUp) {
             await tester.tap(find.byType(
                 FloatingActionButton));
             tester.printToConsole('Loading popup');
             await tester.pumpAndSettle();
           }
-          // await tester.tap(find.byType(
-          //     FloatingActionButton));
-          // tester.printToConsole('Loading popup');
-          // await tester.pumpAndSettle();
-          // await tester.pump(const Duration(seconds: 2));
+          await tester.pump(const Duration(seconds: 2));
         }
+
+        if(find.text('Yes').evaluate().isNotEmpty) tester.printToConsole("yes found");
         expect(find.text('Yes'), findsOneWidget);
         await tester.tap(find.text('Yes'));
         await tester.pumpAndSettle();
