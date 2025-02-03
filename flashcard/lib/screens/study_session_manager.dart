@@ -216,13 +216,14 @@ class StudySessionManager {
 
       DateTime mockExamDate = firstStudyDay.add(Duration(days: interval));
       mockExamDate = DateTime(mockExamDate.year,mockExamDate.month,mockExamDate.day,0,0,0,0);
-     
-
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day, 0, 0, 0, 0);
+      
       while (generatedEvents[mockExamDate] != null) {
          
         mockExamDate =  DateTime(mockExamDate.year,mockExamDate.month,mockExamDate.day+1,0,0,0,0);
       }
-      if (testDay.isAfter(mockExamDate)){
+      if (testDay.isAfter(mockExamDate) && mockExamDate.isAfter(today)){
       generatedEvents[mockExamDate] = [
           Event(title: "Full-sized Mock Exam ${i + 1}", color: kFullMockColor)
         ];
