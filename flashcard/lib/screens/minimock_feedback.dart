@@ -25,7 +25,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
   final FirebaseAuth auth = FirebaseAuth.instance;
   late User user;
 
-   @override
+  @override
   void initState() {
     super.initState();
     getQuestions(); // Fetch the questions on initialisation (Needed as this is not to be called in the widget build)
@@ -99,7 +99,6 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
            widget.answerDirectory).get();
        Map<String, dynamic> userAnswerMap = userAnswers.get('answers');
        return userAnswerMap;
-
   }
 
   Future<void> fetchUserAnswers() async {
@@ -116,7 +115,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
         print('Error fetching answers: $error');
       }
     }
-}
+  }
 
   //need to query for the user's answers stored in firebase
 
