@@ -217,8 +217,10 @@ class MiniMockExamState extends State<MiniMockExam> {
                   ),
                   child: Center(
                       child: Text('Time Remaining: $_displayTime',
-                        style: const TextStyle(
-                          color: Color.fromARGB(255, 98, 86, 139),
+                        style: TextStyle(
+                          color:(remainingSeconds <= 600)?
+                          Colors.white
+                          : Color.fromARGB(255, 98, 86, 139),
                           fontSize: 15,
                           fontWeight: FontWeight.w500,
                         ),
