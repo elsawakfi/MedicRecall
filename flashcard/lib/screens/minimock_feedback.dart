@@ -12,7 +12,8 @@ class MiniMockFeedBack extends StatefulWidget {
   final String title;
   final String questionDirectory;
   final String answerDirectory;
-  const MiniMockFeedBack({super.key, required this.title, required this.questionDirectory, required this.answerDirectory});
+  final List<int> answerScores;
+  const MiniMockFeedBack({super.key, required this.title, required this.questionDirectory, required this.answerDirectory, required this.answerScores});
 
   @override
   State<MiniMockFeedBack> createState() => MinimockFeedbackState();
@@ -52,7 +53,6 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
       user = auth.currentUser!;
     }
   }
-
 
   Future<List<Map<String, dynamic>>> queryQuestionData() async {
     QuerySnapshot snapshot = await FirebaseFirestore.instance.collection(widget.questionDirectory).orderBy('questionNumber').get(); //questions are not properly stored in order on firestore so order via a field instead
@@ -200,6 +200,14 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                if (currentQuestion == 0) //Prevents button being shown if no previous questions available
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: Icon(Icons.arrow_back, color: Colors.white),
+                    label: Text('Scoring', style: TextStyle(color: Colors.white)),
+                  ),
                 if (currentQuestion > 0) //Prevents button being shown if no previous questions available
                   ElevatedButton.icon(
                     onPressed: () {

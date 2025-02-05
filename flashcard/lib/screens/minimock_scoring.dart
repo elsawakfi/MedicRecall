@@ -21,10 +21,11 @@ class MiniMockScoring extends StatefulWidget {
   State<MiniMockScoring> createState() => MiniMockScoringState();
 }
 class MiniMockScoringState extends State<MiniMockScoring> {
-  List<Map<String, dynamic>> questions = [];
+  Map<String, dynamic> questionAnswers = {};
   Map<String, dynamic> userAnswers = {};
   final FirebaseAuth auth = FirebaseAuth.instance;
   late User user;
+  List<int> answerScores = [];
 
   @override
   void initState() {
@@ -32,6 +33,7 @@ class MiniMockScoringState extends State<MiniMockScoring> {
     getQuestions(); // Fetch the questions on initialisation (Needed as this is not to be called in the widget build)
     getUser();
     fetchUserAnswers(); //Fetch the user's answers from the database
+    calculateScores();
   }
 
   Future<void> getUser() async {
@@ -63,23 +65,9 @@ class MiniMockScoringState extends State<MiniMockScoring> {
   Future<void> getQuestions() async {
     try {
       List<Map<String, dynamic>> fetchedQuestions = await queryQuestionData();
-      // Initialise questions and selectedOptions based on fetched data
       setState(() {
-        questions = fetchedQuestions;
-        for (var doc in questions){
-          String type = doc['type'];
-          switch (type) {
-            case 'ranking':
-              String modifiedQuestion = doc['question'].replaceFirst('Rank', '\nRank');
-              doc['question'] = modifiedQuestion; // Add a newline between the question (could store a newline in the firebase itself but this allows for easier customisation)
-              break;
-            case 'multiple choice':
-              String modifiedQuestion = doc['question'].replaceFirst('Choose', '\nChoose');
-              doc['question'] = modifiedQuestion;
-              break;
-            default:
-          }
-        }
+        // Extract the necessary data from the fetchedQuestions and turn it into the same format as userAnswers
+        questionAnswers = fetchedQuestions.asMap().map((index, value) => MapEntry((index+1).toString(), fetchedQuestions[index]['correct_answers']));
       });
     } catch (error) {
       if (kDebugMode) {
@@ -104,9 +92,7 @@ class MiniMockScoringState extends State<MiniMockScoring> {
 
   Future<void> fetchUserAnswers() async {
     try {
-      // Fetch the question data (this simulates your Future)
       Map<String, dynamic> fetchedUserAnswers = await queryUserAnswerData();
-
       // Initialise questions and selectedOptions based on fetched data
       setState(() {
         userAnswers = fetchedUserAnswers;
@@ -118,6 +104,12 @@ class MiniMockScoringState extends State<MiniMockScoring> {
     }
   }
 
+  void calculateScores(){
+    answerScores.add(0); // Remove this, placeholder to ensure page loads
+    // INSERT SCORING ALGORITHM HERE
+    // answerScores.add(...) <- Add scores to the list in order of question number
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -125,67 +117,71 @@ class MiniMockScoringState extends State<MiniMockScoring> {
         child: Scaffold(
         appBar: AppBar(
           // backgroundColor: Colors.blue,
-            elevation: 0,
-            title:  Align(
-              alignment: const Alignment(-0.05,0),
-              child: Stack(
-                children: [
-                  Positioned(
-                    top: 2.3,
-                    child: Image.asset(
-                      'assets/newlogo.png',
-                      fit: BoxFit.cover,
-                      height: 34,
-                    ),
+          elevation: 0,
+          title:  Align(
+            alignment: const Alignment(-0.05,0),
+            child: Stack(
+              children: [
+                Positioned(
+                  top: 2.3,
+                  child: Image.asset(
+                    'assets/newlogo.png',
+                    fit: BoxFit.cover,
+                    height: 34,
                   ),
-                  Container(
-                    margin: const EdgeInsets.only(left: 32),
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text('${widget.title}: Scoring',
-                    ),
+                ),
+                Container(
+                  margin: const EdgeInsets.only(left: 32),
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text('${widget.title}: Scoring',
                   ),
-                ],
+                ),
+              ],
+            ),
+          ),
+          centerTitle: true,
+          leading: Builder(
+            builder: (context) => GestureDetector(
+              onTap: () => Scaffold.of(context).openDrawer(),
+              child: const Icon(
+                Icons.menu,
               ),
             ),
-            centerTitle: true,
-                  leading: Builder(
-                    builder: (context) => GestureDetector(
-                      onTap: () => Scaffold.of(context).openDrawer(),
-                      child: const Icon(
-                        Icons.menu,
-                      ),
-                    ),
-                  ),
-          
-                ),
-                
-                body: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Align(
-                        alignment: Alignment.bottomRight,
-                        child: ElevatedButton.icon(
-                          onPressed: () => {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => MiniMockFeedBack(
-                                    title: widget.title,
-                                    questionDirectory: widget.questionDirectory,
-                                    answerDirectory: widget.answerDirectory)
-                              ),
-                            )
-                          },
-                          // icon:Icon(Icons.arrow_forward, color: Colors.white),
-                          label: const Text('Complete Scoring', style:TextStyle(color: Colors.white, fontSize: 16)),
+          ),
+        ),
+        body: answerScores.isEmpty
+            ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
+            : Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+
+              // EXIT BUTTON
+              Align(
+                alignment: Alignment.bottomRight,
+                child: ElevatedButton.icon(
+                  onPressed: () => {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => MiniMockFeedBack(
+                            title: widget.title,
+                            questionDirectory: widget.questionDirectory,
+                            answerDirectory: widget.answerDirectory,
+                            answerScores: answerScores,
                         ),
                       ),
-                    ]
-                  )
-                )
-        ),
+                    )
+                  },
+                  icon:Icon(Icons.arrow_forward, color: Colors.white),
+                  label: const Text('Feedback', style:TextStyle(color: Colors.white, fontSize: 16)),
+                ),
+              ),
+            ]
+          )
+        )
+      ),
     );
   }
 }
