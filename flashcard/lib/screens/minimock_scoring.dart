@@ -105,9 +105,9 @@ class MiniMockScoringState extends State<MiniMockScoring> {
   }
 
   void calculateScores(){
-    answerScores.add(0); // Remove this, placeholder to ensure page loads
+    answerScores = List.filled(25, 0); // Remove this, placeholder to ensure page loads
     // INSERT SCORING ALGORITHM HERE
-    // answerScores.add(...) <- Add scores to the list in order of question number
+    // answerScores[i] = ...
   }
 
   @override

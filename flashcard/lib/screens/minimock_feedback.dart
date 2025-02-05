@@ -117,17 +117,88 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
     }
   }
 
+  int questionMarks(int currentQuestion){
+    if (questions[currentQuestion]['type'] == 'ranking'){
+      return 20;
+    }else if(questions[currentQuestion]['type'] == 'multiple choice'){
+      return 12;
+    }
+    return 0;
+  }
+
   //need to query for the user's answers stored in firebase
 
   @override
   Widget build(BuildContext context) {
     final listEquality = ListEquality();
     return PopScope(
-      canPop: false,
+      canPop: true,
       child: Scaffold(
-      appBar: CustomAppBar(
-        title: widget.title,
-      ),
+        appBar: AppBar(
+          // backgroundColor: Colors.blue,
+          elevation: 0,
+          title: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Stack(
+                children: [
+                  Positioned(
+                    top: 2.3,
+                    child: Image.asset(
+                      'assets/newlogo.png',
+                      fit: BoxFit.cover,
+                      height: 34,
+                    ),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.only(left: 32),
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text('${widget.title}: Feedback',
+                    ),
+                  ),
+                ],
+              )
+            ],
+          ),
+
+          centerTitle: true,
+          actions:[
+            Container(
+                margin: const EdgeInsets.only(right: 16),
+                width: 160,
+                height: 40.31,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  color: const Color.fromARGB(255, 235, 230, 239),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      spreadRadius: 0,
+                      blurRadius: 5,
+                      offset: const Offset(0, 3), // changes position of shadow
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Text('Question ${currentQuestion+1}/${questions.length}',
+                    style: const TextStyle(
+                      color: Color.fromARGB(255, 98, 86, 139),
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                )
+            )
+          ],
+          leading: Builder(
+            builder: (context) => GestureDetector(
+              onTap: () => Scaffold.of(context).openDrawer(),
+              child: const Icon(
+                Icons.menu,
+              ),
+            ),
+          ),
+        ),
       body: questions.isEmpty && userAnswers.isEmpty
           ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
           : Padding( //Else load the data
@@ -156,7 +227,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                       ],
                     ),
                     child: Center(
-                      child: Text('Question ${currentQuestion+1}/${questions.length}',
+                      child: Text('Score: ${widget.answerScores[currentQuestion]}/${questionMarks(currentQuestion)}',
                         style: const TextStyle(
                           color: Color.fromARGB(255, 98, 86, 139),
                           fontSize: 15,
