@@ -52,8 +52,9 @@ class MiniMock1RulesState extends State<MiniMock1Rules> {
                 ),
                 
                 ),
-        body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        /**body:
+        Padding(padding: 
+        const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -64,15 +65,17 @@ class MiniMock1RulesState extends State<MiniMock1Rules> {
               )
             ),
             const SizedBox(height: 10),
-            const Text(
+            Container( 
+              margin: const EdgeInsets.only(left: 5, right: 5),
+              width: 300,
+              child: Text(
               'In this test, you will be presented with typical scenarios that Foundation Year Two (FY2) Doctors '
               'encounter , and you will be asked questions about dealing with them. When answering questions, '
               'please consider yourself to be a FY2 Doctor unless stated otherwise and answer based on what you '
               'should do in each scenario.\n',
               style: TextStyle(fontSize: 21),
-
-
-            ),
+              textAlign: TextAlign.center,
+            ),),
             const Text(
               'The paper is divided into two parts: ',
               style: TextStyle(fontSize: 23, fontWeight: FontWeight.bold),
@@ -121,8 +124,39 @@ class MiniMock1RulesState extends State<MiniMock1Rules> {
                     child: Text('Begin Exam', style: TextStyle(color:Colors.white))
                 ))
           ])
-        )
-    );
+        )**/
+       body: SafeArea(
+  child: SingleChildScrollView(
+    child: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: const Text(
+              'MedicRecall Mini-Mock 1 Exam Instructions: \n',
+              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Center( child: 
+          SizedBox(
+            width: 1000,
+            child: Text(
+              'In this test, you will be presented with typical scenarios that Foundation Year Two (FY2) Doctors '
+              'encounter, and you will be asked questions about dealing with them. When answering questions, '
+              'please consider yourself to be an FY2 Doctor unless stated otherwise and answer based on what you '
+              'should do in each scenario.\n',
+              style: TextStyle(fontSize: 21),
+              textAlign: TextAlign.center,
+            ),
+          )),
+        ],
+      ),
+    ),
+  ),
+));
+
   }
 }
 
