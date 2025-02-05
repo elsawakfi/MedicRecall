@@ -108,6 +108,17 @@ class MiniMockScoringState extends State<MiniMockScoring> {
     answerScores = List.filled(25, 0); // Remove this, placeholder to ensure page loads
     // INSERT SCORING ALGORITHM HERE
     // answerScores[i] = ...
+    // answerScores[i] = 1;
+
+    userAnswers.forEach((questionNumber, userAnswers){
+      if (questionAnswers[questionNumber] == userAnswers){
+        answerScores[int.parse(questionNumber)-1] = 1;
+      }
+    });
+
+    int totalScore =answerScores.reduce((value, element) => value + element);
+    print('Total Score: $totalScore');
+
   }
 
   @override
