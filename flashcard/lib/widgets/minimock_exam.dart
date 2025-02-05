@@ -20,7 +20,7 @@ abstract class MiniMockExam extends StatefulWidget {
 class MiniMockExamState extends State<MiniMockExam> {
   final FirebaseAuth auth = FirebaseAuth.instance;
   late User user;
-
+  late int remainingSeconds;
   int currentQuestion = 0;
   List<List<bool>> multiChoiceAnswers = []; // For each question store selected options as a list of booleans
   List<List<String>> rankingAnswers = [];
@@ -41,7 +41,13 @@ class MiniMockExamState extends State<MiniMockExam> {
       startTime: widget.time, //measured in seconds
       onTimeUpdate: (time) {
         setState(() {
-          _displayTime = time; // Update display every second
+          _displayTime = time; 
+          
+            // Parse time string "MM:SS" to seconds
+          List<String> parts = time.split(":");
+          int minutes = int.parse(parts[0]);
+          int seconds = int.parse(parts[1]);
+          remainingSeconds = (minutes * 60) + seconds;// Update display every second
         });
       },
       onTimerComplete: () {
@@ -197,7 +203,9 @@ class MiniMockExamState extends State<MiniMockExam> {
                   height: 40.31,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
-                    color: const Color.fromARGB(255, 235, 230, 239),
+                    color:  (remainingSeconds <= 600)
+                    ? Colors.red
+                    : const Color.fromARGB(255, 235, 230, 239),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.2),
