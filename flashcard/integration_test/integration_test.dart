@@ -12,10 +12,12 @@ Future<void> loginTest(WidgetTester tester) async{
   await tester.pumpAndSettle();
 
   // Finding the email is really on and off for some reason
-  await tester.pump(const Duration(seconds: 10));
   var emailFinder = find.byKey(const ValueKey('emailSignUpField'));
-  if(emailFinder.evaluate().isNotEmpty) tester.printToConsole('Found email field');
-  else tester.printToConsole("No email field found");
+  if(emailFinder.evaluate().isNotEmpty) {
+    tester.printToConsole('Found email field');
+  } else {
+    tester.printToConsole("No email field found");
+  }
   expect(emailFinder, findsOneWidget);
   await tester.enterText(emailFinder,
       'xecovop602@deligy.com');
@@ -42,29 +44,11 @@ void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
 
-  tearDownAll(
-        () async {},
-  );
-
   testWidgets("Log into the app",
           (WidgetTester tester) async {
         tester.printToConsole('Testing login');
         await loginTest(tester);
         await tester.pumpAndSettle();
-        // await tester.tap(find.byKey(const ValueKey('Flashcards')));
-        // await tester.pumpAndSettle();
-        // // Log out
-        // await tester.tap(find.byIcon(
-        //     Icons.menu));
-        // await tester.pumpAndSettle();
-        // expect(find.byKey(
-        //     const ValueKey('Settings')), findsOneWidget);
-        // tester.printToConsole('Menu opens');
-        // await tester.tap(find.byKey(
-        //   const ValueKey('Log Out Button'),
-        // ));
-        // await tester.pumpAndSettle();
-        // tester.printToConsole('Logged out');
       });
 
   testWidgets("Set Exam Date",
@@ -77,24 +61,24 @@ void main() {
             FloatingActionButton));
         tester.printToConsole('Loading popup');
         await tester.pumpAndSettle();
-        await tester.pump(const Duration(seconds: 2));
         bool examDateSet = find.text('Change Exam Date').evaluate().isNotEmpty;
         if (examDateSet) {
+
           // DELETE CURRENT DATE TO PROCEED WITH TEST
           tester.printToConsole('Exam date is already set');
           await tester.tap(find.text('Change Exam Date'));
           await tester.pumpAndSettle();
-          await tester.pump(const Duration(seconds: 2));
           expect(find.text('DELETE ALL'), findsOneWidget);
           await tester.tap(find.text('DELETE ALL'));
           tester.printToConsole('Exam date deleted');
-          await tester.pump(const Duration(seconds: 2));
+          await tester.pumpAndSettle();
+
           await tester.tap(find.byIcon(
               Icons.menu));
           await tester.pumpAndSettle();
           await tester.tap(find.text('MedicRecall'));
           await tester.pumpAndSettle();
-          await tester.pump(const Duration(seconds: 2));
+
           bool isPopUp = find.text('Yes').evaluate().isNotEmpty;
           if (!isPopUp) {
             await tester.tap(find.byType(
@@ -102,7 +86,6 @@ void main() {
             tester.printToConsole('Loading popup');
             await tester.pumpAndSettle();
           }
-          await tester.pump(const Duration(seconds: 2));
         }
 
         if(find.text('Yes').evaluate().isNotEmpty) tester.printToConsole("yes found");
@@ -126,7 +109,7 @@ void main() {
           return widget is RadioListTile<int> && widget.value == 2;
         }));
         tester.printToConsole('Entered number of repetitions');
-        await tester.pump(const Duration(seconds: 2));
+        await tester.pumpAndSettle();
         expect(find.text('Next'), findsOneWidget);
         await tester.tap(find.text('Next'));
         await tester.pumpAndSettle();
