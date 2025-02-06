@@ -236,9 +236,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               ),
               const SizedBox(height: 10),
               Text(
-                _examDate != null
-                // change to UK date format
-                    ? 'Selected Date: ${DateFormat('d MMM, yyyy').format(_examDate!)}'
+                  _examDate != null
+                    ? 'Selected Date: ${DateFormat('dd MMM, yyyy').format(_examDate!)}'
                     : 'No Date Selected',
                 style: TextStyle(
                   color: _examDate != null
@@ -359,7 +358,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                           );
                         }
                       },
-                      child: const Text('Next'),
+                      child: const Text('Submit'),
                     ),
                   ],
                 ),
@@ -372,148 +371,100 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
   }
 
 void _showOptionsDialog(BuildContext context) {
-    final checkbox1 = ValueNotifier<bool>(false);
-    final checkbox2 = ValueNotifier<bool>(false);
-    final checkbox3 = ValueNotifier<bool>(false);
-    final checkbox4 = ValueNotifier<bool>(false);
+  final checkbox1 = ValueNotifier<bool>(false);
+  final checkbox2 = ValueNotifier<bool>(false);
+  final checkbox3 = ValueNotifier<bool>(false);
+  final checkbox4 = ValueNotifier<bool>(false);
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return _buildAlertDialog(
-          title: 'Which resources would you like to use?',
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                children: [
-                  ValueListenableBuilder(
-                    valueListenable: checkbox1,
-                    builder: (context, value, child) {
-                      return Checkbox(
-                        value: value,
-                        onChanged: (value) {
-                          checkbox1.value = value!;
-                        },
-                      );
-                    },
-                  ),
-                  Text(
-                    'Official MRSA Exam Paper',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  ValueListenableBuilder(
-                    valueListenable: checkbox2,
-                    builder: (context, value, child) {
-                      return Checkbox(
-                        value: value,
-                        onChanged: (value) {
-                          checkbox2.value = value!;
-                        },
-                      );
-                    },
-                  ),
-                  Text(
-                    'Full-sized Mock Exam',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  ValueListenableBuilder(
-                    valueListenable: checkbox3,
-                    builder: (context, value, child) {
-                      return Checkbox(
-                        value: value,
-                        onChanged: (value) {
-                          checkbox3.value = value!;
-                        },
-                      );
-                    },
-                  ),
-                  Text(
-                    'Mini-Mocks',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  ValueListenableBuilder(
-                    valueListenable: checkbox4,
-                    builder: (context, value, child) {
-                      return Checkbox(
-                        value: value,
-                        onChanged: (value) {
-                          checkbox4.value = value!;
-                        },
-                      );
-                    },
-                  ),
-                  Text(
-                    'Topical Flashcards',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _showExamDateDialog(context);
-              },
-              child: const Text('Previous'),
-            ),
-            TextButton(
-              onPressed: () async {
-                if (checkbox1.value ||
-                    checkbox2.value ||
-                    checkbox3.value ||
-                    checkbox4.value) {
-                  List<String> selectedResources = [];
-                  if (checkbox1.value) selectedResources.add('Official paper');
-                  if (checkbox2.value) selectedResources.add('Full-sized mock exam');
-                  if (checkbox3.value) selectedResources.add('Mini-mocks');
-                  if (checkbox4.value) selectedResources.add('Flashcards');
-
-                  QuerySnapshot u = await _userCollectionRef
-                      .where("userID", isEqualTo: user?.uid)
-                      .get();
-
-                  // Update the Firestore document with the selected resources
-                  var id = u.docs.last.id;
-                  _userCollectionRef.doc(id).update({
-                    'selectedResources': selectedResources,
-                  });
-
-                  // Start the study session with the selected resources
-                  StudySessionManager().startStudySession(selectedResources);
-                  
-                  Navigator.of(context).pop();
-                  _showRepetitionDialog(context);
-                  // Add your action here after options are submitted
-                  } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Please select at least one resource'),
-                    ),
-                  );
-                }
-              },
-              child: const Text('Submit'),
-            ),
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return _buildAlertDialog(
+        title: 'Which resources would you like to use?',
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildCheckbox(checkbox1, 'Official MRSA Exam Paper'),
+            _buildCheckbox(checkbox2, 'Full-sized Mock Exam'),
+            _buildCheckbox(checkbox3, 'Mini-Mocks'),
+            _buildCheckbox(checkbox4, 'Topical Flashcards'),
           ],
-        );
-      },
-    );
-  }
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _showExamDateDialog(context);
+            },
+            child: const Text('Previous'),
+          ),
+          TextButton(
+            onPressed: () async {
+              // Check which resources were selected
+              List<String> selectedResources = [];
+              if (checkbox1.value) selectedResources.add('Official paper');
+              if (checkbox2.value) selectedResources.add('Full-sized mock exam');
+              if (checkbox3.value) selectedResources.add('Mini-mocks');
+              if (checkbox4.value) selectedResources.add('Flashcards');
+
+              if (selectedResources.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Please select at least one resource'),
+                  ),
+                );
+                return; // Stop execution if no resources are selected
+              }
+
+              QuerySnapshot u = await _userCollectionRef
+                  .where("userID", isEqualTo: user?.uid)
+                  .get();
+
+              // Update Firestore with selected resources
+              var id = u.docs.last.id;
+              _userCollectionRef.doc(id).update({
+                'selectedResources': selectedResources,
+              });
+
+              // Start study session
+              StudySessionManager().startStudySession(selectedResources);
+
+              // Close current dialog
+              Navigator.of(context).pop();
+
+              // If either Official Paper or Full-sized Mock is selected, show Repetition Dialog
+              if (checkbox1.value || checkbox2.value) {
+                _showRepetitionDialog(context);
+              }
+            },
+            child: const Text('Submit'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+// Helper method to create checkbox rows
+Widget _buildCheckbox(ValueNotifier<bool> notifier, String text) {
+  return Row(
+    children: [
+      ValueListenableBuilder(
+        valueListenable: notifier,
+        builder: (context, value, child) {
+          return Checkbox(
+            value: value,
+            onChanged: (newValue) {
+              notifier.value = newValue!;
+            },
+          );
+        },
+      ),
+      Text(text, style: TextStyle(color: Colors.black)),
+    ],
+  );
+}
+
 
   // Calculate number of days until the exam
   int _calculateDaysUntilExam(DateTime examDate) {
