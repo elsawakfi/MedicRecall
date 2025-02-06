@@ -26,6 +26,7 @@ class MiniMockScoringState extends State<MiniMockScoring> {
   final FirebaseAuth auth = FirebaseAuth.instance;
   late User user;
   List<int> answerScores = [];
+  int totalScore = 0;
 
   @override
   void initState() {
@@ -114,12 +115,16 @@ class MiniMockScoringState extends State<MiniMockScoring> {
       if (questionAnswers[questionNumber] == userAnswers){
         answerScores[int.parse(questionNumber)-1] = 1;
       }
+      else {
+        answerScores[int.parse(questionNumber)-1] = 0;
+      }
     });
 
     int totalScore =answerScores.reduce((value, element) => value + element);
     print('Total Score: $totalScore');
-
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -168,7 +173,7 @@ class MiniMockScoringState extends State<MiniMockScoring> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-
+                Text('Total Score: $totalScore', style: TextStyle(fontSize: 24)),
               // EXIT BUTTON
               Align(
                 alignment: Alignment.bottomRight,
