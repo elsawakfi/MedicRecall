@@ -225,7 +225,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
 
                     if (context.mounted) {
                       Navigator.of(context).pop();
-                      _showRepetitionDialog(context); // Proceed to next dialog
+                      _showOptionsDialog(context); // Proceed to next dialog
                     }
                   }
                 },
@@ -329,7 +329,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     TextButton(
                       onPressed: () {
                         Navigator.of(context).pop();
-                        _showExamDateDialog(context);
+                        _showOptionsDialog(context);
                       },
                       child: const Text('Previous'),
                     ),
@@ -348,10 +348,10 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                           'selectedRepetition': selectedRepetition,
                           });
 
-                          Navigator.of(context).pop();
-                          _showOptionsDialog(
-                              context); // Proceed to the next dialog
-                        } else {
+                          if (context.mounted) {
+                            Navigator.of(context).pop();
+                          } // Proceed to the next dialog
+                          } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text('Please enter number of repetitions'),
@@ -467,7 +467,7 @@ void _showOptionsDialog(BuildContext context) {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                _showRepetitionDialog(context);
+                _showExamDateDialog(context);
               },
               child: const Text('Previous'),
             ),
@@ -495,12 +495,11 @@ void _showOptionsDialog(BuildContext context) {
 
                   // Start the study session with the selected resources
                   StudySessionManager().startStudySession(selectedResources);
-
-                  if (context.mounted) {
-                    Navigator.of(context).pop();
-                  }
+                  
+                  Navigator.of(context).pop();
+                  _showRepetitionDialog(context);
                   // Add your action here after options are submitted
-                } else {
+                  } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Please select at least one resource'),
