@@ -732,12 +732,12 @@ class LandingState extends State<Landing> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromRGBO(21, 58, 103, 1),
                 ),
-                child: const Text('Pick Date'),
+                child: const Text('Select Exam Date'),
               ),
               const SizedBox(height: 10),
               Text(
                 hasDate != null
-                    ? 'Selected Date: ${DateFormat('MMM d, yyyy').format(_examDate!)}'
+                    ? 'Selected Date: ${DateFormat('d MMM, yyyy').format(_examDate!)}'
                     : 'No Date Selected',
                 style: TextStyle(
                   color: _examDate != null
@@ -772,7 +772,7 @@ class LandingState extends State<Landing> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'How many repetitions of the official past paper would you like to schedule?',
+                    'How many times would you like to practice the official past paper?',
                     style: const TextStyle(
                       color: Color.fromRGBO(21, 58, 103, 1),
                       fontSize: 21,
@@ -781,7 +781,7 @@ class LandingState extends State<Landing> {
                   ),
                   const SizedBox(height: 8), // Add spacing between lines
                   Text(
-                    'We recommend at least 3 repetitions.',
+                    'We recommend at least 3 times.',
                     style: const TextStyle(
                       color: Color.fromRGBO(21, 58, 103, 1),
                       fontSize: 16, // Slightly smaller font size
@@ -904,7 +904,7 @@ void _showOptionsDialog(BuildContext context) {
       context: context,
       builder: (BuildContext context) {
         return _buildAlertDialog(
-          title: 'What resources do you want to use?',
+          title: 'Which resources would you like to use?',
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -922,7 +922,7 @@ void _showOptionsDialog(BuildContext context) {
                     },
                   ),
                   Text(
-                    'Official paper',
+                    'Official MRSA Exam Paper',
                     style: TextStyle(color: Colors.black),
                   ),
                 ],
@@ -941,7 +941,7 @@ void _showOptionsDialog(BuildContext context) {
                     },
                   ),
                   Text(
-                    'Full-sized mock exam',
+                    'Full-sized Mock Exam',
                     style: TextStyle(color: Colors.black),
                   ),
                 ],
@@ -960,7 +960,7 @@ void _showOptionsDialog(BuildContext context) {
                     },
                   ),
                   Text(
-                    'Mini-mocks',
+                    'Mini-Mocks',
                     style: TextStyle(color: Colors.black),
                   ),
                 ],
@@ -979,7 +979,7 @@ void _showOptionsDialog(BuildContext context) {
                     },
                   ),
                   Text(
-                    'Flashcards',
+                    'Topical Flashcards',
                     style: TextStyle(color: Colors.black),
                   ),
                 ],

@@ -232,12 +232,13 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromRGBO(21, 58, 103, 1),
                 ),
-                child: const Text('Pick Date'),
+                child: const Text('Select Exam Date'),
               ),
               const SizedBox(height: 10),
               Text(
                 _examDate != null
-                    ? 'Selected Date: ${DateFormat('MMM d, yyyy').format(_examDate!)}'
+                // change to UK date format
+                    ? 'Selected Date: ${DateFormat('d MMM, yyyy').format(_examDate!)}'
                     : 'No Date Selected',
                 style: TextStyle(
                   color: _examDate != null
@@ -272,7 +273,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'How many repetitions of the official past paper would you like to schedule?',
+                    'How many times would you like to practice the official past paper?',
                     style: const TextStyle(
                       color: Color.fromRGBO(21, 58, 103, 1),
                       fontSize: 21,
@@ -281,7 +282,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                   ),
                   const SizedBox(height: 8), // Add spacing between lines
                   Text(
-                    'We recommend at least 3 repetitions.',
+                    'We recommend at least 3 times.',
                     style: const TextStyle(
                       color: Color.fromRGBO(21, 58, 103, 1),
                       fontSize: 16, // Slightly smaller font size
@@ -370,7 +371,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     );
   }
 
-  void _showOptionsDialog(BuildContext context) {
+void _showOptionsDialog(BuildContext context) {
     final checkbox1 = ValueNotifier<bool>(false);
     final checkbox2 = ValueNotifier<bool>(false);
     final checkbox3 = ValueNotifier<bool>(false);
@@ -380,7 +381,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       context: context,
       builder: (BuildContext context) {
         return _buildAlertDialog(
-          title: 'What resources do you want to use?',
+          title: 'Which resources would you like to use?',
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -398,7 +399,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     },
                   ),
                   Text(
-                    'Official paper',
+                    'Official MRSA Exam Paper',
                     style: TextStyle(color: Colors.black),
                   ),
                 ],
@@ -417,7 +418,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     },
                   ),
                   Text(
-                    'Full-sized mock exam',
+                    'Full-sized Mock Exam',
                     style: TextStyle(color: Colors.black),
                   ),
                 ],
@@ -436,7 +437,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     },
                   ),
                   Text(
-                    'Mini-mocks',
+                    'Mini-Mocks',
                     style: TextStyle(color: Colors.black),
                   ),
                 ],
@@ -455,7 +456,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     },
                   ),
                   Text(
-                    'Flashcards',
+                    'Topical Flashcards',
                     style: TextStyle(color: Colors.black),
                   ),
                 ],
@@ -478,8 +479,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     checkbox4.value) {
                   List<String> selectedResources = [];
                   if (checkbox1.value) selectedResources.add('Official paper');
-                  if (checkbox2.value)
-                    selectedResources.add('Full-sized mock exam');
+                  if (checkbox2.value) selectedResources.add('Full-sized mock exam');
                   if (checkbox3.value) selectedResources.add('Mini-mocks');
                   if (checkbox4.value) selectedResources.add('Flashcards');
 
