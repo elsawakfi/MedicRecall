@@ -63,7 +63,10 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
           fontWeight: FontWeight.w500,
         ),
       ),
-      content: content,
+      content: SizedBox(
+        width: 300,
+        child: content,
+      ),
       actions: actions,
     );
   }
@@ -215,6 +218,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     initialDate: DateTime.now(),
                     firstDate: DateTime.now(),
                     lastDate: DateTime.now().add(const Duration(days: 365)),
+                    locale: const Locale('en', 'GB'),
                   );
                   if (picked != null) {
                     setState(() {
@@ -254,121 +258,134 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
   }
 
   // Show dialog to ask for number of repetitions
-  void _showRepetitionDialog(BuildContext context) {
-    final List<int> repetitionOptions = [2, 3, 4, 5, 6];
-    int? selectedRepetition;
+void _showRepetitionDialog(BuildContext context) {
+  final List<int> repetitionOptions = [2, 3, 4, 5, 6];
+  int? selectedRepetition;
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return AlertDialog(
-              backgroundColor: const Color(0xFFE6EDF2),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(0),
-              ),
-              title: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'How many times would you like to practice the official past paper?',
-                    style: const TextStyle(
-                      color: Color.fromRGBO(21, 58, 103, 1),
-                      fontSize: 21,
-                      fontWeight: FontWeight.w500,
-                    ),
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return AlertDialog(
+            backgroundColor: const Color(0xFFE6EDF2),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(0),
+            ),
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'How many times would you like to practice the selected resources?',
+                  style: const TextStyle(
+                    color: Color.fromRGBO(21, 58, 103, 1),
+                    fontSize: 21,
+                    fontWeight: FontWeight.w500,
                   ),
-                  const SizedBox(height: 8), // Add spacing between lines
-                  Text(
-                    'We recommend at least 3 times.',
-                    style: const TextStyle(
-                      color: Color.fromRGBO(21, 58, 103, 1),
-                      fontSize: 16, // Slightly smaller font size
-                      fontWeight: FontWeight.w400, // Regular font weight
-                    ),
+                ),
+                const SizedBox(height: 8), // Add spacing between lines
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      const TextSpan(
+                        text: 'We recommend practicing at least three times.\nYour chosen number of repetition will apply to both the ',
+                        style: TextStyle(
+                          color: Color.fromRGBO(21, 58, 103, 1),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400, // Regular font weight
+                        ),
+                      ),
+                      TextSpan(
+                        text: 'Official Paper and Full-sized Mock Exam.',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold, // Make it bold
+                          color: Color.fromRGBO(21, 58, 103, 1),
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ...repetitionOptions.map((int value) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 5.0),
+                      child: RadioListTile<int>(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15.0),
+                        ),
+                        tileColor: const Color.fromRGBO(21, 58, 103, 1),
+                        title: Text(
+                          '$value',
+                          style: const TextStyle(
+                            color: Colors.white,
+                          ),
+                        ),
+                        value: value,
+                        groupValue: selectedRepetition,
+                        onChanged: (int? newValue) {
+                          setState(() {
+                            selectedRepetition = newValue;
+                          });
+                        },
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            ),
+            actions: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _showOptionsDialog(context);
+                    },
+                    child: const Text('Previous'),
+                  ),
+                  TextButton(
+                    onPressed: () async {
+                      if (selectedRepetition != null) {
+                        // Save selectedRepetition to the database
+                        QuerySnapshot u = await _userCollectionRef
+                            .where("userID", isEqualTo: user?.uid)
+                            .get();
+
+                        var id = u.docs.last.id;
+                        await _userCollectionRef.doc(id).update({
+                          'selectedRepetition': selectedRepetition,
+                        });
+
+                        if (context.mounted) {
+                          Navigator.of(context).pop();
+                        }
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Please enter number of repetitions'),
+                          ),
+                        );
+                      }
+                    },
+                    child: const Text('Submit'),
                   ),
                 ],
               ),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ...repetitionOptions.map((int value) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 5.0),
-                        child: RadioListTile<int>(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15.0),
-                          ),
-                          tileColor: const Color.fromRGBO(21, 58, 103, 1),
-                          title: Text(
-                            '$value',
-                            style: const TextStyle(
-                              color: Colors.white,
-                            ),
-                          ),
-                          value: value,
-                          groupValue: selectedRepetition,
-                          onChanged: (int? newValue) {
-                            setState(() {
-                              selectedRepetition = newValue;
-                            });
-                          },
-                        ),
-                      );
-                    }),
-                  ],
-                ),
-              ),
-              actions: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        _showOptionsDialog(context);
-                      },
-                      child: const Text('Previous'),
-                    ),
-                    TextButton(
-                      onPressed: () async {
-                        if (selectedRepetition != null) {
-                          // Save selectedRepetition to the database
-                          // code taken from below resources option dialog
-                          QuerySnapshot u = await _userCollectionRef
-                              .where("userID", isEqualTo: user?.uid)
-                              .get();
+            ],
+          );
+        },
+      );
+    },
+  );
+}
 
-                          var id = u.docs.last.id;
-                          // updates the selectedRepetition field in the user's document
-                          await _userCollectionRef.doc(id).update({
-                          'selectedRepetition': selectedRepetition,
-                          });
-
-                          if (context.mounted) {
-                            Navigator.of(context).pop();
-                          } // Proceed to the next dialog
-                          } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Please enter number of repetitions'),
-                            ),
-                          );
-                        }
-                      },
-                      child: const Text('Submit'),
-                    ),
-                  ],
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
 
   void _showOptionsDialog(BuildContext context) {
     final checkbox1 = ValueNotifier<bool>(false);

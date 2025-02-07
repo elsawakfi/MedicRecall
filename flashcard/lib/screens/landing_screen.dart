@@ -715,6 +715,7 @@ class LandingState extends State<Landing> {
                     initialDate: DateTime.now(),
                     firstDate: DateTime.now(),
                     lastDate: DateTime.now().add(const Duration(days: 365)),
+                    locale: const Locale('en', 'GB'),
                   );
                   if (picked != null) {
                     setState(() {
@@ -737,7 +738,7 @@ class LandingState extends State<Landing> {
               const SizedBox(height: 10),
               Text(
                 hasDate != null
-                    ? 'Selected Date: ${DateFormat('dd MMM, yyyy').format(_examDate!)}'
+                    ? 'Selected Date: ${DateFormat('dd MMM, yyyy', 'en_GB').format(_examDate!)}'
                     : 'No Date Selected',
                 style: TextStyle(
                   color: _examDate != null
@@ -772,7 +773,7 @@ class LandingState extends State<Landing> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'How many times would you like to practice the official past paper?',
+                    'How many times would you like to practice the selected resources?',
                     style: const TextStyle(
                       color: Color.fromRGBO(21, 58, 103, 1),
                       fontSize: 21,
@@ -780,12 +781,26 @@ class LandingState extends State<Landing> {
                     ),
                   ),
                   const SizedBox(height: 8), // Add spacing between lines
-                  Text(
-                    'We recommend at least 3 times.',
-                    style: const TextStyle(
-                      color: Color.fromRGBO(21, 58, 103, 1),
-                      fontSize: 16, // Slightly smaller font size
-                      fontWeight: FontWeight.w400, // Regular font weight
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        const TextSpan(
+                          text: 'We recommend practicing at least three times.\nYour chosen number of repetition will apply to both the ',
+                          style: TextStyle(
+                            color: Color.fromRGBO(21, 58, 103, 1),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w400, // Regular font weight
+                          ),
+                        ),
+                        TextSpan(
+                          text: 'Official Paper and Full-sized Mock Exam.',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold, // Make it bold
+                            color: Color.fromRGBO(21, 58, 103, 1),
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -828,7 +843,7 @@ class LandingState extends State<Landing> {
                     TextButton(
                       onPressed: () {
                         Navigator.of(context).pop();
-                        _showExamDateDialog(context);
+                        _showOptionsDialog(context);
                       },
                       child: const Text('Previous'),
                     ),
@@ -836,23 +851,21 @@ class LandingState extends State<Landing> {
                       onPressed: () async {
                         if (selectedRepetition != null) {
                           // Save selectedRepetition to the database
-                          // code taken from below resources option dialog
                           QuerySnapshot u = await _userCollectionRef
                               .where("userID", isEqualTo: user?.uid)
                               .get();
 
                           var id = u.docs.last.id;
-                          // updates the selectedRepetition field in the user's document
                           await _userCollectionRef.doc(id).update({
-                          'selectedRepetition': selectedRepetition,
+                            'selectedRepetition': selectedRepetition,
                           });
 
                           if (context.mounted) {
                             Navigator.of(context).pop();
-                          } // End Dialog
+                          }
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
+                            const SnackBar(
                               content: Text('Please enter number of repetitions'),
                             ),
                           );
@@ -869,6 +882,7 @@ class LandingState extends State<Landing> {
       },
     );
   }
+
 
   // Helper method
   Widget _buildAlertDialog({
