@@ -20,8 +20,8 @@ abstract class MiniMockExam extends StatefulWidget {
 class MiniMockExamState extends State<MiniMockExam> {
   final FirebaseAuth auth = FirebaseAuth.instance;
   late User user;
-  late int remainingSeconds;
   int currentQuestion = 0;
+  int remainingSeconds = 2700; // Temp fix for late initialisation error
   List<List<bool>> multiChoiceAnswers = []; // For each question store selected options as a list of booleans
   List<List<String>> rankingAnswers = [];
   List<Map<String, dynamic>> questions = []; // Store question data with the question number as key e.g Q14
@@ -37,17 +37,19 @@ class MiniMockExamState extends State<MiniMockExam> {
     getUser();
     getQuestions(); // Fetch the questions on initialisation (Needed as this is not to be called in the widget build)
     // Below defines the exam timer and what happens on each tick / end of exam
+    remainingSeconds = widget.time;
     _timerController = TimerController(
       startTime: widget.time, //measured in seconds
       onTimeUpdate: (time) {
         setState(() {
-          _displayTime = time; 
-          
-            // Parse time string "MM:SS" to seconds
-          List<String> parts = time.split(":");
-          int minutes = int.parse(parts[0]);
-          int seconds = int.parse(parts[1]);
-          remainingSeconds = (minutes * 60) + seconds;// Update display every second
+          _displayTime = time;
+          remainingSeconds -= 1;
+
+          //   // Parse time string "MM:SS" to seconds
+          // List<String> parts = time.split(":");
+          // int minutes = int.parse(parts[0]);
+          // int seconds = int.parse(parts[1]);
+          // remainingSeconds = (minutes * 60) + seconds;// Update display every second
         });
       },
       onTimerComplete: () {
@@ -175,25 +177,28 @@ class MiniMockExamState extends State<MiniMockExam> {
           appBar: AppBar(
               automaticallyImplyLeading: false,
               elevation: 0,
-              title: Align(
-                alignment: const Alignment(-0.05, 0),
-                child: Stack(
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Positioned(
-                      top: 2.3,
-                      child: Image.asset(
-                        'assets/newlogo.png',
-                        fit: BoxFit.cover,
-                        height: 34,
-                      ),
-                    ),
-                    Container(
-                        margin: const EdgeInsets.only(left: 32),
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(widget.title)
-                    ),
-                  ],
-                ),
+                    Stack(
+                        children: [
+                          Positioned(
+                            top: 2.3,
+                            child: Image.asset(
+                              'assets/newlogo.png',
+                              fit: BoxFit.cover,
+                              height: 34,
+                            ),
+                          ),
+                          Container(
+                              margin: const EdgeInsets.only(left: 32),
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(widget.title)
+                          ),
+                        ],
+                      )
+                  ]
               ),
               centerTitle: true,
               actions: [
@@ -204,7 +209,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
                     color:  (remainingSeconds <= 600)
-                    ? Colors.red
+                    ? Colors.red.shade400
                     : const Color.fromARGB(255, 235, 230, 239),
                     boxShadow: [
                       BoxShadow(
@@ -217,8 +222,10 @@ class MiniMockExamState extends State<MiniMockExam> {
                   ),
                   child: Center(
                       child: Text('Time Remaining: $_displayTime',
-                        style: const TextStyle(
-                          color: Color.fromARGB(255, 98, 86, 139),
+                        style: TextStyle(
+                          color: (remainingSeconds <= 600)
+                              ? Colors.white
+                              : Color.fromARGB(255, 98, 86, 139),
                           fontSize: 15,
                           fontWeight: FontWeight.w500,
                         ),

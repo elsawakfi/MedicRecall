@@ -461,7 +461,7 @@ class LandingState extends State<Landing> {
                                     SizedBox(width: 10),
                                     Expanded(
                                       child: Text(
-                                        'Mini-mock',
+                                        'Mini-Mocks',
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontSize: 34,
