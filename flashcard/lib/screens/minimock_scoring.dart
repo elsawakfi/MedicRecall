@@ -5,6 +5,7 @@ import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
+import 'package:flashcard_x/screens/minimock_feedback.dart';
 
 class MiniMockScoring extends StatefulWidget {
   final String title;
@@ -136,8 +137,10 @@ class MiniMockScoringState extends State<MiniMockScoring> {
       }
     });
 
-    int totalScore = answerScores.reduce((value, element) => value + element);
-    print('Total Score: $totalScore');
+    totalScore = answerScores.reduce((value, element) => value + element);
+    setState(() {
+      totalScore = totalScore;
+    });
   }
 
 

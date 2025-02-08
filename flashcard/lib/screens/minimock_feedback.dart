@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:collection/collection.dart';
-
 import 'minimock_landing.dart';
 
 class MiniMockFeedBack extends StatefulWidget {
