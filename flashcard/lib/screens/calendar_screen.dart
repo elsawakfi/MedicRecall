@@ -120,24 +120,6 @@ class CalendarStateO extends State<Calendar> {
         []; // returns the events of a specified day, [] if empty.
   }
 
-  // Add color mapping for different event types
-  final Map<String, Color> eventColors = {
-    'Patient focus': Color.fromARGB(255, 33, 150, 243),  // Blue
-    'Acting within your remit': Color.fromARGB(255, 156, 39, 176),  // Purple
-    'Commitment to professionalism': Color.fromARGB(255, 76, 175, 80),  // Green
-    'Coping with pressure': Color.fromARGB(255, 255, 152, 0),  // Orange
-    'Effective communication': Color.fromARGB(255, 233, 30, 99),  // Pink
-    'Team working': Color.fromARGB(255, 0, 150, 136),  // Teal
-    'Confidentiality': Color.fromARGB(255, 255, 193, 7),  // Amber
-    'Test Day': Color.fromARGB(255, 255, 89, 94),  // Red
-  };
-
-  Color getEventColor(String eventTitle) {
-    // Extract the main topic from the event title
-    String mainTopic = eventTitle.split(' - ')[0];
-    return eventColors[mainTopic] ?? Color.fromARGB(255, 158, 158, 158);  // Default to grey if no match
-  }
-
   // generates events for revision plan and places topics and dates in an array
   Future<void> generateEvents(DateTime testDay, User user) async {
 
@@ -167,18 +149,29 @@ class CalendarStateO extends State<Calendar> {
           selectedEvents[standardisedDate]?.add(
             Event(
               title: topicTitle,
-              color: getEventColor(topicTitle)
+              color: StudySessionManager.kFlashcardColor  // Use flashcard color for topic events
             )
           );
         } else {
           selectedEvents[standardisedDate] = [
             Event(
               title: topicTitle,
-              color: getEventColor(topicTitle)
+              color: StudySessionManager.kFlashcardColor  // Use flashcard color for topic events
             )
           ];
         }
       }
+    }
+
+    // Add Test Day event with red color
+    if (selectedEvents[testDay] == null) {
+      selectedEvents[testDay] = [
+        Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94))
+      ];
+    } else {
+      selectedEvents[testDay]?.add(
+        Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94))
+      );
     }
 
     updateEventsToDB(user); // add these events to the database, so they can be pulled later on.
