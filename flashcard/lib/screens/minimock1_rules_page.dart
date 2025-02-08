@@ -226,7 +226,7 @@ class MiniMock1RulesState extends State<MiniMock1Rules> {
                         borderRadius: BorderRadius.circular(5),
                       ),
                     ),
-                    child: Text('Begin Exam', style: TextStyle(color:Colors.white))
+                    child: Text('Begin Exam', style: TextStyle(color:Colors.white, fontSize: 20))
                 )))
           
         ],

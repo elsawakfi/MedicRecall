@@ -363,20 +363,20 @@ class MiniMockExamState extends State<MiniMockExam> {
                                 String option = entry.value;
                                 int questionIndex = currentQuestion - rankingAnswers.length;
                                 String optionLetter = options[optionIndex];
-                                return ListTile(
-                                  title: Text('$optionLetter. $option', style: TextStyle(color: Colors.white, fontSize: 16)),
-                                  leading: Checkbox(
-                                    value: multiChoiceAnswers[questionIndex][optionIndex],
-                                    onChanged: (value) {
-                                      int checkedCount = multiChoiceAnswers[questionIndex].where((element) => element).length;
-                                      if (checkedCount < 3 || value == false) {
-                                        setState(() {
-                                          multiChoiceAnswers[questionIndex][optionIndex] = value!;
-                                        });
-                                      }
-                                    },
-                                    side: BorderSide( color: Colors.white),
-                                  ),
+                                return CheckboxListTile(
+                                  title: Text('$optionLetter. $option', style: TextStyle(color: Colors.white, fontSize: 20)),
+                                  value: multiChoiceAnswers[questionIndex][optionIndex],
+                                  onChanged: (value) {
+                                    int checkedCount = multiChoiceAnswers[questionIndex].where((element) => element).length;
+                                    if (checkedCount < 3 || value == false) {
+                                      setState(() {
+                                        multiChoiceAnswers[questionIndex][optionIndex] = value!;
+                                      });
+                                    }
+                                  },
+                                  side: BorderSide( color: Colors.white),
+                                  enableFeedback: false,
+                                  controlAffinity: ListTileControlAffinity.leading,
                                 );
                               }).toList()
                           )
