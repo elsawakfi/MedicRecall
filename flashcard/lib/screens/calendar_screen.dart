@@ -545,10 +545,10 @@ Widget build(BuildContext context) {
                             children: events.take(3).map((event) {
                               return Container(
                                 margin: const EdgeInsets.symmetric(horizontal: 1),
-                                width: 6,
-                                height: 6,
+                                width: 12,  // Make wider
+                                height: 3,  // Make shorter for a line appearance
                                 decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
+                                  borderRadius: BorderRadius.circular(1),  // Slight rounding on the ends
                                   color: (event as Event).color,
                                 ),
                               );
