@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'package:flashcard_x/screens/minimock_feedback.dart';
 import 'package:flashcard_x/widgets/circular_percentage_indicator.dart';
+import 'package:percent_indicator/circular_percent_indicator.dart';
 // import 'package:percent_indicator/circular_percent_indicator.dart';
 
 class MiniMockScoring extends StatefulWidget {
@@ -210,9 +211,19 @@ class MiniMockScoringState extends State<MiniMockScoring> {
             : Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.end,
+            // crossAxisAlignment: CrossAxisAlignment.start,
+            // mainAxisAlignment: MainAxisAlignment.end,
             children: [
+              ScoreIndicator(
+                  title: 'Example',
+                  totalScore: totalScore,
+                  percentageScore: percentageScore,
+                  radius: 130.0,
+                  lineWidth: 15.0,
+                  progressColor: Colors.red,
+                  backgroundColor: Colors.green
+              ),
+              const Spacer(),
               // circularPercentIndicator:
                 // Text('Your Score: $totalScore/$totalQuestions', style: TextStyle(fontSize: 24)),
                 // Text('Percentage: $percentageScore%', style: TextStyle(fontSize: 24)),

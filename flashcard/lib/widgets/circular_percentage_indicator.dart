@@ -1,7 +1,5 @@
-import 'package:flashcard_x/main.dart';
 import 'package:flutter/material.dart';
-import 'package:flashcard_x/screens/minimock_scoring.dart';
-// import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:percent_indicator/circular_percent_indicator.dart';
 
 
   class ScoreIndicator extends StatelessWidget {
@@ -12,10 +10,9 @@ import 'package:flashcard_x/screens/minimock_scoring.dart';
   final double lineWidth;
   final Color progressColor;
   final Color backgroundColor;
-  // final circularPercentIndicator;
 
   const ScoreIndicator({
-    Key? key,
+    super.key,
     required this.title,
     required this.totalScore,
     required this.percentageScore,
@@ -23,10 +20,7 @@ import 'package:flashcard_x/screens/minimock_scoring.dart';
     required this.lineWidth,
     required this.progressColor,
     required this.backgroundColor,
-    // required this.circularPercentIndicator,
-    // required this.circularPercentIndicator(),
-    
-  }) : super(key: key);
+  });
 
 
   @override
@@ -42,7 +36,7 @@ import 'package:flashcard_x/screens/minimock_scoring.dart';
         CircularPercentIndicator(
           radius: radius,
           lineWidth: lineWidth,
-          percent: percentageScore,
+          percent: 1 - (percentageScore/100),
           // circularPercentIndicator: circularPercentIndicator,
           center: Text(
             "${percentageScore.toStringAsFixed(2)}%",
@@ -60,6 +54,4 @@ import 'package:flashcard_x/screens/minimock_scoring.dart';
       ],
     );
   }
-  
-  CircularPercentIndicator({required double radius, required double lineWidth, required double percent, required Text center, required Color progressColor, required Color backgroundColor}) {}
 }
