@@ -1,11 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/minimock_feedback.dart';
+import 'package:flashcard_x/screens/quiz_choice_screen.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'package:flashcard_x/screens/minimock_feedback.dart';
+import 'package:flashcard_x/widgets/circular_percentage_indicator.dart';
 
 class MiniMockScoring extends StatefulWidget {
   final String title;
@@ -30,6 +32,7 @@ class MiniMockScoringState extends State<MiniMockScoring> {
   List<int> answerScores = [];
   int totalScore = 0;
   double percentageScore = 0;
+  final totalQuestions = 25;
 
   @override
   void initState() {
@@ -195,7 +198,8 @@ class MiniMockScoringState extends State<MiniMockScoring> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-                Text('Total Score: $percentageScore%', style: TextStyle(fontSize: 24)),
+                Text('Your Score: $totalScore/$totalQuestions', style: TextStyle(fontSize: 24)),
+                Text('Percentage: $percentageScore%', style: TextStyle(fontSize: 24)),
               // EXIT BUTTON
               Align(
                 alignment: Alignment.bottomRight,
