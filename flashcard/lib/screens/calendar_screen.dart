@@ -580,6 +580,12 @@ Widget build(BuildContext context) {
                       titleCentered: true,
                       // Add margin to the header
                       headerMargin: EdgeInsets.only(bottom: 8.0),
+                      // Enable left and right arrows
+                      leftChevronVisible: true,
+                      rightChevronVisible: true,
+                      // Style the arrows
+                      leftChevronIcon: Icon(Icons.chevron_left, color: Color.fromARGB(255, 13, 71, 161)),
+                      rightChevronIcon: Icon(Icons.chevron_right, color: Color.fromARGB(255, 13, 71, 161)),
                     ),
                     daysOfWeekStyle: DaysOfWeekStyle(
                       // Style for weekday names
