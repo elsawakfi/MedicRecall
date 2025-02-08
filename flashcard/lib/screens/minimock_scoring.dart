@@ -4,6 +4,7 @@ import 'package:flashcard_x/screens/minimock_feedback.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:collection/collection.dart';
 
 class MiniMockScoring extends StatefulWidget {
   final String title;
@@ -21,7 +22,7 @@ class MiniMockScoring extends StatefulWidget {
   State<MiniMockScoring> createState() => MiniMockScoringState();
 }
 class MiniMockScoringState extends State<MiniMockScoring> {
-  Map<String, dynamic> questionAnswers = {};
+  List<Map<String, dynamic>> questions = [];
   Map<String, dynamic> userAnswers = {};
   final FirebaseAuth auth = FirebaseAuth.instance;
   late User user;
@@ -31,9 +32,13 @@ class MiniMockScoringState extends State<MiniMockScoring> {
   @override
   void initState() {
     super.initState();
-    getQuestions(); // Fetch the questions on initialisation (Needed as this is not to be called in the widget build)
-    getUser();
-    fetchUserAnswers(); //Fetch the user's answers from the database
+    initialise(); // As calculateScores relies on data we need from firebase we require the use of 'await'
+  }
+
+  Future<void> initialise() async{
+    await getQuestions(); // Fetch the questions on initialisation (Needed as this is not to be called in the widget build)
+    await getUser();
+    await fetchUserAnswers(); //Fetch the user's answers from the database
     calculateScores();
   }
 
@@ -68,7 +73,7 @@ class MiniMockScoringState extends State<MiniMockScoring> {
       List<Map<String, dynamic>> fetchedQuestions = await queryQuestionData();
       setState(() {
         // Extract the necessary data from the fetchedQuestions and turn it into the same format as userAnswers
-        questionAnswers = fetchedQuestions.asMap().map((index, value) => MapEntry((index+1).toString(), fetchedQuestions[index]['correct_answers']));
+        questions = fetchedQuestions;
       });
     } catch (error) {
       if (kDebugMode) {
@@ -106,21 +111,32 @@ class MiniMockScoringState extends State<MiniMockScoring> {
   }
 
   void calculateScores(){
-    answerScores = List.filled(25, 0); // Remove this, placeholder to ensure page loads
-    // INSERT SCORING ALGORITHM HERE
-    // answerScores[i] = ...
-    // answerScores[i] = 1;
+    answerScores = List.filled(25, 0); // Placeholder to ensure page loads
 
-    userAnswers.forEach((questionNumber, userAnswers){
-      if (questionAnswers[questionNumber] == userAnswers){
-        answerScores[int.parse(questionNumber)-1] = 1;
-      }
-      else {
-        answerScores[int.parse(questionNumber)-1] = 0;
+    userAnswers.forEach((questionNumber, userAnswer){
+      int questionIndex = int.parse(questionNumber) - 1; // String question number to integer index
+      // Score answers based on question type:
+      switch (questions[questionIndex]['type']) {
+        case 'ranking':
+          if (ListEquality().equals(questions[questionIndex]['correct_answers'], userAnswer)){
+            answerScores[questionIndex] = 1;
+          } else{
+            answerScores[questionIndex] = 0;
+          }
+          break;
+        case 'multiple choice':
+          if (questions[questionIndex]['type'] == "multiple choice" &&
+              UnorderedIterableEquality().equals(questions[questionIndex]['correct_answers'], userAnswer)){
+            answerScores[questionIndex] = 1;
+          } else{
+            answerScores[questionIndex] = 0;
+          }
+          break;
+        default:
       }
     });
 
-    int totalScore =answerScores.reduce((value, element) => value + element);
+    int totalScore = answerScores.reduce((value, element) => value + element);
     print('Total Score: $totalScore');
   }
 
