@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
@@ -444,100 +443,120 @@ Widget build(BuildContext context) {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                TableCalendar(
-                  focusedDay: focusedDay,
-                  firstDay: DateTime(2020),
-                  lastDay: DateTime(2050),
-                  calendarFormat: format,
-                  onFormatChanged: (CalendarFormat format) {
-                    setState(() {
-                      this.format = format;
-                    });
-                  },
-                  startingDayOfWeek: StartingDayOfWeek.monday,
-                  daysOfWeekVisible: true,
-                  selectedDayPredicate: (day) => isSameDay(selectedDay, day),
-                  onDaySelected: (DateTime selectDay, DateTime focusDay) {
-                    setState(() {
-                      selectedDay = selectDay;
-                      focusedDay = focusDay;
-                    });
-                  },
-                  eventLoader: _getEventsfromDay,
-                  // calendarBuilders: CalendarBuilders(
-                  //   markerBuilder: (context, day, events) {
-                  //     if (events.isNotEmpty) {
-                  //       return Positioned(
-                  //         bottom: 1,
-                  //         child: Row(
-                  //           mainAxisSize: MainAxisSize.min,
-                  //           children: events.map((event) {
-                  //             Event ev = event as Event;
-                  //             return Container(
-                  //               margin: const EdgeInsets.symmetric(horizontal: 1.5),
-                  //               width: 8,
-                  //               height: 8,
-                  //               decoration: BoxDecoration(
-                  //                 color: ev.color, // Set color based on event color
-                  //                 shape: BoxShape.circle,
-                  //               ),
-                  //             );
-                  //           }).toList(),
-                  //         ),
-                  //       );
-                  //     }
-                  //     return null;
-                  //   },
-                  // ),
-                  calendarBuilders: CalendarBuilders(
-                    markerBuilder: (context, day, events) {
-                      if (events.isNotEmpty) {
-                        return Positioned(
-                          bottom: 4, // Adjust the position under the day number
-                          child: Column(
-                            children: events.map((event) {
-                              Event ev = event as Event;
-                              return Container(
-                                margin: const EdgeInsets.symmetric(vertical: 1), // Space between lines
-                                width: 40, // Fixed width for uniformity
-                                height: 3, // Line's height
-                                decoration: BoxDecoration(
-                                  color: ev.color, // Retrieve event colour
-                                  borderRadius: BorderRadius.circular(2),
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        );
-                      }
-                      return null;
+                Container(
+                  padding: const EdgeInsets.all(16.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16.0),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.1),
+                        spreadRadius: 2,
+                        blurRadius: 8,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: TableCalendar(
+                    firstDay: DateTime.utc(2020, 1, 1),
+                    lastDay: DateTime.utc(2030, 12, 31),
+                    focusedDay: focusedDay,
+                    calendarFormat: format,
+                    onFormatChanged: (CalendarFormat _format) {
+                      setState(() {
+                        format = _format;
+                      });
                     },
-                  ),
-                  calendarStyle: CalendarStyle(
-                    isTodayHighlighted: true,
-                    selectedDecoration: BoxDecoration(
-                      color: Colors.blue,
-                      shape: BoxShape.rectangle,
-                      borderRadius: BorderRadius.circular(10.0),
+                    startingDayOfWeek: StartingDayOfWeek.monday,
+                    daysOfWeekVisible: true,
+                    onDaySelected: (DateTime selectDay, DateTime focusDay) {
+                      setState(() {
+                        selectedDay = selectDay;
+                        focusedDay = focusDay;
+                      });
+                    },
+                    selectedDayPredicate: (DateTime date) {
+                      return isSameDay(selectedDay, date);
+                    },
+                    eventLoader: _getEventsfromDay,
+                    calendarStyle: CalendarStyle(
+                      // Make selected day more visible with a darker blue
+                      selectedDecoration: BoxDecoration(
+                        color: Color.fromARGB(255, 0, 102, 204),
+                        shape: BoxShape.circle,
+                      ),
+                      // Make today's date stand out with a distinct color
+                      todayDecoration: BoxDecoration(
+                        color: Color.fromARGB(255, 46, 125, 50),
+                        shape: BoxShape.circle,
+                      ),
+                      // Improve visibility of selected text
+                      selectedTextStyle: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      // Make default days more visible
+                      defaultTextStyle: TextStyle(
+                        color: Colors.black87,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      // Make weekend days stand out
+                      weekendTextStyle: TextStyle(
+                        color: Color.fromARGB(255, 198, 40, 40),
+                        fontWeight: FontWeight.w500,
+                      ),
+                      // Improve visibility of outside days
+                      outsideTextStyle: TextStyle(
+                        color: Colors.grey[600],
+                      ),
+                      // Make markers more visible
+                      markerDecoration: BoxDecoration(
+                        color: Color.fromARGB(255, 255, 152, 0),
+                        shape: BoxShape.circle,
+                      ),
+                      // Add padding to the calendar cells
+                      cellPadding: EdgeInsets.all(8.0),
+                      // Add margin between rows
+                      cellMargin: EdgeInsets.all(4.0),
                     ),
-                    selectedTextStyle: const TextStyle(color: Colors.white),
-                    todayDecoration: BoxDecoration(
-                      color: Colors.grey,
-                      shape: BoxShape.rectangle,
-                      borderRadius: BorderRadius.circular(10.0),
+                    headerStyle: HeaderStyle(
+                      titleTextStyle: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Color.fromARGB(255, 13, 71, 161),
+                      ),
+                      formatButtonTextStyle: TextStyle(
+                        color: Color.fromARGB(255, 13, 71, 161),
+                        fontWeight: FontWeight.bold,
+                      ),
+                      // Add padding to the header
+                      headerPadding: EdgeInsets.symmetric(vertical: 16.0),
+                      // Make the format button more modern
+                      formatButtonDecoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16.0),
+                        border: Border.all(color: Color.fromARGB(255, 13, 71, 161)),
+                      ),
+                      formatButtonPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                      // Center the title
+                      titleCentered: true,
+                      // Add margin to the header
+                      headerMargin: EdgeInsets.only(bottom: 8.0),
                     ),
-                    defaultDecoration: BoxDecoration(
-                      shape: BoxShape.rectangle,
-                      borderRadius: BorderRadius.circular(10.0),
+                    daysOfWeekStyle: DaysOfWeekStyle(
+                      // Style for weekday names
+                      weekdayStyle: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14.0,
+                        color: Colors.black87,
+                      ),
+                      // Style for weekend names
+                      weekendStyle: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14.0,
+                        color: Color.fromARGB(255, 198, 40, 40),
+                      ),
                     ),
-                    weekendDecoration: BoxDecoration(
-                      shape: BoxShape.rectangle,
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                  ),
-                  headerStyle: const HeaderStyle(
-                    titleCentered: true,
-                    formatButtonShowsNext: false,
                   ),
                 ),
                 ..._getEventsfromDay(selectedDay).map(
