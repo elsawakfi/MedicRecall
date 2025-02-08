@@ -172,7 +172,7 @@ class MiniMockExamState extends State<MiniMockExam> {
   Widget build(BuildContext context) {
     return PopScope(
         canPop: false,
-        child: Scaffold( //Widget made to prevent necessary repetition
+        child: Scaffold(
           key: ValueKey(widget.title),
           appBar: AppBar(
               automaticallyImplyLeading: false,
@@ -382,11 +382,25 @@ class MiniMockExamState extends State<MiniMockExam> {
                       )
                   )
                 ],
-
                 // Buttons to change questions
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
+                    Align(
+                        alignment: Alignment.centerLeft,
+                        child: FloatingActionButton(
+                          onPressed: (){
+
+                          },
+                          clipBehavior: Clip.none,
+                          backgroundColor: const Color.fromARGB(255, 235, 230, 239),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: const Icon(Icons.question_mark, color: Color.fromARGB(255, 98, 86, 139),),
+                        )
+                    ),
+                    const Spacer(),
                     if (currentQuestion > 0) //Prevents button being shown if no previous questions available
                       ElevatedButton.icon(
                         onPressed: () {
@@ -432,9 +446,10 @@ class MiniMockExamState extends State<MiniMockExam> {
                       ),
                   ],
                 ),
-              ],
+              ]
             ),
           ),
+
         )
     );
   }
