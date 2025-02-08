@@ -120,6 +120,24 @@ class CalendarStateO extends State<Calendar> {
         []; // returns the events of a specified day, [] if empty.
   }
 
+  // Add color mapping for different event types
+  final Map<String, Color> eventColors = {
+    'Patient focus': Color.fromARGB(255, 33, 150, 243),  // Blue
+    'Acting within your remit': Color.fromARGB(255, 156, 39, 176),  // Purple
+    'Commitment to professionalism': Color.fromARGB(255, 76, 175, 80),  // Green
+    'Coping with pressure': Color.fromARGB(255, 255, 152, 0),  // Orange
+    'Effective communication': Color.fromARGB(255, 233, 30, 99),  // Pink
+    'Team working': Color.fromARGB(255, 0, 150, 136),  // Teal
+    'Confidentiality': Color.fromARGB(255, 255, 193, 7),  // Amber
+    'Test Day': Color.fromARGB(255, 255, 89, 94),  // Red
+  };
+
+  Color getEventColor(String eventTitle) {
+    // Extract the main topic from the event title
+    String mainTopic = eventTitle.split(' - ')[0];
+    return eventColors[mainTopic] ?? Color.fromARGB(255, 158, 158, 158);  // Default to grey if no match
+  }
+
   // generates events for revision plan and places topics and dates in an array
   Future<void> generateEvents(DateTime testDay, User user) async {
 
@@ -144,13 +162,22 @@ class CalendarStateO extends State<Calendar> {
       DateTime standardisedDate = DateTime(nextReviewDateObject.year, nextReviewDateObject.month, nextReviewDateObject.day);
 
       if (daysToNextReviewDate >= 0 && topicCount[i] > 0 && daysToNextReviewDate < daysUntilTest) {
+        String topicTitle = topics[i]["topic"].toString();
         if (selectedEvents[standardisedDate] != null) {
-          selectedEvents[standardisedDate]?.add(Event(title: topics[i]["topic"].toString(), color: Color.fromARGB(255, 255, 202, 58)));// add to the selected items list - this is then added to the calendar
+          selectedEvents[standardisedDate]?.add(
+            Event(
+              title: topicTitle,
+              color: getEventColor(topicTitle)
+            )
+          );
         } else {
-          selectedEvents[standardisedDate] ??= [];
-          selectedEvents[standardisedDate]?.add(Event(title: topics[i]["topic"].toString(), color: Color.fromARGB(255, 255, 202, 58)));// add to the selected items list - this is then added to the calendar
+          selectedEvents[standardisedDate] = [
+            Event(
+              title: topicTitle,
+              color: getEventColor(topicTitle)
+            )
+          ];
         }
-
       }
     }
 
@@ -509,15 +536,33 @@ Widget build(BuildContext context) {
                       outsideTextStyle: TextStyle(
                         color: Colors.grey[600],
                       ),
-                      // Make markers more visible
-                      markerDecoration: BoxDecoration(
-                        color: Color.fromARGB(255, 255, 152, 0),
-                        shape: BoxShape.circle,
-                      ),
-                      // Add padding to the calendar cells
+                      // Custom marker settings
+                      markersMaxCount: 5,  // Show up to 5 markers per day
+                      markersAnchor: 1.0,
                       cellPadding: EdgeInsets.all(8.0),
-                      // Add margin between rows
                       cellMargin: EdgeInsets.all(4.0),
+                    ),
+                    calendarBuilders: CalendarBuilders(
+                      markerBuilder: (context, date, events) {
+                        if (events.isEmpty) return null;
+                        return Positioned(
+                          bottom: 1,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: events.take(3).map((event) {
+                              return Container(
+                                margin: const EdgeInsets.symmetric(horizontal: 1),
+                                width: 6,
+                                height: 6,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: (event as Event).color,
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        );
+                      },
                     ),
                     headerStyle: HeaderStyle(
                       titleTextStyle: TextStyle(
@@ -561,7 +606,26 @@ Widget build(BuildContext context) {
                 ),
                 ..._getEventsfromDay(selectedDay).map(
                   (Event event) => ListTile(
-                    title: Text(event.title),
+                    title: Text(
+                      event.title,
+                      style: TextStyle(
+                        color: Colors.black87,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    leading: Container(
+                      width: 12,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: event.color,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    tileColor: event.color.withOpacity(0.1),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   ),
                 ),
                 Column(
