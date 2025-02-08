@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'package:flashcard_x/screens/minimock_feedback.dart';
 import 'package:flashcard_x/widgets/circular_percentage_indicator.dart';
+// import 'package:percent_indicator/circular_percent_indicator.dart';
 
 class MiniMockScoring extends StatefulWidget {
   final String title;
@@ -33,6 +34,8 @@ class MiniMockScoringState extends State<MiniMockScoring> {
   int totalScore = 0;
   double percentageScore = 0;
   final totalQuestions = 25;
+  final ScoringIndicator = ScoreIndicator;
+  // get circularPercentIndicator => null;
 
   @override
   void initState() {
@@ -148,6 +151,18 @@ class MiniMockScoringState extends State<MiniMockScoring> {
       percentageScore = percentageScore;
     });
   }
+  ScoreIndicator get circularPercentIndicator{
+    return ScoreIndicator(
+      title: "Your Score: ", 
+      totalScore: totalScore, 
+      percentageScore: percentageScore, 
+      radius: 80.0, lineWidth: 10.0, 
+      progressColor: Colors.green, 
+      backgroundColor: Colors.red,
+      // circularPercentIndicator: circularPercentIndicator,
+    );
+      
+      }
 
 
 
@@ -198,8 +213,9 @@ class MiniMockScoringState extends State<MiniMockScoring> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-                Text('Your Score: $totalScore/$totalQuestions', style: TextStyle(fontSize: 24)),
-                Text('Percentage: $percentageScore%', style: TextStyle(fontSize: 24)),
+              // circularPercentIndicator:
+                // Text('Your Score: $totalScore/$totalQuestions', style: TextStyle(fontSize: 24)),
+                // Text('Percentage: $percentageScore%', style: TextStyle(fontSize: 24)),
               // EXIT BUTTON
               Align(
                 alignment: Alignment.bottomRight,
