@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flashcard_x/screens/minimock_feedback.dart';
 import '../screens/minimock_review.dart';
 import '../utils/timer.dart';
+import 'minimock_help_button.dart';
 
 abstract class MiniMockExam extends StatefulWidget {
   final String title;
@@ -388,17 +389,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                   children: [
                     Align(
                         alignment: Alignment.centerLeft,
-                        child: FloatingActionButton(
-                          onPressed: (){
-
-                          },
-                          clipBehavior: Clip.none,
-                          backgroundColor: const Color.fromARGB(255, 235, 230, 239),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: const Icon(Icons.question_mark, color: Color.fromARGB(255, 98, 86, 139),),
-                        )
+                        child: MiniMockHelpButton(),
                     ),
                     const Spacer(),
                     if (currentQuestion > 0) //Prevents button being shown if no previous questions available
