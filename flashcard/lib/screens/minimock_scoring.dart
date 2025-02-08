@@ -29,6 +29,7 @@ class MiniMockScoringState extends State<MiniMockScoring> {
   late User user;
   List<int> answerScores = [];
   int totalScore = 0;
+  double percentageScore = 0;
 
   @override
   void initState() {
@@ -138,8 +139,10 @@ class MiniMockScoringState extends State<MiniMockScoring> {
     });
 
     totalScore = answerScores.reduce((value, element) => value + element);
+    percentageScore = (totalScore / questions.length) * 100;
     setState(() {
       totalScore = totalScore;
+      percentageScore = percentageScore;
     });
   }
 
@@ -192,7 +195,7 @@ class MiniMockScoringState extends State<MiniMockScoring> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-                Text('Total Score: $totalScore', style: TextStyle(fontSize: 24)),
+                Text('Total Score: $percentageScore%', style: TextStyle(fontSize: 24)),
               // EXIT BUTTON
               Align(
                 alignment: Alignment.bottomRight,
