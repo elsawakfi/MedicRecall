@@ -35,6 +35,7 @@ class MiniMockScoringState extends State<MiniMockScoring> {
   double percentageScore = 0;
   late final int totalQuestions;
   int maxScore = 0;
+  double averageScore =0;
   final scoringIndicator = ScoreIndicator;
 
   @override
@@ -48,6 +49,7 @@ class MiniMockScoringState extends State<MiniMockScoring> {
     await getUser();
     await fetchUserAnswers(); //Fetch the user's answers from the database
     calculateScores();
+    await fetchAverageScore(); // Fetch the average score from the database
   }
 
   Future<void> getUser() async {
@@ -115,6 +117,56 @@ class MiniMockScoringState extends State<MiniMockScoring> {
     } catch (error) {
       if (kDebugMode) {
         print('Error fetching answers: $error');
+      }
+    }
+  }
+
+  Future<void> fetchAverageScore() async {
+    try {
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+      .collection('users')
+      .get();
+      // List scores = snapshot.docs.map((doc) => doc.get('score')).toList();
+      int totalScores = 0;
+      int userCount = snapshot.docs.length;
+     
+     for (var doc in snapshot.docs){
+      DocumentSnapshot<Map<String, dynamic >> userAnswers = await FirebaseFirestore.instance
+      .collection('users')
+      .doc(doc.id)
+      .collection('Exam answers')
+      .doc(widget.answerDirectory)
+      .get();
+      Map<String, dynamic> userAnswerMap = userAnswers.get('answers');
+      int userTotalScore = 0;
+
+      userAnswerMap.forEach((questionNumber, userAnswer){
+        int questionIndex = int.parse(questionNumber) - 1; // String question number to integer index
+        // Score answers based on question type:
+        switch (questions[questionIndex]['type']) {
+          case 'ranking':
+            if (ListEquality().equals(questions[questionIndex]['correct_answers'], userAnswer)){
+              userTotalScore += 1;
+            }
+            break;
+          case 'multiple choice':
+            if (questions[questionIndex]['type'] == "multiple choice" &&
+                UnorderedIterableEquality().equals(questions[questionIndex]['correct_answers'], userAnswer)){
+              userTotalScore += 1;
+            }
+            break;
+          default:
+        }
+      });
+      totalScores +=userTotalScore;
+     }
+     averageScore = totalScores / userCount;
+     setState((){
+       averageScore = averageScore;
+     });
+    } catch (error) {
+      if (kDebugMode) {
+        print('Error fetching average score: $error');
       }
     }
   }
