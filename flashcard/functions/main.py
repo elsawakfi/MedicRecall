@@ -193,6 +193,7 @@ def update_exam_score(request):
         # Extract userId and score from the JSON data
         user_id = request_json.get('userId')
         new_score = request_json.get('score')
+        directory_name = request_json.get('directory')
 
         if not user_id or not new_score:
             return jsonify({"error": "User ID and score are required."}), 400
@@ -210,15 +211,15 @@ def update_exam_score(request):
         # Helper function to update the global stats document
         def update_stats_document(scores):
             median = calculate_median(scores)
-            stats_ref = db.collection('mini-mock-stats').document('mini-mock-1')
+            stats_ref = db.collection('mini-mock-stats').document(f'{directory_name}')
             stats_ref.set({'scores': scores, 'median': median}, merge=True)
 
         # Fetch the user's exam score from the correct subcollection
-        exam_doc_ref = db.collection('users').document(user_id).collection('Exam answers').document('mini-mock-1-answers')
+        exam_doc_ref = db.collection('users').document(user_id).collection('Exam answers').document(f'{directory_name}-answers')
         exam_doc = exam_doc_ref.get()
 
         # Get global scores and add the new score
-        stats_ref = db.collection('mini-mock-stats').document('mini-mock-1')
+        stats_ref = db.collection('mini-mock-stats').document(f'{directory_name}')
         stats_doc = stats_ref.get()
 
         # Initialize global scores
