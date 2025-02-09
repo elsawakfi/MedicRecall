@@ -9,7 +9,7 @@ import 'package:collection/collection.dart';
 import 'package:flashcard_x/screens/minimock_feedback.dart';
 import 'package:flashcard_x/widgets/circular_percentage_indicator.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
-// import 'package:percent_indicator/circular_percent_indicator.dart';
+
 
 class MiniMockScoring extends StatefulWidget {
   final String title;
@@ -155,7 +155,7 @@ class MiniMockScoringState extends State<MiniMockScoring> {
   ScoreIndicator get circularPercentIndicator{
     return ScoreIndicator(
       title: "Your Score: ", 
-      totalScore: totalScore, 
+      totalScore: '$totalScore/25',
       percentageScore: percentageScore, 
       radius: 80.0, lineWidth: 10.0, 
       progressColor: Colors.green, 
@@ -215,8 +215,8 @@ class MiniMockScoringState extends State<MiniMockScoring> {
             // mainAxisAlignment: MainAxisAlignment.end,
             children: [
               ScoreIndicator(
-                  title: 'Example',
-                  totalScore: totalScore,
+                  title: 'Your Score: ',
+                  totalScore: '$totalScore/25',
                   percentageScore: percentageScore,
                   radius: 130.0,
                   lineWidth: 15.0,

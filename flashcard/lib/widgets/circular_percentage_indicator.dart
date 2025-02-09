@@ -4,7 +4,7 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
 
   class ScoreIndicator extends StatelessWidget {
   final String title;
-  final int totalScore;
+  final totalScore;
   final double percentageScore;
   final double radius;
   final double lineWidth;
