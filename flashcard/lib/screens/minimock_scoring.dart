@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/minimock_feedback.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
+import 'package:flashcard_x/widgets/average_percent_indicator';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
@@ -37,12 +38,7 @@ class MiniMockScoringState extends State<MiniMockScoring> {
   int maxScore = 0;
   double averageScore =0;
   final scoringIndicator = ScoreIndicator;
-
-  @override
-  void initState() {
-    super.initState();
-    initialise(); // As calculateScores relies on data we need from firebase we require the use of 'await'
-  }
+  final averageScoringIndicator = AverageScoreIndicator;
 
   Future<void> initialise() async{
     await getQuestions(); // Fetch the questions on initialisation
@@ -214,18 +210,28 @@ class MiniMockScoringState extends State<MiniMockScoring> {
   ScoreIndicator get circularPercentIndicator{
     return ScoreIndicator(
       title: "Your Score: ", 
-      totalScore: '$totalScore/$maxScore',
+      totalScore: '$totalScore/25',
       percentageScore: percentageScore, 
       radius: 80.0, lineWidth: 10.0, 
       progressColor: Colors.green, 
       backgroundColor: Colors.red,
     );
-      
+  }
+
+  AverageScoreIndicator get averageCircularPercentIndicator{
+    return AverageScoreIndicator(
+      title: "Average Score: ", 
+      totalScore: '$averageScore/$maxScore',
+      percentageScore: percentageScore, 
+      radius: 80.0, lineWidth: 10.0, 
+      progressColor: Colors.green, 
+      backgroundColor: Colors.red,
+    );
   }
 
 
-
   @override
+
   Widget build(BuildContext context) {
     return PopScope(
         canPop: false,
@@ -265,12 +271,10 @@ class MiniMockScoringState extends State<MiniMockScoring> {
           ),
         ),
         body: answerScores.isEmpty && (maxScore == 0)
-            ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
+            ? Center(child: CircularProgressIndicator(),) // If data is still being fetched, show loading circle
             : Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
-            // crossAxisAlignment: CrossAxisAlignment.center,
-            // mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Align(
                 alignment: Alignment(-0.5,-3),
@@ -290,6 +294,26 @@ class MiniMockScoringState extends State<MiniMockScoring> {
                 // Text('Your Score: $totalScore/$totalQuestions', style: TextStyle(fontSize: 24)),
                 // Text('Percentage: $percentageScore%', style: TextStyle(fontSize: 24)),
               // EXIT BUTTON
+        // body: answerScores.isEmpty && (maxScore == 0)
+        //     ? Center(child: CircularProgressIndicator(),) // If data is still being fetched, show loading circle
+        //     : Padding(
+        //   padding: const EdgeInsets.all(16.0),
+        //   child: Column(
+        //     children: [
+        //       Align(
+        //         alignment: Alignment(-0.5,-3),
+        //         child:
+        //         ScoreIndicator(
+        //           title: 'Your Score: ',
+        //           totalScore: '$totalScore/$maxScore',
+        //           percentageScore: percentageScore,
+        //           radius: 130.0,
+        //           lineWidth: 15.0,
+        //           progressColor: Colors.red,
+        //           backgroundColor: Colors.green
+        //       ),
+        //       ),
+        //       const Spacer(),
               Align(
                 alignment: Alignment.bottomRight,
                 child: ElevatedButton.icon(
@@ -309,7 +333,7 @@ class MiniMockScoringState extends State<MiniMockScoring> {
                   label: const Text('Feedback', style:TextStyle(color: Colors.white, fontSize: 16)),
                 ),
               ),
-            ]
+            ],
           )
         )
       ),

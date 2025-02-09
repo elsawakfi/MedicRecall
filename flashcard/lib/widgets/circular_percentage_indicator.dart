@@ -37,14 +37,12 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
           radius: radius,
           lineWidth: lineWidth,
           percent: 1 - (percentageScore/100),
-          // circularPercentIndicator: circularPercentIndicator,
           center: Text(
             "${percentageScore.toStringAsFixed(2)}%",
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
           progressColor: progressColor,
           backgroundColor: backgroundColor,
-          // circularStrokeCap: circularStrokeCap,
         ),
         SizedBox(height: 10),
         Text(
@@ -54,4 +52,4 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
       ],
     );
   }
-}
+  }
