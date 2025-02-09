@@ -1,12 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/minimock_feedback.dart';
-import 'package:flashcard_x/screens/quiz_choice_screen.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
-import 'package:flashcard_x/screens/minimock_feedback.dart';
 import 'package:flashcard_x/widgets/circular_percentage_indicator.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
@@ -27,16 +25,17 @@ class MiniMockScoring extends StatefulWidget {
   State<MiniMockScoring> createState() => MiniMockScoringState();
 }
 class MiniMockScoringState extends State<MiniMockScoring> {
-  List<Map<String, dynamic>> questions = [];
-  Map<String, dynamic> userAnswers = {};
   final FirebaseAuth auth = FirebaseAuth.instance;
   late User user;
+
+  List<Map<String, dynamic>> questions = [];
+  Map<String, dynamic> userAnswers = {};
   List<int> answerScores = [];
   int totalScore = 0;
   double percentageScore = 0;
-  final totalQuestions = 25;
-  final ScoringIndicator = ScoreIndicator;
-  // get circularPercentIndicator => null;
+  late final int totalQuestions;
+  int maxScore = 0;
+  final scoringIndicator = ScoreIndicator;
 
   @override
   void initState() {
@@ -45,7 +44,7 @@ class MiniMockScoringState extends State<MiniMockScoring> {
   }
 
   Future<void> initialise() async{
-    await getQuestions(); // Fetch the questions on initialisation (Needed as this is not to be called in the widget build)
+    await getQuestions(); // Fetch the questions on initialisation
     await getUser();
     await fetchUserAnswers(); //Fetch the user's answers from the database
     calculateScores();
@@ -83,6 +82,7 @@ class MiniMockScoringState extends State<MiniMockScoring> {
       setState(() {
         // Extract the necessary data from the fetchedQuestions and turn it into the same format as userAnswers
         questions = fetchedQuestions;
+        totalQuestions = questions.length;
       });
     } catch (error) {
       if (kDebugMode) {
@@ -120,6 +120,7 @@ class MiniMockScoringState extends State<MiniMockScoring> {
   }
 
   void calculateScores(){
+    int tempMaxScore = 0;
     answerScores = List.filled(25, 0); // Placeholder to ensure page loads
 
     userAnswers.forEach((questionNumber, userAnswer){
@@ -127,13 +128,18 @@ class MiniMockScoringState extends State<MiniMockScoring> {
       // Score answers based on question type:
       switch (questions[questionIndex]['type']) {
         case 'ranking':
-          if (ListEquality().equals(questions[questionIndex]['correct_answers'], userAnswer)){
-            answerScores[questionIndex] = 1;
-          } else{
-            answerScores[questionIndex] = 0;
+          tempMaxScore += 20; // Each ranking question is worth a max of 20 marks
+          int userScore = 0;
+          // The for loop gets the ASCII value of the letters at each index and subtracts them from one another to get a difference
+          // It then subtracts the absolute value of the difference from 4 to get the correct score for that index based on the mark scheme
+          // To check for errors just make a list of each score and print it
+          for(int i = 0; i < userAnswer.length; i++){
+            userScore += (4 - (questions[questionIndex]['correct_answers'][i].codeUnitAt(0) - userAnswer[i].codeUnitAt(0)).abs()).toInt();
           }
+          answerScores[questionIndex] = userScore;
           break;
         case 'multiple choice':
+          tempMaxScore += 1;
           if (questions[questionIndex]['type'] == "multiple choice" &&
               UnorderedIterableEquality().equals(questions[questionIndex]['correct_answers'], userAnswer)){
             answerScores[questionIndex] = 1;
@@ -146,8 +152,9 @@ class MiniMockScoringState extends State<MiniMockScoring> {
     });
 
     totalScore = answerScores.reduce((value, element) => value + element);
-    percentageScore = (totalScore / questions.length) * 100;
+    percentageScore = (totalScore / tempMaxScore) * 100;
     setState(() {
+      maxScore = tempMaxScore;
       totalScore = totalScore;
       percentageScore = percentageScore;
     });
@@ -155,14 +162,14 @@ class MiniMockScoringState extends State<MiniMockScoring> {
   ScoreIndicator get circularPercentIndicator{
     return ScoreIndicator(
       title: "Your Score: ", 
-      totalScore: '$totalScore/25',
+      totalScore: '$totalScore/$maxScore',
       percentageScore: percentageScore, 
       radius: 80.0, lineWidth: 10.0, 
       progressColor: Colors.green, 
       backgroundColor: Colors.red,
     );
       
-      }
+  }
 
 
 
@@ -205,7 +212,7 @@ class MiniMockScoringState extends State<MiniMockScoring> {
             ),
           ),
         ),
-        body: answerScores.isEmpty
+        body: answerScores.isEmpty && (maxScore == 0)
             ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
             : Padding(
           padding: const EdgeInsets.all(16.0),
@@ -218,7 +225,7 @@ class MiniMockScoringState extends State<MiniMockScoring> {
                 child:
                 ScoreIndicator(
                   title: 'Your Score: ',
-                  totalScore: '$totalScore/25',
+                  totalScore: '$totalScore/$maxScore',
                   percentageScore: percentageScore,
                   radius: 130.0,
                   lineWidth: 15.0,
