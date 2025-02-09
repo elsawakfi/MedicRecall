@@ -160,7 +160,6 @@ class MiniMockScoringState extends State<MiniMockScoring> {
       radius: 80.0, lineWidth: 10.0, 
       progressColor: Colors.green, 
       backgroundColor: Colors.red,
-      // circularPercentIndicator: circularPercentIndicator,
     );
       
       }
@@ -190,7 +189,7 @@ class MiniMockScoringState extends State<MiniMockScoring> {
                 Container(
                   margin: const EdgeInsets.only(left: 32),
                   padding: const EdgeInsets.all(8.0),
-                  child: Text('${widget.title}: Scoring',
+                  child: Text('Scoring',
                   ),
                 ),
               ],
@@ -211,10 +210,13 @@ class MiniMockScoringState extends State<MiniMockScoring> {
             : Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
-            // crossAxisAlignment: CrossAxisAlignment.start,
-            // mainAxisAlignment: MainAxisAlignment.end,
+            // crossAxisAlignment: CrossAxisAlignment.center,
+            // mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ScoreIndicator(
+              Align(
+                alignment: Alignment(-0.5,-3),
+                child:
+                ScoreIndicator(
                   title: 'Your Score: ',
                   totalScore: '$totalScore/25',
                   percentageScore: percentageScore,
@@ -222,6 +224,7 @@ class MiniMockScoringState extends State<MiniMockScoring> {
                   lineWidth: 15.0,
                   progressColor: Colors.red,
                   backgroundColor: Colors.green
+              ),
               ),
               const Spacer(),
               // circularPercentIndicator:

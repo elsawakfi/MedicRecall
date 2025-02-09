@@ -152,7 +152,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                   Container(
                     margin: const EdgeInsets.only(left: 32),
                     padding: const EdgeInsets.all(8.0),
-                    child: Text('${widget.title}: Feedback',
+                    child: Text('Feedback',
                     ),
                   ),
                 ],
