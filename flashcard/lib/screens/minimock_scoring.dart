@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'package:flashcard_x/widgets/circular_percentage_indicator.dart';
-import 'package:percent_indicator/circular_percent_indicator.dart';
+// import 'package:percent_indicator/circular_percent_indicator.dart';
 
 
 class MiniMockScoring extends StatefulWidget {
@@ -36,16 +36,22 @@ class MiniMockScoringState extends State<MiniMockScoring> {
   double percentageScore = 0;
   late final int totalQuestions;
   int maxScore = 0;
-  double averageScore =0;
+  double averageScore = 0;
   final scoringIndicator = ScoreIndicator;
   final averageScoringIndicator = AverageScoreIndicator;
+
+  @override
+  void initState() {
+    super.initState();
+    initialise(); // As calculateScores relies on data we need from firebase we require the use of 'await'
+  }
 
   Future<void> initialise() async{
     await getQuestions(); // Fetch the questions on initialisation
     await getUser();
     await fetchUserAnswers(); //Fetch the user's answers from the database
     calculateScores();
-    await fetchAverageScore(); // Fetch the average score from the database
+    // await fetchAverageScore(); // Fetch the average score from the database
   }
 
   Future<void> getUser() async {
@@ -198,15 +204,16 @@ class MiniMockScoringState extends State<MiniMockScoring> {
         default:
       }
     });
-
     totalScore = answerScores.reduce((value, element) => value + element);
     percentageScore = (totalScore / tempMaxScore) * 100;
+    _updateScore(totalScore);
     setState(() {
       maxScore = tempMaxScore;
       totalScore = totalScore;
       percentageScore = percentageScore;
     });
   }
+
   ScoreIndicator get circularPercentIndicator{
     return ScoreIndicator(
       title: "Your Score: ", 
@@ -218,15 +225,34 @@ class MiniMockScoringState extends State<MiniMockScoring> {
     );
   }
 
-  AverageScoreIndicator get averageCircularPercentIndicator{
-    return AverageScoreIndicator(
-      title: "Average Score: ", 
-      totalScore: '$averageScore/$maxScore',
-      percentageScore: percentageScore, 
-      radius: 80.0, lineWidth: 10.0, 
-      progressColor: Colors.green, 
-      backgroundColor: Colors.red,
-    );
+  // AverageScoreIndicator get averageCircularPercentIndicator{
+  //   return AverageScoreIndicator(
+  //     title: "Average Score: ",
+  //     totalScore: '$averageScore/$maxScore',
+  //     percentageScore: percentageScore,
+  //     radius: 80.0, lineWidth: 10.0,
+  //     progressColor: Colors.green,
+  //     backgroundColor: Colors.red,
+  //   );
+  // }
+
+  // Update user's score for this mock
+  Future<void> _updateScore(int score) async {
+    final CollectionReference users = FirebaseFirestore.instance.collection(
+        'users');
+    QuerySnapshot u =
+    await users.where("userID", isEqualTo: user.uid).get();
+    var id = u.docs.last.id;
+    DocumentReference userDocRef = FirebaseFirestore.instance.collection(
+        'users').doc(id);
+    DocumentReference scoreDocRef = userDocRef.collection(
+        'Exam answers').doc(widget.answerDirectory);
+
+    // Add user's score to user score field
+    await scoreDocRef.update({
+      'score': score,
+    });
+
   }
 
 
@@ -270,7 +296,7 @@ class MiniMockScoringState extends State<MiniMockScoring> {
             ),
           ),
         ),
-        body: answerScores.isEmpty && (maxScore == 0)
+        body: answerScores.isEmpty || (maxScore == 0)
             ? Center(child: CircularProgressIndicator(),) // If data is still being fetched, show loading circle
             : Padding(
           padding: const EdgeInsets.all(16.0),
