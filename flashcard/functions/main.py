@@ -227,7 +227,7 @@ def update_exam_score(request):
 
         # If the exam document doesn't exist, create it with the new score
         if 'score' not in exam_doc.to_dict():
-            exam_doc_ref.set({'score': new_score})
+            exam_doc_ref.update({'score': new_score})
 
             # Add the new score to global scores
             global_scores.append(new_score)
@@ -252,4 +252,4 @@ def update_exam_score(request):
         return jsonify({"message": f"Score updated to {new_score} and median recalculated."}), 200
 
     except Exception as e:
-        return jsonify({"error": "An internal server error occurred."}), 500
+        return jsonify({"error": f"An internal server error occurred.{e}"}), 500
