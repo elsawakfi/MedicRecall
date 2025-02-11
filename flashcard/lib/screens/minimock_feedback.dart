@@ -261,7 +261,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                       )
                   )
               )),
-              SizedBox(height: 20),
+              SizedBox(height: 10),
               //display the selected answers and the correct answers
               Container(
                 padding: EdgeInsets.all(16),
@@ -282,7 +282,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                 )
               ),
             ],
-            SizedBox(height: 20),
+            SizedBox(height: 10),
             Expanded(
               child: Scrollbar(
                 controller: _explanationScrollController,

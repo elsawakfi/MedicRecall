@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/drawer_widget.dart';
 import 'package:flashcard_x/screens/minimock_exams.dart';
 
+import '../widgets/minimock_help_button.dart';
+
 class MiniMockReview extends StatefulWidget {
   final int rankingLength;
   final int multiChoiceLength;
@@ -85,11 +87,11 @@ Widget build(BuildContext context) {
       child: Center(
         child: SizedBox(
            width: 1000,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
+      child:
           Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              Spacer(),
             ExpansionPanelList(
               elevation: 1,
               expandedHeaderPadding: EdgeInsets.all(4.0),
@@ -277,20 +279,46 @@ Widget build(BuildContext context) {
                     ),
                   ],
                 ),
-              ],
-            ),
+              Spacer(),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: MiniMockHelpButton(),
+                  ),
+                  const Spacer(),
+                  SizedBox(
+                    height: 50,
+                    width: 200,
+                    child:
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          widget.miniMockWidget.examEnd();
+                        },
+                        icon: Icon(Icons.check_outlined, color: Colors.white),
+                        label: Text('Complete Exam',  style: TextStyle(color: Colors.white, fontSize: 16)),
+                      )
+                  ),
+                ],
+              )
         ],
       ),
-    ))),
-    floatingActionButton:SizedBox(
-      height: 50,
-      width: 200,
-      child: 
-        FloatingActionButton.extended(onPressed: () {
-          widget.miniMockWidget.examEnd();
-      }, label: Text('Complete Exam',  style: TextStyle(color: Colors.white, fontSize: 16))
-      )),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+
+    )
+      )
+    ),
+
+
+    // floatingActionButton:SizedBox(
+    //   height: 50,
+    //   width: 200,
+    //   child:
+    //     FloatingActionButton.extended(onPressed: () {
+    //       widget.miniMockWidget.examEnd();
+    //   }, label: Text('Complete Exam',  style: TextStyle(color: Colors.white, fontSize: 16))
+    //   )),
+    //   floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     ),
   );
 }

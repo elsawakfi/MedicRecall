@@ -322,6 +322,12 @@ class MiniMockExamState extends State<MiniMockExam> {
                 if (questions[currentQuestion]['type'] == "ranking") ...[
                   Expanded(
                     child: ReorderableListView(
+                      proxyDecorator:  (Widget child, int index, Animation<double> animation) {
+                        return Material(
+                          color: Colors.transparent,
+                          child: child,
+                        );
+                      },
                       onReorder: (oldIndex, newIndex) {
                         setState(() {
                           if(newIndex > oldIndex) newIndex --; // Adjust the list based on movement of item
