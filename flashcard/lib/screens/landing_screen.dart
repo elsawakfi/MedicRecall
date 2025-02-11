@@ -809,7 +809,7 @@ class LandingState extends State<Landing> {
                     TextSpan(
                       children: [
                         const TextSpan(
-                          text: 'We recommend practicing at least three times.\nYour chosen number of repetition will apply to both the ',
+                          text: 'It is recommended to practice at least three times.\nYour chosen number of repetition will apply to both the ',
                           style: TextStyle(
                             color: Color.fromRGBO(21, 58, 103, 1),
                             fontSize: 16,
