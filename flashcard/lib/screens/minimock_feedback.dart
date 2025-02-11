@@ -219,16 +219,26 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
             ],
             SizedBox(height: 20),
             //display the selected answers and the correct answers
+            Container(
+              padding: EdgeInsets.all(16),
+  margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+  decoration: BoxDecoration(
+    color: Colors.white, // Dark background for contrast
+    borderRadius: BorderRadius.circular(10),
+    border: Border.all(color: Colors.white), // White border
+  ),
+  child: Column(
+    children: [
             if (questions[currentQuestion]['type'] == "ranking")
               (listEquality.equals(questions[currentQuestion]['correct_answers'], userAnswers[(currentQuestion+1).toString()]))
                   ? Text("Correct: ${userAnswers[(currentQuestion+1).toString()]}", style: TextStyle(color: Colors.green,fontSize: 18))
-                  : Text("Incorrect: ${userAnswers[(currentQuestion+1).toString()]}", style: TextStyle(color: Colors.red,fontSize: 18)),
+                  : Text("Incorrect: ${userAnswers[(currentQuestion+1).toString()]}", style: TextStyle(color: Color(0xFF800000),fontSize: 18)),
 
             if (questions[currentQuestion]['type'] == "multiple choice")
               (UnorderedIterableEquality().equals(questions[currentQuestion]['correct_answers'], userAnswers[(currentQuestion+1).toString()]))
                   ? Text("Correct: ${userAnswers[(currentQuestion+1).toString()]}", style: TextStyle(color: Colors.green,fontSize: 18))
                   : Text("Incorrect: ${userAnswers[(currentQuestion+1).toString()]}", style: TextStyle(color: Colors.red,fontSize: 18)),
-            Text("Correct Answer: ${questions[currentQuestion]['correct_answers']}", style: TextStyle(color: Colors.white,fontSize: 18)),
+            Text("Correct Answer: ${questions[currentQuestion]['correct_answers']}", style: TextStyle(color: Colors.black,fontSize: 18))])),
 
             SizedBox(height: 20),
             Expanded(
