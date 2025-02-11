@@ -456,7 +456,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               _buildCheckbox(checkbox1, 'Official MRSA Exam Paper'),
               _buildCheckbox(checkbox2, 'Full-sized Mock Exam'),
               _buildCheckbox(checkbox3, 'Mini-Mocks'),
-              _buildCheckbox(checkbox4, 'Topical Flashcards'),
+              _buildCheckbox(checkbox4, 'Flashcards'),
             ],
           ),
           actions: [
