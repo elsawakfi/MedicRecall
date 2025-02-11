@@ -477,11 +477,18 @@ void _showRepetitionDialog(BuildContext context) {
             );
           },
         ),
-        Text(text, style: TextStyle(color: Colors.black)),
+        GestureDetector(
+          onTap: () {
+            notifier.value = !notifier.value;
+          },
+          child: Text(
+            text,
+            style: TextStyle(color: Colors.black),
+          ),
+        ),
       ],
     );
   }
-
 
   // Calculate number of days until the exam
   int _calculateDaysUntilExam(DateTime examDate) {

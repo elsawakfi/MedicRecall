@@ -998,7 +998,15 @@ class LandingState extends State<Landing> {
             );
           },
         ),
-        Text(text, style: TextStyle(color: Colors.black)),
+        GestureDetector(
+          onTap: () {
+            notifier.value = !notifier.value;
+          },
+          child: Text(
+            text,
+            style: TextStyle(color: Colors.black),
+          ),
+        ),
       ],
     );
   }
