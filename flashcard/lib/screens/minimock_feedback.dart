@@ -24,6 +24,15 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
   Map<String, dynamic> userAnswers = {};
   final FirebaseAuth auth = FirebaseAuth.instance;
   late User user;
+  final ScrollController _optionScrollController = ScrollController();
+  final ScrollController _explanationScrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _optionScrollController.dispose();
+    _explanationScrollController.dispose();
+    super.dispose();
+  }
 
    @override
   void initState() {
@@ -230,7 +239,11 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
             else if(questions[currentQuestion]['type'] == "multiple choice") ...[
               //Line below takes the result of the map() and spreads its widgets into the children of Column
               Expanded(
+                child: Scrollbar(
+                  controller: _optionScrollController,
+                  thumbVisibility: true,
                   child: SingleChildScrollView(
+                    controller: _optionScrollController,
                       child: Column(
                           children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
                             int optionIndex = entry.key;
@@ -247,37 +260,40 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                           }).toList()
                       )
                   )
-              ),
+              )),
               SizedBox(height: 20),
               //display the selected answers and the correct answers
               Container(
                 padding: EdgeInsets.all(16),
                 margin: EdgeInsets.symmetric(vertical: 8),
                 decoration: BoxDecoration(
-                color: Colors.white, // Dark background for contrast
+                color: (UnorderedIterableEquality().equals(questions[currentQuestion]['correct_answers'], userAnswers[(currentQuestion+1).toString()]))
+                        ? Colors.green
+                        : Colors.red.shade400, // Dark background for contrast
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(color: Colors.white), // White border
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    (UnorderedIterableEquality().equals(questions[currentQuestion]['correct_answers'], userAnswers[(currentQuestion+1).toString()]))
-                        ? Text("Given Answer: ${userAnswers[(currentQuestion+1).toString()]}", style: TextStyle(color: Colors.green,fontSize: 18))
-                        : Text("Given Answer: ${userAnswers[(currentQuestion+1).toString()]}", style: TextStyle(color: Colors.red.shade400,fontSize: 18)),
-                    Text("Correct Answer: ${questions[currentQuestion]['correct_answers']}", style: TextStyle(color: Colors.black,fontSize: 18))
+                    Text("Given Answer: ${userAnswers[(currentQuestion+1).toString()]}", style: TextStyle(color: Colors.white,fontSize: 18)),
+                    Text("Correct Answer: ${questions[currentQuestion]['correct_answers']}", style: TextStyle(color: Colors.white,fontSize: 18))
                   ]
                 )
               ),
-
             ],
-
             SizedBox(height: 20),
             Expanded(
-              child: SingleChildScrollView(
-               //Display the explanation of the question
-                child: Text(
-                  questions[currentQuestion]['explanation'],
-                  style: TextStyle(fontSize: 18),
+              child: Scrollbar(
+                controller: _explanationScrollController,
+                thumbVisibility: true,
+                child: SingleChildScrollView(
+                  controller: _explanationScrollController,
+                 //Display the explanation of the question
+                  child: Text(
+                    questions[currentQuestion]['explanation'],
+                    style: TextStyle(fontSize: 18),
+                  )
                 )
               )
             ),
