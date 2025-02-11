@@ -82,6 +82,9 @@ Widget build(BuildContext context) {
     ),
     body: Padding(
       padding: const EdgeInsets.all(16.0),
+      child: Center(
+        child: SizedBox(
+           width: 1000,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -278,14 +281,15 @@ Widget build(BuildContext context) {
             ),
         ],
       ),
-    ),
+    ))),
     floatingActionButton:SizedBox(
       height: 50,
       width: 200,
       child: 
         FloatingActionButton.extended(onPressed: () {
           widget.miniMockWidget.examEnd();
-      }, label: Text('Complete Exam',  style: TextStyle(color: Colors.white, fontSize: 16)))),
+      }, label: Text('Complete Exam',  style: TextStyle(color: Colors.white, fontSize: 16))
+      )),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     ),
   );
