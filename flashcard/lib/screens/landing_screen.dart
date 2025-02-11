@@ -84,19 +84,37 @@ class LandingState extends State<Landing> {
           content: const SizedBox(), // Empty content for this dialog
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                 _setFirstStudyDay();
-                _showExamDateDialog(context); // Call to show exam date dialog
-              },
-              child: const Text('Yes'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: const Color.fromRGBO(243, 90, 90, 1),
+              // backgroundColor: const Color.fromRGBO(243, 90, 90, 1),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              minimumSize: const Size(120, 45), // Sets minimum width and height
             ),
+            child: const Text(
+              'No',
+              style: TextStyle(fontSize: 16),
+            ),
+          ),
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('No'),
+            onPressed: () {
+              Navigator.of(context).pop();
+              _setFirstStudyDay(); // Ensure this function is defined
+              _showExamDateDialog(context); // Ensure this function is defined
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white,
+              backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              minimumSize: const Size(120, 45), // Sets minimum width and height
             ),
+            child: const Text(
+              'Yes',
+              style: TextStyle(fontSize: 16),
+            ),
+          ),
           ],
         );
       },
@@ -702,7 +720,7 @@ class LandingState extends State<Landing> {
       context: context,
       builder: (BuildContext context) {
         return _buildAlertDialog(
-          title: 'What is your exam date?',
+          title: 'When is your exam date?',
           content: Column(
             mainAxisSize: MainAxisSize.min,
 
@@ -731,9 +749,15 @@ class LandingState extends State<Landing> {
         
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromRGBO(21, 58, 103, 1),
+                  foregroundColor: Colors.white, // Text color
+                  backgroundColor: const Color.fromRGBO(51, 178, 73, 1), // Same color as 'Yes' button
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  minimumSize: const Size(120, 45),
                 ),
-                child: const Text('Select Exam Date'),
+                child: const Text(
+                  'Select Exam Date',
+                  style: TextStyle(fontSize: 16),
+                  ),
               ),
               const SizedBox(height: 10),
               Text(
@@ -841,12 +865,20 @@ class LandingState extends State<Landing> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        _showOptionsDialog(context);
-                      },
-                      child: const Text('Previous'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    style: TextButton.styleFrom(
+                      foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
+                      // backgroundColor: const Color.fromRGBO(243, 90, 90, 1),
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      minimumSize: const Size(120, 45), // Sets minimum width and height
                     ),
+                    child: const Text(
+                      'Previous',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ),
                     TextButton(
                       onPressed: () async {
                         if (selectedRepetition != null) {
@@ -871,7 +903,16 @@ class LandingState extends State<Landing> {
                           );
                         }
                       },
-                      child: const Text('Submit'),
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        minimumSize: const Size(120, 45), // Sets minimum width and height
+                      ),
+                      child: const Text(
+                      'Submit',
+                      style: TextStyle(fontSize: 16),
+                      ),
                     ),
                   ],
                 ),
@@ -930,12 +971,20 @@ class LandingState extends State<Landing> {
           ),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _showExamDateDialog(context);
-              },
-              child: const Text('Previous'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
+              // backgroundColor: const Color.fromRGBO(243, 90, 90, 1),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              minimumSize: const Size(120, 45), // Sets minimum width and height
             ),
+            child: const Text(
+              'Previous',
+              style: TextStyle(fontSize: 16),
+            ),
+          ),
             TextButton(
               onPressed: () async {
                 // Check which resources were selected
@@ -975,7 +1024,16 @@ class LandingState extends State<Landing> {
                   _showRepetitionDialog(context);
                 }
               },
-              child: const Text('Submit'),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                minimumSize: const Size(120, 45), // Sets minimum width and height
+              ),
+              child: const Text(
+              'Submit',
+              style: TextStyle(fontSize: 16),
+              ),
             ),
           ],
         );
