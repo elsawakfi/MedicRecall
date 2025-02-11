@@ -129,7 +129,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
       appBar: CustomAppBar(
         title: widget.title,
       ),
-      body: questions.isEmpty && userAnswers.isEmpty
+      body: questions.isEmpty || userAnswers.isEmpty
           ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
           : Padding( //Else load the data
 
@@ -174,11 +174,55 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
               style: TextStyle(fontSize: 18),
             ),
             SizedBox(height: 20),
+            // If the question is a ranking question, display a reorderable list of options
+            if (questions[currentQuestion]['type'] == "ranking") ...[
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                      children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
+                      int optionIndex = entry.key;
+                      String option = entry.value;
+                      String optionLetter = String.fromCharCode(optionIndex + 65);
+                      return Card(
+                        child: ListTile(
+                          title: Text('$optionLetter. $option',
+                              style: TextStyle(color: Colors.blueGrey, fontSize: 18)),
+                        )
+                      );
+                    }).toList()
+                  ),
+                )
+              ),
+            ]
+            // If the question is a multiple choice question, display checkboxes
+            else if(questions[currentQuestion]['type'] == "multiple choice") ...[
+              //Line below takes the result of the map() and spreads its widgets into the children of Column
+              Expanded(
+                  child: SingleChildScrollView(
+                      child: Column(
+                          children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
+                            int optionIndex = entry.key;
+                            String option = entry.value;
+                            String optionLetter = String.fromCharCode(optionIndex + 65);
+                            return CheckboxListTile(
+                              title: Text('$optionLetter. $option', style: TextStyle(color: Colors.white, fontSize: 18)),
+                              value: false,
+                              onChanged: null,
+                              side: BorderSide( color: Colors.white),
+                              enabled: false,
+                              controlAffinity: ListTileControlAffinity.leading,
+                            );
+                          }).toList()
+                      )
+                  )
+              )
+            ],
+            SizedBox(height: 20),
             //display the selected answers and the correct answers
             if (questions[currentQuestion]['type'] == "ranking")
               (listEquality.equals(questions[currentQuestion]['correct_answers'], userAnswers[(currentQuestion+1).toString()]))
                   ? Text("Correct: ${userAnswers[(currentQuestion+1).toString()]}", style: TextStyle(color: Colors.green,fontSize: 18))
-                  : Text("Incorrect: ${userAnswers[(currentQuestion+1).toString()]}", style: TextStyle(color: Colors.red,fontSize: 19)),
+                  : Text("Incorrect: ${userAnswers[(currentQuestion+1).toString()]}", style: TextStyle(color: Colors.red,fontSize: 18)),
 
             if (questions[currentQuestion]['type'] == "multiple choice")
               (UnorderedIterableEquality().equals(questions[currentQuestion]['correct_answers'], userAnswers[(currentQuestion+1).toString()]))
@@ -187,11 +231,13 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
             Text("Correct Answer: ${questions[currentQuestion]['correct_answers']}", style: TextStyle(color: Colors.white,fontSize: 18)),
 
             SizedBox(height: 20),
-              Expanded(
+            Expanded(
+              child: SingleChildScrollView(
                //Display the explanation of the question
                 child: Text(
-                questions[currentQuestion]['explanation'],
-                style: TextStyle(fontSize: 18),
+                  questions[currentQuestion]['explanation'],
+                  style: TextStyle(fontSize: 18),
+                )
               )
             ),
             //compare the answers keys and the user's answers and provided
