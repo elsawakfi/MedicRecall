@@ -122,7 +122,6 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
 
   @override
   Widget build(BuildContext context) {
-    final listEquality = ListEquality();
     return PopScope(
       canPop: false,
       child: Scaffold(
@@ -135,6 +134,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
 
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
@@ -176,23 +176,55 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
             SizedBox(height: 20),
             // If the question is a ranking question, display a reorderable list of options
             if (questions[currentQuestion]['type'] == "ranking") ...[
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                      children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
-                      int optionIndex = entry.key;
-                      String option = entry.value;
-                      String optionLetter = String.fromCharCode(optionIndex + 65);
-                      return Card(
-                        child: ListTile(
-                          title: Text('$optionLetter. $option',
-                              style: TextStyle(color: Colors.blueGrey, fontSize: 18)),
-                        )
-                      );
-                    }).toList()
+              Row(
+                children: [
+                  Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text('  Given Answer:', style: TextStyle(color: Colors.white,fontSize: 18)),
+                              ...questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
+                                int optionIndex = entry.key;
+                                String option = entry.value;
+                                String optionLetter = String.fromCharCode(optionIndex + 65);
+                                return Card(
+                                  color: (questions[currentQuestion]['correct_answers'][optionIndex] == userAnswers[(currentQuestion+1).toString()][optionIndex])
+                                      ? Colors.green
+                                      : Colors.red.shade400,
+                                    child: ListTile(
+                                      title: Text('$optionLetter. $option', style: TextStyle(color: Colors.white,fontSize: 18))
+                                    )
+                                );
+                              }).toList()
+                            ]
+                        ),
+                      )
                   ),
-                )
-              ),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('  Correct Answer:', style: TextStyle(color: Colors.white,fontSize: 18)),
+                            ...questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
+                              int optionIndex = entry.key;
+                              String option = entry.value;
+                              String optionLetter = String.fromCharCode(optionIndex + 65);
+                              return Card(
+                                child: ListTile(
+                                  title: Text('$optionLetter. $option',
+                                      style: TextStyle(color: Colors.blueGrey, fontSize: 18)),
+                                )
+                              );
+                            }).toList()
+                          ]
+                      ),
+                    )
+                  ),
+              ])
             ]
             // If the question is a multiple choice question, display checkboxes
             else if(questions[currentQuestion]['type'] == "multiple choice") ...[
@@ -215,30 +247,29 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                           }).toList()
                       )
                   )
-              )
-            ],
-            SizedBox(height: 20),
-            //display the selected answers and the correct answers
-            Container(
-              padding: EdgeInsets.all(16),
-  margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-  decoration: BoxDecoration(
-    color: Colors.white, // Dark background for contrast
-    borderRadius: BorderRadius.circular(10),
-    border: Border.all(color: Colors.white), // White border
-  ),
-  child: Column(
-    children: [
-            if (questions[currentQuestion]['type'] == "ranking")
-              (listEquality.equals(questions[currentQuestion]['correct_answers'], userAnswers[(currentQuestion+1).toString()]))
-                  ? Text("Correct: ${userAnswers[(currentQuestion+1).toString()]}", style: TextStyle(color: Colors.green,fontSize: 18))
-                  : Text("Incorrect: ${userAnswers[(currentQuestion+1).toString()]}", style: TextStyle(color: Color(0xFF800000),fontSize: 18)),
+              ),
+              SizedBox(height: 20),
+              //display the selected answers and the correct answers
+              Container(
+                padding: EdgeInsets.all(16),
+                margin: EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                color: Colors.white, // Dark background for contrast
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.white), // White border
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    (UnorderedIterableEquality().equals(questions[currentQuestion]['correct_answers'], userAnswers[(currentQuestion+1).toString()]))
+                        ? Text("Given Answer: ${userAnswers[(currentQuestion+1).toString()]}", style: TextStyle(color: Colors.green,fontSize: 18))
+                        : Text("Given Answer: ${userAnswers[(currentQuestion+1).toString()]}", style: TextStyle(color: Colors.red.shade400,fontSize: 18)),
+                    Text("Correct Answer: ${questions[currentQuestion]['correct_answers']}", style: TextStyle(color: Colors.black,fontSize: 18))
+                  ]
+                )
+              ),
 
-            if (questions[currentQuestion]['type'] == "multiple choice")
-              (UnorderedIterableEquality().equals(questions[currentQuestion]['correct_answers'], userAnswers[(currentQuestion+1).toString()]))
-                  ? Text("Correct: ${userAnswers[(currentQuestion+1).toString()]}", style: TextStyle(color: Colors.green,fontSize: 18))
-                  : Text("Incorrect: ${userAnswers[(currentQuestion+1).toString()]}", style: TextStyle(color: Colors.red,fontSize: 18)),
-            Text("Correct Answer: ${questions[currentQuestion]['correct_answers']}", style: TextStyle(color: Colors.black,fontSize: 18))])),
+            ],
 
             SizedBox(height: 20),
             Expanded(
