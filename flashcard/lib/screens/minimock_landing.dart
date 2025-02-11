@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flashcard_x/screens/minimock2_rules_page.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flutter/material.dart';
@@ -125,7 +126,7 @@ class MiniMockLandingState extends State<MiniMockLanding> {
                     ? () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => const MiniMockExam2(),
+                        builder: (context) => const MiniMock2Rules(),
                       ),
                     );
                   }
