@@ -423,8 +423,11 @@ Widget build(BuildContext context) {
   buildCount++;
   
   return Scaffold(
+    backgroundColor: Color.fromARGB(255, 33, 33, 33),
     drawer: const DrawMain(),
     appBar: AppBar(
+      elevation: 0,
+      toolbarHeight: 60,
       leading: Builder(
         builder: (context) => GestureDetector(
           onTap: () => Scaffold.of(context).openDrawer(),
@@ -456,361 +459,335 @@ Widget build(BuildContext context) {
       ),
       centerTitle: true,
     ),
-    body: Stack(
+    body: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 50.0),
-          child: Row(
+        // Labels section
+        Container(
+          width: 250,
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: Color.fromARGB(255, 33, 33, 33),
+          ),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Labels section
-              Container(
-                width: 250,
-                margin: EdgeInsets.only(right: 16),
-                padding: EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Color.fromARGB(255, 33, 33, 33),
-                  borderRadius: BorderRadius.circular(16.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      spreadRadius: 2,
-                      blurRadius: 8,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Labels',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                    _buildLabelItem('Mini Mock', StudySessionManager.kMiniMockColor),
-                    SizedBox(height: 12),
-                    _buildLabelItem('Full Mock', StudySessionManager.kFullMockColor),
-                    SizedBox(height: 12),
-                    _buildLabelItem('Official Paper', StudySessionManager.kOfficialPaperColor),
-                    SizedBox(height: 12),
-                    _buildLabelItem('Flashcards', StudySessionManager.kFlashcardColor),
-                    SizedBox(height: 12),
-                    _buildLabelItem('Test Day', const Color.fromARGB(255, 255, 89, 94)),
-                  ],
+              Text(
+                'Labels',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              // Calendar section
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(16.0),
-                        decoration: BoxDecoration(
-                          color: Color.fromARGB(255, 33, 33, 33), // Changed from white to dark grey
-                          borderRadius: BorderRadius.circular(16.0),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              spreadRadius: 2,
-                              blurRadius: 8,
-                              offset: Offset(0, 2),
+              SizedBox(height: 12),
+              _buildLabelItem('Mini Mock', StudySessionManager.kMiniMockColor),
+              SizedBox(height: 12),
+              _buildLabelItem('Full Mock', StudySessionManager.kFullMockColor),
+              SizedBox(height: 12),
+              _buildLabelItem('Official Paper', StudySessionManager.kOfficialPaperColor),
+              SizedBox(height: 12),
+              _buildLabelItem('Flashcards', StudySessionManager.kFlashcardColor),
+              SizedBox(height: 12),
+              _buildLabelItem('Test Day', const Color.fromARGB(255, 255, 89, 94)),
+            ],
+          ),
+        ),
+        // Calendar section
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  decoration: BoxDecoration(
+                    color: Color.fromARGB(255, 33, 33, 33),
+                  ),
+                  child: TableCalendar(
+                    firstDay: DateTime.utc(2020, 1, 1),
+                    lastDay: DateTime.utc(2030, 12, 31),
+                    focusedDay: focusedDay,
+                    calendarFormat: format,
+                    onFormatChanged: (CalendarFormat _format) {
+                      setState(() {
+                        format = _format;
+                      });
+                    },
+                    startingDayOfWeek: StartingDayOfWeek.monday,
+                    daysOfWeekVisible: true,
+                    onDaySelected: (DateTime selectDay, DateTime focusDay) {
+                      setState(() {
+                        selectedDay = selectDay;
+                        focusedDay = focusDay;
+                      });
+                    },
+                    selectedDayPredicate: (DateTime date) {
+                      return isSameDay(selectedDay, date);
+                    },
+                    eventLoader: _getEventsfromDay,
+                    calendarStyle: CalendarStyle(
+                      // Make selected day more visible with a darker blue
+                      selectedDecoration: BoxDecoration(
+                        color: Color.fromARGB(255, 0, 102, 204),
+                        shape: BoxShape.circle,
+                      ),
+                      // Make today's date stand out with a distinct color
+                      todayDecoration: BoxDecoration(
+                        color: Color.fromARGB(255, 13, 71, 161),
+                        shape: BoxShape.circle,
+                      ),
+                      // Improve visibility of selected text
+                      selectedTextStyle: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      // Make default days more visible on dark background
+                      defaultTextStyle: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      // Make weekend days stand out
+                      weekendTextStyle: TextStyle(
+                        color: Color.fromARGB(255, 255, 128, 128),
+                        fontWeight: FontWeight.w500,
+                      ),
+                      // Improve visibility of outside days
+                      outsideTextStyle: TextStyle(
+                        color: Colors.grey[600],
+                      ),
+                      // Custom marker settings
+                      markersMaxCount: 5,  // Show up to 5 markers per day
+                      markersAnchor: 1.0,
+                      cellPadding: EdgeInsets.all(8.0),
+                      cellMargin: EdgeInsets.all(4.0),
+                    ),
+                    calendarBuilders: CalendarBuilders(
+                      markerBuilder: (context, date, events) {
+                        if (events.isEmpty) return null;
+                        return Positioned(
+                          bottom: 2,
+                          child: Container(
+                            width: 60, // Increased container width significantly
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: events.take(3).map((event) {
+                                return Container(
+                                  margin: const EdgeInsets.symmetric(horizontal: 1),
+                                  width: 18,  // Made lines much longer
+                                  height: 3,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(1.5),
+                                    color: (event as Event).color,
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    headerStyle: HeaderStyle(
+                      titleTextStyle: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white, // Changed to white for dark mode
+                      ),
+                      formatButtonTextStyle: TextStyle(
+                        color: Colors.white, // Changed to white for dark mode
+                        fontWeight: FontWeight.bold,
+                      ),
+                      // Add padding to the header
+                      headerPadding: EdgeInsets.symmetric(vertical: 16.0),
+                      // Make the format button more modern
+                      formatButtonDecoration: BoxDecoration(
+                        color: Color.fromARGB(255, 45, 45, 45), // Slightly lighter than background
+                        borderRadius: BorderRadius.circular(16.0),
+                        border: Border.all(color: Colors.grey[600]!),
+                      ),
+                      // Center the title
+                      titleCentered: true,
+                      // Add margin to the header
+                      headerMargin: EdgeInsets.only(bottom: 8.0),
+                      // Enable left and right arrows
+                      leftChevronVisible: true,
+                      rightChevronVisible: true,
+                      // Style the arrows
+                      leftChevronIcon: Icon(Icons.chevron_left, color: Color.fromARGB(255, 13, 71, 161)),
+                      rightChevronIcon: Icon(Icons.chevron_right, color: Color.fromARGB(255, 13, 71, 161)),
+                    ),
+                    daysOfWeekStyle: DaysOfWeekStyle(
+                      // Style for weekday names
+                      weekdayStyle: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14.0,
+                        color: Colors.white, // Changed to white for dark mode
+                      ),
+                      // Style for weekend names
+                      weekendStyle: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14.0,
+                        color: Color.fromARGB(255, 255, 128, 128), // Lighter red for dark mode
+                      ),
+                    ),
+                  ),
+                ),
+                ..._getEventsfromDay(selectedDay).map(
+                  (Event event) => ListTile(
+                    title: Text(
+                      event.title,
+                      style: TextStyle(
+                        color: Colors.black87,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    leading: Container(
+                      width: 12,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: event.color,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    tileColor: event.color.withOpacity(0.1),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  ),
+                ),
+                Column(
+                  children: [
+                    const Text("Your exam is on:"),
+                    Text(
+                      (testDayBool)
+                          ? "Exam date has not been set"
+                          : testDayString,
+                      style: const TextStyle(fontSize: 30),
+                    ),
+                    MaterialButton(
+                      onPressed: () {
+                        testDay = null;
+                        testDayBool = true;
+                        deleteAllEvents();
+                        setState(() {});
+                      },
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      textColor: const Color.fromARGB(255, 243, 167, 162),
+                      child: const Text("DELETE ALL"),
+                    ),
+                    ElevatedButton(
+                      onPressed: () => showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text(
+                              "Would you like to generate a revision plan?"),
+                          actions: [
+                            TextButton(
+                              child: const Text("No"),
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                            TextButton(
+                              child: const Text("Yes"),
+                              onPressed: () {
+                                Navigator.pop(context);
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                    title: const Text(
+                                        "When is your next test date? (final test)"),
+                                    actions: [
+                                      TextButton(
+                                        child: const Text("Cancel"),
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                      ),
+                                      ElevatedButton(
+                                        child: const Text(
+                                          "Pick your test date",
+                                          style: TextStyle(color: Colors.blue),
+                                        ),
+                                        onPressed: () {
+                                          showDatePicker(
+                                            context: context,
+                                            initialDate: DateTime.now(),
+                                            firstDate: DateTime.now(),
+                                            lastDate: DateTime(2050),
+                                          ).then((date) {
+                                            if (date != null) {
+                                              setState(() {
+                                                if (testDayBool == false) {
+                                                  showDialog(
+                                                    context: context,
+                                                    builder: (BuildContext
+                                                        context) {
+                                                      return AlertDialog(
+                                                        title:
+                                                            const Text('Alert'),
+                                                        content: const Text(
+                                                            'You cannot update the Test Day because it already exists.'),
+                                                        actions: <Widget>[
+                                                          TextButton(
+                                                            onPressed: () {
+                                                              Navigator.of(
+                                                                      context)
+                                                                  .pop();
+                                                              Navigator.of(
+                                                                      context)
+                                                                  .pop();
+                                                            },
+                                                            child:
+                                                                const Text('OK'),
+                                                          ),
+                                                        ],
+                                                      );
+                                                    },
+                                                  );
+                                                } else if (testDayBool ==
+                                                    true) {
+                                                  testDayBool == true;
+                                                  testDay = date;
+                                                  updateTestDay(testDay!);
+                                                  getTestDay();
+                                                  testDayString =
+                                                      "${date.day}-${date.month}-${date.year}";
+                                                  getEventsFromDB();
+                                                  generateEventsUIChange(
+                                                      testDay!);
+                                                  Navigator.pop(context);
+                                                }
+                                              });
+                                            } else {
+                                              if (context.mounted){
+                                                Navigator.pop(context);
+                                              }
+                                            }
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
                             ),
                           ],
                         ),
-                        child: TableCalendar(
-                          firstDay: DateTime.utc(2020, 1, 1),
-                          lastDay: DateTime.utc(2030, 12, 31),
-                          focusedDay: focusedDay,
-                          calendarFormat: format,
-                          onFormatChanged: (CalendarFormat _format) {
-                            setState(() {
-                              format = _format;
-                            });
-                          },
-                          startingDayOfWeek: StartingDayOfWeek.monday,
-                          daysOfWeekVisible: true,
-                          onDaySelected: (DateTime selectDay, DateTime focusDay) {
-                            setState(() {
-                              selectedDay = selectDay;
-                              focusedDay = focusDay;
-                            });
-                          },
-                          selectedDayPredicate: (DateTime date) {
-                            return isSameDay(selectedDay, date);
-                          },
-                          eventLoader: _getEventsfromDay,
-                          calendarStyle: CalendarStyle(
-                            // Make selected day more visible with a darker blue
-                            selectedDecoration: BoxDecoration(
-                              color: Color.fromARGB(255, 0, 102, 204),
-                              shape: BoxShape.circle,
-                            ),
-                            // Make today's date stand out with a distinct color
-                            todayDecoration: BoxDecoration(
-                              color: Color.fromARGB(255, 13, 71, 161),
-                              shape: BoxShape.circle,
-                            ),
-                            // Improve visibility of selected text
-                            selectedTextStyle: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            // Make default days more visible on dark background
-                            defaultTextStyle: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            // Make weekend days stand out
-                            weekendTextStyle: TextStyle(
-                              color: Color.fromARGB(255, 255, 128, 128),
-                              fontWeight: FontWeight.w500,
-                            ),
-                            // Improve visibility of outside days
-                            outsideTextStyle: TextStyle(
-                              color: Colors.grey[600],
-                            ),
-                            // Custom marker settings
-                            markersMaxCount: 5,  // Show up to 5 markers per day
-                            markersAnchor: 1.0,
-                            cellPadding: EdgeInsets.all(8.0),
-                            cellMargin: EdgeInsets.all(4.0),
-                          ),
-                          calendarBuilders: CalendarBuilders(
-                            markerBuilder: (context, date, events) {
-                              if (events.isEmpty) return null;
-                              return Positioned(
-                                bottom: 2,
-                                child: Container(
-                                  width: 60, // Increased container width significantly
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: events.take(3).map((event) {
-                                      return Container(
-                                        margin: const EdgeInsets.symmetric(horizontal: 1),
-                                        width: 18,  // Made lines much longer
-                                        height: 3,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(1.5),
-                                          color: (event as Event).color,
-                                        ),
-                                      );
-                                    }).toList(),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                          headerStyle: HeaderStyle(
-                            titleTextStyle: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white, // Changed to white for dark mode
-                            ),
-                            formatButtonTextStyle: TextStyle(
-                              color: Colors.white, // Changed to white for dark mode
-                              fontWeight: FontWeight.bold,
-                            ),
-                            // Add padding to the header
-                            headerPadding: EdgeInsets.symmetric(vertical: 16.0),
-                            // Make the format button more modern
-                            formatButtonDecoration: BoxDecoration(
-                              color: Color.fromARGB(255, 45, 45, 45), // Slightly lighter than background
-                              borderRadius: BorderRadius.circular(16.0),
-                              border: Border.all(color: Colors.grey[600]!),
-                            ),
-                            // Center the title
-                            titleCentered: true,
-                            // Add margin to the header
-                            headerMargin: EdgeInsets.only(bottom: 8.0),
-                            // Enable left and right arrows
-                            leftChevronVisible: true,
-                            rightChevronVisible: true,
-                            // Style the arrows
-                            leftChevronIcon: Icon(Icons.chevron_left, color: Color.fromARGB(255, 13, 71, 161)),
-                            rightChevronIcon: Icon(Icons.chevron_right, color: Color.fromARGB(255, 13, 71, 161)),
-                          ),
-                          daysOfWeekStyle: DaysOfWeekStyle(
-                            // Style for weekday names
-                            weekdayStyle: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14.0,
-                              color: Colors.white, // Changed to white for dark mode
-                            ),
-                            // Style for weekend names
-                            weekendStyle: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14.0,
-                              color: Color.fromARGB(255, 255, 128, 128), // Lighter red for dark mode
-                            ),
-                          ),
-                        ),
                       ),
-                      ..._getEventsfromDay(selectedDay).map(
-                        (Event event) => ListTile(
-                          title: Text(
-                            event.title,
-                            style: TextStyle(
-                              color: Colors.black87,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          leading: Container(
-                            width: 12,
-                            height: 12,
-                            decoration: BoxDecoration(
-                              color: event.color,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          tileColor: event.color.withOpacity(0.1),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
                       ),
-                      Column(
-                        children: [
-                          const Text("Your exam is on:"),
-                          Text(
-                            (testDayBool)
-                                ? "Exam date has not been set"
-                                : testDayString,
-                            style: const TextStyle(fontSize: 30),
-                          ),
-                          MaterialButton(
-                            onPressed: () {
-                              testDay = null;
-                              testDayBool = true;
-                              deleteAllEvents();
-                              setState(() {});
-                            },
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            textColor: const Color.fromARGB(255, 243, 167, 162),
-                            child: const Text("DELETE ALL"),
-                          ),
-                          ElevatedButton(
-                            onPressed: () => showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: const Text(
-                                    "Would you like to generate a revision plan?"),
-                                actions: [
-                                  TextButton(
-                                    child: const Text("No"),
-                                    onPressed: () => Navigator.pop(context),
-                                  ),
-                                  TextButton(
-                                    child: const Text("Yes"),
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                      showDialog(
-                                        context: context,
-                                        builder: (context) => AlertDialog(
-                                          title: const Text(
-                                              "When is your next test date? (final test)"),
-                                          actions: [
-                                            TextButton(
-                                              child: const Text("Cancel"),
-                                              onPressed: () {
-                                                Navigator.pop(context);
-                                              },
-                                            ),
-                                            ElevatedButton(
-                                              child: const Text(
-                                                "Pick your test date",
-                                                style: TextStyle(color: Colors.blue),
-                                              ),
-                                              onPressed: () {
-                                                showDatePicker(
-                                                  context: context,
-                                                  initialDate: DateTime.now(),
-                                                  firstDate: DateTime.now(),
-                                                  lastDate: DateTime(2050),
-                                                ).then((date) {
-                                                  if (date != null) {
-                                                    setState(() {
-                                                      if (testDayBool == false) {
-                                                        showDialog(
-                                                          context: context,
-                                                          builder: (BuildContext
-                                                              context) {
-                                                            return AlertDialog(
-                                                              title:
-                                                                  const Text('Alert'),
-                                                              content: const Text(
-                                                                  'You cannot update the Test Day because it already exists.'),
-                                                              actions: <Widget>[
-                                                                TextButton(
-                                                                  onPressed: () {
-                                                                    Navigator.of(
-                                                                            context)
-                                                                        .pop();
-                                                                    Navigator.of(
-                                                                            context)
-                                                                        .pop();
-                                                                  },
-                                                                  child:
-                                                                      const Text('OK'),
-                                                                ),
-                                                              ],
-                                                            );
-                                                          },
-                                                        );
-                                                      } else if (testDayBool ==
-                                                          true) {
-                                                        testDayBool == true;
-                                                        testDay = date;
-                                                        updateTestDay(testDay!);
-                                                        getTestDay();
-                                                        testDayString =
-                                                            "${date.day}-${date.month}-${date.year}";
-                                                        getEventsFromDB();
-                                                        generateEventsUIChange(
-                                                            testDay!);
-                                                        Navigator.pop(context);
-                                                      }
-                                                    });
-                                                  } else {
-                                                    if (context.mounted){
-                                                      Navigator.pop(context);
-                                                    }
-                                                  }
-                                                });
-                                              },
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue,
-                            ),
-                            child: const Text(
-                              "Generate Revision Plan",
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ],
+                      child: const Text(
+                        "Generate Revision Plan",
+                        style: TextStyle(color: Colors.white),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
      
