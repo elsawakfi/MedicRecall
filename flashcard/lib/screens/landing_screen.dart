@@ -12,6 +12,7 @@ import 'package:flashcard_x/screens/minimock_landing.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'feedback_screen.dart';
+import 'landing_service.dart';
 import 'mark_scheme.dart';
 import 'package:flashcard_x/screens/settings_screen.dart' as setting;
 // import 'package:flashcard_x/screens/exam_guide_screen.dart';
@@ -42,6 +43,7 @@ class LandingState extends State<Landing> {
   DateTime? hasDate;
   DateTime? _examDate;
   DateTime? _firstStudyDate;
+  bool onLanding = true;
   int buildCount = 0;
   final CollectionReference _userCollectionRef =
       FirebaseFirestore.instance.collection('users');
@@ -55,8 +57,14 @@ class LandingState extends State<Landing> {
     super.initState();
     getUser();
     getFirstStudyDay();
+    landingService.onLanding = true;
     setState(() {});
   }
+
+ 
+ bool getOnLanding(){
+  return onLanding;
+ }
 
 
   Future<void> _setFirstStudyDay() async {
@@ -74,35 +82,6 @@ class LandingState extends State<Landing> {
     await getFirstStudyDay();
   }
 
-  // Future<void> shouldShowDialog() async{
-  //     await getTestDay();
-  //     if (mounted && testDayBool_ && _examDate == null){
-  //        showDialog(context: context,
-  //        builder: (BuildContext context){
-  //         return _buildAlertDialog(
-  //         title: 'Do you want to start your revision plan today?',
-  //         content: const SizedBox(), // Empty content for this dialog
-  //         actions: [
-  //           TextButton(
-  //             onPressed: () {
-  //               Navigator.of(context).pop();
-  //                _setFirstStudyDay();
-  //               _showExamDateDialog(context); // Call to show exam date dialog
-  //             },
-  //             child: const Text('Yes'),
-  //           ),
-  //           TextButton(
-  //             onPressed: () {
-  //               Navigator.of(context).pop();
-  //             },
-  //             child: const Text('No'),
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );setState(() {}); } else {}
-  
-  // }
 
 
   Future<void> getUser() async {
@@ -186,6 +165,7 @@ class LandingState extends State<Landing> {
 
   @override
   Widget build(BuildContext context) {
+    
     buildCount ++;
     return Scaffold(
       key: const ValueKey('Welcome bar'),
@@ -635,15 +615,7 @@ class LandingState extends State<Landing> {
   }
 
 
-  // @override
-  // void didChangeDependencies(){
-  //   super.didChangeDependencies();
-  //   //waits for build function to complete and then calls back to call the condition checking function 
-  //   WidgetsBinding.instance.addPostFrameCallback((_){
-  //      shouldShowDialog();
-  //   });
-  
-  // }
+ 
 
   Future<void> triggerSignIn(String screen) async{
     NavigatorState nav = Navigator.of(context);
@@ -653,6 +625,8 @@ class LandingState extends State<Landing> {
           .first;
      
       if (tmp == null) {
+        landingService.onLanding = false; 
+        print("Setting to false");
         nav.push(
             MaterialPageRoute(
               builder: (context) => const SignInScreen(),
@@ -663,6 +637,8 @@ class LandingState extends State<Landing> {
       }
     } else {
       if (screen == 'HomePage'){
+       landingService.onLanding = false; 
+        print("Setting to false");
         nav.push(
             MaterialPageRoute(
               builder: (context) => const HomePage(title: 'Home'),
@@ -670,6 +646,8 @@ class LandingState extends State<Landing> {
         );
       }
       else if (screen == 'FlashcardEditor'){
+       landingService.onLanding = false; 
+        print("Setting to false");
         nav.push(
             MaterialPageRoute(
               builder: (context) => const FlashcardEditor(),
@@ -677,6 +655,8 @@ class LandingState extends State<Landing> {
         );
       }
       else if (screen == 'Calendar'){
+       landingService.onLanding = false; 
+        print("Setting to false");
         nav.push(
             MaterialPageRoute(
               builder: (context) => const Calendar(),
@@ -695,6 +675,16 @@ class LandingState extends State<Landing> {
       //       )),
       // );
     }
+  }
+  
+  
+  
+
+  @override
+  void dispose() {
+    landingService.onLanding = false; 
+    print("Setting to false");
+    super.dispose();
   }
  
  void _showExamDateDialog(BuildContext context) {

@@ -5,6 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'calendar_screen.dart';
 import 'study_session_manager.dart';
+import 'landing_service.dart';
+
 
 /*import 'package:flashcard_x/widgets/drawer_widget.dart';
 import 'package:flashcard_x/widgets/event.dart';
@@ -181,7 +183,10 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
   }
     Future<void> shouldShowDialog() async{
       await getTestDay();
-      if (mounted && testDayBool && _examDate == null){
+      
+      if (mounted && testDayBool && _examDate == null && landingService.onLanding){
+        print("Are we on the landing page: ");
+        print(landingService.onLanding);
          showDialog(context: context,
          builder: (BuildContext context){
           return _buildAlertDialog(
@@ -229,7 +234,6 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       "firstStudyDay": DateTime.now(), // Save the current date as first study day
     });
 
-    print('WE BEEN ADDING IT THO \n');
 
     // Optionally, retrieve the first study day
     await getFirstStudyDay();
