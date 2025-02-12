@@ -456,7 +456,6 @@ class CalendarStateO extends State<Calendar> {
   );
 }
 
-
 @override
 Widget build(BuildContext context) {
   buildCount++;
@@ -505,7 +504,7 @@ Widget build(BuildContext context) {
           width: 250,
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: Color.fromARGB(255, 33, 33, 33),
+            color: Color.fromARGB(40, 33, 33, 33),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -533,8 +532,8 @@ Widget build(BuildContext context) {
         ),
         // Vertical Divider
         Container(
-          width: 1,
-          color: Colors.grey[700],
+          width: 2,
+          color: Colors.grey[400],
           height: double.infinity,
         ),
         // Calendar section
@@ -544,9 +543,6 @@ Widget build(BuildContext context) {
               children: [
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                  decoration: BoxDecoration(
-                    // color: Color.fromARGB(255, 52, 93, 127),
-                  ),
                   child: TableCalendar(
                     firstDay: DateTime.utc(2020, 1, 1),
                     lastDay: DateTime.utc(2030, 12, 31),
@@ -572,7 +568,7 @@ Widget build(BuildContext context) {
                     calendarStyle: CalendarStyle(
                       // Make selected day more visible with a darker blue
                       selectedDecoration: BoxDecoration(
-                        color: Color.fromARGB(255, 0, 102, 204),
+                        color: Colors.blue[600],
                         shape: BoxShape.circle,
                       ),
                       // Make today's date stand out with a distinct color
@@ -633,7 +629,7 @@ Widget build(BuildContext context) {
                     ),
                     headerStyle: HeaderStyle(
                       titleTextStyle: TextStyle(
-                        fontSize: 20,
+                        fontSize: 40,
                         fontWeight: FontWeight.bold,
                         color: Colors.white, // Changed to white for dark mode
                       ),
@@ -645,7 +641,6 @@ Widget build(BuildContext context) {
                       headerPadding: EdgeInsets.symmetric(vertical: 16.0),
                       // Make the format button more modern
                       formatButtonDecoration: BoxDecoration(
-                        // color: Color.fromARGB(255, 45, 45, 45), // Slightly lighter than background
                         borderRadius: BorderRadius.circular(16.0),
                         border: Border.all(color: Colors.grey[600]!),
                       ),
@@ -657,8 +652,8 @@ Widget build(BuildContext context) {
                       leftChevronVisible: true,
                       rightChevronVisible: true,
                       // Style the arrows
-                      leftChevronIcon: Icon(Icons.chevron_left, color: Color.fromARGB(255, 13, 71, 161)),
-                      rightChevronIcon: Icon(Icons.chevron_right, color: Color.fromARGB(255, 13, 71, 161)),
+                      leftChevronIcon: Icon(Icons.chevron_left, color: Colors.blue[300]),
+                      rightChevronIcon: Icon(Icons.chevron_right, color: Colors.blue[300]),
                     ),
                     daysOfWeekStyle: DaysOfWeekStyle(
                       // Style for weekday names
@@ -671,7 +666,7 @@ Widget build(BuildContext context) {
                       weekendStyle: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14.0,
-                        color: Colors.white, // Changed to white for dark mode
+                        color: Colors.grey[400], // Changed to white for dark mode
                       ),
                     ),
                   ),
@@ -724,7 +719,7 @@ Widget build(BuildContext context) {
         bottomNavigationBar: Padding(
           padding: const EdgeInsets.all(20),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween, // Evenly spaced buttons
+            mainAxisAlignment: MainAxisAlignment.end, // Evenly spaced buttons
             children: [
               // Add New Event Button
               ElevatedButton.icon(
@@ -733,11 +728,15 @@ Widget build(BuildContext context) {
                   backgroundColor: Colors.lightBlue, // Soft blue
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 ),
-                icon: const Icon(Icons.add, size: 18),
-                label: const Text("Add New Event"),
+                icon: const Icon(Icons.add, size: 25),
+                label: const Text(
+                  "Add New Event",
+                  style: TextStyle(fontSize: 22),),
               ),
+
+              const SizedBox(width: 20),
 
               // Homepage Button
               ElevatedButton(
@@ -752,10 +751,14 @@ Widget build(BuildContext context) {
                   backgroundColor: Colors.lightBlue, // Same soft blue
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 ),
-                child: const Text("Homepage"),
+                child: const Text(
+                  "Homepage", 
+                  style: TextStyle(fontSize: 22),),
               ),
+
+              const SizedBox(width: 20),
 
               ElevatedButton.icon(
                 onPressed: () {
@@ -793,11 +796,15 @@ Widget build(BuildContext context) {
                   backgroundColor: Colors.redAccent, // Soft red
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 ),
-                icon: const Icon(Icons.delete, size: 18),
-                label: const Text("Delete All Events"),
+                icon: const Icon(Icons.delete, size: 25),
+                label: const Text(
+                  "Delete All Events",
+                  style: TextStyle(fontSize: 22),),
               ),
+
+              const SizedBox(width: 20),
 
             ],
           ),
