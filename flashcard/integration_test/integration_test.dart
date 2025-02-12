@@ -10,6 +10,8 @@ Future<void> loginTest(WidgetTester tester) async{
   app.main();
   tester.printToConsole('App started');
   await tester.pumpAndSettle();
+  await tester.pump(const Duration(seconds: 5));
+
 
   // Finding the email is really on and off for some reason
   var emailFinder = find.byKey(const ValueKey('emailSignUpField'));
@@ -113,7 +115,7 @@ void main() {
         expect(find.text('Next'), findsOneWidget);
         await tester.tap(find.text('Next'));
         await tester.pumpAndSettle();
-        await tester.tap(find.byType(Checkbox).at(2));
+        await tester.tap(find.byKey(Key('testCheck')));
         await tester.tap(find.text('Submit'));
         tester.printToConsole('Exam date set');
         await tester.pumpAndSettle();

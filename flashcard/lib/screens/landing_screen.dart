@@ -914,6 +914,7 @@ void _showOptionsDialog(BuildContext context) {
                     valueListenable: checkbox1,
                     builder: (context, value, child) {
                       return Checkbox(
+                        key: Key('testCheck'),
                         value: value,
                         onChanged: (value) {
                           checkbox1.value = value!;
