@@ -301,6 +301,7 @@ class LandingState extends State<Landing> {
                                   ),
                                 ),
                                 onPressed: () {
+                                  landingService.onLanding = false;
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
@@ -425,12 +426,16 @@ class LandingState extends State<Landing> {
                                     borderRadius: BorderRadius.all(Radius.circular(100)),
                                   ),
                                 ),
-                                onPressed: () => Navigator.push(
+                                onPressed: () {
+                                  landingService.onLanding = false;
+                                Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => const MiniMockLanding(),
                                   ),
-                                ),
+                                );
+                                },
+                                
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: const [
@@ -452,7 +457,8 @@ class LandingState extends State<Landing> {
                                     ),
                                   ],
                                 ),
-                              ),
+                              ), 
+                                
                             ),
                           ),
                         
@@ -470,12 +476,14 @@ class LandingState extends State<Landing> {
                                     borderRadius: BorderRadius.all(Radius.circular(100)),
                                   ),
                                 ),
-                                onPressed: () => Navigator.push(
+                                onPressed: (){
+                                  landingService.onLanding = false;
+                                  Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => const FeedbackScreen(),
                                   ),
-                                ),
+                                );},
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
@@ -521,12 +529,14 @@ class LandingState extends State<Landing> {
                                     borderRadius: BorderRadius.all(Radius.circular(100)),
                                   ),
                                 ),
-                                onPressed: () => Navigator.push(
+                                onPressed: (){
+                                  landingService.onLanding = false;
+                                  Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => const setting.Settings(),
                                   ),
-                                ),
+                                );},
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: const [
@@ -566,12 +576,14 @@ class LandingState extends State<Landing> {
                                     borderRadius: BorderRadius.all(Radius.circular(100)),
                                   ),
                                 ),
-                                onPressed: () => Navigator.push(
+                                onPressed: () {
+                                  landingService.onLanding = false;
+                                  Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => const FAQScreen(),
                                   ),
-                                ),
+                                );},
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
