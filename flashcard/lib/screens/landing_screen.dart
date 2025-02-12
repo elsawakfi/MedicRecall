@@ -68,7 +68,7 @@ class LandingState extends State<Landing> {
       "firstStudyDay": DateTime.now(), // Save the current date as first study day
     });
 
-    print('WE BEEN ADDING IT THO \n');
+    
 
     // Optionally, retrieve the first study day
     await getFirstStudyDay();
@@ -1014,9 +1014,7 @@ void _showOptionsDialog(BuildContext context) {
                   _userCollectionRef.doc(id).update({
                     'selectedResources': selectedResources,
                   });
-                  print("Are these my resources?");
-                  print(selectedResources);
-                  print("\n");
+                 
 
                   // Start the study session with the selected resources
                   StudySessionManager().startStudySession(selectedResources);
@@ -1058,8 +1056,7 @@ void _showOptionsDialog(BuildContext context) {
         ? data["firstStudyDay"] // Keep existing firstStudyDay if it exists
         : DateTime.now(), // Otherwise, set it to now
       });
-      print('Added firstStudyDay to Document:');
-      print(_firstStudyDate);// update field testday to what is passed as param
+      // update field testday to what is passed as param
     await getTestDay();
     setState(() {});
   
