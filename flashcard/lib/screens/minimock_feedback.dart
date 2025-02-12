@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:collection/collection.dart';
-
 import '../widgets/drawer_widget.dart';
 import 'minimock_landing.dart';
 
@@ -13,7 +12,8 @@ class MiniMockFeedBack extends StatefulWidget {
   final String title;
   final String questionDirectory;
   final String answerDirectory;
-  const MiniMockFeedBack({super.key, required this.title, required this.questionDirectory, required this.answerDirectory});
+  final List<int> answerScores;
+  const MiniMockFeedBack({super.key, required this.title, required this.questionDirectory, required this.answerDirectory, required this.answerScores});
 
   @override
   State<MiniMockFeedBack> createState() => MinimockFeedbackState();
@@ -63,7 +63,6 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
     }
   }
 
-
   Future<List<Map<String, dynamic>>> queryQuestionData() async {
     QuerySnapshot snapshot = await FirebaseFirestore.instance.collection(widget.questionDirectory).orderBy('questionNumber').get(); //questions are not properly stored in order on firestore so order via a field instead
     return snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
@@ -109,7 +108,6 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
            widget.answerDirectory).get();
        Map<String, dynamic> userAnswerMap = userAnswers.get('answers');
        return userAnswerMap;
-
   }
 
   Future<void> fetchUserAnswers() async {
@@ -128,18 +126,89 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
     }
 }
 
+  int questionMarks(int currentQuestion){
+    if (questions[currentQuestion]['type'] == 'ranking'){
+      return 20;
+    }else if(questions[currentQuestion]['type'] == 'multiple choice'){
+      return 12;
+    }
+    return 0;
+  }
+
   //need to query for the user's answers stored in firebase
 
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
+      canPop: true,
       child: Scaffold(
         drawer: const DrawMain(),
-      appBar: CustomAppBar(
-        title: widget.title,
-      ),
-      body: questions.isEmpty || userAnswers.isEmpty
+        appBar: AppBar(
+          // backgroundColor: Colors.blue,
+          elevation: 0,
+          title: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Stack(
+                children: [
+                  Positioned(
+                    top: 2.3,
+                    child: Image.asset(
+                      'assets/newlogo.png',
+                      fit: BoxFit.cover,
+                      height: 34,
+                    ),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.only(left: 32),
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text('Feedback',
+                    ),
+                  ),
+                ],
+              )
+            ],
+          ),
+
+          centerTitle: true,
+          actions:[
+            Container(
+                margin: const EdgeInsets.only(right: 16),
+                width: 160,
+                height: 40.31,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  color: const Color.fromARGB(255, 235, 230, 239),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      spreadRadius: 0,
+                      blurRadius: 5,
+                      offset: const Offset(0, 3), // changes position of shadow
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Text('Question ${currentQuestion+1}/${questions.length}',
+                    style: const TextStyle(
+                      color: Color.fromARGB(255, 98, 86, 139),
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                )
+            )
+          ],
+          leading: Builder(
+            builder: (context) => GestureDetector(
+              onTap: () => Scaffold.of(context).openDrawer(),
+              child: const Icon(
+                Icons.menu,
+              ),
+            ),
+          ),
+        ),
+      body: questions.isEmpty && userAnswers.isEmpty
           ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
           : Padding( //Else load the data
 
@@ -168,7 +237,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                       ],
                     ),
                     child: Center(
-                      child: Text('Question ${currentQuestion+1}/${questions.length}',
+                      child: Text('Score: ${widget.answerScores[currentQuestion]}/${questionMarks(currentQuestion)}',
                         style: const TextStyle(
                           color: Color.fromARGB(255, 98, 86, 139),
                           fontSize: 15,
@@ -306,6 +375,14 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                if (currentQuestion == 0) //Prevents button being shown if no previous questions available
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: Icon(Icons.arrow_back, color: Colors.white),
+                    label: Text('Scoring', style: TextStyle(color: Colors.white)),
+                  ),
                 if (currentQuestion > 0) //Prevents button being shown if no previous questions available
                   ElevatedButton.icon(
                     onPressed: () {
