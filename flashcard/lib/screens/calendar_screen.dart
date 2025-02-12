@@ -539,20 +539,24 @@ Widget build(BuildContext context) {
                       markerBuilder: (context, date, events) {
                         if (events.isEmpty) return null;
                         return Positioned(
-                          bottom: 1,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: events.take(3).map((event) {
-                              return Container(
-                                margin: const EdgeInsets.symmetric(horizontal: 1),
-                                width: 12,  // Make wider
-                                height: 3,  // Make shorter for a line appearance
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(1),  // Slight rounding on the ends
-                                  color: (event as Event).color,
-                                ),
-                              );
-                            }).toList(),
+                          bottom: 2,
+                          child: Container(
+                            width: 60, // Increased container width significantly
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: events.take(3).map((event) {
+                                return Container(
+                                  margin: const EdgeInsets.symmetric(horizontal: 1),
+                                  width: 18,  // Made lines much longer
+                                  height: 3,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(1.5),
+                                    color: (event as Event).color,
+                                  ),
+                                );
+                              }).toList(),
+                            ),
                           ),
                         );
                       },
