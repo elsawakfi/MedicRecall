@@ -466,11 +466,11 @@ Widget build(BuildContext context) {
                 Container(
                   padding: const EdgeInsets.all(16.0),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Color.fromARGB(255, 33, 33, 33), // Changed from white to dark grey
                     borderRadius: BorderRadius.circular(16.0),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.withOpacity(0.1),
+                        color: Colors.black.withOpacity(0.2),
                         spreadRadius: 2,
                         blurRadius: 8,
                         offset: Offset(0, 2),
@@ -507,7 +507,7 @@ Widget build(BuildContext context) {
                       ),
                       // Make today's date stand out with a distinct color
                       todayDecoration: BoxDecoration(
-                        color: Color.fromARGB(255, 46, 125, 50),
+                        color: Color.fromARGB(255, 13, 71, 161),
                         shape: BoxShape.circle,
                       ),
                       // Improve visibility of selected text
@@ -515,14 +515,14 @@ Widget build(BuildContext context) {
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                       ),
-                      // Make default days more visible
+                      // Make default days more visible on dark background
                       defaultTextStyle: TextStyle(
-                        color: Colors.black87,
+                        color: Colors.white,
                         fontWeight: FontWeight.w500,
                       ),
                       // Make weekend days stand out
                       weekendTextStyle: TextStyle(
-                        color: Color.fromARGB(255, 198, 40, 40),
+                        color: Color.fromARGB(255, 255, 128, 128),
                         fontWeight: FontWeight.w500,
                       ),
                       // Improve visibility of outside days
@@ -561,21 +561,20 @@ Widget build(BuildContext context) {
                       titleTextStyle: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
-                        color: Color.fromARGB(255, 13, 71, 161),
+                        color: Colors.white, // Changed to white for dark mode
                       ),
                       formatButtonTextStyle: TextStyle(
-                        color: Color.fromARGB(255, 13, 71, 161),
+                        color: Colors.white, // Changed to white for dark mode
                         fontWeight: FontWeight.bold,
                       ),
                       // Add padding to the header
                       headerPadding: EdgeInsets.symmetric(vertical: 16.0),
                       // Make the format button more modern
                       formatButtonDecoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Color.fromARGB(255, 45, 45, 45), // Slightly lighter than background
                         borderRadius: BorderRadius.circular(16.0),
-                        border: Border.all(color: Color.fromARGB(255, 13, 71, 161)),
+                        border: Border.all(color: Colors.grey[600]!),
                       ),
-                      formatButtonPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                       // Center the title
                       titleCentered: true,
                       // Add margin to the header
@@ -592,13 +591,13 @@ Widget build(BuildContext context) {
                       weekdayStyle: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14.0,
-                        color: Colors.black87,
+                        color: Colors.white, // Changed to white for dark mode
                       ),
                       // Style for weekend names
                       weekendStyle: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14.0,
-                        color: Color.fromARGB(255, 198, 40, 40),
+                        color: Color.fromARGB(255, 255, 128, 128), // Lighter red for dark mode
                       ),
                     ),
                   ),
