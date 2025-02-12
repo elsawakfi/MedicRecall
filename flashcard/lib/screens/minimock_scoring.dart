@@ -32,14 +32,15 @@ class MiniMockScoringState extends State<MiniMockScoring> {
 
   List<Map<String, dynamic>> questions = [];
   Map<String, dynamic> userAnswers = {};
+  late final int totalQuestions;
+
   List<int> answerScores = [];
   int totalScore = 0;
-  double percentageScore = 0;
-  late final int totalQuestions;
+  double userPercentageScore = 0;
+  double averagePercentageScore = 0;
   int maxScore = 0;
   double averageScore = 0;
   final scoringIndicator = ScoreIndicator;
-  // final averageScoringIndicator = AverageScoreIndicator;
 
   @override
   void initState() {
@@ -166,11 +167,13 @@ Future<void> fetchAverageScore() async {
       }
     });
     totalScore = answerScores.reduce((value, element) => value + element);
-    percentageScore = (totalScore / tempMaxScore) * 100;
+    userPercentageScore = (totalScore / tempMaxScore) * 100;
+    averagePercentageScore = (averageScore/ tempMaxScore) * 100;
     setState(() {
       maxScore = tempMaxScore;
-      totalScore = totalScore;
-      percentageScore = percentageScore;
+      // totalScore = totalScore;
+      // userPercentageScore = userPercentageScore;
+      // averagePercentageScore = averagePercentageScore;
     });
     _updateScore(totalScore);
   }
@@ -250,34 +253,37 @@ Future<void> fetchAverageScore() async {
             : Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(height: 150),
+              const Spacer(),
               Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SizedBox(width: 300),
-                Align(
-                  alignment: Alignment.center,
+                  Align(
+                    alignment: Alignment.center,
+                    child: ScoreIndicator(
+                      title: 'Your Score: ',
+                      totalScore: '$totalScore/$maxScore',
+                      percentageScore: userPercentageScore,
+                      radius: 130.0,
+                      lineWidth: 30.0,
+                      progressColor: Colors.red,
+                      backgroundColor: Colors.green
+                    ),
                   ),
-                  ScoreIndicator(
-                    title: 'Your Score: ',
-                    totalScore: '$totalScore/$maxScore',
-                    percentageScore: percentageScore,
-                    radius: 130.0,
-                    lineWidth: 30.0,
-                    progressColor: Colors.red,
-                    backgroundColor: Colors.green
-                ),
-                
-                SizedBox(width: 200),
-                Align(alignment: Alignment(5,5)
-                ),
-                ScoreIndicator(title: 'Average Score: ', 
-                totalScore: '$averageScore/$maxScore',
-                percentageScore: percentageScore,
-                radius: 130.0, 
-                lineWidth:  30.0, 
-                progressColor: Colors.red, 
-                backgroundColor:  Colors.green),
+                  SizedBox(width: 60),
+                  Align(
+                    alignment: Alignment.center,
+                    child: ScoreIndicator(
+                      title: 'Average Score: ',
+                      totalScore: '$averageScore/$maxScore',
+                      percentageScore: averagePercentageScore,
+                      radius: 130.0,
+                      lineWidth:  30.0,
+                      progressColor: Colors.red,
+                      backgroundColor:  Colors.green
+                    ),
+                  ),
                 ]
               ),
               const Spacer(),

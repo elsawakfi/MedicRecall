@@ -208,7 +208,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
             ),
           ),
         ),
-      body: questions.isEmpty && userAnswers.isEmpty
+      body: questions.isEmpty || userAnswers.isEmpty
           ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
           : Padding( //Else load the data
 
