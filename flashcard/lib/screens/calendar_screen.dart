@@ -493,6 +493,12 @@ Widget build(BuildContext context) {
             ],
           ),
         ),
+        // Vertical Divider
+        Container(
+          width: 1,
+          color: Colors.grey[700],
+          height: double.infinity,
+        ),
         // Calendar section
         Expanded(
           child: SingleChildScrollView(
@@ -546,9 +552,9 @@ Widget build(BuildContext context) {
                         color: Colors.white,
                         fontWeight: FontWeight.w500,
                       ),
-                      // Make weekend days stand out
+                      // Make weekend days match default days
                       weekendTextStyle: TextStyle(
-                        color: Color.fromARGB(255, 255, 128, 128),
+                        color: Colors.white,
                         fontWeight: FontWeight.w500,
                       ),
                       // Improve visibility of outside days
@@ -627,7 +633,7 @@ Widget build(BuildContext context) {
                       weekendStyle: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14.0,
-                        color: Color.fromARGB(255, 255, 128, 128), // Lighter red for dark mode
+                        color: Colors.white, // Changed to white for dark mode
                       ),
                     ),
                   ),
