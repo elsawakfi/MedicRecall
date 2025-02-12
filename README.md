@@ -201,12 +201,12 @@ To build MedicRecall yourself, you will need the following tools:
 
 ## Team Members
 
-| Member                       | Email                                                 | LinkedIn  |
-| ---------------------------- | ----------------------------------------------------- | ----------|
-| Clarissa Ch'ng               | [fr22378@bristol.ac.uk](mailto:fr22378@bristol.ac.uk) | 
-| Elsa Wakfi                   | [xp23980@bristol.ac.uk](mailto:xp23980@bristol.ac.uk) |
-| Tinaye Samuel Chibanda       | [ua20351@bristol.ac.uk](mailto:ua20351@bristol.ac.uk) |
-| Rowan Watcham                | [no23481@bristol.ac.uk](mailto:no23481@bristol.ac.uk) |
-| Dennis Han                   | [jf23616@bristol.ac.uk](mailto:jf23616@bristol.ac.uk) |
-| Saud Binlebdah               | [hr22169@bristol.ac.uk](mailto:hr22169@bristol.ac.uk) |
+| Member                       | Email                                                 | Connect With Us! |
+| ---------------------------- | ----------------------------------------------------- | ----------------- |
+| Clarissa Ch'ng               | [fr22378@bristol.ac.uk](mailto:fr22378@bristol.ac.uk) | [![clarissa-linkedin](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/clarissa-chng/)
+| Elsa Wakfi                   | [xp23980@bristol.ac.uk](mailto:xp23980@bristol.ac.uk) |[![elsa-linkedin](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/elsa-wakfi-9925fklg/)
+| Tinaye Samuel Chibanda       | [ua20351@bristol.ac.uk](mailto:ua20351@bristol.ac.uk) | [![sam-linkedin](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/tinaye-samuel-chibanda-825280257/)
+| Rowan Watcham                | [no23481@bristol.ac.uk](mailto:no23481@bristol.ac.uk) | [![rowan-linkedin](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/rowan-watcham/)
+| Dennis Han                   | [jf23616@bristol.ac.uk](mailto:jf23616@bristol.ac.uk) | [![dennis-linkedin](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/kaung-zaw-han-660614333/)
+| Saud Binlebdah               | [hr22169@bristol.ac.uk](mailto:hr22169@bristol.ac.uk) | [![saud-linkedin](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/saud-binlebdah/)
 
