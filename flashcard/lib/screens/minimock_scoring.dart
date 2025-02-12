@@ -251,9 +251,10 @@ Future<void> fetchAverageScore() async {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              SizedBox(height: 20),
+              SizedBox(height: 150),
               Row(
                 children: [
+                  SizedBox(width: 300),
                 Align(
                   alignment: Alignment.center,
                   ),
@@ -262,19 +263,19 @@ Future<void> fetchAverageScore() async {
                     totalScore: '$totalScore/$maxScore',
                     percentageScore: percentageScore,
                     radius: 130.0,
-                    lineWidth: 15.0,
+                    lineWidth: 30.0,
                     progressColor: Colors.red,
                     backgroundColor: Colors.green
                 ),
                 
-                SizedBox(width: 20),
-                Align(alignment: Alignment.center,
+                SizedBox(width: 200),
+                Align(alignment: Alignment(5,5)
                 ),
                 ScoreIndicator(title: 'Average Score: ', 
                 totalScore: '$averageScore/$maxScore',
                 percentageScore: percentageScore,
                 radius: 130.0, 
-                lineWidth:  15.0, 
+                lineWidth:  30.0, 
                 progressColor: Colors.red, 
                 backgroundColor:  Colors.green),
                 ]
