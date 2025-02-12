@@ -499,45 +499,50 @@ Widget build(BuildContext context) {
     body: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Labels section
-        Container(
-          width: 250,
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            color: Color.fromARGB(40, 33, 33, 33),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Labels',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+        // Labels section (Left side of the page)
+        Expanded(
+          flex: 1,
+          child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  decoration: BoxDecoration(
+                    color: Color.fromARGB(40, 33, 33, 33),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Labels',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+
+                      SizedBox(height: 30), // More space between main label and first label
+                      _buildLabelItem('Mini Mock', StudySessionManager.kMiniMockColor),
+                      SizedBox(height: 30),
+                      _buildLabelItem('Full-Sized Mock', StudySessionManager.kFullMockColor),
+                      SizedBox(height: 30),
+                      _buildLabelItem('Official MRSA Paper', StudySessionManager.kOfficialPaperColor),
+                      SizedBox(height: 30),
+                      _buildLabelItem('Flashcards', StudySessionManager.kFlashcardColor),
+                      SizedBox(height: 30),
+                      _buildLabelItem('Test Day', const Color.fromARGB(255, 255, 89, 94)),
+
+                    ]
+                  ),
                 ),
               ),
-              SizedBox(height: 30), // More space between main label and first label
-              _buildLabelItem('Mini Mock', StudySessionManager.kMiniMockColor),
-              SizedBox(height: 30),
-              _buildLabelItem('Full Mock', StudySessionManager.kFullMockColor),
-              SizedBox(height: 30),
-              _buildLabelItem('Official Paper', StudySessionManager.kOfficialPaperColor),
-              SizedBox(height: 30),
-              _buildLabelItem('Flashcards', StudySessionManager.kFlashcardColor),
-              SizedBox(height: 30),
-              _buildLabelItem('Test Day', const Color.fromARGB(255, 255, 89, 94)),
-            ],
-          ),
-        ),
-        // Vertical Divider
+        // Vertical Divider (the line between the calendar and the label)
         Container(
           width: 2,
           color: Colors.grey[400],
           height: double.infinity,
         ),
-        // Calendar section
+        // Right side of the page -> Calendar, EventsList and Buttons
         Expanded(
+          flex: 5,
           child: SingleChildScrollView(
             child: Column(
               children: [
@@ -641,42 +646,46 @@ Widget build(BuildContext context) {
                       headerPadding: EdgeInsets.symmetric(vertical: 16.0),
                       // Make the format button more modern
                       formatButtonDecoration: BoxDecoration(
+                        color: Colors.blue[600],
                         borderRadius: BorderRadius.circular(16.0),
                         border: Border.all(color: Colors.grey[600]!),
                       ),
                       // Center the title
                       titleCentered: true,
                       // Add margin to the header
-                      headerMargin: EdgeInsets.only(bottom: 8.0),
+                      headerMargin: EdgeInsets.only(bottom: 15.0),
                       // Enable left and right arrows
                       leftChevronVisible: true,
                       rightChevronVisible: true,
                       // Style the arrows
-                      leftChevronIcon: Icon(Icons.chevron_left, color: Colors.blue[300]),
-                      rightChevronIcon: Icon(Icons.chevron_right, color: Colors.blue[300]),
+                      leftChevronIcon: Icon(Icons.chevron_left, size:30,  color: Colors.blue[300]),
+                      rightChevronIcon: Icon(Icons.chevron_right, size:30, color: Colors.blue[300]),
                     ),
                     daysOfWeekStyle: DaysOfWeekStyle(
                       // Style for weekday names
                       weekdayStyle: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14.0,
+                        // fontWeight: FontWeight.bold,
+                        fontSize: 16.0,
                         color: Colors.white, // Changed to white for dark mode
                       ),
                       // Style for weekend names
                       weekendStyle: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14.0,
+                        // fontWeight: FontWeight.bold,
+                        fontSize: 16.0,
                         color: Colors.grey[400], // Changed to white for dark mode
                       ),
                     ),
                   ),
                 ),
+                const SizedBox(height: 20), // add space in ebtween the calendar and list
                 ..._getEventsfromDay(selectedDay).map(
-                  (Event event) => ListTile(
+                  (Event event) => Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0), // Adds spacing
+                    child: ListTile(
                     title: Text(
                       event.title,
                       style: TextStyle(
-                        color: Colors.black87,
+                        color: Colors.white,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -688,13 +697,13 @@ Widget build(BuildContext context) {
                         shape: BoxShape.circle,
                       ),
                     ),
-                    tileColor: event.color.withOpacity(0.1),
+                    tileColor: event.color.withOpacity(0.4),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                     contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   ),
-                ),
+                ),),
                 Column(
                   children: [
                     const Text("Your exam is on:"),
@@ -709,14 +718,17 @@ Widget build(BuildContext context) {
               ],
             ),
           ),
+          
         ),
-     
+        
+        
       ],
       
     ),
-       floatingActionButton: const CustomFloatingButton(),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
-        bottomNavigationBar: Padding(
+      floatingActionButton: const CustomFloatingButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
+      
+      bottomNavigationBar: Padding(
           padding: const EdgeInsets.all(20),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end, // Evenly spaced buttons
