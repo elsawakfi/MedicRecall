@@ -742,12 +742,12 @@ Widget build(BuildContext context) {
               // Homepage Button
               ElevatedButton(
                 onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => Landing()),
-                            );
-                          },
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                    builder: (context) => Landing()),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.lightBlue, // Same soft blue
                   foregroundColor: Colors.white,
@@ -757,13 +757,37 @@ Widget build(BuildContext context) {
                 child: const Text("Homepage"),
               ),
 
-              // Delete All Events Button
               ElevatedButton.icon(
                 onPressed: () {
                   testDay = null;
                   testDayBool = true;
                   deleteAllEvents();
                   setState(() {});
+
+                  // Show confirmation popup
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text("All Events Deleted"),
+                      content: const Text("Go to the homepage to schedule your study schedule."),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context), // Just close dialog
+                          child: const Text("OK"),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                              builder: (context) => Landing()),
+                            );
+                          },
+                          child: const Text("Go to Homepage"),
+                        ),
+                      ],
+                    ),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.redAccent, // Soft red
@@ -774,6 +798,7 @@ Widget build(BuildContext context) {
                 icon: const Icon(Icons.delete, size: 18),
                 label: const Text("Delete All Events"),
               ),
+
             ],
           ),
         ),
