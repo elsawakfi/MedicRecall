@@ -63,7 +63,10 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
           fontWeight: FontWeight.w500,
         ),
       ),
-      content: content,
+      content: SizedBox(
+        width: 300,
+        child: content,
+      ),
       actions: actions,
     );
   }
@@ -83,9 +86,15 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
         _examDate = DateTime.fromMicrosecondsSinceEpoch(userFromDb["TestDay"]
             .microsecondsSinceEpoch); // Firebase is weird. Conversion from TimeStamp to DateTime object
         String? day = _examDate?.day.toString();
-        String? month = _examDate?.month.toString();
+        // String? month = _examDate?.month.toString();
+
+        // Convert month number to month name
+        String? month = _examDate?.month != null 
+            ? DateFormat('MMMM').format(DateTime(_examDate!.year, _examDate!.month))
+            : null;
         String? year = _examDate?.year.toString();
-        testDayString = '$day-$month-$year';
+        // testDayString = '$day-$month-$year';
+        testDayString = '$day ${month} $year';
       } else {
         testDayBool = true;
       }
@@ -97,7 +106,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
   Future<void> updateTestDay(DateTime date) async {
     QuerySnapshot u =
         await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
-      
+
     /*  FIRST update on database */
     var id = u.docs.last.id; // id being where the user's id details
 
@@ -106,13 +115,14 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
 
     _userCollectionRef.doc(id).update({
       "TestDay": _examDate,
-      "firstStudyDay": data.containsKey("firstStudyDay") && data["firstStudyDay"] != null
-        ? data["firstStudyDay"] // Keep existing firstStudyDay if it exists
-        : DateTime.now(), // Otherwise, set it to now
-      });
+      "firstStudyDay": data.containsKey("firstStudyDay") &&
+              data["firstStudyDay"] != null
+          ? data["firstStudyDay"] // Keep existing firstStudyDay if it exists
+          : DateTime.now(), // Otherwise, set it to now
+    });
 
-      print('Added firstStudyDay to Document:');
-      print(_firstStudyDate);
+    print('Added firstStudyDay to Document:');
+    print(_firstStudyDate);
     // update field testday to what is passed as param
     await getTestDay();
     setState(() {});
@@ -136,19 +146,20 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
 
   Future<void> getFirstStudyDay() async {
     if (user != null) {
-      QuerySnapshot u = await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
+      QuerySnapshot u =
+          await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
 
       var userFromDb = u.docs.first;
       Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
       // If the Test Day field isn't null and is in the database we update the UI with it. Otherwise it is displayed as being not set.
       if (data.containsKey("firstStudyDay") && data["firstStudyDay"] != null) {
         // firstDayBool = false;
-        _firstStudyDate = DateTime.fromMicrosecondsSinceEpoch(userFromDb["firstStudyDay"]
-            .microsecondsSinceEpoch);
+        _firstStudyDate = DateTime.fromMicrosecondsSinceEpoch(
+            userFromDb["firstStudyDay"].microsecondsSinceEpoch);
       }
 
       setState(() {});
-    } 
+    }
   }
 
   // Revision dialog
@@ -161,19 +172,38 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
           content: const SizedBox(), // Empty content for this dialog
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _setFirstStudyDay();
-                _showExamDateDialog(context); // Call to show exam date dialog
-              },
-              child: const Text('Yes'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: const Color.fromRGBO(243, 90, 90, 1),
+              // backgroundColor: const Color.fromRGBO(243, 90, 90, 1),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              minimumSize: const Size(120, 45), // Sets minimum width and height
             ),
+            child: const Text(
+              'No',
+              style: TextStyle(fontSize: 16),
+            ),
+          ),
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('No'),
+            onPressed: () {
+              Navigator.of(context).pop();
+              _setFirstStudyDay(); // Ensure this function is defined
+              _showExamDateDialog(context); // Ensure this function is defined
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white,
+              backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              minimumSize: const Size(120, 45), // Sets minimum width and height
             ),
+            child: const Text(
+              'Yes',
+              style: TextStyle(fontSize: 16),
+            ),
+          ),
+            
           ],
         );
       },
@@ -182,12 +212,14 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
 
   // Method to save firstStudyDay
   Future<void> _setFirstStudyDay() async {
-    QuerySnapshot u = await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
+    QuerySnapshot u =
+        await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
     var id = u.docs.last.id;
-    
+
     // Save the first study day only once when the revision plan starts
     await _userCollectionRef.doc(id).update({
-      "firstStudyDay": DateTime.now(), // Save the current date as first study day
+      "firstStudyDay":
+          DateTime.now(), // Save the current date as first study day
     });
 
     print('WE BEEN ADDING IT THO \n');
@@ -202,10 +234,9 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       context: context,
       builder: (BuildContext context) {
         return _buildAlertDialog(
-          title: 'What is your exam date?',
+          title: 'When is your exam date?',
           content: Column(
             mainAxisSize: MainAxisSize.min,
-
             // If statement to check if firebase already has exam date in database
             children: [
               ElevatedButton(
@@ -215,6 +246,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     initialDate: DateTime.now(),
                     firstDate: DateTime.now(),
                     lastDate: DateTime.now().add(const Duration(days: 365)),
+                    locale: const Locale('en', 'GB'),
                   );
                   if (picked != null) {
                     setState(() {
@@ -225,21 +257,27 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
 
                     if (context.mounted) {
                       Navigator.of(context).pop();
-                      _showRepetitionDialog(context); // Proceed to next dialog
+                      _showOptionsDialog(context); // Proceed to next dialog
                     }
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromRGBO(21, 58, 103, 1),
+                  foregroundColor: Colors.white, // Text color
+                  backgroundColor: const Color.fromRGBO(51, 178, 73, 1), // Same color as 'Yes' button
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  minimumSize: const Size(120, 45),
                 ),
-                child: const Text('Pick Date'),
+                child: const Text(
+                  'Select Exam Date',
+                  style: TextStyle(fontSize: 16),
+                  ),
               ),
               const SizedBox(height: 10),
               Text(
                 _examDate != null
-                    ? 'Selected Date: ${DateFormat('MMM d, yyyy').format(_examDate!)}'
-                    : 'No Date Selected',
-                style: TextStyle(
+                    ? 'Selected Date: ${DateFormat('dd MMM, yyyy').format(_examDate!)}' // UK Format
+                  : 'No Date Selected',
+              style: TextStyle(
                   color: _examDate != null
                       ? Colors.black
                       : const Color.fromRGBO(21, 58, 103, 1),
@@ -272,7 +310,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'How many repetitions of the official past paper would you like to schedule?',
+                    'How many times would you like to practice the selected resources?',
                     style: const TextStyle(
                       color: Color.fromRGBO(21, 58, 103, 1),
                       fontSize: 21,
@@ -280,12 +318,27 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     ),
                   ),
                   const SizedBox(height: 8), // Add spacing between lines
-                  Text(
-                    'We recommend at least 3 repetitions.',
-                    style: const TextStyle(
-                      color: Color.fromRGBO(21, 58, 103, 1),
-                      fontSize: 16, // Slightly smaller font size
-                      fontWeight: FontWeight.w400, // Regular font weight
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        const TextSpan(
+                          text:
+                              'It is recommended to practice at least three times.\nYour chosen number of repetition will apply to both the ',
+                          style: TextStyle(
+                            color: Color.fromRGBO(21, 58, 103, 1),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w400, // Regular font weight
+                          ),
+                        ),
+                        TextSpan(
+                          text: 'Official Paper and Full-sized Mock Exam.',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold, // Make it bold
+                            color: Color.fromRGBO(21, 58, 103, 1),
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -326,39 +379,55 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        _showExamDateDialog(context);
-                      },
-                      child: const Text('Previous'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    style: TextButton.styleFrom(
+                      foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
+                      // backgroundColor: const Color.fromRGBO(243, 90, 90, 1),
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      minimumSize: const Size(120, 45), // Sets minimum width and height
                     ),
+                    child: const Text(
+                      'Previous',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ),
                     TextButton(
                       onPressed: () async {
                         if (selectedRepetition != null) {
                           // Save selectedRepetition to the database
-                          // code taken from below resources option dialog
                           QuerySnapshot u = await _userCollectionRef
                               .where("userID", isEqualTo: user?.uid)
                               .get();
 
                           var id = u.docs.last.id;
-                          // updates the selectedRepetition field in the user's document
                           await _userCollectionRef.doc(id).update({
-                          'selectedRepetition': selectedRepetition,
+                            'selectedRepetition': selectedRepetition,
                           });
 
-                          Navigator.of(context).pop();
-                          _showOptionsDialog(
-                              context); // Proceed to the next dialog
+                          if (context.mounted) {
+                            Navigator.of(context).pop();
+                          }
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Please enter number of repetitions'),
+                            const SnackBar(
+                              content:
+                                  Text('Please enter number of repetitions'),
                             ),
                           );
                         }
                       },
-                      child: const Text('Next'),
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        minimumSize: const Size(120, 45), // Sets minimum width and height
+                      ),
+                      child: const Text(
+                      'Submit',
+                      style: TextStyle(fontSize: 16),
+                      ),
                     ),
                   ],
                 ),
@@ -380,140 +449,113 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       context: context,
       builder: (BuildContext context) {
         return _buildAlertDialog(
-          title: 'What resources do you want to use?',
+          title: 'Which resources would you like to use?',
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Row(
-                children: [
-                  ValueListenableBuilder(
-                    valueListenable: checkbox1,
-                    builder: (context, value, child) {
-                      return Checkbox(
-                        key: Key('testCheck'),
-                        value: value,
-                        onChanged: (value) {
-                          checkbox1.value = value!;
-                        },
-                      );
-                    },
-                  ),
-                  Text(
-                    'Official paper',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  ValueListenableBuilder(
-                    valueListenable: checkbox2,
-                    builder: (context, value, child) {
-                      return Checkbox(
-                        value: value,
-                        onChanged: (value) {
-                          checkbox2.value = value!;
-                        },
-                      );
-                    },
-                  ),
-                  Text(
-                    'Full-sized mock exam',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  ValueListenableBuilder(
-                    valueListenable: checkbox3,
-                    builder: (context, value, child) {
-                      return Checkbox(
-                        value: value,
-                        onChanged: (value) {
-                          checkbox3.value = value!;
-                        },
-                      );
-                    },
-                  ),
-                  Text(
-                    'Mini-mocks',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  ValueListenableBuilder(
-                    valueListenable: checkbox4,
-                    builder: (context, value, child) {
-                      return Checkbox(
-                        value: value,
-                        onChanged: (value) {
-                          checkbox4.value = value!;
-                        },
-                      );
-                    },
-                  ),
-                  Text(
-                    'Flashcards',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ],
-              ),
+              _buildCheckbox(checkbox1, 'Official MRSA Exam Paper'),
+              _buildCheckbox(checkbox2, 'Full-sized Mock Exam'),
+              _buildCheckbox(checkbox3, 'Mini-Mocks'),
+              _buildCheckbox(checkbox4, 'Flashcards'),
             ],
           ),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _showRepetitionDialog(context);
-              },
-              child: const Text('Previous'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
+              // backgroundColor: const Color.fromRGBO(243, 90, 90, 1),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              minimumSize: const Size(120, 45), // Sets minimum width and height
             ),
+            child: const Text(
+              'Previous',
+              style: TextStyle(fontSize: 16),
+            ),
+          ),
             TextButton(
               onPressed: () async {
-                if (checkbox1.value ||
-                    checkbox2.value ||
-                    checkbox3.value ||
-                    checkbox4.value) {
-                  List<String> selectedResources = [];
-                  if (checkbox1.value) selectedResources.add('Official paper');
-                  if (checkbox2.value)
-                    selectedResources.add('Full-sized mock exam');
-                  if (checkbox3.value) selectedResources.add('Mini-mocks');
-                  if (checkbox4.value) selectedResources.add('Flashcards');
+                // Check which resources were selected
+                List<String> selectedResources = [];
+                if (checkbox1.value) selectedResources.add('Official paper');
+                if (checkbox2.value) selectedResources.add('Full-sized mock exam');
+                if (checkbox3.value) selectedResources.add('Mini-mocks');
+                if (checkbox4.value) selectedResources.add('Flashcards');
 
-                  QuerySnapshot u = await _userCollectionRef
-                      .where("userID", isEqualTo: user?.uid)
-                      .get();
-
-                  // Update the Firestore document with the selected resources
-                  var id = u.docs.last.id;
-                  _userCollectionRef.doc(id).update({
-                    'selectedResources': selectedResources,
-                  });
-
-                  // Start the study session with the selected resources
-                  StudySessionManager().startStudySession(selectedResources);
-
-                  if (context.mounted) {
-                    Navigator.of(context).pop();
-                  }
-                  // Add your action here after options are submitted
-                } else {
+                if (selectedResources.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text('Please select at least one resource'),
                     ),
                   );
+                  return; // Stop execution if no resources are selected
+                }
+
+                QuerySnapshot u = await _userCollectionRef
+                    .where("userID", isEqualTo: user?.uid)
+                    .get();
+
+                // Update Firestore with selected resources
+                var id = u.docs.last.id;
+                _userCollectionRef.doc(id).update({
+                  'selectedResources': selectedResources,
+                });
+
+                // Start study session
+                StudySessionManager().startStudySession(selectedResources);
+
+                // Close current dialog
+                Navigator.of(context).pop();
+
+                // If either Official Paper or Full-sized Mock is selected, show Repetition Dialog
+                if (checkbox1.value || checkbox2.value) {
+                  _showRepetitionDialog(context);
                 }
               },
-              child: const Text('Submit'),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                minimumSize: const Size(120, 45), // Sets minimum width and height
+              ),
+              child: const Text(
+              'Submit',
+              style: TextStyle(fontSize: 16),
+              ),
             ),
           ],
         );
       },
+    );
+  }
+
+  // Helper method to create checkbox rows
+  Widget _buildCheckbox(ValueNotifier<bool> notifier, String text) {
+    return Row(
+      children: [
+        ValueListenableBuilder(
+          valueListenable: notifier,
+          builder: (context, value, child) {
+            return Checkbox(
+              value: value,
+              onChanged: (newValue) {
+                notifier.value = newValue!;
+              },
+            );
+          },
+        ),
+        GestureDetector(
+          onTap: () {
+            notifier.value = !notifier.value;
+          },
+          child: Text(
+            text,
+            style: TextStyle(color: Colors.black),
+          ),
+        ),
+      ],
     );
   }
 
@@ -546,10 +588,10 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
           _examDate == null
               ? 'Set Your Exam Date'
               : _calculateDaysUntilExam(_examDate!) < 0
-               ? 'Exam has already passed'
-               : _calculateDaysUntilExam(_examDate!) == 0
-                  ? "Exam is Today"
-                  : '${_calculateDaysUntilExam(_examDate!)} Days to Your Exam',
+                  ? 'Exam has already passed'
+                  : _calculateDaysUntilExam(_examDate!) == 0
+                      ? "Exam is Today"
+                      : '${_calculateDaysUntilExam(_examDate!)} Days to Your Exam',
           style: const TextStyle(
             color: Color.fromARGB(255, 98, 86, 139),
             fontSize: 14,
@@ -566,17 +608,47 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                 builder: (BuildContext context) {
                   return _buildAlertDialog(
                     title: 'Exam Date Already Set',
-                    content: Text(
-                      'Your exam date is already set to $testDayString.\nDo you want to change it?',
-                      style: TextStyle(
-                        color: const Color.fromRGBO(21, 58, 103, 1),
-                        fontSize: 16,
+                    content: Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                            text: 'Your exam date is already set to ',
+                            style: TextStyle(
+                              color: const Color.fromRGBO(21, 58, 103, 1),
+                              fontSize: 17,
+                            ),
+                          ),
+                          TextSpan(
+                            text: '${testDayString}',
+                            style: TextStyle(
+                              color: const Color.fromRGBO(21, 58, 103, 1),
+                              fontSize: 17,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          TextSpan(
+                            text: '.\nDo you want to change it?',
+                            style: TextStyle(
+                              color: const Color.fromRGBO(21, 58, 103, 1),
+                              fontSize: 17,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     actions: [
                       TextButton(
                           onPressed: () => Navigator.of(context).pop(),
-                          child: Text('Cancel')),
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 12),
+                            minimumSize:
+                                Size(120, 45), // Sets minimum width and height
+                          ),
+                          child: Text(
+                            'Cancel',
+                            style: TextStyle(fontSize: 16),
+                          )),
                       TextButton(
                           onPressed: () {
                             Navigator.push(
@@ -585,7 +657,18 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                                   builder: (context) => Calendar()),
                             );
                           },
-                          child: Text('Change Exam Date')),
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            backgroundColor: Color.fromRGBO(243, 90, 90, 1),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 12),
+                            minimumSize:
+                                Size(120, 45), // Sets minimum width and height
+                          ),
+                          child: Text(
+                            'Change Exam Date',
+                            style: TextStyle(fontSize: 16),
+                          )),
                     ],
                   );
                 });
