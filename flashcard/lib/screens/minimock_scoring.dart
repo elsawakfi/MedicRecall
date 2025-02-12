@@ -4,13 +4,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/minimock_feedback.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
-import 'package:flashcard_x/widgets/average_percent_indicator';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'package:flashcard_x/widgets/circular_percentage_indicator.dart';
 import 'package:http/http.dart' as http;
-// import 'package:percent_indicator/circular_percent_indicator.dart';
 
 
 class MiniMockScoring extends StatefulWidget {
@@ -41,7 +39,7 @@ class MiniMockScoringState extends State<MiniMockScoring> {
   int maxScore = 0;
   double averageScore = 0;
   final scoringIndicator = ScoreIndicator;
-  final averageScoringIndicator = AverageScoreIndicator;
+  // final averageScoringIndicator = AverageScoreIndicator;
 
   @override
   void initState() {
@@ -53,8 +51,8 @@ class MiniMockScoringState extends State<MiniMockScoring> {
     await getQuestions(); // Fetch the questions on initialisation
     await getUser();
     await fetchUserAnswers(); //Fetch the user's answers from the database
+    await fetchAverageScore(); // Fetch the average score for the mock
     calculateScores();
-    // await fetchAverageScore(); // Fetch the average score from the database
   }
 
   Future<void> getUser() async {
@@ -126,55 +124,15 @@ class MiniMockScoringState extends State<MiniMockScoring> {
     }
   }
 
-  Future<void> fetchAverageScore() async {
-    try {
-      QuerySnapshot snapshot = await FirebaseFirestore.instance
-      .collection('users')
-      .get();
-      // List scores = snapshot.docs.map((doc) => doc.get('score')).toList();
-      int totalScores = 0;
-      int userCount = snapshot.docs.length;
-     
-     for (var doc in snapshot.docs){
-      DocumentSnapshot<Map<String, dynamic >> userAnswers = await FirebaseFirestore.instance
-      .collection('users')
-      .doc(doc.id)
-      .collection('Exam answers')
-      .doc(widget.answerDirectory)
-      .get();
-      Map<String, dynamic> userAnswerMap = userAnswers.get('answers');
-      int userTotalScore = 0;
-
-      userAnswerMap.forEach((questionNumber, userAnswer){
-        int questionIndex = int.parse(questionNumber) - 1; // String question number to integer index
-        // Score answers based on question type:
-        switch (questions[questionIndex]['type']) {
-          case 'ranking':
-            if (ListEquality().equals(questions[questionIndex]['correct_answers'], userAnswer)){
-              userTotalScore += 1;
-            }
-            break;
-          case 'multiple choice':
-            if (questions[questionIndex]['type'] == "multiple choice" &&
-                UnorderedIterableEquality().equals(questions[questionIndex]['correct_answers'], userAnswer)){
-              userTotalScore += 1;
-            }
-            break;
-          default:
-        }
-      });
-      totalScores +=userTotalScore;
-     }
-     averageScore = totalScores / userCount;
-     setState((){
-       averageScore = averageScore;
-     });
-    } catch (error) {
-      if (kDebugMode) {
-        print('Error fetching average score: $error');
-      }
-    }
+Future<void> fetchAverageScore() async {
+    DocumentSnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore.instance
+        .collection('mini-mock-stats')
+        .doc(widget.questionDirectory)
+        .get();
+        int median = snapshot.get('median');
+    averageScore = median.toDouble();
   }
+
 
   void calculateScores(){
     int tempMaxScore = 0;
@@ -217,27 +175,6 @@ class MiniMockScoringState extends State<MiniMockScoring> {
     _updateScore(totalScore);
   }
 
-  ScoreIndicator get circularPercentIndicator{
-    return ScoreIndicator(
-      title: "Your Score: ", 
-      totalScore: '$totalScore/25',
-      percentageScore: percentageScore, 
-      radius: 80.0, lineWidth: 10.0, 
-      progressColor: Colors.green, 
-      backgroundColor: Colors.red,
-    );
-  }
-
-  AverageScoreIndicator get averageCircularPercentIndicator{
-    return AverageScoreIndicator(
-      title: "Average Score: ",
-      totalScore: '$averageScore/$maxScore',
-      percentageScore: percentageScore,
-      radius: 80.0, lineWidth: 10.0,
-      progressColor: Colors.green,
-      backgroundColor: Colors.red,
-    );
-  }
 
   // Update user's score for this mock
   Future<void> _updateScore(int score) async {
@@ -314,26 +251,37 @@ class MiniMockScoringState extends State<MiniMockScoring> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              Align(
-                alignment: Alignment(-0.5,-3),
-                child:
-                ScoreIndicator(
-                  title: 'Your Score: ',
-                  totalScore: '$totalScore/$maxScore',
-                  percentageScore: percentageScore,
-                  radius: 130.0,
-                  lineWidth: 15.0,
-                  progressColor: Colors.red,
-                  backgroundColor: Colors.green
-              ),
+              SizedBox(height: 20),
+              Row(
+                children: [
+                Align(
+                  alignment: Alignment.center,
+                  ),
+                  ScoreIndicator(
+                    title: 'Your Score: ',
+                    totalScore: '$totalScore/$maxScore',
+                    percentageScore: percentageScore,
+                    radius: 130.0,
+                    lineWidth: 15.0,
+                    progressColor: Colors.red,
+                    backgroundColor: Colors.green
+                ),
+                
+                SizedBox(width: 20),
+                Align(alignment: Alignment.center,
+                ),
+                ScoreIndicator(title: 'Average Score: ', 
+                totalScore: '$averageScore/$maxScore',
+                percentageScore: percentageScore,
+                radius: 130.0, 
+                lineWidth:  15.0, 
+                progressColor: Colors.red, 
+                backgroundColor:  Colors.green),
+                ]
               ),
               const Spacer(),
-              // circularPercentIndicator:
-                // Text('Your Score: $totalScore/$totalQuestions', style: TextStyle(fontSize: 24)),
-                // Text('Percentage: $percentageScore%', style: TextStyle(fontSize: 24)),
-              // EXIT BUTTON
               Align(
-                alignment: Alignment.bottomRight,
+                alignment: Alignment.topRight,
                 child: ElevatedButton.icon(
                   onPressed: () => {
                     Navigator.of(context).push(
