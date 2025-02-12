@@ -368,6 +368,47 @@ class CalendarStateO extends State<Calendar> {
     getTestDay();
   }
 
+  Future<void> deleteSingleEvent(String eventTitle) async {
+  // Step 1: Delete the event from Firestore
+  QuerySnapshot userSnapshot =
+      await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+  String userId = userSnapshot.docs.last.id;
+  CollectionReference eventsCollectionRef =
+      FirebaseFirestore.instance.collection('users/$userId/events');
+
+  // Query the event by its title (or another unique identifier)
+  QuerySnapshot eventSnapshot = await eventsCollectionRef
+      .where("title", isEqualTo: eventTitle)
+      .get();
+
+  // Delete the event document(s) from Firestore
+  for (var doc in eventSnapshot.docs) {
+    await doc.reference.delete();
+  }
+
+  // Step 2: Update the local state
+  setState(() {
+    // Remove the event from the selectedEvents map
+    selectedEvents.forEach((date, events) {
+      events.removeWhere((event) => event.title == eventTitle);
+    });
+  });
+
+  // Optional: If the event is related to "Test Day," handle it separately
+  if (eventTitle == "Test Day") {
+    var userFromDb = userSnapshot.docs.first;
+    Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
+    CollectionReference users = FirebaseFirestore.instance.collection('users');
+
+    if (data.containsKey("TestDay")) {
+      await users.doc(userId).update({"TestDay": FieldValue.delete()});
+    }
+  }
+
+  // Step 3: Refresh the UI
+  getTestDay(); // Refresh the test day logic if needed
+}
+
   @override
   void initState() {
     selectedEvents = {};
@@ -470,6 +511,7 @@ class CalendarStateO extends State<Calendar> {
     ),
   );
 }
+
 @override
 Widget build(BuildContext context) {
   buildCount++;
@@ -511,57 +553,61 @@ Widget build(BuildContext context) {
       centerTitle: true,
     ),
     body: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Labels section (Left side of the page)
-        Expanded(
-          flex: 1,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            decoration: BoxDecoration(
-              color: Color.fromARGB(40, 33, 33, 33),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Labels',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                SizedBox(height: 30), // More space between main label and first label
-                _buildLabelItem('Mini Mock', StudySessionManager.kMiniMockColor),
-                SizedBox(height: 30),
-                _buildLabelItem('Full-Sized Mock', StudySessionManager.kFullMockColor),
-                SizedBox(height: 30),
-                _buildLabelItem('Official MRSA Paper', StudySessionManager.kOfficialPaperColor),
-                SizedBox(height: 30),
-                _buildLabelItem('Flashcards', StudySessionManager.kFlashcardColor),
-                SizedBox(height: 30),
-                _buildLabelItem('Test Day', const Color.fromARGB(255, 255, 89, 94)),
-              ],
-            ),
-          ),
+  crossAxisAlignment: CrossAxisAlignment.start,
+  children: [
+    // Labels section (Left side of the page)
+    Expanded(
+      flex: 1,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        decoration: BoxDecoration(
+          color: Color.fromARGB(40, 33, 33, 33),
         ),
-        // Vertical Divider (the line between the calendar and the label)
-        Container(
-          width: 2,
-          color: Colors.grey[400],
-          height: double.infinity,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Labels',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            SizedBox(height: 30),
+            _buildLabelItem('Mini Mock', StudySessionManager.kMiniMockColor),
+            SizedBox(height: 30),
+            _buildLabelItem('Full-Sized Mock', StudySessionManager.kFullMockColor),
+            SizedBox(height: 30),
+            _buildLabelItem('Official MRSA Paper', StudySessionManager.kOfficialPaperColor),
+            SizedBox(height: 30),
+            _buildLabelItem('Flashcards', StudySessionManager.kFlashcardColor),
+            SizedBox(height: 30),
+            _buildLabelItem('Test Day', const Color.fromARGB(255, 255, 89, 94)),
+          ],
         ),
-        // Right side of the page -> Calendar, EventsList and Buttons
-        Expanded(
-          flex: 5,
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                  child: TableCalendar(
-                    firstDay: DateTime.utc(2020, 1, 1),
+      ),
+    ),
+    // Vertical Divider (the line between the calendar and the label)
+    Container(
+      width: 2,
+      color: Colors.grey[400],
+      height: double.infinity,
+    ),
+    // Right side of the page -> Calendar, EventsList and Buttons
+    Expanded(
+      flex: 5,
+      child: Column(
+        children: [
+          // Calendar and Events List
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                    child: TableCalendar(
+                      firstDay: DateTime.utc(2020, 1, 1),
                     lastDay: DateTime.utc(2030, 12, 31),
                     focusedDay: focusedDay,
                     calendarFormat: format,
@@ -687,199 +733,207 @@ Widget build(BuildContext context) {
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 20), // add space in between the calendar and list
-                ..._getEventsfromDay(selectedDay).map(
-                  (Event event) => Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0), // Adds spacing
-                    child: ListTile(
-                      title: Text(
-                        event.title,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w500,
+                
+                    ),
+       
+                  const SizedBox(height: 20),
+                  ..._getEventsfromDay(selectedDay).map(
+                    (Event event) => Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                      child: ListTile(
+                        title: Text(
+                          event.title,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                      ),
-                      leading: Container(
-                        width: 12,
-                        height: 12,
-                        decoration: BoxDecoration(
-                          color: event.color,
-                          shape: BoxShape.circle,
+                        leading: Container(
+                          width: 12,
+                          height: 12,
+                          decoration: BoxDecoration(
+                            color: event.color,
+                            shape: BoxShape.circle,
+                          ),
                         ),
+                        tileColor: event.color.withOpacity(0.4),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       ),
-                      tileColor: event.color.withOpacity(0.4),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     ),
                   ),
+                  Column(
+                    children: [
+                      const Text("Your exam is on:"),
+                      Text(
+                        (testDayBool)
+                            ? "Exam date has not been set"
+                            : testDayString,
+                        style: const TextStyle(fontSize: 30),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // Buttons at the bottom of the right section
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end, // Align buttons to the right
+              children: [
+                // Add New Event Button
+                ElevatedButton.icon(
+                  onPressed: () => _showAddEventDialog(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.lightBlue,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  ),
+                  icon: const Icon(Icons.add, size: 25),
+                  label: const Text(
+                    "Add New Event",
+                    style: TextStyle(fontSize: 22),
+                  ),
                 ),
-                Column(
-                  children: [
-                    const Text("Your exam is on:"),
-                    Text(
-                      (testDayBool)
-                          ? "Exam date has not been set"
-                          : testDayString,
-                      style: const TextStyle(fontSize: 30),
-                    ),
-                  ],
+                const SizedBox(width: 20),
+                // Homepage Button
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => Landing()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.lightBlue,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  ),
+                  child: const Text(
+                    "Homepage",
+                    style: TextStyle(fontSize: 22),
+                  ),
+                ),
+                const SizedBox(width: 20),
+                // Delete All Events Button
+                ElevatedButton.icon(
+                  onPressed: () {
+                    testDay = null;
+                    testDayBool = true;
+                    deleteAllEvents();
+                    setState(() {});
+
+                    // Show confirmation popup
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        backgroundColor: const Color(0xFFE6EDF2),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(0),
+                        ),
+                        title: const Text(
+                          "All Events Deleted",
+                          style: const TextStyle(
+                            color: Color.fromRGBO(21, 58, 103, 1),
+                            fontSize: 21,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        content: const Text(
+                          "Go to the homepage to schedule your study schedule.",
+                          style: const TextStyle(
+                            color: Color.fromRGBO(21, 58, 103, 1),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            style: TextButton.styleFrom(
+                              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                              minimumSize: Size(120, 45),
+                            ),
+                            child: Text(
+                              'OK',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => Landing()),
+                              );
+                            },
+                            style: TextButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              backgroundColor: Colors.blue,
+                              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                              minimumSize: Size(120, 45),
+                            ),
+                            child: Text(
+                              'Go to Homepage',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.redAccent,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  ),
+                  icon: const Icon(Icons.delete, size: 25),
+                  label: const Text(
+                    "Delete All Events",
+                    style: TextStyle(fontSize: 22),
+                  ),
                 ),
               ],
             ),
           ),
-        ),
-      ],
-    ),
-    floatingActionButton: const CustomFloatingButton(),
-    floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
-    bottomNavigationBar: Padding(
-      padding: const EdgeInsets.all(20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.end, // Evenly spaced buttons
-        children: [
-          // Add New Event Button
-          ElevatedButton.icon(
-            onPressed: () => _showAddEventDialog(context), // Call dialog function
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.lightBlue, // Soft blue
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            ),
-            icon: const Icon(Icons.add, size: 25),
-            label: const Text(
-              "Add New Event",
-              style: TextStyle(fontSize: 22),
-            ),
-          ),
-          const SizedBox(width: 20),
-          // Homepage Button
-          ElevatedButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => Landing()),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.lightBlue, // Same soft blue
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            ),
-            child: const Text(
-              "Homepage",
-              style: TextStyle(fontSize: 22),
-            ),
-          ),
-          const SizedBox(width: 20),
-          ElevatedButton.icon(
-            onPressed: () {
-              testDay = null;
-              testDayBool = true;
-              deleteAllEvents();
-              setState(() {});
-
-              // Show confirmation popup
-              showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  backgroundColor: const Color(0xFFE6EDF2),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(0),
-                  ),
-                  title: const Text(
-                    "All Events Deleted",
-                    style: const TextStyle(
-                      color: Color.fromRGBO(21, 58, 103, 1),
-                      fontSize: 21,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  content: const Text(
-                    "Go to the homepage to schedule your study schedule.",
-                    style: const TextStyle(
-                      color: Color.fromRGBO(21, 58, 103, 1),
-                      fontSize: 16,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context), // Just close dialog
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                        minimumSize: Size(120, 45), // Sets minimum width and height
-                      ),
-                      child: Text(
-                        'OK',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => Landing()),
-                        );
-                      },
-                      style: TextButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        backgroundColor: Colors.blue,
-                        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                        minimumSize: Size(120, 45), // Sets minimum width and height
-                      ),
-                      child: Text(
-                        'Go to Homepage',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.redAccent, // Soft red
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            ),
-            icon: const Icon(Icons.delete, size: 25),
-            label: const Text(
-              "Delete All Events",
-              style: TextStyle(fontSize: 22),
-            ),
-          ),
-          const SizedBox(width: 20),
         ],
       ),
     ),
+  ],
+),
+floatingActionButton: const CustomFloatingButton(), // Keep your custom floating button
+floatingActionButtonLocation: FloatingActionButtonLocation.endTop, // Position it at the top right
+    
   );
 }
 
+// VoidCallback -> Signature of callbacks that have no arguments and return no data.
   Widget _buildLabelItem(String label, Color color) {
-    return Row(
-      children: [
-        Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+  return Row(
+    children: [
+      Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle,
         ),
-        SizedBox(width: 12),
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-          ),
+      ),
+      SizedBox(width: 12),
+      Text(
+        label,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 16,
         ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
+}
 }
