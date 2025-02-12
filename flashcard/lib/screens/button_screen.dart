@@ -112,9 +112,6 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
         ? data["firstStudyDay"] // Keep existing firstStudyDay if it exists
         : DateTime.now(), // Otherwise, set it to now
       });
-
-      print('Added firstStudyDay to Document:');
-      print(_firstStudyDate);
     // update field testday to what is passed as param
     await getTestDay();
     setState(() {});
@@ -185,8 +182,6 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       await getTestDay();
       
       if (mounted && testDayBool && _examDate == null && landingService.onLanding){
-        print("Are we on the landing page: ");
-        print(landingService.onLanding);
          showDialog(context: context,
          builder: (BuildContext context){
           return _buildAlertDialog(

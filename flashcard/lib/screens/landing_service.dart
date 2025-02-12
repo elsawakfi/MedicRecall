@@ -3,7 +3,7 @@ class LandingService {
   factory LandingService() => _instance;
   LandingService._internal();
 
-  bool onLanding = false; // Default to false
+  bool onLanding = false; 
 }
 
 LandingService landingService = LandingService();

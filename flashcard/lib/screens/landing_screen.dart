@@ -637,8 +637,8 @@ class LandingState extends State<Landing> {
           .first;
      
       if (tmp == null) {
+        //whenever nav.push is called, the onLanding variable needs to be set to false to make
         landingService.onLanding = false; 
-        print("Setting to false");
         nav.push(
             MaterialPageRoute(
               builder: (context) => const SignInScreen(),
@@ -650,7 +650,6 @@ class LandingState extends State<Landing> {
     } else {
       if (screen == 'HomePage'){
        landingService.onLanding = false; 
-        print("Setting to false");
         nav.push(
             MaterialPageRoute(
               builder: (context) => const HomePage(title: 'Home'),
@@ -659,7 +658,6 @@ class LandingState extends State<Landing> {
       }
       else if (screen == 'FlashcardEditor'){
        landingService.onLanding = false; 
-        print("Setting to false");
         nav.push(
             MaterialPageRoute(
               builder: (context) => const FlashcardEditor(),
@@ -668,7 +666,6 @@ class LandingState extends State<Landing> {
       }
       else if (screen == 'Calendar'){
        landingService.onLanding = false; 
-        print("Setting to false");
         nav.push(
             MaterialPageRoute(
               builder: (context) => const Calendar(),
@@ -689,16 +686,7 @@ class LandingState extends State<Landing> {
     }
   }
   
-  
-  
 
-  @override
-  void dispose() {
-    landingService.onLanding = false; 
-    print("Setting to false");
-    super.dispose();
-  }
- 
  void _showExamDateDialog(BuildContext context) {
     showDialog(
       context: context,
