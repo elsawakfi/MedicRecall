@@ -500,7 +500,7 @@ Widget build(BuildContext context) {
                     SizedBox(height: 12),
                     _buildLabelItem('Flashcards', StudySessionManager.kFlashcardColor),
                     SizedBox(height: 12),
-                    _buildLabelItem('Event A', const Color.fromARGB(255, 255, 89, 94)),
+                    _buildLabelItem('Test Day', const Color.fromARGB(255, 255, 89, 94)),
                   ],
                 ),
               ),
