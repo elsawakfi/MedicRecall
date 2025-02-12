@@ -423,7 +423,6 @@ Widget build(BuildContext context) {
   buildCount++;
   
   return Scaffold(
-    backgroundColor: Color.fromARGB(255, 33, 33, 33),
     drawer: const DrawMain(),
     appBar: AppBar(
       elevation: 0,
@@ -507,7 +506,7 @@ Widget build(BuildContext context) {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                   decoration: BoxDecoration(
-                    color: Color.fromARGB(255, 33, 33, 33),
+                    // color: Color.fromARGB(255, 52, 93, 127),
                   ),
                   child: TableCalendar(
                     firstDay: DateTime.utc(2020, 1, 1),
@@ -607,7 +606,7 @@ Widget build(BuildContext context) {
                       headerPadding: EdgeInsets.symmetric(vertical: 16.0),
                       // Make the format button more modern
                       formatButtonDecoration: BoxDecoration(
-                        color: Color.fromARGB(255, 45, 45, 45), // Slightly lighter than background
+                        // color: Color.fromARGB(255, 45, 45, 45), // Slightly lighter than background
                         borderRadius: BorderRadius.circular(16.0),
                         border: Border.all(color: Colors.grey[600]!),
                       ),
@@ -683,112 +682,6 @@ Widget build(BuildContext context) {
                       ),
                       textColor: const Color.fromARGB(255, 243, 167, 162),
                       child: const Text("DELETE ALL"),
-                    ),
-                    ElevatedButton(
-                      onPressed: () => showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          title: const Text(
-                              "Would you like to generate a revision plan?"),
-                          actions: [
-                            TextButton(
-                              child: const Text("No"),
-                              onPressed: () => Navigator.pop(context),
-                            ),
-                            TextButton(
-                              child: const Text("Yes"),
-                              onPressed: () {
-                                Navigator.pop(context);
-                                showDialog(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    title: const Text(
-                                        "When is your next test date? (final test)"),
-                                    actions: [
-                                      TextButton(
-                                        child: const Text("Cancel"),
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                        },
-                                      ),
-                                      ElevatedButton(
-                                        child: const Text(
-                                          "Pick your test date",
-                                          style: TextStyle(color: Colors.blue),
-                                        ),
-                                        onPressed: () {
-                                          showDatePicker(
-                                            context: context,
-                                            initialDate: DateTime.now(),
-                                            firstDate: DateTime.now(),
-                                            lastDate: DateTime(2050),
-                                          ).then((date) {
-                                            if (date != null) {
-                                              setState(() {
-                                                if (testDayBool == false) {
-                                                  showDialog(
-                                                    context: context,
-                                                    builder: (BuildContext
-                                                        context) {
-                                                      return AlertDialog(
-                                                        title:
-                                                            const Text('Alert'),
-                                                        content: const Text(
-                                                            'You cannot update the Test Day because it already exists.'),
-                                                        actions: <Widget>[
-                                                          TextButton(
-                                                            onPressed: () {
-                                                              Navigator.of(
-                                                                      context)
-                                                                  .pop();
-                                                              Navigator.of(
-                                                                      context)
-                                                                  .pop();
-                                                            },
-                                                            child:
-                                                                const Text('OK'),
-                                                          ),
-                                                        ],
-                                                      );
-                                                    },
-                                                  );
-                                                } else if (testDayBool ==
-                                                    true) {
-                                                  testDayBool == true;
-                                                  testDay = date;
-                                                  updateTestDay(testDay!);
-                                                  getTestDay();
-                                                  testDayString =
-                                                      "${date.day}-${date.month}-${date.year}";
-                                                  getEventsFromDB();
-                                                  generateEventsUIChange(
-                                                      testDay!);
-                                                  Navigator.pop(context);
-                                                }
-                                              });
-                                            } else {
-                                              if (context.mounted){
-                                                Navigator.pop(context);
-                                              }
-                                            }
-                                          });
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                      ),
-                      child: const Text(
-                        "Generate Revision Plan",
-                        style: TextStyle(color: Colors.white),
-                      ),
                     ),
                   ],
                 ),
