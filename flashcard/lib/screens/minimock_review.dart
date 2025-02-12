@@ -209,7 +209,7 @@ Widget build(BuildContext context) {
                                     onPressed: () {
                                       _returnToMiniMock(context, index+13);
                                     },
-                                     icon: Visibility( visible: widget.flaggedQuestions[index+13],
+                                    icon: Visibility( visible: widget.flaggedQuestions[index+13],
                                       child: Icon(Icons.flag, color: Colors.black),),
                                     label: Text(
                                       '${index + 14}',
@@ -256,7 +256,7 @@ Widget build(BuildContext context) {
                                     onPressed: () {
                                       _returnToMiniMock(context, index+24);
                                     },
-                                     icon: Visibility( visible: widget.flaggedQuestions[index+24],
+                                    icon: Visibility( visible: widget.flaggedQuestions[index+24],
                                       child: Icon(Icons.flag, color: Colors.black),),
                                     label: Text(
                                       '${index + 25}',

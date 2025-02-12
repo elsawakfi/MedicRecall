@@ -1,5 +1,7 @@
 # Welcome to Cloud Functions for Firebase for Python!
 # Deploy with `firebase deploy`
+import firebase_admin
+import functions_framework
 from firebase_functions import https_fn, firestore_fn, scheduler_fn
 from firebase_admin import initialize_app, firestore, credentials, auth
 from datetime import datetime, timedelta
@@ -12,6 +14,7 @@ from email.message import EmailMessage
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 import pytz
+from flask import jsonify, request
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly",
@@ -19,8 +22,8 @@ SCOPES = ["https://www.googleapis.com/auth/gmail.readonly",
           "https://www.googleapis.com/auth/gmail.labels",
           "https://www.googleapis.com/auth/gmail.compose"]
 
-initialize_app()
-
+# initialize_app()
+firebase_admin.initialize_app()
 
 @https_fn.on_request()
 def sendEmail(req: https_fn.Request) -> https_fn.Response:
@@ -173,3 +176,80 @@ def gmail_send_message(service, sender, receiver, subject, body):
         sent_draft = None
 
     return sent_draft
+
+@https_fn.on_request()
+def update_exam_score(request):
+    """
+    HTTP Cloud Function to update a user's score and recalculate the global median.
+    """
+    try:
+        db = firestore.client()
+        # Get the JSON data sent with the POST request
+        request_json = request.get_json()
+
+        if not request_json:
+            return jsonify({"error": "No JSON data provided."}), 400
+
+        # Extract userId and score from the JSON data
+        user_id = request_json.get('userId')
+        new_score = request_json.get('score')
+        directory_name = request_json.get('directory')
+
+        if not user_id or not new_score:
+            return jsonify({"error": "User ID and score are required."}), 400
+
+        # Helper function to calculate the median
+        def calculate_median(scores):
+            if not scores:
+                return 0
+            scores.sort()
+            mid = len(scores) // 2
+            if len(scores) % 2 == 0:
+                return (scores[mid - 1] + scores[mid]) / 2
+            return scores[mid]
+
+        # Helper function to update the global stats document
+        def update_stats_document(scores):
+            median = calculate_median(scores)
+            stats_ref = db.collection('mini-mock-stats').document(f'{directory_name}')
+            stats_ref.set({'scores': scores, 'median': median}, merge=True)
+
+        # Fetch the user's exam score from the correct subcollection
+        exam_doc_ref = db.collection('users').document(user_id).collection('Exam answers').document(f'{directory_name}-answers')
+        exam_doc = exam_doc_ref.get()
+
+        # Get global scores and add the new score
+        stats_ref = db.collection('mini-mock-stats').document(f'{directory_name}')
+        stats_doc = stats_ref.get()
+
+        # Initialize global scores
+        global_scores = stats_doc.to_dict().get('scores', []) if stats_doc.exists else []
+
+        # If the exam document doesn't exist, create it with the new score
+        if 'score' not in exam_doc.to_dict():
+            exam_doc_ref.update({'score': new_score})
+
+            # Add the new score to global scores
+            global_scores.append(new_score)
+            update_stats_document(global_scores)
+
+            return jsonify({"message": f"First time user. Score added and median updated to {new_score}."}), 200
+
+        # If the exam document exists, update the score
+        old_score = exam_doc.to_dict().get('score')
+
+        if old_score != new_score:
+            # Update the user's score
+            exam_doc_ref.update({'score': new_score})
+
+            if old_score in global_scores:
+                global_scores.remove(old_score)
+            global_scores.append(new_score)
+
+            # Update the stats document with the new scores and median
+            update_stats_document(global_scores)
+
+        return jsonify({"message": f"Score updated to {new_score} and median recalculated."}), 200
+
+    except Exception as e:
+        return jsonify({"error": f"An internal server error occurred.{e}"}), 500

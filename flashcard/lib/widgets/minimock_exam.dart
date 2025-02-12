@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flashcard_x/screens/minimock_scoring.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/screens/minimock_feedback.dart';
@@ -155,7 +156,7 @@ class MiniMockExamState extends State<MiniMockExam> {
     updateExamResults(finalAnswerList);
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => MiniMockFeedBack(title: widget.title, questionDirectory: widget.questionDirectory, answerDirectory: widget.answerDirectory),
+        builder: (context) => MiniMockScoring(title: widget.title, questionDirectory: widget.questionDirectory, answerDirectory: widget.answerDirectory),
       ),
     );
   }
