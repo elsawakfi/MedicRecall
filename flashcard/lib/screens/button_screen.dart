@@ -179,6 +179,45 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       },
     );
   }
+    Future<void> shouldShowDialog() async{
+      await getTestDay();
+      if (mounted && testDayBool && _examDate == null){
+         showDialog(context: context,
+         builder: (BuildContext context){
+          return _buildAlertDialog(
+          title: 'Do you want to start your revision plan today?',
+          content: const SizedBox(), // Empty content for this dialog
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                 _setFirstStudyDay();
+                _showExamDateDialog(context); // Call to show exam date dialog
+              },
+              child: const Text('Yes'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('No'),
+            ),
+          ],
+        );
+      },
+    );setState(() {}); } else {}
+  
+  }
+
+   @override
+  void didChangeDependencies(){
+    super.didChangeDependencies();
+    //waits for build function to complete and then calls back to call the condition checking function 
+    WidgetsBinding.instance.addPostFrameCallback((_){
+       shouldShowDialog();
+    });
+  
+  }
 
   // Method to save firstStudyDay
   Future<void> _setFirstStudyDay() async {

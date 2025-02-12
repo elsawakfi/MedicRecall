@@ -74,35 +74,35 @@ class LandingState extends State<Landing> {
     await getFirstStudyDay();
   }
 
-  Future<void> shouldShowDialog() async{
-      await getTestDay();
-      if (mounted && testDayBool_ && _examDate == null){
-         showDialog(context: context,
-         builder: (BuildContext context){
-          return _buildAlertDialog(
-          title: 'Do you want to start your revision plan today?',
-          content: const SizedBox(), // Empty content for this dialog
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                 _setFirstStudyDay();
-                _showExamDateDialog(context); // Call to show exam date dialog
-              },
-              child: const Text('Yes'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('No'),
-            ),
-          ],
-        );
-      },
-    );setState(() {}); } else {}
+  // Future<void> shouldShowDialog() async{
+  //     await getTestDay();
+  //     if (mounted && testDayBool_ && _examDate == null){
+  //        showDialog(context: context,
+  //        builder: (BuildContext context){
+  //         return _buildAlertDialog(
+  //         title: 'Do you want to start your revision plan today?',
+  //         content: const SizedBox(), // Empty content for this dialog
+  //         actions: [
+  //           TextButton(
+  //             onPressed: () {
+  //               Navigator.of(context).pop();
+  //                _setFirstStudyDay();
+  //               _showExamDateDialog(context); // Call to show exam date dialog
+  //             },
+  //             child: const Text('Yes'),
+  //           ),
+  //           TextButton(
+  //             onPressed: () {
+  //               Navigator.of(context).pop();
+  //             },
+  //             child: const Text('No'),
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );setState(() {}); } else {}
   
-  }
+  // }
 
 
   Future<void> getUser() async {
@@ -635,15 +635,15 @@ class LandingState extends State<Landing> {
   }
 
 
-  @override
-  void didChangeDependencies(){
-    super.didChangeDependencies();
-    //waits for build function to complete and then calls back to call the condition checking function 
-    WidgetsBinding.instance.addPostFrameCallback((_){
-       shouldShowDialog();
-    });
+  // @override
+  // void didChangeDependencies(){
+  //   super.didChangeDependencies();
+  //   //waits for build function to complete and then calls back to call the condition checking function 
+  //   WidgetsBinding.instance.addPostFrameCallback((_){
+  //      shouldShowDialog();
+  //   });
   
-  }
+  // }
 
   Future<void> triggerSignIn(String screen) async{
     NavigatorState nav = Navigator.of(context);
