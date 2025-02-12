@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:collection/collection.dart';
 
+import '../widgets/drawer_widget.dart';
 import 'minimock_landing.dart';
 
 class MiniMockFeedBack extends StatefulWidget {
@@ -134,6 +135,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
     return PopScope(
       canPop: false,
       child: Scaffold(
+        drawer: const DrawMain(),
       appBar: CustomAppBar(
         title: widget.title,
       ),

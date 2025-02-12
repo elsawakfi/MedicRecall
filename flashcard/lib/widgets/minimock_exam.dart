@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flashcard_x/screens/minimock_feedback.dart';
 import '../screens/minimock_review.dart';
 import '../utils/timer.dart';
+import 'drawer_widget.dart';
 import 'minimock_help_button.dart';
 
 abstract class MiniMockExam extends StatefulWidget {
@@ -172,9 +173,10 @@ class MiniMockExamState extends State<MiniMockExam> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-        canPop: false,
+        canPop: true,
         child: Scaffold(
           key: ValueKey(widget.title),
+          drawer: const DrawMain(),
           appBar: AppBar(
               automaticallyImplyLeading: false,
               elevation: 0,
@@ -202,6 +204,14 @@ class MiniMockExamState extends State<MiniMockExam> {
                   ]
               ),
               centerTitle: true,
+              leading: Builder(
+                builder: (context) => GestureDetector(
+                  onTap: () => Scaffold.of(context).openDrawer(),
+                  child: const Icon(
+                    Icons.menu,
+                  ),
+                ),
+              ),
               actions: [
                 Container(
                   margin: const EdgeInsets.only(right: 16),
@@ -232,7 +242,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                         ),
                       )),
                 )
-              ]
+              ],
           ),
           body: questions.isEmpty
               ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
