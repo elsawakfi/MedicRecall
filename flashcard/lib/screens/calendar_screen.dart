@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flashcard_x/screens/landing_screen.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flashcard_x/widgets/drawer_widget.dart';
 import 'package:flashcard_x/widgets/event.dart';
@@ -417,6 +418,44 @@ class CalendarStateO extends State<Calendar> {
 
   //maybe make testDay string be default string, then set state to be a string returned from firebase
   // so get object from databse, then .toString or as String
+  
+  // helper function for adding new events
+  void _showAddEventDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text("Add Event"),
+      content: TextFormField(controller: _eventController),
+      actions: [
+        TextButton(
+          child: const Text("Cancel"),
+          onPressed: () => Navigator.pop(context),
+        ),
+        TextButton(
+          child: const Text("Ok"),
+          onPressed: () {
+            if (_eventController.text.isNotEmpty) {
+              if (selectedEvents[selectedDay] != null) {
+                selectedEvents[selectedDay]?.add(
+                  Event(title: _eventController.text, color: const Color.fromARGB(255, 253, 252, 220)),
+                );
+              } else {
+                selectedEvents[selectedDay] = [
+                  Event(title: _eventController.text, color: const Color.fromARGB(255, 253, 252, 220)),
+                ];
+              }
+              updateEventsToDB(user);
+              Navigator.pop(context);
+              _eventController.clear();
+              setState(() {});
+            }
+          },
+        ),
+      ],
+    ),
+  );
+}
+
 
 @override
 Widget build(BuildContext context) {
@@ -670,19 +709,6 @@ Widget build(BuildContext context) {
                           : testDayString,
                       style: const TextStyle(fontSize: 30),
                     ),
-                    MaterialButton(
-                      onPressed: () {
-                        testDay = null;
-                        testDayBool = true;
-                        deleteAllEvents();
-                        setState(() {});
-                      },
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      textColor: const Color.fromARGB(255, 243, 167, 162),
-                      child: const Text("DELETE ALL"),
-                    ),
                   ],
                 ),
               ],
@@ -695,49 +721,63 @@ Widget build(BuildContext context) {
     ),
        floatingActionButton: const CustomFloatingButton(),
         floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
-        bottomNavigationBar:  SizedBox (
-                height: 90,
-                child: Align(alignment: Alignment.bottomRight,
-                    child : Padding(
-                      padding: EdgeInsets.all(20),
-                      child: FloatingActionButton.extended(
-                      heroTag: UniqueKey().toString(),
-                      onPressed: () => showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                        title: const Text("Add Event"),
-                        content: TextFormField(controller: _eventController),
-                        actions: [
-                            TextButton(
-                              child: const Text("Cancel"),
-                              onPressed: () => Navigator.pop(context),
-                            ),
-                            TextButton(
-                              child: const Text("Ok"),
-                              onPressed: () {
-                                if (_eventController.text.isNotEmpty) {
-                                  if (selectedEvents[selectedDay] != null) {
-                                    selectedEvents[selectedDay]?.add(
-                                      Event(title: _eventController.text, color: const Color.fromARGB(255, 253, 252, 220)),
-                                    );
-                                  } else {
-                                    selectedEvents[selectedDay] = [
-                                      Event(title: _eventController.text, color: const Color.fromARGB(255, 253, 252, 220)),
-                                    ];
-                                  }
-                                  updateEventsToDB(user);
-                                  Navigator.pop(context);
-                                  _eventController.clear();
-                                  setState(() {});
-                                }
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    
-                    label: const Text("Add event", style: TextStyle(color: Colors.white)),
-                    icon: const Icon(Icons.add))))),
+        bottomNavigationBar: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween, // Evenly spaced buttons
+            children: [
+              // Add New Event Button
+              ElevatedButton.icon(
+                onPressed: () => _showAddEventDialog(context),  // Call dialog function
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.lightBlue, // Soft blue
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                ),
+                icon: const Icon(Icons.add, size: 18),
+                label: const Text("Add New Event"),
+              ),
+
+              // Homepage Button
+              ElevatedButton(
+                onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Landing()),
+                            );
+                          },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.lightBlue, // Same soft blue
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                ),
+                child: const Text("Homepage"),
+              ),
+
+              // Delete All Events Button
+              ElevatedButton.icon(
+                onPressed: () {
+                  testDay = null;
+                  testDayBool = true;
+                  deleteAllEvents();
+                  setState(() {});
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.redAccent, // Soft red
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                ),
+                icon: const Icon(Icons.delete, size: 18),
+                label: const Text("Delete All Events"),
+              ),
+            ],
+          ),
+        ),
+
   );
   
 }
