@@ -1,9 +1,7 @@
 # Welcome to Cloud Functions for Firebase for Python!
 # Deploy with `firebase deploy`
-import firebase_admin
-import functions_framework
-from firebase_functions import https_fn, firestore_fn, scheduler_fn
-from firebase_admin import initialize_app, firestore, credentials, auth
+from firebase_functions import https_fn
+from firebase_admin import firestore, initialize_app
 from datetime import datetime, timedelta
 import os.path
 from google.auth.transport.requests import Request
@@ -14,7 +12,7 @@ from email.message import EmailMessage
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 import pytz
-from flask import jsonify, request
+from flask import jsonify, Response
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly",
@@ -23,7 +21,8 @@ SCOPES = ["https://www.googleapis.com/auth/gmail.readonly",
           "https://www.googleapis.com/auth/gmail.compose"]
 
 # initialize_app()
-firebase_admin.initialize_app()
+initialize_app()
+
 
 @https_fn.on_request()
 def sendEmail(req: https_fn.Request) -> https_fn.Response:
@@ -177,26 +176,25 @@ def gmail_send_message(service, sender, receiver, subject, body):
 
     return sent_draft
 
+
 @https_fn.on_request()
-def update_exam_score(request):
+def update_exam_score(req: https_fn.Request) -> https_fn.Response:
     """
     HTTP Cloud Function to update a user's score and recalculate the global median.
     """
     try:
-        db = firestore.client()
+        db = firestore.Client()
         # Get the JSON data sent with the POST request
-        request_json = request.get_json()
-
-        if not request_json:
-            return jsonify({"error": "No JSON data provided."}), 400
+        request_json = req.get_json()
 
         # Extract userId and score from the JSON data
         user_id = request_json.get('userId')
-        new_score = request_json.get('score')
+        json_score = request_json.get('score')
+        new_score = int(json_score)
         directory_name = request_json.get('directory')
 
         if not user_id or not new_score:
-            return jsonify({"error": "User ID and score are required."}), 400
+            return https_fn.Response("User ID and score are required.", status=400)
 
         # Helper function to calculate the median
         def calculate_median(scores):
@@ -215,7 +213,8 @@ def update_exam_score(request):
             stats_ref.set({'scores': scores, 'median': median}, merge=True)
 
         # Fetch the user's exam score from the correct subcollection
-        exam_doc_ref = db.collection('users').document(user_id).collection('Exam answers').document(f'{directory_name}-answers')
+        exam_doc_ref = db.collection('users').document(user_id).collection('Exam answers').document(
+            f'{directory_name}-answers')
         exam_doc = exam_doc_ref.get()
 
         # Get global scores and add the new score
@@ -233,7 +232,7 @@ def update_exam_score(request):
             global_scores.append(new_score)
             update_stats_document(global_scores)
 
-            return jsonify({"message": f"First time user. Score added and median updated to {new_score}."}), 200
+            return https_fn.Response(f"First time user. Score added and median updated to {new_score}.", status=200)
 
         # If the exam document exists, update the score
         old_score = exam_doc.to_dict().get('score')
@@ -249,7 +248,7 @@ def update_exam_score(request):
             # Update the stats document with the new scores and median
             update_stats_document(global_scores)
 
-        return jsonify({"message": f"Score updated to {new_score} and median recalculated."}), 200
+        return https_fn.Response(f"Score updated to {new_score} and median recalculated.", status=200)
 
     except Exception as e:
-        return jsonify({"error": f"An internal server error occurred.{e}"}), 500
+        return https_fn.Response(f"An internal server error occurred.{e}", status=500)

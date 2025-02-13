@@ -39,7 +39,6 @@ class MiniMockScoringState extends State<MiniMockScoring> {
   int maxScore = 0;
   double averageScore = 0;
   final scoringIndicator = ScoreIndicator;
-  // final averageScoringIndicator = AverageScoreIndicator;
 
   @override
   void initState() {
@@ -183,27 +182,23 @@ Future<void> fetchAverageScore() async {
     QuerySnapshot u =
     await users.where("userID", isEqualTo: user.uid).get();
     var id = u.docs.last.id;
-    DocumentReference userDocRef = FirebaseFirestore.instance.collection(
-        'users').doc(id);
-    DocumentReference scoreDocRef = userDocRef.collection(
-        'Exam answers').doc(widget.answerDirectory);
 
-    // Add user's score to user score field
-    await scoreDocRef.update({
-      'score': score,
-    });
-
-    // final url = Uri.parse('http://localhost:5001/flashcard-6edc2/us-central1/update_exam_score');
-    // final response = await http.post(
-    //   url,
-    //   headers: {'Content-Type': 'application/json'},
-    //   body: jsonEncode({
-    //     "userId": id,
-    //     "score": score,
-    //     "directory": widget.questionDirectory
-    //   })
-    // );
-    // print(response);
+    try {
+      http.Response response = await http.post(
+        Uri.parse('https://us-central1-flashcard-6edc2.cloudfunctions.net/update_exam_score'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          "userId": id,
+          "score": score,
+          "directory": widget.questionDirectory
+        }),
+      );
+      print(response.body);
+    }catch(er){
+      print(er);
+    }
   }
 
   @override
