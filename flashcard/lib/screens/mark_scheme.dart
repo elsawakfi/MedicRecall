@@ -90,7 +90,7 @@ Have the first place be an explanation of the mark scheme, leave blank for rn
                 ),
               )),
     ),
-      body: SafeArea(
+    body: SafeArea(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [

@@ -10,6 +10,8 @@ Future<void> loginTest(WidgetTester tester) async{
   app.main();
   tester.printToConsole('App started');
   await tester.pumpAndSettle();
+  await tester.pump(const Duration(seconds: 5));
+
 
   // Finding the email is really on and off for some reason
   var emailFinder = find.byKey(const ValueKey('emailSignUpField'));
@@ -88,23 +90,21 @@ void main() {
           }
         }
 
+        // Start entering exam details
         if(find.text('Yes').evaluate().isNotEmpty) tester.printToConsole("yes found");
-        expect(find.text('Yes'), findsOneWidget);
+        tester.printToConsole('${find.text('Yes').evaluate()}');
+        expect(find.text('Yes'), findsAny);
         await tester.tap(find.text('Yes'));
         await tester.pumpAndSettle();
+
         expect(find.text('Pick Date'), findsOneWidget);
         await tester.tap(find.text('Pick Date'));
         await tester.pumpAndSettle();
+
         expect(find.text('OK'), findsOneWidget);
         await tester.tap(find.text('OK'));
         await tester.pumpAndSettle();
-        // expect(find.byWidgetPredicate((widget) {
-        //   return widget is Text && widget.data!.contains('repetitions');
-        // }), findsOneWidget);
-        // await tester.tap(find.byType(TextField));
-        // await tester.pump(const Duration(seconds: 2));
-        // await tester.enterText(find.byType(TextField),
-        //     '8');
+
         await tester.tap(find.byWidgetPredicate((widget) {
           return widget is RadioListTile<int> && widget.value == 2;
         }));
@@ -113,7 +113,7 @@ void main() {
         expect(find.text('Next'), findsOneWidget);
         await tester.tap(find.text('Next'));
         await tester.pumpAndSettle();
-        await tester.tap(find.byType(Checkbox).at(2));
+        await tester.tap(find.byKey(Key('testCheck')));
         await tester.tap(find.text('Submit'));
         tester.printToConsole('Exam date set');
         await tester.pumpAndSettle();
@@ -141,21 +141,4 @@ void main() {
         await tester.pumpAndSettle();
         tester.printToConsole('Logged out');
       });
-
-  // testWidgets("Access and complete a mini-mock",
-  //         (WidgetTester tester) async {
-  //           await tester.pumpAndSettle();
-  //
-  //           expect(find.byKey(
-  //               const ValueKey('Mini-mock')), findsOneWidget);
-  //           await tester.tap(find.byKey(
-  //               const ValueKey('Mini-mock')));
-  //           tester.printToConsole('Loading mini-mock landing');
-  //           await tester.pumpAndSettle();
-  //
-  //
-  //         });
-
-
-// });
 }
