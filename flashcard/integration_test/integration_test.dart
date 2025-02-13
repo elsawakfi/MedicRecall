@@ -64,25 +64,23 @@ void main() {
         tester.printToConsole('Loading popup');
         await tester.pumpAndSettle();
         bool examDateSet = find.text('Change Exam Date').evaluate().isNotEmpty;
+        await tester.pump(const Duration(seconds: 2));
         if (examDateSet) {
-
           // DELETE CURRENT DATE TO PROCEED WITH TEST
           tester.printToConsole('Exam date is already set');
           await tester.tap(find.text('Change Exam Date'));
           await tester.pumpAndSettle();
           // DELETE ALL BUTTON
+          await tester.pump(const Duration(seconds: 2));
           var deleteButton = find.byWidgetPredicate((widget) {
-            return widget is MaterialButton && widget.key == Key('deleteButton');
+            return widget is ElevatedButton && widget.key == Key('deleteButton');
           });
+
           expect(deleteButton, findsOneWidget);
           await tester.tap(deleteButton);
           tester.printToConsole('Exam date deleted');
           await tester.pumpAndSettle();
-
-          await tester.tap(find.byIcon(
-              Icons.menu));
-          await tester.pumpAndSettle();
-          await tester.tap(find.text('MedicRecall'));
+          await tester.tap(find.text('Go to Homepage'));
           await tester.pumpAndSettle();
 
           bool isPopUp = find.text('Yes').evaluate().isNotEmpty;
@@ -94,6 +92,7 @@ void main() {
           }
         }
         await tester.pumpAndSettle();
+
         // Start entering exam details
         if(find.text('Yes').evaluate().isNotEmpty) tester.printToConsole("yes found");
         tester.printToConsole('${find.text('Yes').evaluate()}');
