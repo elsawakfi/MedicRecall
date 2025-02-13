@@ -672,6 +672,7 @@ Widget build(BuildContext context) {
                       style: const TextStyle(fontSize: 30),
                     ),
                     MaterialButton(
+                      key: const Key('deleteButton'),
                       onPressed: () {
                         testDay = null;
                         testDayBool = true;
