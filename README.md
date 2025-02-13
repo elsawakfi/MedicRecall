@@ -53,7 +53,7 @@ This is the third iteration of the study support tool for medical students under
 
 <p align="right">(<a href="#title">back to top</a>)</p>
 
-## Tech Stack
+### Built With (Tech Stacks)
 
 - **Language**: [![Dart](https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev/)
 - **Front-End**: [![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white])](https://flutter.dev/)
@@ -70,7 +70,7 @@ This is the third iteration of the study support tool for medical students under
 
 <p align="right">(<a href="#title">back to top</a>)</p>
 
-## Architecture Diagram
+### Architecture Diagram
 <p align="left">
   <img width="470" alt="architecture image" src="docs/2024/Architecture/Architecture.png" style="box-shadow: 5px 5px 10px rgba(0,0,0,0.5)";>
 </p>
@@ -80,14 +80,42 @@ This is the third iteration of the study support tool for medical students under
 ## Project Requirements
 
 - **Learning Progress Tracking**
+  _MVP Release_
   - [x] Implement revision reminders
-  - [x] Develop quarterly mini-exams
+  - [x] Develop quarterly Mini Mocks
+<br>
 
-- **Mobile Application Development**
-  - [ ] Deploy the existing project as a mobile application for both Android and iOS
+- **Quarterly Mini Mocks**
+  _MVP Release_
+  - [x] Implemented mini-mock landing page with locked feature
+  - [x] Implemented mini-mock rules page
+  - [x] Implemented answer feedback page
+  - [x] Implemented MCQ and ranking questions
 
-- **UI/UX Redesign**  
-  - [ ] Redesign the user interface to align with industry standards
+  _BETA Release_
+  - [x] Improved UI for mini-mock pages
+  - [x] Implemented review page
+  - [x] Implemented scoring page which takes in individual and average score
+  
+  _Final Release_
+  - [ ] Update the mini-mock colour scheme for light mode compatibility
+  - [ ] Implement a new ranking UI system, as proposed by the client 
+  <br>
+
+- **Countdown Button/ Scheduling-Calendar Feature**  
+  _MVP Release_
+  - [x] Complete exam countdown button that comes with a pop-up that prompts for study scheduling
+  - [x] Mini mock and exam date events reflecting on calendar
+  - [x] Automated pop-up notifications to prompt users who have not yet set their exam date and study schedule
+
+  _BETA Release_
+  - [x] Improved UI for button popups and calendar
+  - [x] Complete implementing scheduling feature for four types of resources
+  - [x] Complete calendar redesign with revision reminders and event labels
+
+  _Final Release_
+  - [ ] Complete calendar redesign with single event edit/ delete feature and links to the respective page
+  - [ ] Scheduling feature which has exclusion of certain day(s) for studying (TBD)
 
 ### Additional Features
 
