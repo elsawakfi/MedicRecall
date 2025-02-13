@@ -802,6 +802,7 @@ Widget build(BuildContext context) {
                     const SizedBox(width: 20),
                     // Delete All Events Button
                     ElevatedButton.icon(
+
                       onPressed: () {
                         testDay = null;
                         testDayBool = true;
