@@ -295,27 +295,44 @@ class CalendarStateO extends State<Calendar> {
   }
 
   //upload each event in the calendar to the database
-  Future<void> updateOneEvent(DateTime date, List<String> events, User user) async {
-    QuerySnapshot u =
-    await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+  Future<void> updateOneEvent(DateTime date, List<String> events, User user, {String? eventToDelete}) async {
+    // Step 1: Get the user's document ID
+    QuerySnapshot u = await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
     String id = u.docs.last.id;
 
-    _eventsCollectionRef =
-        FirebaseFirestore.instance.collection('users/$id/events');
+    // Step 2: Reference the events collection for the user
+    _eventsCollectionRef = FirebaseFirestore.instance.collection('users/$id/events');
+
+    // Step 3: Query Firestore for events on the given date
     QuerySnapshot querySnapshot = await _eventsCollectionRef
         .where("date", isEqualTo: date)
-        .get(); // get the events matching to the date given
+        .get();
+
+    // Step 4: Handle the event upload/update
     if (querySnapshot.docs.isEmpty) {
-      // incase of no event,
-      _eventsCollectionRef
-          .add({"date": date, "events": events}); // add the event with the day
+      // Case 1: No events exist for this date → Add a new document
+      _eventsCollectionRef.add({
+        "date": date,
+        "events": events,
+      });
     } else {
-      var id = querySnapshot.docs.first.id;
+      // Case 2: Events exist for this date → Update or delete the document
+      var docId = querySnapshot.docs.first.id;
+
+      // If eventToDelete is provided, remove it from the events list
+      if (eventToDelete != null) {
+        events.remove(eventToDelete);
+      }
 
       if (events.isEmpty) {
-        _eventsCollectionRef.doc(id).delete();
-      } else if (events != querySnapshot.docs.first["events"]) {
-        _eventsCollectionRef.doc(id).update({"date": date, "events": events});
+        // Case 2a: Events list is empty → Delete the document
+        _eventsCollectionRef.doc(docId).delete();
+      } else {
+        // Case 2b: Events list has changed → Update the document
+        _eventsCollectionRef.doc(docId).update({
+          "date": date,
+          "events": events,
+        });
       }
     }
   }
@@ -367,47 +384,6 @@ class CalendarStateO extends State<Calendar> {
     selectedEvents[testDay]?.remove(Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
     getTestDay();
   }
-
-  Future<void> deleteSingleEvent(Event eventTitle) async {
-  // Step 1: Delete the event from Firestore
-  QuerySnapshot userSnapshot =
-      await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
-  String userId = userSnapshot.docs.last.id;
-  CollectionReference eventsCollectionRef =
-      FirebaseFirestore.instance.collection('users/$userId/events');
-
-  // Query the event by its title (or another unique identifier)
-  QuerySnapshot eventSnapshot = await eventsCollectionRef
-      .where("title", isEqualTo: eventTitle)
-      .get();
-
-  // Delete the event document(s) from Firestore
-  for (var doc in eventSnapshot.docs) {
-    await doc.reference.delete();
-  }
-
-  // Step 2: Update the local state
-  setState(() {
-    // Remove the event from the selectedEvents map
-    selectedEvents.forEach((date, events) {
-      events.removeWhere((event) => event.title == eventTitle);
-    });
-  });
-
-  // Optional: If the event is related to "Test Day," handle it separately
-  if (eventTitle == "Test Day") {
-    var userFromDb = userSnapshot.docs.first;
-    Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
-    CollectionReference users = FirebaseFirestore.instance.collection('users');
-
-    if (data.containsKey("TestDay")) {
-      await users.doc(userId).update({"TestDay": FieldValue.delete()});
-    }
-  }
-
-  // Step 3: Refresh the UI
-  getTestDay(); // Refresh the test day logic if needed
-}
 
   @override
   void initState() {
@@ -759,12 +735,22 @@ Widget build(BuildContext context) {
                               borderRadius: BorderRadius.circular(8),
                             ),
                             contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            trailing: IconButton(
+                            trailing: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.redAccent,
+                                shape: BoxShape.circle,
+                              ),
+                              child:  IconButton(
                               icon: Icon(Icons.delete_outlined, color: Colors.white),
                               onPressed: () async {
-                                await deleteSingleEvent(event); // Call the delete function
+                                await updateOneEvent(
+                                  selectedDay, 
+                                  selectedEvents[selectedDay]!.map((e) => e.title).toList(), // Current events as a list of strings
+                                  user,
+                                  eventToDelete: event.title); // Call the delete function
                               },
                             ),
+                            )
                           ),
                         ),
                       ),
