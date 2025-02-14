@@ -74,8 +74,6 @@ class LandingState extends State<Landing> {
     await getFirstStudyDay();
   }
 
-
-
   Future<void> getUser() async {
     NavigatorState nav = Navigator.of(context);
     if (auth.currentUser == null) {
@@ -438,7 +436,7 @@ class LandingState extends State<Landing> {
                                     SizedBox(width: 10),
                                     Expanded(
                                       child: Text(
-                                        'Mini-mock',
+                                        'Mini-Mocks',
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontSize: 34,
@@ -677,10 +675,6 @@ class LandingState extends State<Landing> {
       // );
     }
   }
-  
-
-
-
 
 
   // Helper method

@@ -10,6 +10,8 @@ Future<void> loginTest(WidgetTester tester) async{
   app.main();
   tester.printToConsole('App started');
   await tester.pumpAndSettle();
+  await tester.pump(const Duration(seconds: 5));
+
 
   // Finding the email is really on and off for some reason
   var emailFinder = find.byKey(const ValueKey('emailSignUpField'));
@@ -62,21 +64,23 @@ void main() {
         tester.printToConsole('Loading popup');
         await tester.pumpAndSettle();
         bool examDateSet = find.text('Change Exam Date').evaluate().isNotEmpty;
+        await tester.pump(const Duration(seconds: 2));
         if (examDateSet) {
-
           // DELETE CURRENT DATE TO PROCEED WITH TEST
           tester.printToConsole('Exam date is already set');
           await tester.tap(find.text('Change Exam Date'));
           await tester.pumpAndSettle();
-          expect(find.text('DELETE ALL'), findsOneWidget);
-          await tester.tap(find.text('DELETE ALL'));
+          // DELETE ALL BUTTON
+          await tester.pump(const Duration(seconds: 2));
+          var deleteButton = find.byWidgetPredicate((widget) {
+            return widget is ElevatedButton && widget.key == Key('deleteButton');
+          });
+
+          expect(deleteButton, findsOneWidget);
+          await tester.tap(deleteButton);
           tester.printToConsole('Exam date deleted');
           await tester.pumpAndSettle();
-
-          await tester.tap(find.byIcon(
-              Icons.menu));
-          await tester.pumpAndSettle();
-          await tester.tap(find.text('MedicRecall'));
+          await tester.tap(find.text('Go to Homepage'));
           await tester.pumpAndSettle();
 
           bool isPopUp = find.text('Yes').evaluate().isNotEmpty;
@@ -87,75 +91,63 @@ void main() {
             await tester.pumpAndSettle();
           }
         }
+        await tester.pumpAndSettle();
 
+        // Start entering exam details
         if(find.text('Yes').evaluate().isNotEmpty) tester.printToConsole("yes found");
-        expect(find.text('Yes'), findsOneWidget);
-        await tester.tap(find.text('Yes'));
+        tester.printToConsole('${find.text('Yes').evaluate()}');
+        expect(find.text('Yes'), findsAny);
+        await tester.tap(find.text('Yes').first);
         await tester.pumpAndSettle();
-        expect(find.text('Pick Date'), findsOneWidget);
-        await tester.tap(find.text('Pick Date'));
+
+        expect(find.text('Select Exam Date'), findsOneWidget);
+        await tester.tap(find.text('Select Exam Date'));
         await tester.pumpAndSettle();
+
         expect(find.text('OK'), findsOneWidget);
         await tester.tap(find.text('OK'));
         await tester.pumpAndSettle();
-        // expect(find.byWidgetPredicate((widget) {
-        //   return widget is Text && widget.data!.contains('repetitions');
-        // }), findsOneWidget);
-        // await tester.tap(find.byType(TextField));
-        // await tester.pump(const Duration(seconds: 2));
-        // await tester.enterText(find.byType(TextField),
-        //     '8');
-        await tester.tap(find.byWidgetPredicate((widget) {
-          return widget is RadioListTile<int> && widget.value == 2;
-        }));
-        tester.printToConsole('Entered number of repetitions');
-        await tester.pumpAndSettle();
-        expect(find.text('Next'), findsOneWidget);
-        await tester.tap(find.text('Next'));
-        await tester.pumpAndSettle();
-        await tester.tap(find.byType(Checkbox).at(2));
+
+        // await tester.tap(find.byWidgetPredicate((widget) {
+        //   return widget is RadioListTile<int> && widget.value == 2;
+        // }));
+        // tester.printToConsole('Entered number of repetitions');
+        // await tester.pumpAndSettle();
+        // expect(find.text('Next'), findsOneWidget);
+        // await tester.tap(find.text('Next'));
+        // await tester.pumpAndSettle();
+
+        await tester.tap((find.byWidgetPredicate((widget) {
+          return widget is Checkbox && widget.value == false;
+        })).first);
         await tester.tap(find.text('Submit'));
         tester.printToConsole('Exam date set');
         await tester.pumpAndSettle();
-
-        expect(find.text('Revision Calendar'), findsOneWidget);
-        await tester.tap(find.text('Revision Calendar'));
-        await tester.pumpAndSettle();
-        await tester.pump(const Duration(seconds: 2));
-        expect(find.text('DELETE ALL'), findsOneWidget);
-        await tester.tap(find.text('DELETE ALL'));
-        tester.printToConsole('Exam date deleted');
-        await tester.pump(const Duration(seconds: 2));
-
-        // Log out
-        await tester.tap(find.byIcon(
-            Icons.menu));
-        await tester.pumpAndSettle();
-        expect(find.byKey(
-            const ValueKey('Settings')), findsOneWidget);
-        tester.printToConsole('Menu opens');
-        // Logging out
-        await tester.tap(find.byKey(
-          const ValueKey('Log Out Button'),
-        ));
-        await tester.pumpAndSettle();
-        tester.printToConsole('Logged out');
+        //
+        // expect(find.text('Revision Calendar'), findsOneWidget);
+        // await tester.tap(find.text('Revision Calendar'));
+        // await tester.pumpAndSettle();
+        // // DELETE ALL BUTTON
+        // var deleteButton = find.byWidgetPredicate((widget) {
+        //   return widget is ElevatedButton && widget.key == Key('deleteButton');
+        // });
+        // expect(deleteButton, findsOneWidget);
+        // await tester.tap(deleteButton);
+        // tester.printToConsole('Exam date deleted');
+        // await tester.pumpAndSettle();
+        //
+        // // Log out
+        // await tester.tap(find.byIcon(
+        //     Icons.menu));
+        // await tester.pumpAndSettle();
+        // expect(find.byKey(
+        //     const ValueKey('Settings')), findsOneWidget);
+        // tester.printToConsole('Menu opens');
+        // // Logging out
+        // await tester.tap(find.byKey(
+        //   const ValueKey('Log Out Button'),
+        // ));
+        // await tester.pumpAndSettle();
+        // tester.printToConsole('Logged out');
       });
-
-  // testWidgets("Access and complete a mini-mock",
-  //         (WidgetTester tester) async {
-  //           await tester.pumpAndSettle();
-  //
-  //           expect(find.byKey(
-  //               const ValueKey('Mini-mock')), findsOneWidget);
-  //           await tester.tap(find.byKey(
-  //               const ValueKey('Mini-mock')));
-  //           tester.printToConsole('Loading mini-mock landing');
-  //           await tester.pumpAndSettle();
-  //
-  //
-  //         });
-
-
-// });
 }

@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:collection/collection.dart';
+import '../widgets/drawer_widget.dart';
 import 'minimock_landing.dart';
 
 class MiniMockFeedBack extends StatefulWidget {
@@ -24,8 +25,17 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
   Map<String, dynamic> userAnswers = {};
   final FirebaseAuth auth = FirebaseAuth.instance;
   late User user;
+  final ScrollController _optionScrollController = ScrollController();
+  final ScrollController _explanationScrollController = ScrollController();
 
   @override
+  void dispose() {
+    _optionScrollController.dispose();
+    _explanationScrollController.dispose();
+    super.dispose();
+  }
+
+   @override
   void initState() {
     super.initState();
     getQuestions(); // Fetch the questions on initialisation (Needed as this is not to be called in the widget build)
@@ -114,7 +124,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
         print('Error fetching answers: $error');
       }
     }
-  }
+}
 
   int questionMarks(int currentQuestion){
     if (questions[currentQuestion]['type'] == 'ranking'){
@@ -129,10 +139,10 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
 
   @override
   Widget build(BuildContext context) {
-    final listEquality = ListEquality();
     return PopScope(
       canPop: true,
       child: Scaffold(
+        drawer: const DrawMain(),
         appBar: AppBar(
           // backgroundColor: Colors.blue,
           elevation: 0,
@@ -198,12 +208,13 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
             ),
           ),
         ),
-      body: questions.isEmpty && userAnswers.isEmpty
+      body: questions.isEmpty || userAnswers.isEmpty
           ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
           : Padding( //Else load the data
 
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
@@ -243,24 +254,118 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
               style: TextStyle(fontSize: 18),
             ),
             SizedBox(height: 20),
-            //display the selected answers and the correct answers
-            if (questions[currentQuestion]['type'] == "ranking")
-              (listEquality.equals(questions[currentQuestion]['correct_answers'], userAnswers[(currentQuestion+1).toString()]))
-                  ? Text("Correct: ${userAnswers[(currentQuestion+1).toString()]}", style: TextStyle(color: Colors.green,fontSize: 18))
-                  : Text("Incorrect: ${userAnswers[(currentQuestion+1).toString()]}", style: TextStyle(color: Colors.red,fontSize: 19)),
-
-            if (questions[currentQuestion]['type'] == "multiple choice")
-              (UnorderedIterableEquality().equals(questions[currentQuestion]['correct_answers'], userAnswers[(currentQuestion+1).toString()]))
-                  ? Text("Correct: ${userAnswers[(currentQuestion+1).toString()]}", style: TextStyle(color: Colors.green,fontSize: 18))
-                  : Text("Incorrect: ${userAnswers[(currentQuestion+1).toString()]}", style: TextStyle(color: Colors.red,fontSize: 18)),
-            Text("Correct Answer: ${questions[currentQuestion]['correct_answers']}", style: TextStyle(color: Colors.white,fontSize: 18)),
-
-            SizedBox(height: 20),
+            // If the question is a ranking question, display a reorderable list of options
+            if (questions[currentQuestion]['type'] == "ranking") ...[
+              Row(
+                children: [
+                  Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text('  Given Answer:', style: TextStyle(color: Colors.white,fontSize: 18)),
+                              ...questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
+                                int optionIndex = entry.key;
+                                String option = entry.value;
+                                String optionLetter = String.fromCharCode(optionIndex + 65);
+                                return Card(
+                                  color: (questions[currentQuestion]['correct_answers'][optionIndex] == userAnswers[(currentQuestion+1).toString()][optionIndex])
+                                      ? Colors.green
+                                      : Colors.red.shade400,
+                                    child: ListTile(
+                                      title: Text('$optionLetter. $option', style: TextStyle(color: Colors.white,fontSize: 18))
+                                    )
+                                );
+                              }).toList()
+                            ]
+                        ),
+                      )
+                  ),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('  Correct Answer:', style: TextStyle(color: Colors.white,fontSize: 18)),
+                            ...questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
+                              int optionIndex = entry.key;
+                              String option = entry.value;
+                              String optionLetter = String.fromCharCode(optionIndex + 65);
+                              return Card(
+                                child: ListTile(
+                                  title: Text('$optionLetter. $option',
+                                      style: TextStyle(color: Colors.blueGrey, fontSize: 18)),
+                                )
+                              );
+                            }).toList()
+                          ]
+                      ),
+                    )
+                  ),
+              ])
+            ]
+            // If the question is a multiple choice question, display checkboxes
+            else if(questions[currentQuestion]['type'] == "multiple choice") ...[
+              //Line below takes the result of the map() and spreads its widgets into the children of Column
               Expanded(
-               //Display the explanation of the question
-                child: Text(
-                questions[currentQuestion]['explanation'],
-                style: TextStyle(fontSize: 18),
+                child: Scrollbar(
+                  controller: _optionScrollController,
+                  thumbVisibility: true,
+                  child: SingleChildScrollView(
+                    controller: _optionScrollController,
+                      child: Column(
+                          children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
+                            int optionIndex = entry.key;
+                            String option = entry.value;
+                            String optionLetter = String.fromCharCode(optionIndex + 65);
+                            return CheckboxListTile(
+                              title: Text('$optionLetter. $option', style: TextStyle(color: Colors.white, fontSize: 18)),
+                              value: false,
+                              onChanged: null,
+                              side: BorderSide( color: Colors.white),
+                              enabled: false,
+                              controlAffinity: ListTileControlAffinity.leading,
+                            );
+                          }).toList()
+                      )
+                  )
+              )),
+              SizedBox(height: 10),
+              //display the selected answers and the correct answers
+              Container(
+                padding: EdgeInsets.all(16),
+                margin: EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                color: (UnorderedIterableEquality().equals(questions[currentQuestion]['correct_answers'], userAnswers[(currentQuestion+1).toString()]))
+                        ? Colors.green
+                        : Colors.red.shade400, // Dark background for contrast
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.white), // White border
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Given Answer: ${userAnswers[(currentQuestion+1).toString()]}", style: TextStyle(color: Colors.white,fontSize: 18)),
+                    Text("Correct Answer: ${questions[currentQuestion]['correct_answers']}", style: TextStyle(color: Colors.white,fontSize: 18))
+                  ]
+                )
+              ),
+            ],
+            SizedBox(height: 10),
+            Expanded(
+              child: Scrollbar(
+                controller: _explanationScrollController,
+                thumbVisibility: true,
+                child: SingleChildScrollView(
+                  controller: _explanationScrollController,
+                 //Display the explanation of the question
+                  child: Text(
+                    questions[currentQuestion]['explanation'],
+                    style: TextStyle(fontSize: 18),
+                  )
+                )
               )
             ),
             //compare the answers keys and the user's answers and provided
