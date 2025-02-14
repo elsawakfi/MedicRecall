@@ -2,42 +2,27 @@ name: deploy
 on:
   push:
     branches: [main]
-
 defaults:
   run:
     working-directory: flashcard
-
-permissions:
-  contents: write
-  pages: write
-  id-token: write
-
 jobs:
-  build:
+  build_and_deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.3.10'
+          flutter-version: '3.7.12'
           channel: 'stable'
-      - run: flutter config --enable-web
-      - run: flutter pub get
       - run: flutter analyze
+      - run: flutter pub get
       - run: flutter test
-      - run: flutter build web --release --base-href="/flashcard/"
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
+      - run: flutter config --enable-web
+      - run: flutter build web --release
+      - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          path: flashcard/build/web
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v2
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_FLASHCARD_6EDC2 }}'
+          channelId: live
+          projectId: flashcard-6edc2
+          entryPoint: flashcard
