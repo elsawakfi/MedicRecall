@@ -5,6 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'calendar_screen.dart';
 import 'study_session_manager.dart';
+import 'landing_service.dart';
+
 
 /*import 'package:flashcard_x/widgets/drawer_widget.dart';
 import 'package:flashcard_x/widgets/event.dart';
@@ -115,14 +117,12 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
 
     _userCollectionRef.doc(id).update({
       "TestDay": _examDate,
-      "firstStudyDay": data.containsKey("firstStudyDay") &&
-              data["firstStudyDay"] != null
-          ? data["firstStudyDay"] // Keep existing firstStudyDay if it exists
-          : DateTime.now(), // Otherwise, set it to now
-    });
 
-    print('Added firstStudyDay to Document:');
-    print(_firstStudyDate);
+      "firstStudyDay": data.containsKey("firstStudyDay") && data["firstStudyDay"] != null
+        ? data["firstStudyDay"] // Keep existing firstStudyDay if it exists
+        : DateTime.now(), // Otherwise, set it to now
+      });
+
     // update field testday to what is passed as param
     await getTestDay();
     setState(() {});
@@ -209,6 +209,46 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       },
     );
   }
+    Future<void> shouldShowDialog() async{
+      await getTestDay();
+      
+      if (mounted && testDayBool && _examDate == null && landingService.onLanding){
+         showDialog(context: context,
+         builder: (BuildContext context){
+          return _buildAlertDialog(
+          title: 'Do you want to start your revision plan today?',
+          content: const SizedBox(), // Empty content for this dialog
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                 _setFirstStudyDay();
+                _showExamDateDialog(context); // Call to show exam date dialog
+              },
+              child: const Text('Yes'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('No'),
+            ),
+          ],
+        );
+      },
+    );setState(() {}); } else {}
+  
+  }
+
+   @override
+  void didChangeDependencies(){
+    super.didChangeDependencies();
+    //waits for build function to complete and then calls back to call the condition checking function 
+    WidgetsBinding.instance.addPostFrameCallback((_){
+       shouldShowDialog();
+    });
+  
+  }
 
   // Method to save firstStudyDay
   Future<void> _setFirstStudyDay() async {
@@ -222,7 +262,6 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
           DateTime.now(), // Save the current date as first study day
     });
 
-    print('WE BEEN ADDING IT THO \n');
 
     // Optionally, retrieve the first study day
     await getFirstStudyDay();
