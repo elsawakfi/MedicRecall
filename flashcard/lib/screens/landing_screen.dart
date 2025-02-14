@@ -12,6 +12,7 @@ import 'package:flashcard_x/screens/minimock_landing.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'feedback_screen.dart';
+import 'landing_service.dart';
 import 'mark_scheme.dart';
 import 'package:flashcard_x/screens/settings_screen.dart' as setting;
 // import 'package:flashcard_x/screens/exam_guide_screen.dart';
@@ -42,6 +43,7 @@ class LandingState extends State<Landing> {
   DateTime? hasDate;
   DateTime? _examDate;
   DateTime? _firstStudyDate;
+  bool onLanding = true;
   int buildCount = 0;
   final CollectionReference _userCollectionRef =
       FirebaseFirestore.instance.collection('users');
@@ -55,9 +57,9 @@ class LandingState extends State<Landing> {
     super.initState();
     getUser();
     getFirstStudyDay();
+    landingService.onLanding = true;
     setState(() {});
   }
-
 
   Future<void> _setFirstStudyDay() async {
     QuerySnapshot u = await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
@@ -68,42 +70,9 @@ class LandingState extends State<Landing> {
       "firstStudyDay": DateTime.now(), // Save the current date as first study day
     });
 
-    print('WE BEEN ADDING IT THO \n');
-
     // Optionally, retrieve the first study day
     await getFirstStudyDay();
   }
-
-  Future<void> shouldShowDialog() async{
-      await getTestDay();
-      if (mounted && testDayBool_ && _examDate == null){
-         showDialog(context: context,
-         builder: (BuildContext context){
-          return _buildAlertDialog(
-          title: 'Do you want to start your revision plan today?',
-          content: const SizedBox(), // Empty content for this dialog
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                 _setFirstStudyDay();
-                _showExamDateDialog(context); // Call to show exam date dialog
-              },
-              child: const Text('Yes'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('No'),
-            ),
-          ],
-        );
-      },
-    );setState(() {}); } else {}
-  
-  }
-
 
   Future<void> getUser() async {
     NavigatorState nav = Navigator.of(context);
@@ -186,6 +155,7 @@ class LandingState extends State<Landing> {
 
   @override
   Widget build(BuildContext context) {
+    
     buildCount ++;
     return Scaffold(
       key: const ValueKey('Welcome bar'),
@@ -321,6 +291,7 @@ class LandingState extends State<Landing> {
                                   ),
                                 ),
                                 onPressed: () {
+                                  landingService.onLanding = false;
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
@@ -445,12 +416,16 @@ class LandingState extends State<Landing> {
                                     borderRadius: BorderRadius.all(Radius.circular(100)),
                                   ),
                                 ),
-                                onPressed: () => Navigator.push(
+                                onPressed: () {
+                                  landingService.onLanding = false;
+                                Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => const MiniMockLanding(),
                                   ),
-                                ),
+                                );
+                                },
+                                
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: const [
@@ -461,7 +436,7 @@ class LandingState extends State<Landing> {
                                     SizedBox(width: 10),
                                     Expanded(
                                       child: Text(
-                                        'Mini-mock',
+                                        'Mini-Mocks',
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontSize: 34,
@@ -472,7 +447,8 @@ class LandingState extends State<Landing> {
                                     ),
                                   ],
                                 ),
-                              ),
+                              ), 
+                                
                             ),
                           ),
                         
@@ -490,12 +466,14 @@ class LandingState extends State<Landing> {
                                     borderRadius: BorderRadius.all(Radius.circular(100)),
                                   ),
                                 ),
-                                onPressed: () => Navigator.push(
+                                onPressed: (){
+                                  landingService.onLanding = false;
+                                  Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => const FeedbackScreen(),
                                   ),
-                                ),
+                                );},
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
@@ -541,12 +519,14 @@ class LandingState extends State<Landing> {
                                     borderRadius: BorderRadius.all(Radius.circular(100)),
                                   ),
                                 ),
-                                onPressed: () => Navigator.push(
+                                onPressed: (){
+                                  landingService.onLanding = false;
+                                  Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => const setting.Settings(),
                                   ),
-                                ),
+                                );},
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: const [
@@ -586,12 +566,14 @@ class LandingState extends State<Landing> {
                                     borderRadius: BorderRadius.all(Radius.circular(100)),
                                   ),
                                 ),
-                                onPressed: () => Navigator.push(
+                                onPressed: () {
+                                  landingService.onLanding = false;
+                                  Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => const FAQScreen(),
                                   ),
-                                ),
+                                );},
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
@@ -635,15 +617,7 @@ class LandingState extends State<Landing> {
   }
 
 
-  @override
-  void didChangeDependencies(){
-    super.didChangeDependencies();
-    //waits for build function to complete and then calls back to call the condition checking function 
-    WidgetsBinding.instance.addPostFrameCallback((_){
-       shouldShowDialog();
-    });
-  
-  }
+ 
 
   Future<void> triggerSignIn(String screen) async{
     NavigatorState nav = Navigator.of(context);
@@ -653,6 +627,8 @@ class LandingState extends State<Landing> {
           .first;
      
       if (tmp == null) {
+        //whenever nav.push is called, the onLanding variable needs to be set to false to make
+        landingService.onLanding = false; 
         nav.push(
             MaterialPageRoute(
               builder: (context) => const SignInScreen(),
@@ -663,6 +639,7 @@ class LandingState extends State<Landing> {
       }
     } else {
       if (screen == 'HomePage'){
+       landingService.onLanding = false; 
         nav.push(
             MaterialPageRoute(
               builder: (context) => const HomePage(title: 'Home'),
@@ -670,6 +647,7 @@ class LandingState extends State<Landing> {
         );
       }
       else if (screen == 'FlashcardEditor'){
+       landingService.onLanding = false; 
         nav.push(
             MaterialPageRoute(
               builder: (context) => const FlashcardEditor(),
@@ -677,6 +655,7 @@ class LandingState extends State<Landing> {
         );
       }
       else if (screen == 'Calendar'){
+       landingService.onLanding = false; 
         nav.push(
             MaterialPageRoute(
               builder: (context) => const Calendar(),
@@ -696,179 +675,7 @@ class LandingState extends State<Landing> {
       // );
     }
   }
- 
- void _showExamDateDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return _buildAlertDialog(
-          title: 'What is your exam date?',
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
 
-            //if statement to check if firebase already has exam date in database
-            children: [
-              ElevatedButton(
-                onPressed: () async {
-                  final DateTime? picked = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime.now(),
-                    lastDate: DateTime.now().add(const Duration(days: 365)),
-                  );
-                  if (picked != null) {
-                    setState(() {
-                      _examDate = picked;
-                      updateTestDay(picked); // Update parent state
-                      testDayBool_ = false;
-                    });
-                    if (context.mounted) {
-                      Navigator.of(context).pop();
-                      _showRepetitionDialog(context);
-                    }
-                  }
-        
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromRGBO(21, 58, 103, 1),
-                ),
-                child: const Text('Pick Date'),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                hasDate != null
-                    ? 'Selected Date: ${DateFormat('MMM d, yyyy').format(_examDate!)}'
-                    : 'No Date Selected',
-                style: TextStyle(
-                  color: _examDate != null
-                      ? Colors.black
-                      : const Color.fromRGBO(21, 58, 103, 1),
-                ),
-              ),
-            ],
-          ),
-          actions: [],
-        );
-      },
-    );
-  }
-
- // Show dialog to ask for number of repetitions
-  void _showRepetitionDialog(BuildContext context) {
-    final List<int> repetitionOptions = [2, 3, 4, 5, 6];
-    int? selectedRepetition;
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return AlertDialog(
-              backgroundColor: const Color(0xFFE6EDF2),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(0),
-              ),
-              title: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'How many repetitions of the official past paper would you like to schedule?',
-                    style: const TextStyle(
-                      color: Color.fromRGBO(21, 58, 103, 1),
-                      fontSize: 21,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 8), // Add spacing between lines
-                  Text(
-                    'We recommend at least 3 repetitions.',
-                    style: const TextStyle(
-                      color: Color.fromRGBO(21, 58, 103, 1),
-                      fontSize: 16, // Slightly smaller font size
-                      fontWeight: FontWeight.w400, // Regular font weight
-                    ),
-                  ),
-                ],
-              ),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ...repetitionOptions.map((int value) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 5.0),
-                        child: RadioListTile<int>(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15.0),
-                          ),
-                          tileColor: const Color.fromRGBO(21, 58, 103, 1),
-                          title: Text(
-                            '$value',
-                            style: const TextStyle(
-                              color: Colors.white,
-                            ),
-                          ),
-                          value: value,
-                          groupValue: selectedRepetition,
-                          onChanged: (int? newValue) {
-                            setState(() {
-                              selectedRepetition = newValue;
-                            });
-                          },
-                        ),
-                      );
-                    }),
-                  ],
-                ),
-              ),
-              actions: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        _showExamDateDialog(context);
-                      },
-                      child: const Text('Previous'),
-                    ),
-                    TextButton(
-                      onPressed: () async {
-                        if (selectedRepetition != null) {
-                          // Save selectedRepetition to the database
-                          // code taken from below resources option dialog
-                          QuerySnapshot u = await _userCollectionRef
-                              .where("userID", isEqualTo: user?.uid)
-                              .get();
-
-                          var id = u.docs.last.id;
-                          // updates the selectedRepetition field in the user's document
-                          await _userCollectionRef.doc(id).update({
-                          'selectedRepetition': selectedRepetition,
-                          });
-
-                          Navigator.of(context).pop();
-                          _showOptionsDialog(
-                              context); // Proceed to the next dialog
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Please enter number of repetitions'),
-                            ),
-                          );
-                        }
-                      },
-                      child: const Text('Next'),
-                    ),
-                  ],
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
 
   // Helper method
   Widget _buildAlertDialog({
@@ -894,153 +701,7 @@ class LandingState extends State<Landing> {
     );
   }
 
-void _showOptionsDialog(BuildContext context) {
-    final checkbox1 = ValueNotifier<bool>(false);
-    final checkbox2 = ValueNotifier<bool>(false);
-    final checkbox3 = ValueNotifier<bool>(false);
-    final checkbox4 = ValueNotifier<bool>(false);
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return _buildAlertDialog(
-          title: 'What resources do you want to use?',
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                children: [
-                  ValueListenableBuilder(
-                    valueListenable: checkbox1,
-                    builder: (context, value, child) {
-                      return Checkbox(
-                        value: value,
-                        onChanged: (value) {
-                          checkbox1.value = value!;
-                        },
-                      );
-                    },
-                  ),
-                  Text(
-                    'Official paper',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  ValueListenableBuilder(
-                    valueListenable: checkbox2,
-                    builder: (context, value, child) {
-                      return Checkbox(
-                        value: value,
-                        onChanged: (value) {
-                          checkbox2.value = value!;
-                        },
-                      );
-                    },
-                  ),
-                  Text(
-                    'Full-sized mock exam',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  ValueListenableBuilder(
-                    valueListenable: checkbox3,
-                    builder: (context, value, child) {
-                      return Checkbox(
-                        value: value,
-                        onChanged: (value) {
-                          checkbox3.value = value!;
-                        },
-                      );
-                    },
-                  ),
-                  Text(
-                    'Mini-mocks',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  ValueListenableBuilder(
-                    valueListenable: checkbox4,
-                    builder: (context, value, child) {
-                      return Checkbox(
-                        value: value,
-                        onChanged: (value) {
-                          checkbox4.value = value!;
-                        },
-                      );
-                    },
-                  ),
-                  Text(
-                    'Flashcards',
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        _showRepetitionDialog(context);
-                      },
-                      child: const Text('Previous'),
-                    ),
-            TextButton(
-              onPressed: () async {
-                if (checkbox1.value ||
-                    checkbox2.value ||
-                    checkbox3.value ||
-                    checkbox4.value) {
-                  List<String> selectedResources = [];
-                  if (checkbox1.value) selectedResources.add('Official paper');
-                  if (checkbox2.value) selectedResources.add('Full-sized mock exam');
-                  if (checkbox3.value) selectedResources.add('Mini-mocks');
-                  if (checkbox4.value) selectedResources.add('Flashcards');
-
-                  QuerySnapshot u =
-                  await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
-
-                  // Update the Firestore document with the selected resources
-                  var id = u.docs.last.id;
-                  _userCollectionRef.doc(id).update({
-                    'selectedResources': selectedResources,
-                  });
-                  print("Are these my resources?");
-                  print(selectedResources);
-                  print("\n");
-
-                  // Start the study session with the selected resources
-                  StudySessionManager().startStudySession(selectedResources);
-
-                  if(context.mounted){
-                    Navigator.of(context).pop();
-                  }
-                  // Add your action here after options are submitted
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Please select at least one resource'),
-                    ),
-                  );
-                }
-              },
-              child: const Text('Submit'),
-            ),
-          ],
-        );
-      },
-    );
-    
-  }
 
    Future<void> updateTestDay(DateTime date) async {
     CollectionReference users = FirebaseFirestore.instance.collection('users');
@@ -1058,8 +719,7 @@ void _showOptionsDialog(BuildContext context) {
         ? data["firstStudyDay"] // Keep existing firstStudyDay if it exists
         : DateTime.now(), // Otherwise, set it to now
       });
-      print('Added firstStudyDay to Document:');
-      print(_firstStudyDate);// update field testday to what is passed as param
+      // update field testday to what is passed as param
     await getTestDay();
     setState(() {});
   
