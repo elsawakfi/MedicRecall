@@ -1,6 +1,6 @@
 # Medic Recall 2 - Pull Request
 
-*Well done for completing another coding task! Please read the instructions and replace all italicized text with your own writting. You may remove any sections that do not apply to your PR. Place an 'x' inside the check boxes to have it ticked.*
+*Well done for completing another coding task! Please read the instructions and replace all italicized text with your own writing. You may remove any sections that do not apply to your PR. Place an 'x' inside the check boxes to have it ticked.*
 
 ## Issue ticket number and link
 *Once your pull request has been made paste the issue ticket number here.*
@@ -11,7 +11,7 @@
 
 ## My PR relates to:
 - [ ] Adding a new feature 
-- [ ] Contined work on a larger feature
+- [ ] Continued work on a larger feature
 - [ ] Cleaning up code
 - [ ] Fixing a small bug 
 - [ ] Repairing the functionality of a feature 
@@ -22,12 +22,12 @@
 
 ## Checklist before requesting review 
 - [ ] The project still compiles after my changes
-- [ ] The project succesfully runs locally after the changes I've made
+- [ ] The project successfully runs locally after the changes I've made
 - [ ] I have added helpful comments to my changes
 - [ ] I've used appropriate variable names
 - [ ] I have adhered to the same style of code as the rest of the project
 - [ ] I have informed my team members that I have completed this task
-- [ ] I have requested atleast two team members to review this PR
+- [ ] I have requested at least two team members to review this PR
 
 ## Additional Notes
 *Please add anything else you have to say here - such as ideas on how to make your specific changes, or the project in general, better.*

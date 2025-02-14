@@ -1,24 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flashcard_x/widgets/drawer_widget.dart';
 
-class PageLayout extends StatelessWidget {
-  final String titleText;  // Variable for the title text
-  final Widget body;       // Body of the screen that can change on different screens
+class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final String title;  // Variable for the title text
 
-  const PageLayout({
+  const CustomAppBar({
     super.key,
-    required this.titleText,
-    required this.body,
+    required this.title,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      drawer: const DrawMain(),
-      appBar: AppBar(
+    return AppBar(
         elevation: 0,
         title: Align(
-          alignment: const Alignment(-1.0, 0),
+          alignment: const Alignment(-0.05, 0),
           child: Stack(
             children: [
               Positioned(
@@ -32,22 +27,21 @@ class PageLayout extends StatelessWidget {
               Container(
                 margin: const EdgeInsets.only(left: 32),
                 padding: const EdgeInsets.all(8.0),
-                child: Text(titleText,  // Use the variable for the title text
-                textAlign: TextAlign.left
-                )
+                child: Text(title)
               ),
             ],
           ),
         ),
-        centerTitle: false,
+        centerTitle: true,
         leading: Builder(
           builder: (context) => GestureDetector(
             onTap: () => Scaffold.of(context).openDrawer(),
             child: const Icon(Icons.menu),
           ),
         ),
-      ),
-      body: body,  // Pass the body of the screen here
     );
   }
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
