@@ -186,7 +186,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               style: TextStyle(fontSize: 16),
             ),
           ),
-            TextButton(
+          TextButton(
+            key: const Key('yesButton'),
             onPressed: () {
               Navigator.of(context).pop();
               _setFirstStudyDay(); // Ensure this function is defined

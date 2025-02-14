@@ -96,8 +96,8 @@ void main() {
         // Start entering exam details
         if(find.text('Yes').evaluate().isNotEmpty) tester.printToConsole("yes found");
         tester.printToConsole('${find.text('Yes').evaluate()}');
-        expect(find.text('Yes'), findsAny);
-        await tester.tap(find.text('Yes').first);
+        expect(find.byKey(Key('yesButton')), findsAny);
+        await tester.tap(find.byKey(Key('yesButton')).first);
         await tester.pumpAndSettle();
 
         expect(find.text('Select Exam Date'), findsOneWidget);
