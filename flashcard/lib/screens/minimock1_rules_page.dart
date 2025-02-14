@@ -222,8 +222,10 @@ class MiniMock1RulesState extends State<MiniMock1Rules> {
                         borderRadius: BorderRadius.circular(5),
                       ),
                       backgroundColor: Colors.green
-                    ),
-                
+                    ), child: Text('Begin Exam', style: TextStyle(color:Colors.white, fontSize: 20)),
+                  )
+                )
+           )
         ],
       ),
     ),
