@@ -61,7 +61,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
         title,
         style: const TextStyle(
           color: Color.fromRGBO(21, 58, 103, 1),
-          fontSize: 19,
+          fontSize: 16,
           fontWeight: FontWeight.w500,
         ),
       ),
