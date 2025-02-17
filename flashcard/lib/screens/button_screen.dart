@@ -61,11 +61,12 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
         title,
         style: const TextStyle(
           color: Color.fromRGBO(21, 58, 103, 1),
-          fontSize: 21,
+          fontSize: 19,
           fontWeight: FontWeight.w500,
         ),
       ),
       content: SizedBox(
+        height: 150,
         width: 300,
         child: content,
       ),
@@ -169,7 +170,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       builder: (BuildContext context) {
         return _buildAlertDialog(
           title: 'Do you want to start your revision plan today?',
-          content: const SizedBox(), // Empty content for this dialog
+          content: const SizedBox(),// Empty content for this dialog
           actions: [
             TextButton(
             onPressed: () {
@@ -178,8 +179,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
             style: TextButton.styleFrom(
               foregroundColor: const Color.fromRGBO(243, 90, 90, 1),
               // backgroundColor: const Color.fromRGBO(243, 90, 90, 1),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              minimumSize: const Size(120, 45), // Sets minimum width and height
+              //padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              //minimumSize: const Size(120, 45), // Sets minimum width and height
             ),
             child: const Text(
               'No',
@@ -357,7 +358,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const SizedBox(height: 8), // Add spacing between lines
+                  const SizedBox(height: 3), // Add spacing between lines
                   Text.rich(
                     TextSpan(
                       children: [
@@ -383,16 +384,18 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                   ),
                 ],
               ),
-              content: SingleChildScrollView(
+              content: SizedBox(
+                width: 80,
+                height: 250,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     ...repetitionOptions.map((int value) {
                       return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 5.0),
+                        padding: const EdgeInsets.symmetric(vertical: 2.0),
                         child: RadioListTile<int>(
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15.0),
+                            borderRadius: BorderRadius.circular(5.0),
                           ),
                           tileColor: const Color.fromRGBO(21, 58, 103, 1),
                           title: Text(
@@ -425,8 +428,9 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     style: TextButton.styleFrom(
                       foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
                       // backgroundColor: const Color.fromRGBO(243, 90, 90, 1),
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      minimumSize: const Size(120, 45), // Sets minimum width and height
+                      //padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+                      minimumSize: const Size(30, 30), // Sets minimum width and height
+                      maximumSize: const Size (120,45),
                     ),
                     child: const Text(
                       'Previous',
@@ -461,7 +465,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                       style: TextButton.styleFrom(
                         foregroundColor: Colors.white,
                         backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        //padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
                         minimumSize: const Size(120, 45), // Sets minimum width and height
                       ),
                       child: const Text(
