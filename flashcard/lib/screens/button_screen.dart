@@ -277,7 +277,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
         return _buildAlertDialog(
           title: 'When is your exam date?',
           content: Column(
-            mainAxisSize: MainAxisSize.min,
+            //mainAxisSize: MainAxisSize.min,
             // If statement to check if firebase already has exam date in database
             children: [
               ElevatedButton(
@@ -305,15 +305,15 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.white, // Text color
                   backgroundColor: const Color.fromRGBO(51, 178, 73, 1), // Same color as 'Yes' button
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  minimumSize: const Size(120, 45),
+                 // padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  minimumSize: const Size(150, 45),
                 ),
                 child: const Text(
                   'Select Exam Date',
                   style: TextStyle(fontSize: 16),
                   ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(),
               Text(
                 _examDate != null
                     ? 'Selected Date: ${DateFormat('dd MMM, yyyy').format(_examDate!)}' // UK Format
@@ -386,7 +386,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               ),
               content: SizedBox(
                 width: 80,
-                height: 250,
+                height: 260,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
