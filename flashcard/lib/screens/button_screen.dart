@@ -589,83 +589,92 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
 
   // Helper method to create checkbox rows
   Widget _buildCheckbox(ValueNotifier<bool> notifier, String text, String description) {
-    return Row(
-      children: [
-        ValueListenableBuilder<bool>(
-          valueListenable: notifier,
-          builder: (context, value, child) {
-            return Checkbox(
-              value: value,
-              onChanged: (bool? newValue) {
-                notifier.value = newValue ?? false;
-              },
-              activeColor: const Color.fromRGBO(51, 178, 73, 1),
-            );
-          },
-        ),
-        Expanded(
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  text,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Theme.of(context).textTheme.titleMedium?.color ?? Colors.black,
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.all(12.0),
+      decoration: BoxDecoration(
+        color: const Color.fromRGBO(21, 58, 103, 0.1),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Row(
+        children: [
+          ValueListenableBuilder<bool>(
+            valueListenable: notifier,
+            builder: (context, value, child) {
+              return Checkbox(
+                value: value,
+                onChanged: (bool? newValue) {
+                  notifier.value = newValue ?? false;
+                },
+                activeColor: const Color.fromRGBO(51, 178, 73, 1),
+              );
+            },
+          ),
+          Expanded(
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    text,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Color.fromRGBO(21, 58, 103, 1),
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
-              ),
-              IconButton(
-                icon: Icon(
-                  Icons.info_outline,
-                  size: 20,
-                  color: const Color.fromRGBO(73, 148, 236, 1),
+                IconButton(
+                  icon: const Icon(
+                    Icons.info_outline,
+                    size: 20,
+                    color: Color.fromRGBO(73, 148, 236, 1),
+                  ),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          backgroundColor: const Color(0xFFE6EDF2),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(0),
+                          ),
+                          title: Text(
+                            text,
+                            style: const TextStyle(
+                              color: Color.fromRGBO(21, 58, 103, 1),
+                              fontSize: 21,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          content: Text(
+                            description,
+                            style: const TextStyle(
+                              color: Color.fromRGBO(21, 58, 103, 1),
+                              fontSize: 16,
+                            ),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              style: TextButton.styleFrom(
+                                foregroundColor: const Color.fromRGBO(51, 178, 73, 1),
+                              ),
+                              child: const Text(
+                                'Close',
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
                 ),
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        backgroundColor: const Color(0xFFE6EDF2),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(0),
-                        ),
-                        title: Text(
-                          text,
-                          style: const TextStyle(
-                            color: Color.fromRGBO(21, 58, 103, 1),
-                            fontSize: 21,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        content: Text(
-                          description,
-                          style: const TextStyle(
-                            color: Color.fromRGBO(21, 58, 103, 1),
-                            fontSize: 16,
-                          ),
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            style: TextButton.styleFrom(
-                              foregroundColor: const Color.fromRGBO(51, 178, 73, 1),
-                            ),
-                            child: const Text(
-                              'Close',
-                              style: TextStyle(fontSize: 16),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
