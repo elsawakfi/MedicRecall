@@ -493,10 +493,26 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildCheckbox(checkbox1, 'Official MRSA Exam Paper'),
-              _buildCheckbox(checkbox2, 'Full-sized Mock Exam'),
-              _buildCheckbox(checkbox3, 'Mini-Mocks'),
-              _buildCheckbox(checkbox4, 'Flashcards'),
+              _buildCheckbox(
+                checkbox1, 
+                'Official MRSA Exam Paper',
+                'Practice with authentic MRSA examination papers to familiarize yourself with the actual exam format and difficulty level. These papers are created by the official examining body and represent the most accurate practice material available.'
+              ),
+              _buildCheckbox(
+                checkbox2, 
+                'Full-sized Mock Exam',
+                'Complete mock exams that simulate the full length and structure of the MRSA exam. These comprehensive practice tests help you build stamina and time management skills while getting familiar with the exam format.'
+              ),
+              _buildCheckbox(
+                checkbox3, 
+                'Mini-Mocks',
+                'Shorter practice tests focused on specific topics or skills. Perfect for quick practice sessions when you have limited time or want to focus on particular areas of improvement.'
+              ),
+              _buildCheckbox(
+                checkbox4, 
+                'Flashcards',
+                'Interactive flashcards organized by topic to help you quickly review and memorize key concepts. Great for rapid revision and reinforcing your knowledge of important topics.'
+              ),
             ],
           ),
           actions: [
@@ -572,27 +588,65 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
   }
 
   // Helper method to create checkbox rows
-  Widget _buildCheckbox(ValueNotifier<bool> notifier, String text) {
+  Widget _buildCheckbox(ValueNotifier<bool> notifier, String text, String description) {
     return Row(
       children: [
-        ValueListenableBuilder(
+        ValueListenableBuilder<bool>(
           valueListenable: notifier,
           builder: (context, value, child) {
             return Checkbox(
               value: value,
-              onChanged: (newValue) {
-                notifier.value = newValue!;
+              onChanged: (bool? newValue) {
+                notifier.value = newValue ?? false;
               },
             );
           },
         ),
-        GestureDetector(
-          onTap: () {
-            notifier.value = !notifier.value;
-          },
-          child: Text(
-            text,
-            style: TextStyle(color: Colors.black),
+        Expanded(
+          child: Row(
+            children: [
+              Text(text),
+              IconButton(
+                icon: const Icon(Icons.info_outline, size: 20),
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        backgroundColor: const Color(0xFFE6EDF2),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(0),
+                        ),
+                        title: Text(
+                          text,
+                          style: const TextStyle(
+                            color: Color.fromRGBO(21, 58, 103, 1),
+                            fontSize: 21,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        content: Text(
+                          description,
+                          style: const TextStyle(
+                            color: Color.fromRGBO(21, 58, 103, 1),
+                            fontSize: 16,
+                          ),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            style: TextButton.styleFrom(
+                              foregroundColor: const Color.fromRGBO(51, 178, 73, 1),
+                            ),
+                            child: const Text('Close'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+              ),
+            ],
           ),
         ),
       ],
