@@ -598,25 +598,38 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       ),
       child: Row(
         children: [
-          Theme(
-            data: ThemeData(
-              unselectedWidgetColor: Colors.white,
-            ),
-            child: ValueListenableBuilder<bool>(
-              valueListenable: notifier,
-              builder: (context, value, child) {
-                return Checkbox(
-                  value: value,
-                  onChanged: (bool? newValue) {
-                    notifier.value = newValue ?? false;
-                  },
-                  activeColor: const Color.fromRGBO(51, 178, 73, 1),
-                );
-              },
+          Container(
+            margin: const EdgeInsets.only(right: 16.0),
+            child: Theme(
+              data: ThemeData(
+                unselectedWidgetColor: Colors.white,
+                checkboxTheme: CheckboxThemeData(
+                  side: const BorderSide(color: Colors.black, width: 2),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4.0),
+                  ),
+                ),
+              ),
+              child: ValueListenableBuilder<bool>(
+                valueListenable: notifier,
+                builder: (context, value, child) {
+                  return Transform.scale(
+                    scale: 1.2,
+                    child: Checkbox(
+                      value: value,
+                      onChanged: (bool? newValue) {
+                        notifier.value = newValue ?? false;
+                      },
+                      activeColor: const Color.fromRGBO(51, 178, 73, 1),
+                    ),
+                  );
+                },
+              ),
             ),
           ),
           Expanded(
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: Text(
