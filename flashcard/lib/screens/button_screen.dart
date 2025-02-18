@@ -3,10 +3,10 @@ import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
-import 'calendar_screen.dart';
-import 'study_session_manager.dart';
-import 'landing_service.dart';
-
+import 'package:flashcard_x/screens/calendar_screen.dart';
+import 'package:flashcard_x/screens/study_session_manager.dart';
+import 'package:flashcard_x/screens/landing_service.dart';
+import 'package:hovering/hovering.dart';
 
 /*import 'package:flashcard_x/widgets/drawer_widget.dart';
 import 'package:flashcard_x/widgets/event.dart';
@@ -37,6 +37,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
   bool testDayBool = true;
   late String testDayString = "Test day not set";
 
+  final Map<String, bool> _isHovered = {};
+
   @override
   void initState() {
     super.initState();
@@ -44,6 +46,10 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     getTestDay();
     getFirstStudyDay();
     setState(() {});
+    _isHovered['checkbox1'] = false;
+    _isHovered['checkbox2'] = false;
+    _isHovered['checkbox3'] = false;
+    _isHovered['checkbox4'] = false;
   }
 
   // Helper method
@@ -587,8 +593,92 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     );
   }
 
-  // Helper method to create checkbox rows
+  Widget _buildInfoIcon(String id, String description) {
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return MouseRegion(
+          onEnter: (_) => setState(() => _isHovered[id] = true),
+          onExit: (_) => setState(() => _isHovered[id] = false),
+          child: TweenAnimationBuilder(
+            duration: const Duration(milliseconds: 300),
+            tween: Tween<double>(
+              begin: 0,
+              end: _isHovered[id] ?? false ? 1.0 : 0.0,
+            ),
+            builder: (context, double value, child) {
+              return Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Outer glow
+                  if (value > 0)
+                    Transform.scale(
+                      scale: 1.0 + (value * 0.8),
+                      child: Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: Colors.transparent,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.white.withOpacity(0.3 * value),
+                              blurRadius: 12,
+                              spreadRadius: 0,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  // Inner circle
+                  if (value > 0)
+                    Transform.scale(
+                      scale: 1.0 + (value * 0.4),
+                      child: Container(
+                        width: 28,
+                        height: 28,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.1 * value),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                  // Tooltip and icon
+                  Tooltip(
+                    message: description,
+                    padding: const EdgeInsets.all(16),
+                    margin: const EdgeInsets.symmetric(horizontal: 24),
+                    decoration: BoxDecoration(
+                      color: const Color.fromRGBO(21, 58, 103, 1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.white, width: 1),
+                    ),
+                    textStyle: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                    ),
+                    child: Transform.scale(
+                      scale: 1.0 + (value * 0.2),
+                      child: Transform.rotate(
+                        angle: value * 0.2,
+                        child: const Icon(
+                          Icons.info_outline,
+                          size: 20,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildCheckbox(ValueNotifier<bool> notifier, String text, String description) {
+    String id = text.toLowerCase().replaceAll(' ', '_');
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       padding: const EdgeInsets.all(12.0),
@@ -641,27 +731,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     ),
                   ),
                 ),
-                Tooltip(
-                  message: description,
-                  padding: const EdgeInsets.all(16),
-                  margin: const EdgeInsets.symmetric(horizontal: 24),
-                  decoration: BoxDecoration(
-                    color: const Color.fromRGBO(21, 58, 103, 1),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.white, width: 1),
-                  ),
-                  textStyle: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                  ),
-                  waitDuration: const Duration(milliseconds: 500),
-                  showDuration: const Duration(seconds: 4),
-                  child: const Icon(
-                    Icons.info_outline,
-                    size: 20,
-                    color: Colors.white,
-                  ),
-                ),
+                _buildInfoIcon(id, description),
               ],
             ),
           ),
