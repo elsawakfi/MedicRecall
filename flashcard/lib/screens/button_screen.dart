@@ -593,22 +593,27 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       padding: const EdgeInsets.all(12.0),
       decoration: BoxDecoration(
-        color: const Color.fromRGBO(21, 58, 103, 0.1),
-        borderRadius: BorderRadius.circular(8.0),
+        color: const Color.fromRGBO(21, 58, 103, 1),
+        borderRadius: BorderRadius.circular(25.0),
       ),
       child: Row(
         children: [
-          ValueListenableBuilder<bool>(
-            valueListenable: notifier,
-            builder: (context, value, child) {
-              return Checkbox(
-                value: value,
-                onChanged: (bool? newValue) {
-                  notifier.value = newValue ?? false;
-                },
-                activeColor: const Color.fromRGBO(51, 178, 73, 1),
-              );
-            },
+          Theme(
+            data: ThemeData(
+              unselectedWidgetColor: Colors.white,
+            ),
+            child: ValueListenableBuilder<bool>(
+              valueListenable: notifier,
+              builder: (context, value, child) {
+                return Checkbox(
+                  value: value,
+                  onChanged: (bool? newValue) {
+                    notifier.value = newValue ?? false;
+                  },
+                  activeColor: const Color.fromRGBO(51, 178, 73, 1),
+                );
+              },
+            ),
           ),
           Expanded(
             child: Row(
@@ -618,7 +623,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     text,
                     style: const TextStyle(
                       fontSize: 16,
-                      color: Color.fromRGBO(21, 58, 103, 1),
+                      color: Colors.white,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -627,21 +632,21 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                   icon: const Icon(
                     Icons.info_outline,
                     size: 20,
-                    color: Color.fromRGBO(73, 148, 236, 1),
+                    color: Colors.white,
                   ),
                   onPressed: () {
                     showDialog(
                       context: context,
                       builder: (BuildContext context) {
                         return AlertDialog(
-                          backgroundColor: const Color(0xFFE6EDF2),
+                          backgroundColor: const Color.fromRGBO(21, 58, 103, 1),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(0),
+                            borderRadius: BorderRadius.circular(25.0),
                           ),
                           title: Text(
                             text,
                             style: const TextStyle(
-                              color: Color.fromRGBO(21, 58, 103, 1),
+                              color: Colors.white,
                               fontSize: 21,
                               fontWeight: FontWeight.w500,
                             ),
@@ -649,7 +654,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                           content: Text(
                             description,
                             style: const TextStyle(
-                              color: Color.fromRGBO(21, 58, 103, 1),
+                              color: Colors.white,
                               fontSize: 16,
                             ),
                           ),
@@ -657,7 +662,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                             TextButton(
                               onPressed: () => Navigator.of(context).pop(),
                               style: TextButton.styleFrom(
-                                foregroundColor: const Color.fromRGBO(51, 178, 73, 1),
+                                foregroundColor: Colors.white,
                               ),
                               child: const Text(
                                 'Close',
