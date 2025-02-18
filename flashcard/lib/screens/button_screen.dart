@@ -7,6 +7,7 @@ import 'package:flashcard_x/screens/calendar_screen.dart';
 import 'package:flashcard_x/screens/study_session_manager.dart';
 import 'package:flashcard_x/screens/landing_service.dart';
 import 'package:hovering/hovering.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 /*import 'package:flashcard_x/widgets/drawer_widget.dart';
 import 'package:flashcard_x/widgets/event.dart';
@@ -606,10 +607,15 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               end: _isHovered[id] ?? false ? 1.0 : 0.0,
             ),
             builder: (context, double value, child) {
+              // our primary and secondary colors
+              final primaryColor = const Color(0xFF2E7D32);   // Deep green
+              final middleColor = const Color(0xFF4CAF50);    // Medium green
+              final secondaryColor = const Color(0xFF81C784); // Light green
+
               return Stack(
                 alignment: Alignment.center,
                 children: [
-                  // Outer glow
+                  // Outer wave
                   if (value > 0)
                     Transform.scale(
                       scale: 1.0 + (value * 0.8),
@@ -619,30 +625,66 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                         decoration: BoxDecoration(
                           color: Colors.transparent,
                           shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.white.withOpacity(0.3 * value),
-                              blurRadius: 12,
-                              spreadRadius: 0,
-                            ),
-                          ],
+                          border: Border.all(
+                            color: secondaryColor.withOpacity(0.45 * value),
+                            width: 2.5,
+                          ),
+                          gradient: RadialGradient(
+                            colors: [
+                              secondaryColor.withOpacity(0.2 * value),
+                              Colors.transparent,
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  // Inner circle
+                  // Middle wave
                   if (value > 0)
                     Transform.scale(
-                      scale: 1.0 + (value * 0.4),
+                      scale: 1.0 + (value * 0.5),
                       child: Container(
                         width: 28,
                         height: 28,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.1 * value),
+                          color: Colors.transparent,
                           shape: BoxShape.circle,
+                          border: Border.all(
+                            color: middleColor.withOpacity(0.55 * value),
+                            width: 2.5,
+                          ),
+                          gradient: RadialGradient(
+                            colors: [
+                              middleColor.withOpacity(0.25 * value),
+                              Colors.transparent,
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  // Tooltip and icon
+                  // Inner wave
+                  if (value > 0)
+                    Transform.scale(
+                      scale: 1.0 + (value * 0.2),
+                      child: Container(
+                        width: 24,
+                        height: 24,
+                        decoration: BoxDecoration(
+                          color: Colors.transparent,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: primaryColor.withOpacity(0.65 * value),
+                            width: 2.5,
+                          ),
+                          gradient: RadialGradient(
+                            colors: [
+                              primaryColor.withOpacity(0.3 * value),
+                              Colors.transparent,
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  // Base icon
                   Tooltip(
                     message: description,
                     padding: const EdgeInsets.all(16),
@@ -656,13 +698,35 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                       color: Colors.white,
                       fontSize: 14,
                     ),
-                    child: Transform.scale(
-                      scale: 1.0 + (value * 0.2),
-                      child: Transform.rotate(
-                        angle: value * 0.2,
-                        child: const Icon(
-                          Icons.info_outline,
-                          size: 20,
+                    child: Container(
+                      width: 22,
+                      height: 22,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            primaryColor,    // Deep green
+                            secondaryColor,  // Light green
+                          ],
+                        ),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.8),
+                          width: 1.5,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: primaryColor.withOpacity(0.4),
+                            blurRadius: 8,
+                            spreadRadius: 0,
+                          ),
+                        ],
+                      ),
+                      child: const Center(
+                        child: FaIcon(
+                          FontAwesomeIcons.info,
+                          size: 12,
                           color: Colors.white,
                         ),
                       ),
