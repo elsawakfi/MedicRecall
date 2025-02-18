@@ -495,23 +495,23 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
             children: [
               _buildCheckbox(
                 checkbox1, 
-                'Official MRSA Exam Paper',
-                'Practice with authentic MRSA examination papers to familiarize yourself with the actual exam format and difficulty level. These papers are created by the official examining body and represent the most accurate practice material available.'
+                'Official Practice Paper',
+                'The official past paper is available on the Health Education England website. It contains 22 Professional Dilemma questions with realistic scenarios and reliable rationales created by the same people who write the questions for the MSRA, making it a very valuable resource.'
               ),
               _buildCheckbox(
                 checkbox2, 
                 'Full-sized Mock Exam',
-                'Complete mock exams that simulate the full length and structure of the MRSA exam. These comprehensive practice tests help you build stamina and time management skills while getting familiar with the exam format.'
+                'Our full-sized mock exam has been designed to mimic the exact conditions you will have on exam day, helping you optimise timings while exposing you to different professional scenarios. It includes 50 questions that have been carefully created to align with official rationales and GMC guidelines.'
               ),
               _buildCheckbox(
                 checkbox3, 
-                'Mini-Mocks',
-                'Shorter practice tests focused on specific topics or skills. Perfect for quick practice sessions when you have limited time or want to focus on particular areas of improvement.'
+                'Mini-mocks',
+                'We have two mini-mocks available on the platform, which each contain 25 reliable questions. They have been created to help track your progress, fine-tune exam timings and increase your exposure to different professional scenarios.'
               ),
               _buildCheckbox(
                 checkbox4, 
-                'Flashcards',
-                'Interactive flashcards organized by topic to help you quickly review and memorize key concepts. Great for rapid revision and reinforcing your knowledge of important topics.'
+                'Flashcard Decks',
+                'Our pre-made flashcard decks contain high-yield principles derived from GMC guidelines and official rationales. This resource uses our unique, evidence-based algorithms to help you harness the power of spaced repetition and active recall!'
               ),
             ],
           ),
