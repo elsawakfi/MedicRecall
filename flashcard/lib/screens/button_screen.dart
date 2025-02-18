@@ -599,15 +599,28 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               onChanged: (bool? newValue) {
                 notifier.value = newValue ?? false;
               },
+              activeColor: const Color.fromRGBO(51, 178, 73, 1),
             );
           },
         ),
         Expanded(
           child: Row(
             children: [
-              Text(text),
+              Expanded(
+                child: Text(
+                  text,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Theme.of(context).textTheme.titleMedium?.color ?? Colors.black,
+                  ),
+                ),
+              ),
               IconButton(
-                icon: const Icon(Icons.info_outline, size: 20),
+                icon: Icon(
+                  Icons.info_outline,
+                  size: 20,
+                  color: const Color.fromRGBO(73, 148, 236, 1),
+                ),
                 onPressed: () {
                   showDialog(
                     context: context,
@@ -638,7 +651,10 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                             style: TextButton.styleFrom(
                               foregroundColor: const Color.fromRGBO(51, 178, 73, 1),
                             ),
-                            child: const Text('Close'),
+                            child: const Text(
+                              'Close',
+                              style: TextStyle(fontSize: 16),
+                            ),
                           ),
                         ],
                       );
