@@ -641,52 +641,26 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     ),
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(
+                Tooltip(
+                  message: description,
+                  padding: const EdgeInsets.all(16),
+                  margin: const EdgeInsets.symmetric(horizontal: 24),
+                  decoration: BoxDecoration(
+                    color: const Color.fromRGBO(21, 58, 103, 1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.white, width: 1),
+                  ),
+                  textStyle: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                  ),
+                  waitDuration: const Duration(milliseconds: 500),
+                  showDuration: const Duration(seconds: 4),
+                  child: const Icon(
                     Icons.info_outline,
                     size: 20,
                     color: Colors.white,
                   ),
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          backgroundColor: const Color.fromRGBO(21, 58, 103, 1),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25.0),
-                          ),
-                          title: Text(
-                            text,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 21,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          content: Text(
-                            description,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                            ),
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(),
-                              style: TextButton.styleFrom(
-                                foregroundColor: Colors.white,
-                              ),
-                              child: const Text(
-                                'Close',
-                                style: TextStyle(fontSize: 16),
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  },
                 ),
               ],
             ),
