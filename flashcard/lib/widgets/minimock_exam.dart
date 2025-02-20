@@ -272,7 +272,9 @@ class MiniMockExamState extends State<MiniMockExam> {
                           ],
                         ),
                         child:TextButton.icon(
-                            label: Text('Flag for review',
+                            label: Text(flaggedQuestions[currentQuestion]
+                            ? 'Flagged'
+                            : 'Flag for review',
                               style: const TextStyle(
                                 color: Color.fromARGB(255, 98, 86, 139),
                                 fontSize: 15,
