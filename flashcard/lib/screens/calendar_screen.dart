@@ -925,23 +925,87 @@ Widget build(BuildContext context) {
     );
   }
 
-  void _editEventDate(BuildContext context, Event event) async {
+  void _editEventDate(BuildContext context, Event event) {
+    final TextEditingController _editEventController = TextEditingController(text: event.title);
+    DateTime? _selectedDate = selectedDay;
+
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Coming Soon"),
-          content: Text(
-              "THIS IS THE EDIT BUTTON \n TODO: IMPLEMENT THIS LATER \n ${event.title}"),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text("OK"),
+      builder: (context) => AlertDialog(
+        title: const Text("Edit Event"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextFormField(
+              controller: _editEventController,
+              decoration: InputDecoration(labelText: "Event Title"),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () async {
+                final DateTime? pickedDate = await showDatePicker(
+                  context: context,
+                  initialDate: _selectedDate ?? DateTime.now(),
+                  firstDate: DateTime(2000),
+                  lastDate: DateTime(2100),
+                );
+                if (pickedDate != null && pickedDate != _selectedDate) {
+                  setState(() {
+                    _selectedDate = pickedDate;
+                  });
+                }
+              },
+              child: Text("Change Date: ${_selectedDate?.toLocal().toString().split(' ')[0]}"),
             ),
           ],
-        );
-      },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(
+              foregroundColor: const Color.fromRGBO(243, 90, 90, 1),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              minimumSize: const Size(120, 45),
+            ),
+            child: const Text("Cancel", style: TextStyle(fontSize: 16)),
+          ),
+          TextButton(
+            onPressed: () {
+              if (_editEventController.text.isNotEmpty && _selectedDate != null) {
+                _updateEvent(event, _editEventController.text, _selectedDate!);
+                Navigator.pop(context);
+              }
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white,
+              backgroundColor: Colors.blue,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              minimumSize: const Size(120, 45),
+            ),
+            child: const Text("Save", style: TextStyle(fontSize: 16)),
+          ),
+        ],
+      ),
     );
+  }
+
+  void _updateEvent(Event oldEvent, String newTitle, DateTime newDate) {
+    // Remove the old event from the selectedEvents map
+    selectedEvents[selectedDay]?.removeWhere((event) => event.title == oldEvent.title);
+
+    // Add the updated event to the new date
+    if (selectedEvents[newDate] != null) {
+      selectedEvents[newDate]?.add(Event(title: newTitle, color: oldEvent.color));
+    } else {
+      selectedEvents[newDate] = [Event(title: newTitle, color: oldEvent.color)];
+    }
+
+    // Update the event in Firestore
+    updateOneEvent(newDate, selectedEvents[newDate]!.map((e) => e.title).toList(), user);
+
+    setState(() {
+      selectedDay = newDate;
+    });
   }
 
   void _navigateToEventDetails(Event event) {
