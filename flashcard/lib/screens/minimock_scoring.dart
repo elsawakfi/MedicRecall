@@ -162,12 +162,7 @@ Future<void> fetchAverageScore() async {
             if (userAnswer.contains(correctAnswers[i])){
               userScore += 4; // Each correct answer is worth 4 marks.
             }}
-          // if (questions[questionIndex]['type'] == "multiple choice" &&
-          //     UnorderedIterableEquality().equals(questions[questionIndex]['correct_answers'], userAnswer)){
-          //   answerScores[questionIndex] = 1;
-          // } else{
-          //   answerScores[questionIndex] = 0;
-          // }
+          answerScores[questionIndex] = userScore;
           break;
         default:  
       }
