@@ -167,11 +167,11 @@ class MiniMockExamState extends State<MiniMockExam> {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) => MiniMockScoring(title: widget.title, questionDirectory: widget.questionDirectory, answerDirectory: widget.answerDirectory),
-      ),
-    );
+      ),);
   }
 
   @override
+
   Widget build(BuildContext context) {
     return PopScope(
         canPop: true,
@@ -437,7 +437,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                           int? newIndex = await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => MiniMockReview(miniMockWidget: this, rankingLength: rankingAnswers.length, multiChoiceLength: multiChoiceAnswers.length, flaggedQuestions: flaggedQuestions,),
+                              builder: (context) => MiniMockReview(miniMockWidget: this, rankingLength: rankingAnswers.length, multiChoiceLength: multiChoiceAnswers.length, flaggedQuestions: flaggedQuestions, displayTime: _displayTime, remainingSeconds: remainingSeconds,),
                             ),
                           );
                           // statement bellow allows for faster page update

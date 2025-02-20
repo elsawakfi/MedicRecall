@@ -9,13 +9,17 @@ class MiniMockReview extends StatefulWidget {
   final int multiChoiceLength;
   final dynamic miniMockWidget;
   final List<dynamic> flaggedQuestions; 
+  final String displayTime;
+  final int remainingSeconds;
 
   const MiniMockReview({
     super.key,
     required this.miniMockWidget,
     required this.rankingLength,
     required this.multiChoiceLength,
-    required this.flaggedQuestions,
+    required this.flaggedQuestions, 
+    required this.remainingSeconds, 
+    required this.displayTime,
   });
 
   @override
@@ -81,7 +85,35 @@ Widget build(BuildContext context) {
           child: const Icon(Icons.menu),
         ),
       ),
+      actions: [
+        Container(margin: const EdgeInsets.only(right: 16),
+        width: 210,
+        height: 50,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          color: const Color.fromARGB(255, 216, 136, 238),
+          boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                spreadRadius: 0,
+                blurRadius: 5,
+                offset: const Offset(0, 3), // changes position of shadow
+        ),
+      ],
     ),
+    child: Center(
+              child: Text(
+                'Time Remaining: ${widget.displayTime}',
+                style: TextStyle(
+                  color: Color.fromARGB(255, 255, 255, 255),
+                  fontSize: 18.5,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     body: Padding(
       padding: const EdgeInsets.all(16.0),
       child: Center(
