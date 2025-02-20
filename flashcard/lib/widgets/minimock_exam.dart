@@ -216,13 +216,13 @@ class MiniMockExamState extends State<MiniMockExam> {
               actions: [
                 Container(
                   margin: const EdgeInsets.only(right: 16),
-                  width: 160,
-                  height: 40.31,
+                  width: 180,
+                  height: 50,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
-                    color:  (remainingSeconds <= 600)
-                    ? Colors.red.shade400
-                    : const Color.fromARGB(255, 235, 230, 239),
+                    color:  //(remainingSeconds <= 600)
+                    // ? Colors.red.shade400
+                    const Color.fromARGB(255, 167, 32, 204),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.2),
@@ -237,9 +237,9 @@ class MiniMockExamState extends State<MiniMockExam> {
                         style: TextStyle(
                           color: (remainingSeconds <= 600)
                               ? Colors.white
-                              : Color.fromARGB(255, 98, 86, 139),
+                              : Color.fromARGB(255, 255, 255, 255),
                           fontSize: 15,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.bold,//FontWeight.w500,
                         ),
                       )),
                 )
