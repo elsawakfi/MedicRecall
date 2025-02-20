@@ -216,13 +216,13 @@ class MiniMockExamState extends State<MiniMockExam> {
               actions: [
                 Container(
                   margin: const EdgeInsets.only(right: 16),
-                  width: 180,
+                  width: 210,
                   height: 50,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
                     color:  //(remainingSeconds <= 600)
                     // ? Colors.red.shade400
-                    const Color.fromARGB(255, 167, 32, 204),
+                    const Color.fromARGB(255, 216, 136, 238),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.2),
@@ -235,10 +235,10 @@ class MiniMockExamState extends State<MiniMockExam> {
                   child: Center(
                       child: Text('Time Remaining: $_displayTime',
                         style: TextStyle(
-                          color: (remainingSeconds <= 600)
-                              ? Colors.white
-                              : Color.fromARGB(255, 255, 255, 255),
-                          fontSize: 15,
+                          color: //(remainingSeconds <= 600)
+                              // ? Colors.white
+                            Color.fromARGB(255, 255, 255, 255),
+                          fontSize: 18.5,
                           fontWeight: FontWeight.bold,//FontWeight.w500,
                         ),
                       )),
