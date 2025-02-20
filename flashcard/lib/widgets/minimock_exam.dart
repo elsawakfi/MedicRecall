@@ -408,6 +408,33 @@ class MiniMockExamState extends State<MiniMockExam> {
                         alignment: Alignment.centerLeft,
                         child: MiniMockHelpButton(),
                     ),
+                    const SizedBox(width: 16),
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 10),
+                        width: 160,
+                        height: 45,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          color: const Color.fromARGB(255, 235, 230, 239),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              spreadRadius: 0,
+                              blurRadius: 6,
+                              offset: const Offset(0, 6), // changes position of shadow
+                            ),
+                          ],
+                        ),
+                    child: TextButton.icon(onPressed: (){
+                     Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MiniMockReview(miniMockWidget: this, rankingLength: rankingAnswers.length, multiChoiceLength: multiChoiceAnswers.length, flaggedQuestions: flaggedQuestions,),
+                            ),
+                          );
+                    } , label: Text('Review Page', style: TextStyle(color:  Color.fromARGB(255, 98, 86, 139), fontSize: 16)),
+                    icon: Icon(Icons.search, color:  Color.fromARGB(255, 98, 86, 139),),
+                    )),
                     const Spacer(),
                     if (currentQuestion > 0) //Prevents button being shown if no previous questions available
                       ElevatedButton.icon(
