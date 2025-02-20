@@ -735,22 +735,30 @@ Widget build(BuildContext context) {
                               borderRadius: BorderRadius.circular(8),
                             ),
                             contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            trailing: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.redAccent,
-                                shape: BoxShape.circle,
-                              ),
-                              child:  IconButton(
-                              icon: Icon(Icons.delete_outlined, color: Colors.white),
-                              onPressed: () async {
-                                await updateOneEvent(
-                                  selectedDay, 
-                                  selectedEvents[selectedDay]!.map((e) => e.title).toList(), // Current events as a list of strings
-                                  user,
-                                  eventToDelete: event.title); // Call the delete function
-                              },
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: Icon(Icons.edit, color: Colors.white),
+                                  onPressed: () => _editEventDate(context, event),
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.link, color: Colors.white),
+                                  onPressed: () => _navigateToEventDetails(event),
+                                ),
+                                IconButton(
+                                  icon: Icon(Icons.delete_outlined, color: Colors.redAccent),
+                                  onPressed: () async {
+                                    await updateOneEvent(
+                                      selectedDay,
+                                      selectedEvents[selectedDay]!.map((e) => e.title).toList(),
+                                      user,
+                                      eventToDelete: event.title,
+                                    );
+                                  },
+                                ),
+                              ],
                             ),
-                            )
                           ),
                         ),
                       ),
@@ -895,25 +903,63 @@ Widget build(BuildContext context) {
 
 // VoidCallback -> Signature of callbacks that have no arguments and return no data.
   Widget _buildLabelItem(String label, Color color) {
-  return Row(
-    children: [
-      Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: color,
-          shape: BoxShape.circle,
+    return Row(
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+          ),
         ),
-      ),
-      SizedBox(width: 12),
-      Text(
-        label,
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 16,
+        SizedBox(width: 12),
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+          ),
         ),
-      ),
-    ],
-  );
-}
+      ],
+    );
+  }
+
+  void _editEventDate(BuildContext context, Event event) async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Coming Soon"),
+          content: Text(
+              "THIS IS THE EDIT BUTTON \n TODO: IMPLEMENT THIS LATER \n ${event.title}"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _navigateToEventDetails(Event event) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Coming Soon"),
+          content: Text(
+              "THIS IS THE LINK BUTTON \n TODO: IMPLEMENT THIS LATER \n ${event.title}"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("OK"),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
