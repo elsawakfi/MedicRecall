@@ -105,27 +105,29 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
   }
 
   void _reorderAnswers(){
-    for(int i = 0; i < questions.length; i++ ){
-      if(questions[i]['type'] != "ranking"){
-        break;
+    if(questions.isNotEmpty){
+      for(int i = 0; i < questions.length; i++ ){
+        if(questions[i]['type'] != "ranking"){
+          break;
+        }
+        List<dynamic> options = questions[i]['options'];
+        List<dynamic> examLetters = questions[i]['correct_answers'];
+        List<dynamic> userLetters = userAnswers[(i + 1).toString()];
+
+        // Assign each option a letter
+        // Generates a list where each option is paired with their associated letter
+        // These letters are then compared with the index of the correct arrangement allowing them to be reordered correctly
+        List<MapEntry<String, String>> tempExamOptions = List.generate(
+            options.length, (index) => MapEntry(String.fromCharCode(65 + index), options[index]));
+        tempExamOptions.sort((a, b) => examLetters.indexOf(a.key).compareTo(examLetters.indexOf(b.key)));
+        examOptions.add(tempExamOptions);
+
+        List<MapEntry<String, String>> tempUserOptions = List.generate(
+            options.length, (index) => MapEntry(String.fromCharCode(65 + index), options[index]));
+        tempUserOptions.sort((a, b) => userLetters.indexOf(a.key).compareTo(userLetters.indexOf(b.key)));
+        userOptions.add(tempUserOptions);
       }
-      List<dynamic> options = questions[i]['options'];
-      List<dynamic> examLetters = questions[i]['correct_answers'];
-      List<dynamic> userLetters = userAnswers[(i + 1).toString()];
-
-      // Assign each option a letter
-      List<MapEntry<String, String>> tempExamOptions = List.generate(
-          options.length, (index) => MapEntry(examLetters[index], options[index]));
-      tempExamOptions.sort((a, b) => a.key.compareTo(b.key));
-      examOptions.add(tempExamOptions);
-
-      List<MapEntry<String, String>> tempUserOptions = List.generate(
-          options.length, (index) => MapEntry(userLetters[index], options[index]));
-      tempUserOptions.sort((a, b) => a.key.compareTo(b.key));
-      userOptions.add(tempUserOptions);
     }
-    print(examOptions);
-    print(userOptions);
   }
 
   Future<Map<String, dynamic>> queryUserAnswerData() async {
@@ -298,19 +300,20 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text('  Given Answer:', style: TextStyle(color: Colors.white,fontSize: 18)),
-                              ...questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
+                              ...userOptions[currentQuestion].asMap().entries.map<Widget>((entry) {
                                 int optionIndex = entry.key;
-                                String option = entry.value;
-                                String optionLetter = userAnswers[(currentQuestion+1).toString()][optionIndex];
+                                MapEntry<String, String> currentEntry = entry.value;
+                                String optionLetter = currentEntry.key;
+                                String optionText = currentEntry.value;
                                 return Card(
                                   color: (questions[currentQuestion]['correct_answers'][optionIndex] == optionLetter)
                                       ? Colors.green
                                       : Colors.red.shade400,
                                     child: ListTile(
-                                      title: Text('$optionLetter. $option', style: TextStyle(color: Colors.white,fontSize: 18))
+                                      title: Text('$optionLetter. $optionText', style: TextStyle(color: Colors.white,fontSize: 18))
                                     )
                                 );
-                              }).toList()
+                              })
                             ]
                         ),
                       )
@@ -323,17 +326,17 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text('  Correct Answer:', style: TextStyle(color: Colors.white,fontSize: 18)),
-                            ...questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
-                              int optionIndex = entry.key;
-                              String option = entry.value;
-                              String optionLetter = String.fromCharCode(optionIndex + 65);
+                            ...examOptions[currentQuestion].asMap().entries.map<Widget>((entry) {
+                              MapEntry<String, String> currentEntry = entry.value;
+                              String optionLetter = currentEntry.key;
+                              String optionText = currentEntry.value;
                               return Card(
                                 child: ListTile(
-                                  title: Text('$optionLetter. $option',
+                                  title: Text('$optionLetter. $optionText',
                                       style: TextStyle(color: Colors.blueGrey, fontSize: 18)),
                                 )
                               );
-                            }).toList()
+                            })
                           ]
                       ),
                     )
