@@ -23,6 +23,9 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
   int currentQuestion = 0;
   List<Map<String, dynamic>> questions = [];
   Map<String, dynamic> userAnswers = {};
+  List<List<MapEntry<String, String>>> examOptions = []; // Correct option associated to each letter of the correct answers
+  List<List<MapEntry<String, String>>> userOptions = []; // Correct option associated to each letter of the user answers
+
   final FirebaseAuth auth = FirebaseAuth.instance;
   late User user;
   final ScrollController _optionScrollController = ScrollController();
@@ -38,9 +41,14 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
    @override
   void initState() {
     super.initState();
-    getQuestions(); // Fetch the questions on initialisation (Needed as this is not to be called in the widget build)
-    getUser();
-    fetchUserAnswers(); //Fetch the user's answers from the database
+    initialise();
+  }
+
+  Future<void> initialise() async{
+    await getQuestions(); // Fetch the questions on initialisation
+    await getUser();
+    await fetchUserAnswers(); //Fetch the user's answers from the database
+    _reorderAnswers();
   }
 
  Future<void> getUser() async {
@@ -94,6 +102,30 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
         print('Error fetching questions: $error');
       }
     }
+  }
+
+  void _reorderAnswers(){
+    for(int i = 0; i < questions.length; i++ ){
+      if(questions[i]['type'] != "ranking"){
+        break;
+      }
+      List<dynamic> options = questions[i]['options'];
+      List<dynamic> examLetters = questions[i]['correct_answers'];
+      List<dynamic> userLetters = userAnswers[(i + 1).toString()];
+
+      // Assign each option a letter
+      List<MapEntry<String, String>> tempExamOptions = List.generate(
+          options.length, (index) => MapEntry(examLetters[index], options[index]));
+      tempExamOptions.sort((a, b) => a.key.compareTo(b.key));
+      examOptions.add(tempExamOptions);
+
+      List<MapEntry<String, String>> tempUserOptions = List.generate(
+          options.length, (index) => MapEntry(userLetters[index], options[index]));
+      tempUserOptions.sort((a, b) => a.key.compareTo(b.key));
+      userOptions.add(tempUserOptions);
+    }
+    print(examOptions);
+    print(userOptions);
   }
 
   Future<Map<String, dynamic>> queryUserAnswerData() async {
@@ -208,7 +240,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
             ),
           ),
         ),
-      body: questions.isEmpty || userAnswers.isEmpty
+      body: examOptions.isEmpty || userOptions.isEmpty
           ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
           : Padding( //Else load the data
 
@@ -258,6 +290,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
             if (questions[currentQuestion]['type'] == "ranking") ...[
               Row(
                 children: [
+                  // USER ANSWERS
                   Expanded(
                       child: SingleChildScrollView(
                         child: Column(
@@ -268,9 +301,9 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                               ...questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
                                 int optionIndex = entry.key;
                                 String option = entry.value;
-                                String optionLetter = String.fromCharCode(optionIndex + 65);
+                                String optionLetter = userAnswers[(currentQuestion+1).toString()][optionIndex];
                                 return Card(
-                                  color: (questions[currentQuestion]['correct_answers'][optionIndex] == userAnswers[(currentQuestion+1).toString()][optionIndex])
+                                  color: (questions[currentQuestion]['correct_answers'][optionIndex] == optionLetter)
                                       ? Colors.green
                                       : Colors.red.shade400,
                                     child: ListTile(
@@ -282,6 +315,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                         ),
                       )
                   ),
+                  // CORRECT ANSWERS
                   Expanded(
                     child: SingleChildScrollView(
                       child: Column(
