@@ -742,12 +742,19 @@ Widget build(BuildContext context) {
                                   icon: Icon(Icons.edit, color: Colors.white),
                                   onPressed: () => _editEventDate(context, event),
                                 ),
+                                const SizedBox(width: 10),
                                 IconButton(
                                   icon: Icon(Icons.link, color: Colors.white),
                                   onPressed: () => _navigateToEventDetails(event),
                                 ),
-                                IconButton(
-                                  icon: Icon(Icons.delete_outlined, color: Colors.redAccent),
+                                const SizedBox(width: 10),
+                                Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.redAccent, // Background color
+                                  shape: BoxShape.circle, // Makes it a round button
+                                ),
+                                child: IconButton(
+                                  icon: Icon(Icons.delete_outlined, color: Colors.white),
                                   onPressed: () async {
                                     await updateOneEvent(
                                       selectedDay,
@@ -756,6 +763,7 @@ Widget build(BuildContext context) {
                                       eventToDelete: event.title,
                                     );
                                   },
+                                ),
                                 ),
                               ],
                             ),
@@ -965,39 +973,54 @@ Widget build(BuildContext context) {
             ),
             const SizedBox(height: 20),
 
-            // Display Date Text (Outside Button)
-            Text(
-              "Date: ${_selectedDate != null ? "${_selectedDate!.day}-${_selectedDate!.month}-${_selectedDate!.year}" : "No date selected"}",
-              style: const TextStyle(
-                color: Color.fromRGBO(21, 58, 103, 1),
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 10),
+            // Row with "Date:" label and button displaying the selected date
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                // Label "Date:"
+                const Text(
+                  "Date:",
+                  style: TextStyle(
+                    color: Color.fromRGBO(21, 58, 103, 1),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(width: 10),
 
-            // Button to Change Date
-            ElevatedButton(
-              onPressed: () async {
-                final DateTime? pickedDate = await showDatePicker(
-                  context: context,
-                  initialDate: _selectedDate ?? DateTime.now(),
-                  firstDate: DateTime(2000),
-                  lastDate: DateTime(2100),
-                );
-                if (pickedDate != null && pickedDate != _selectedDate) {
-                  setState(() {
-                    _selectedDate = pickedDate;
-                  });
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromRGBO(21, 58, 103, 1),
-              ),
-              child: const Text(
-                "Change Date",
-                style: TextStyle(color: Colors.white),
-              ),
+                // Button displaying the selected date
+                ElevatedButton(
+                  onPressed: () async {
+                    final DateTime? pickedDate = await showDatePicker(
+                      context: context,
+                      initialDate: _selectedDate ?? DateTime.now(),
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2100),
+                      locale: const Locale('en', 'GB'), // Set UK locale
+                    );
+                    if (pickedDate != null && pickedDate != _selectedDate) {
+                      setState(() {
+                        _selectedDate = pickedDate;
+                      });
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromRGBO(21, 58, 103, 1),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  child: Text(
+                    _selectedDate != null
+                        ? "${_selectedDate!.day.toString().padLeft(2, '0')}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.year}"
+                        : "Select Date",
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -1030,7 +1053,6 @@ Widget build(BuildContext context) {
       ),
     );
   }
-
 
   void _updateEvent(Event oldEvent, String newTitle, DateTime newDate) {
     // Remove the old event from the selectedEvents map
