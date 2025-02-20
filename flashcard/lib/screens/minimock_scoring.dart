@@ -155,15 +155,21 @@ Future<void> fetchAverageScore() async {
           answerScores[questionIndex] = userScore;
           break;
         case 'multiple choice':
-          tempMaxScore += 1;
-          if (questions[questionIndex]['type'] == "multiple choice" &&
-              UnorderedIterableEquality().equals(questions[questionIndex]['correct_answers'], userAnswer)){
-            answerScores[questionIndex] = 1;
-          } else{
-            answerScores[questionIndex] = 0;
-          }
+          tempMaxScore += 12; // Each multiple choice question is worth a max of 12 marks.
+          int userScore = 0;
+          List correctAnswers = questions[questionIndex]['correct_answers'];
+          for(int i = 0; i < correctAnswers.length; i++){
+            if (userAnswer.contains(correctAnswers[i])){
+              userScore += 4; // Each correct answer is worth 4 marks.
+            }}
+          // if (questions[questionIndex]['type'] == "multiple choice" &&
+          //     UnorderedIterableEquality().equals(questions[questionIndex]['correct_answers'], userAnswer)){
+          //   answerScores[questionIndex] = 1;
+          // } else{
+          //   answerScores[questionIndex] = 0;
+          // }
           break;
-        default:
+        default:  
       }
     });
     totalScore = answerScores.reduce((value, element) => value + element);
