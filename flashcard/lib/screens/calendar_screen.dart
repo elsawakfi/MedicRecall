@@ -460,11 +460,11 @@ class CalendarStateO extends State<Calendar> {
             if (_eventController.text.isNotEmpty) {
               if (selectedEvents[selectedDay] != null) {
                 selectedEvents[selectedDay]?.add(
-                  Event(title: _eventController.text, color: const Color.fromARGB(255, 253, 252, 220)),
+                  Event(title: _eventController.text, color: Color.fromRGBO(253, 252, 220, 1)),
                 );
               } else {
                 selectedEvents[selectedDay] = [
-                  Event(title: _eventController.text, color: const Color.fromARGB(255, 253, 252, 220)),
+                  Event(title: _eventController.text, color: Color.fromRGBO(253, 252, 220, 1)),
                 ];
               }
               updateEventsToDB(user);
@@ -932,15 +932,51 @@ Widget build(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Edit Event"),
+        backgroundColor: const Color(0xFFE6EDF2),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(0),
+        ),
+        title: const Text(
+          "Edit Event",
+          style: TextStyle(
+            color: Color.fromRGBO(21, 58, 103, 1),
+            fontSize: 21,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Editable Event Title
             TextFormField(
               controller: _editEventController,
-              decoration: InputDecoration(labelText: "Event Title"),
+              style: const TextStyle(
+                color: Color.fromRGBO(21, 58, 103, 1),
+                fontSize: 16,
+              ),
+              decoration: const InputDecoration(
+                labelText: "Event Title",
+                labelStyle: TextStyle(
+                  color: Color.fromRGBO(21, 58, 103, 1),
+                  fontSize: 16,
+                ),
+              ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
+
+            // Display Date Text (Outside Button)
+            Text(
+              "Date: ${_selectedDate != null ? "${_selectedDate!.day}-${_selectedDate!.month}-${_selectedDate!.year}" : "No date selected"}",
+              style: const TextStyle(
+                color: Color.fromRGBO(21, 58, 103, 1),
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 10),
+
+            // Button to Change Date
             ElevatedButton(
               onPressed: () async {
                 final DateTime? pickedDate = await showDatePicker(
@@ -955,7 +991,13 @@ Widget build(BuildContext context) {
                   });
                 }
               },
-              child: Text("Change Date: ${_selectedDate?.toLocal().toString().split(' ')[0]}"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromRGBO(21, 58, 103, 1),
+              ),
+              child: const Text(
+                "Change Date",
+                style: TextStyle(color: Colors.white),
+              ),
             ),
           ],
         ),
@@ -978,7 +1020,7 @@ Widget build(BuildContext context) {
             },
             style: TextButton.styleFrom(
               foregroundColor: Colors.white,
-              backgroundColor: Colors.blue,
+              backgroundColor: const Color.fromRGBO(21, 58, 103, 1),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               minimumSize: const Size(120, 45),
             ),
@@ -988,6 +1030,7 @@ Widget build(BuildContext context) {
       ),
     );
   }
+
 
   void _updateEvent(Event oldEvent, String newTitle, DateTime newDate) {
     // Remove the old event from the selectedEvents map
@@ -1013,13 +1056,38 @@ Widget build(BuildContext context) {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Coming Soon"),
+          backgroundColor: const Color(0xFFE6EDF2),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(0),
+          ),
+          title: Text(
+            "Coming Soon",
+            style: const TextStyle(
+              color: Color.fromRGBO(21, 58, 103, 1),
+              fontSize: 21,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
           content: Text(
-              "THIS IS THE LINK BUTTON \n TODO: IMPLEMENT THIS LATER \n ${event.title}"),
+            "This feature will be implemented soon.",
+            style: const TextStyle(
+              color: Color.fromRGBO(21, 58, 103, 1),
+              fontSize: 16,
+            ),
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text("OK"),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: Color.fromRGBO(243, 90, 90, 1),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                minimumSize: const Size(120, 45),
+              ),
+              child: const Text(
+                'Close',
+                style: TextStyle(fontSize: 16),
+              ),
             ),
           ],
         );
