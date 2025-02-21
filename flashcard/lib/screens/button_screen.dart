@@ -35,6 +35,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
 
   int buildCount = 0;
   bool testDayBool = true;
+  bool buttonPressed = false;
   late String testDayString = "Test day not set";
 
   @override
@@ -164,15 +165,17 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
   }
 
   // Revision dialog
-  void _showRevisionPlanDialog(BuildContext context) {
+  void _showRevisionPlanDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return _buildAlertDialog(
           title: 'Do you want to start your revision plan today?',
-          content: SizedBox(
-            child: Text('If')
-              ),// Empty content for this dialog
+          content: 
+          SizedBox(
+            child: buttonPressed
+                ? Text('')
+                : Text('If you want to stop seeing the pop up please press the button below to pause pop ups for a day.')),
           actions: [
             TextButton(
             onPressed: () {
@@ -208,7 +211,9 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
             ),
           ),
           TextButton(
-              onPressed: (){} , 
+              onPressed: (){
+                Navigator.of(context).pop();
+              } , 
               child: Text('Stop Seeing Pop Up')
               ),
             
@@ -225,7 +230,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     //waits for build function to complete and then calls back to call the condition checking function 
     WidgetsBinding.instance.addPostFrameCallback((_){
        if (mounted && testDayBool && _examDate == null && landingService.onLanding){
-       _showRevisionPlanDialog(context);}
+       _showRevisionPlanDialog();}
     });
   
   }
@@ -609,9 +614,10 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
           ),
         ),
         onPressed: () {
+          buttonPressed = true;
           getTestDay();
           if (testDayBool) {
-            _showRevisionPlanDialog(context);
+            _showRevisionPlanDialog();
           } else if (!testDayBool) {
             showDialog(
                 context: context,
