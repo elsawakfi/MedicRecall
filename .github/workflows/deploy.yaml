@@ -1,7 +1,7 @@
 name: Continuous Deployment - Flutter
 on:
   push:
-    branches: [cd-implementation]
+    branches: [main]
 defaults:
   run:
     working-directory: flashcard
@@ -23,6 +23,6 @@ jobs:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_FLASHCARD_6EDC2 }}
 #          channelId: live # This is for deploying to production
-          channelId: continuous-deployment # This deploys to a preview channel
+          channelId: continuous-deployment # This deploys to a preview channel (preferred)
           projectId: flashcard-6edc2
           entryPoint: flashcard
