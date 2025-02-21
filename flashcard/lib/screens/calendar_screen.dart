@@ -296,9 +296,6 @@ class CalendarStateO extends State<Calendar> {
     DateTime normalizedOldDate = DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
     DateTime normalizedNewDate = DateTime(newDate.year, newDate.month, newDate.day);
 
-    print("🔄 Editing Event: '${oldEvent.title}' on $normalizedOldDate");
-    print("📅 New Event Title: '$newTitle' on $normalizedNewDate");
-
     // 1️⃣ Remove the old event from the local `selectedEvents` map
     selectedEvents[normalizedOldDate]?.removeWhere((event) => event.title == oldEvent.title);
     if (selectedEvents[normalizedOldDate]?.isEmpty ?? false) {
@@ -315,7 +312,7 @@ class CalendarStateO extends State<Calendar> {
     // 3️⃣ Remove old event from Firestore
     await deleteSingleEvent(normalizedOldDate, oldEvent.title, user);
 
-    // 4️⃣ Update Firestore directly
+    // 4️⃣ Ensure Firestore is updated correctly
     QuerySnapshot u = await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
     String id = u.docs.last.id;
     _eventsCollectionRef = FirebaseFirestore.instance.collection('users/$id/events');
@@ -330,7 +327,7 @@ class CalendarStateO extends State<Calendar> {
       // If no document exists for the new date, create it
       if (updatedEvents.isNotEmpty) {
         await _eventsCollectionRef.add({
-          "date": normalizedNewDate,
+          "date": Timestamp.fromDate(normalizedNewDate), // Ensure correct format
           "events": updatedEvents,
         });
       }
@@ -347,26 +344,37 @@ class CalendarStateO extends State<Calendar> {
     // 5️⃣ Refresh UI
     setState(() {
       selectedDay = normalizedNewDate;
-      print("✅ Event successfully updated.");
     });
   }
 
   //When creating a new revision plan we update the database with the revision topics and dates in the calendar
   Future<void> updateEventsToDB(User user) async {
-  for (var entry in selectedEvents.entries) {
-    DateTime normalizedDate = DateTime(entry.key!.year, entry.key!.month, entry.key!.day);
-    
-    // Convert events to a list of strings
-    List<String> updatedEvents = entry.value.map((e) => e.title).toList();
-    
-    if (updatedEvents.isEmpty) {
-      await deleteSingleEvent(normalizedDate, "", user);
-    } else {
-      updateOneEvent(entry.value.first, updatedEvents.join(", "), normalizedDate);
+    for (var entry in selectedEvents.entries) {
+      DateTime normalizedDate = DateTime(entry.key!.year, entry.key!.month, entry.key!.day);
+      
+      // Convert events to a list of strings
+      List<String> updatedEvents = entry.value.map((e) => e.title).toList();
+      
+      if (updatedEvents.isEmpty) {
+        await deleteSingleEvent(normalizedDate, "", user);
+      } else {
+        QuerySnapshot querySnapshot = await _eventsCollectionRef
+            .where("date", isEqualTo: Timestamp.fromDate(normalizedDate))
+            .get();
+
+        if (querySnapshot.docs.isEmpty) {
+          await _eventsCollectionRef.add({
+            "date": Timestamp.fromDate(normalizedDate),
+            "events": updatedEvents,
+          });
+        } else {
+          String docId = querySnapshot.docs.first.id;
+          await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
+        }
+      }
     }
+    setState(() {});
   }
-  setState(() {});
-}
 
   //deletes all events and testDay in UI calendar and firebase
   Future<void> deleteAllEvents() async {
@@ -966,7 +974,7 @@ class CalendarStateO extends State<Calendar> {
       List<String> updatedEvents = selectedEvents[date]?.map((e) => e.title).toList() ?? [];
 
       if (updatedEvents.isEmpty) {
-        await _eventsCollectionRef.doc(docId).delete();
+        await _eventsCollectionRef.doc(docId).delete(); // ❗ Ensure deletion happens
       } else {
         await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
       }
