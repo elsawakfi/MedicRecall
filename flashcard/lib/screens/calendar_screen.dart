@@ -760,26 +760,20 @@ class CalendarStateO extends State<Calendar> {
                                         icon: Icon(Icons.delete_outlined,
                                             color: Colors.white),
                                         onPressed: () async {
-                                          await updateOneEvent(
-                                            selectedDay,
-                                            selectedEvents[selectedDay]!
-                                                .map((e) => e.title)
-                                                .toList(),
-                                            user,
-                                            eventToDelete: event.title,
-                                            );
-                                },
-                              ),
-                              )
+                                          await deleteSingleEvent(selectedDay, event.title, user);
+                                          setState(() {});
+                                        },
+                                      ),
+                                    )
                                   ],
+                                ),
+                              ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
-                      ],
                     ),
                   ),
-                ),
                 // Buttons at the bottom of the right section
                 Padding(
                   padding: const EdgeInsets.all(20),
@@ -937,6 +931,67 @@ class CalendarStateO extends State<Calendar> {
         ),
       ],
     );
+  }
+
+  Future<void> deleteSingleEvent(DateTime date, String eventTitle, User user) async {
+    // Normalize the input date to match stored format
+    date = DateTime(date.year, date.month, date.day); 
+
+    print("🔹 Attempting to delete: $eventTitle on $date");
+
+    // 🔍 Debugging: Print all stored dates
+    print("📌 All stored dates in selectedEvents:");
+    for (var d in selectedEvents.keys) {
+      print(" - ${d}");
+    }
+
+    // Check if the exact date exists in selectedEvents
+    if (!selectedEvents.containsKey(date)) {
+      print("⚠️ Date $date NOT found in selectedEvents keys.");
+      return;
+    }
+
+    // Check if the event exists for the given date
+    bool eventFound = selectedEvents[date]!.any((event) => event.title == eventTitle);
+
+    if (!eventFound) {
+      print("⚠️ Event '$eventTitle' NOT found on $date in selectedEvents.");
+      return;
+    }
+
+    // Remove the event from the local map
+    selectedEvents[date]!.removeWhere((event) => event.title == eventTitle);
+
+    // If no events remain for the date, remove the date entry
+    if (selectedEvents[date]!.isEmpty) {
+      selectedEvents.remove(date);
+      print("🗑 Removed entire date from selectedEvents (no remaining events).");
+    }
+
+    // 🔍 Query Firestore for the event
+    QuerySnapshot querySnapshot = await _eventsCollectionRef
+        .where("date", isEqualTo: Timestamp.fromDate(date)) // Ensure same storage format
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      String docId = querySnapshot.docs.first.id;
+      List<String> updatedEvents = selectedEvents[date]?.map((e) => e.title).toList() ?? [];
+
+      if (updatedEvents.isEmpty) {
+        await _eventsCollectionRef.doc(docId).delete();
+        print("✅ Firestore document deleted (no remaining events).");
+      } else {
+        await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
+        print("✅ Firestore updated. Remaining events: $updatedEvents");
+      }
+    } else {
+      print("⚠️ No matching document found in Firestore for $date.");
+    }
+
+    // Refresh UI
+    setState(() {
+      print("🔹 Updated Selected Events: $selectedEvents");
+    });
   }
 
   void _editEventDate(BuildContext context, Event event) {
