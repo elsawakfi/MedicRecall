@@ -66,7 +66,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
         ),
       ),
       content: SizedBox(
-        height: 100,
+        height: 130,
         width: 300,
         child: content,
       ),
@@ -170,7 +170,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       builder: (BuildContext context) {
         return _buildAlertDialog(
           title: 'Do you want to start your revision plan today?',
-          content: const SizedBox(),// Empty content for this dialog
+          content: const Column(),// Empty content for this dialog
           actions: [
             TextButton(
             onPressed: () {
@@ -220,7 +220,7 @@ Future<void> shouldShowDialog() async{
          builder: (BuildContext context){
           return _buildAlertDialog(
           title: 'Do you want to start your revision plan today?',
-          content: const SizedBox(), // Empty content for this dialog
+          content: const Column(mainAxisSize: MainAxisSize.max), // Empty content for this dialog
           actions: [
             TextButton(
               onPressed: () {
@@ -343,22 +343,14 @@ Future<void> shouldShowDialog() async{
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return AlertDialog(
-              backgroundColor: const Color(0xFFE6EDF2),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(0),
-              ),
-              title: Column(
+            return _buildAlertDialog(
+              title: 
+                    'How many times would you like to practice the selected resources?',   
+              content: 
+                Column(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'How many times would you like to practice the selected resources?',
-                    style: const TextStyle(
-                      color: Color.fromRGBO(21, 58, 103, 1),
-                      fontSize: 21,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
                   const SizedBox(height: 3), // Add spacing between lines
                   Text.rich(
                     TextSpan(
@@ -383,14 +375,10 @@ Future<void> shouldShowDialog() async{
                       ],
                     ),
                   ),
-                ],
-              ),
-              content: SizedBox(
-                width: 80,
-                height: 260,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
+                
+              
+                  
+
                     ...repetitionOptions.map((int value) {
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 2.0),
@@ -417,7 +405,7 @@ Future<void> shouldShowDialog() async{
                     }),
                   ],
                 ),
-              ),
+             
               actions: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
