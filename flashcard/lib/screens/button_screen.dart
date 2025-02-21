@@ -1,7 +1,12 @@
+// Flutter and Dart imports
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
+// Firebase imports
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
+// Package imports
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 // Internal imports
@@ -9,13 +14,6 @@ import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flashcard_x/screens/calendar_screen.dart';
 import 'package:flashcard_x/screens/study_session_manager.dart';
 import 'package:flashcard_x/screens/landing_service.dart';
-
-/*import 'package:flashcard_x/widgets/drawer_widget.dart';
-import 'package:flashcard_x/widgets/event.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flashcard_x/screens/dashboard_screen.dart';
-import 'package:table_calendar/table_calendar.dart';*/
 
 class CustomFloatingButton extends StatefulWidget {
   const CustomFloatingButton({super.key});
@@ -25,63 +23,69 @@ class CustomFloatingButton extends StatefulWidget {
 }
 
 class CustomFloatingButtonState extends State<CustomFloatingButton> {
-  DateTime? _examDate;
-  DateTime? _firstStudyDate;
-  final CollectionReference _userCollectionRef =
-      FirebaseFirestore.instance.collection('users');
-
-  CollectionReference users = FirebaseFirestore.instance.collection('users');
-
+  // Firebase instances
+  final CollectionReference _userCollectionRef = FirebaseFirestore.instance.collection('users');
   final FirebaseAuth auth = FirebaseAuth.instance;
+  CollectionReference users = FirebaseFirestore.instance.collection('users');
   User? user;
 
-  int buildCount = 0;
+  // Date-related state variables
+  DateTime? _examDate;
+  DateTime? _firstStudyDate;
   bool testDayBool = true;
   late String testDayString = "Test day not set";
 
+  // UI state variables
+  int buildCount = 0;
   final Map<String, bool> _isHovered = {};
 
-  @override
-  void initState() {
-    super.initState();
+  // Initialization methods
+  void _initializeState() {
     getUser();
     getTestDay();
     getFirstStudyDay();
+    _initializeHoverStates();
     setState(() {});
+  }
+
+  void _initializeHoverStates() {
     _isHovered['checkbox1'] = false;
     _isHovered['checkbox2'] = false;
     _isHovered['checkbox3'] = false;
     _isHovered['checkbox4'] = false;
   }
 
-  // Helper method
-  Widget _buildAlertDialog({
-    required String title,
-    required Widget content,
-    required List<Widget> actions,
-  }) {
-    return AlertDialog(
-      backgroundColor: const Color(0xFFE6EDF2),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(0),
-      ),
-      title: Text(
-        title,
-        style: const TextStyle(
-          color: Color.fromRGBO(21, 58, 103, 1),
-          fontSize: 21,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-      content: SizedBox(
-        width: 300,
-        child: content,
-      ),
-      actions: actions,
-    );
+  @override
+  void initState() {
+    super.initState();
+    _initializeState();
   }
 
-  // Repurposed getter from calendar_screen.dart
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      shouldShowDialog();
+    });
+  }
+
+  // Firebase interaction methods
+  Future<void> getUser() async {
+    NavigatorState nav = Navigator.of(context);
+    if (auth.currentUser == null) {
+      var tmp = await auth.authStateChanges().first;
+      if (tmp == null) {
+        nav.push(MaterialPageRoute(
+          builder: (context) => const SignInScreen(),
+        ));
+      } else {
+        user = tmp;
+      }
+    } else {
+      user = auth.currentUser!;
+    }
+  }
+
   Future<void> getTestDay() async {
     if (user != null) {
       QuerySnapshot querySnapshot =
@@ -112,7 +116,6 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     }
   }
 
-  // Repurposed setter from calendar_screen.dart
   Future<void> updateTestDay(DateTime date) async {
     QuerySnapshot u =
         await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
@@ -136,22 +139,6 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     setState(() {});
   }
 
-  Future<void> getUser() async {
-    NavigatorState nav = Navigator.of(context);
-    if (auth.currentUser == null) {
-      var tmp = await auth.authStateChanges().first;
-      if (tmp == null) {
-        nav.push(MaterialPageRoute(
-          builder: (context) => const SignInScreen(),
-        ));
-      } else {
-        user = tmp;
-      }
-    } else {
-      user = auth.currentUser!;
-    }
-  }
-
   Future<void> getFirstStudyDay() async {
     if (user != null) {
       QuerySnapshot u =
@@ -170,7 +157,23 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     }
   }
 
-  // Revision dialog
+  Future<void> _setFirstStudyDay() async {
+    QuerySnapshot u =
+        await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
+    var id = u.docs.last.id;
+
+    // Save the first study day only once when the revision plan starts
+    await _userCollectionRef.doc(id).update({
+      "firstStudyDay":
+          DateTime.now(), // Save the current date as first study day
+    });
+
+
+    // Optionally, retrieve the first study day
+    await getFirstStudyDay();
+  }
+
+  // Dialog management methods
   void _showRevisionPlanDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -218,65 +221,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       },
     );
   }
-    Future<void> shouldShowDialog() async{
-      await getTestDay();
-      
-      if (mounted && testDayBool && _examDate == null && landingService.onLanding){
-         showDialog(context: context,
-         builder: (BuildContext context){
-          return _buildAlertDialog(
-          title: 'Do you want to start your revision plan today?',
-          content: const SizedBox(), // Empty content for this dialog
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                 _setFirstStudyDay();
-                _showExamDateDialog(context); // Call to show exam date dialog
-              },
-              child: const Text('Yes'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('No'),
-            ),
-          ],
-        );
-      },
-    );setState(() {}); } else {}
-  
-  }
 
-   @override
-  void didChangeDependencies(){
-    super.didChangeDependencies();
-    //waits for build function to complete and then calls back to call the condition checking function 
-    WidgetsBinding.instance.addPostFrameCallback((_){
-       shouldShowDialog();
-    });
-  
-  }
-
-  // Method to save firstStudyDay
-  Future<void> _setFirstStudyDay() async {
-    QuerySnapshot u =
-        await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
-    var id = u.docs.last.id;
-
-    // Save the first study day only once when the revision plan starts
-    await _userCollectionRef.doc(id).update({
-      "firstStudyDay":
-          DateTime.now(), // Save the current date as first study day
-    });
-
-
-    // Optionally, retrieve the first study day
-    await getFirstStudyDay();
-  }
-
-  // Show the date picker dialog to select exam date
   void _showExamDateDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -339,7 +284,6 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     );
   }
 
-  // Show dialog to ask for number of repetitions
   void _showRepetitionDialog(BuildContext context) {
     final List<int> repetitionOptions = [2, 3, 4, 5, 6];
     int? selectedRepetition;
@@ -595,6 +539,64 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     );
   }
 
+  Future<void> shouldShowDialog() async{
+    await getTestDay();
+    
+    if (mounted && testDayBool && _examDate == null && landingService.onLanding){
+       showDialog(context: context,
+       builder: (BuildContext context){
+        return _buildAlertDialog(
+        title: 'Do you want to start your revision plan today?',
+        content: const SizedBox(), // Empty content for this dialog
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+               _setFirstStudyDay();
+              _showExamDateDialog(context); // Call to show exam date dialog
+            },
+            child: const Text('Yes'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('No'),
+          ),
+        ],
+      );
+    },
+  );setState(() {}); } else {}
+  
+  }
+
+  // UI building methods
+  Widget _buildAlertDialog({
+    required String title,
+    required Widget content,
+    required List<Widget> actions,
+  }) {
+    return AlertDialog(
+      backgroundColor: const Color(0xFFE6EDF2),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(0),
+      ),
+      title: Text(
+        title,
+        style: const TextStyle(
+          color: Color.fromRGBO(21, 58, 103, 1),
+          fontSize: 21,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      content: SizedBox(
+        width: 300,
+        child: content,
+      ),
+      actions: actions,
+    );
+  }
+
   Widget _buildInfoIcon(String id, String description) {
     return StatefulBuilder(
       builder: (context, setState) {
@@ -806,7 +808,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     );
   }
 
-  // Calculate number of days until the exam
+  // Helper methods
   int _calculateDaysUntilExam(DateTime examDate) {
     final now = DateTime.now();
     final difference = examDate.difference(now);
