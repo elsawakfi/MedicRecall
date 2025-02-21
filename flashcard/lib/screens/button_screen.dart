@@ -747,19 +747,15 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       padding: const EdgeInsets.all(12.0),
-      decoration: BoxDecoration(
-        color: const Color.fromRGBO(21, 58, 103, 1),
-        borderRadius: BorderRadius.circular(25.0),
-      ),
       child: Row(
         children: [
           Container(
             margin: const EdgeInsets.only(right: 16.0),
             child: Theme(
               data: ThemeData(
-                unselectedWidgetColor: Colors.white,
+                unselectedWidgetColor: const Color.fromRGBO(21, 58, 103, 1),
                 checkboxTheme: CheckboxThemeData(
-                  side: const BorderSide(color: Colors.black, width: 2),
+                  side: const BorderSide(color: Color.fromRGBO(21, 58, 103, 1), width: 2),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(4.0),
                   ),
@@ -795,7 +791,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                       text,
                       style: const TextStyle(
                         fontSize: 16,
-                        color: Colors.white,
+                        color: Color.fromRGBO(21, 58, 103, 1),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -844,7 +840,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                       ? "Exam is Today"
                       : '${_calculateDaysUntilExam(_examDate!)} Days to Your Exam',
           style: const TextStyle(
-            color: Color.fromARGB(255, 98, 86, 139),
+            color: Color.fromRGBO(21, 58, 103, 1),
             fontSize: 14,
             fontWeight: FontWeight.w500,
           ),
