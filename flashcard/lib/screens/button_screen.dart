@@ -170,7 +170,9 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       builder: (BuildContext context) {
         return _buildAlertDialog(
           title: 'Do you want to start your revision plan today?',
-          content: const Column(),// Empty content for this dialog
+          content: SizedBox(
+            child: Text('If')
+              ),// Empty content for this dialog
           actions: [
             TextButton(
             onPressed: () {
@@ -205,42 +207,16 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               style: TextStyle(fontSize: 16),
             ),
           ),
+          TextButton(
+              onPressed: (){} , 
+              child: Text('Stop Seeing Pop Up')
+              ),
             
           ],
         );
       },
-    );
-  }
-
-Future<void> shouldShowDialog() async{
-      await getTestDay();
-      
-      if (mounted && testDayBool && _examDate == null && landingService.onLanding){
-         showDialog(context: context,
-         builder: (BuildContext context){
-          return _buildAlertDialog(
-          title: 'Do you want to start your revision plan today?',
-          content: const Column(mainAxisSize: MainAxisSize.max), // Empty content for this dialog
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                 _setFirstStudyDay();
-                _showExamDateDialog(context); // Call to show exam date dialog
-              },
-              child: const Text('Yes'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('No'),
-            ),
-          ],
-        );
-      },
-    );setState(() {}); } else {}
-  
+    
+    );setState(() {});
   }
 
    @override
@@ -248,7 +224,8 @@ Future<void> shouldShowDialog() async{
     super.didChangeDependencies();
     //waits for build function to complete and then calls back to call the condition checking function 
     WidgetsBinding.instance.addPostFrameCallback((_){
-       shouldShowDialog();
+       if (mounted && testDayBool && _examDate == null && landingService.onLanding){
+       _showRevisionPlanDialog(context);}
     });
   
   }
@@ -348,7 +325,8 @@ Future<void> shouldShowDialog() async{
                     'How many times would you like to practice the selected resources?',   
               content: ConstrainedBox(
                 constraints: const BoxConstraints(
-                    maxHeight: 300,
+                    maxHeight: 130,
+                    maxWidth: 280,
               ), 
                 child: SingleChildScrollView(
                     child : Column(
