@@ -66,7 +66,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
         ),
       ),
       content: SizedBox(
-        height: 150,
+        height: 100,
         width: 300,
         child: content,
       ),
@@ -211,7 +211,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       },
     );
   }
-    Future<void> shouldShowDialog() async{
+
+Future<void> shouldShowDialog() async{
       await getTestDay();
       
       if (mounted && testDayBool && _examDate == null && landingService.onLanding){
@@ -277,7 +278,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
         return _buildAlertDialog(
           title: 'When is your exam date?',
           content: Column(
-            //mainAxisSize: MainAxisSize.min,
+            mainAxisSize: MainAxisSize.max,
             // If statement to check if firebase already has exam date in database
             children: [
               ElevatedButton(
@@ -306,7 +307,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                   foregroundColor: Colors.white, // Text color
                   backgroundColor: const Color.fromRGBO(51, 178, 73, 1), // Same color as 'Yes' button
                  // padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  minimumSize: const Size(150, 45),
+                  minimumSize: const Size(100, 45),
                 ),
                 child: const Text(
                   'Select Exam Date',
