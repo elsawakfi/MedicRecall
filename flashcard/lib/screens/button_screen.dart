@@ -346,8 +346,12 @@ Future<void> shouldShowDialog() async{
             return _buildAlertDialog(
               title: 
                     'How many times would you like to practice the selected resources?',   
-              content: 
-                Column(
+              content: ConstrainedBox(
+                constraints: const BoxConstraints(
+                    maxHeight: 300,
+              ), 
+                child: SingleChildScrollView(
+                    child : Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -375,10 +379,6 @@ Future<void> shouldShowDialog() async{
                       ],
                     ),
                   ),
-                
-              
-                  
-
                     ...repetitionOptions.map((int value) {
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 2.0),
@@ -404,8 +404,7 @@ Future<void> shouldShowDialog() async{
                       );
                     }),
                   ],
-                ),
-             
+                ))),
               actions: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
