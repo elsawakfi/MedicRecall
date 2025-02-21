@@ -166,8 +166,12 @@ class MiniMockExamState extends State<MiniMockExam> {
     updateExamResults(finalAnswerList);
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => MiniMockScoring(title: widget.title, questionDirectory: widget.questionDirectory, answerDirectory: widget.answerDirectory),
-      ),);
+        builder: (context) => MiniMockScoring(title: widget.title, 
+        questionDirectory: widget.questionDirectory, 
+        answerDirectory: widget.answerDirectory
+        ),
+      ),
+      );
   }
 
   @override
@@ -217,11 +221,10 @@ class MiniMockExamState extends State<MiniMockExam> {
                 Container(
                   margin: const EdgeInsets.only(right: 16),
                   width: 210,
-                  height: 50,
+                  height: 40.31,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
-                    color:  //(remainingSeconds <= 600)
-                    // ? Colors.red.shade400
+                    color: 
                     const Color.fromARGB(255, 216, 136, 238),
                     boxShadow: [
                       BoxShadow(
@@ -235,8 +238,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                   child: Center(
                       child: Text('Time Remaining: $_displayTime',
                         style: TextStyle(
-                          color: //(remainingSeconds <= 600)
-                              // ? Colors.white
+                          color: 
                             Color.fromARGB(255, 255, 255, 255),
                           fontSize: 18.5,
                           fontWeight: FontWeight.bold,//FontWeight.w500,
@@ -247,7 +249,8 @@ class MiniMockExamState extends State<MiniMockExam> {
           ),
           body: questions.isEmpty
               ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
-              : Padding( //Else load the data
+              : SingleChildScrollView(
+            child : Padding( //Else load the data
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -322,16 +325,22 @@ class MiniMockExamState extends State<MiniMockExam> {
                     ]
                 ),
 
-                // Display the current question text
+                Center(// Display the current question text
+               child: Container(
+                width: 1000,
+                child: Column(
+                  children:[
                 Text(
                   questions[currentQuestion]['question'],
                   style: TextStyle(fontSize: 20),
                 ),
                 SizedBox(height: 20),
-
+                  
                 // If the question is a ranking question, display a reorderable list of options
-                if (questions[currentQuestion]['type'] == "ranking") ...[
-                  Expanded(
+                if(questions[currentQuestion]['type'] == "ranking") ...[
+                 Container(
+                  alignment: Alignment.center,
+                  height: 400,
                     child: ReorderableListView(
                       proxyDecorator:  (Widget child, int index, Animation<double> animation) {
                         return Material(
@@ -362,18 +371,18 @@ class MiniMockExamState extends State<MiniMockExam> {
                                 child: ListTile(
                                   title: Text('${optionIndex+1}:   $optionLetter. $option', style: TextStyle(color: Colors.blueGrey, fontSize: 20)),
                                   trailing: Icon(Icons.drag_handle , color: Colors.blueGrey),
-                                )
-                            )
+                                ),
+                            ),
                         );
                       }).toList(),
                     ),
-                  )
+                  ),
+                  
                 ]
                 // If the question is a multiple choice question, display checkboxes
                 else if(questions[currentQuestion]['type'] == "multiple choice") ...[
                   //Line below takes the result of the map() and spreads its widgets into the children of Column
-                  Expanded(
-                      child: SingleChildScrollView(
+                    SingleChildScrollView(
                           child: Column(
                               children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
                                 int optionIndex = entry.key;
@@ -398,8 +407,8 @@ class MiniMockExamState extends State<MiniMockExam> {
                               }).toList()
                           )
                       )
-                  )
-                ],
+                ]
+                ]),),),
                 // Buttons to change questions
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -437,7 +446,14 @@ class MiniMockExamState extends State<MiniMockExam> {
                           int? newIndex = await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => MiniMockReview(miniMockWidget: this, rankingLength: rankingAnswers.length, multiChoiceLength: multiChoiceAnswers.length, flaggedQuestions: flaggedQuestions, displayTime: _displayTime, remainingSeconds: remainingSeconds,),
+                              builder: (context) => MiniMockReview(
+                                miniMockWidget: this, 
+                                rankingLength: rankingAnswers.length, 
+                                multiChoiceLength: multiChoiceAnswers.length, 
+                                flaggedQuestions: flaggedQuestions, 
+                                displayTime: _displayTime, 
+                                remainingSeconds: remainingSeconds,
+                                ),
                             ),
                           );
                           // statement bellow allows for faster page update
@@ -456,8 +472,8 @@ class MiniMockExamState extends State<MiniMockExam> {
                 ),
               ]
             ),
-          ),
-
+          ),)
+        
         )
     );
   }
