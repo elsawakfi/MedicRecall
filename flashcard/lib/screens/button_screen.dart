@@ -167,15 +167,6 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
   Future <void> shouldShowDialog() async{
       await getTestDay();
       if (mounted && testDayBool && _examDate == null && landingService.onLanding){
-        print("Mounted: ");
-        print(mounted);
-        print("\n");
-        print("Test Day Bool: ");
-        print(testDayBool);
-          print("\n");
-        print("Exam Date");
-        print(_examDate);
-        print("\n");
        _showRevisionPlanDialog(context);
        }
   }
@@ -191,9 +182,14 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
           SizedBox(
             child: buttonPressed
                 ? Text('')
-                : Text('If you want to stop seeing the pop up please press the button below to pause pop ups for a day.')),
-          actions: [
-            TextButton(
+                : Text(
+                  'If you want to stop seeing this pop up please press the red button below to pause pop ups for a day.',
+                  style: TextStyle(fontSize: 14, color:Color.fromRGBO(21, 58, 103, 1))
+                  )),
+          
+          actions :  
+           [       
+             TextButton(
             onPressed: () {
               Navigator.of(context).pop();
             },
@@ -225,14 +221,22 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               'Yes',
               style: TextStyle(fontSize: 16),
             ),
+          ),  
+              TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: const Color.fromRGBO(243, 90, 90, 1),
+               backgroundColor: const Color.fromRGBO(243, 90, 90, 1),
+              //padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              //minimumSize: const Size(120, 45), // Sets minimum width and height
+            ),
+            child: const Text(
+              '',
+              style: TextStyle(fontSize: 1),
+            ),
           ),
-          TextButton(
-              onPressed: (){
-                Navigator.of(context).pop();
-              } , 
-              child: Text('Stop Seeing Pop Up')
-              ),
-            
           ],
         );
       },
@@ -240,43 +244,19 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     );setState(() {});
   }
 
-   @override
-  void didChangeDependencies(){
-    super.didChangeDependencies();
-    //waits for build function to complete and then calls back to call the condition checking function 
-    WidgetsBinding.instance.addPostFrameCallback((_){
-      shouldShowDialog();
-    });
-  
-  }
-
-  // Method to save firstStudyDay
-  Future<void> _setFirstStudyDay() async {
-    QuerySnapshot u =
-        await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
-    var id = u.docs.last.id;
-
-    // Save the first study day only once when the revision plan starts
-    await _userCollectionRef.doc(id).update({
-      "firstStudyDay":
-          DateTime.now(), // Save the current date as first study day
-    });
-
-
-    // Optionally, retrieve the first study day
-    await getFirstStudyDay();
-  }
-
-  // Show the date picker dialog to select exam date
+    // Show the date picker dialog to select exam date
   void _showExamDateDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return _buildAlertDialog(
           title: 'When is your exam date?',
-          content: Column(
+          content: SizedBox(
+            width: 300,
+            height: 130,
+          child : 
+          Column(
             mainAxisSize: MainAxisSize.max,
-            // If statement to check if firebase already has exam date in database
             children: [
               ElevatedButton(
                 onPressed: () async {
@@ -323,12 +303,41 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                 ),
               ),
             ],
-          ),
+          ),),
           actions: [],
         );
       },
     );
   }
+
+   @override
+  void didChangeDependencies(){
+    super.didChangeDependencies();
+    //waits for build function to complete and then calls back to call the condition checking function 
+    WidgetsBinding.instance.addPostFrameCallback((_){
+      shouldShowDialog();
+    });
+  
+  }
+
+  // Method to save firstStudyDay
+  Future<void> _setFirstStudyDay() async {
+    QuerySnapshot u =
+        await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
+    var id = u.docs.last.id;
+
+    // Save the first study day only once when the revision plan starts
+    await _userCollectionRef.doc(id).update({
+      "firstStudyDay":
+          DateTime.now(), // Save the current date as first study day
+    });
+
+
+    // Optionally, retrieve the first study day
+    await getFirstStudyDay();
+  }
+
+
 
   // Show dialog to ask for number of repetitions
   void _showRepetitionDialog(BuildContext context) {
@@ -341,8 +350,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return _buildAlertDialog(
-              title: 
-                    'How many times would you like to practice the selected resources?',   
+              title: 'How many times would you like to practice the selected resources?',   
               content: ConstrainedBox(
                 constraints: const BoxConstraints(
                     maxHeight: 130,
@@ -379,7 +387,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                   ),
                     ...repetitionOptions.map((int value) {
                       return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 2.0),
+                        padding: const EdgeInsets.symmetric(),
                         child: RadioListTile<int>(
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(5.0),
