@@ -363,7 +363,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                               color: Color.fromARGB(255, 235, 230, 239),
                                 child: ListTile(
                                   title: Text('${optionIndex+1}:   $optionLetter. $option', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 20)),
-                                  trailing: Icon(Icons.drag_handle , color: Colors.blueGrey),
+                                  trailing: Icon(Icons.drag_handle , color: Color.fromARGB(255, 98, 86, 139), size: 30),
                                 )
                             )
                         );
@@ -383,6 +383,15 @@ class MiniMockExamState extends State<MiniMockExam> {
                                 int questionIndex = currentQuestion - rankingAnswers.length;
                                 String optionLetter = options[optionIndex];
                                 return CheckboxListTile(
+                                  fillColor: WidgetStateProperty.resolveWith<Color?>(
+                                        (states) {
+                                      if (states.contains(WidgetState.selected)) {
+                                        return Theme.of(context).textTheme.bodyMedium?.color; // Color when the checkbox is checked
+                                      }
+                                      return Colors.transparent; // Transparent when unchecked
+                                    },
+                                  ),
+                                  checkColor: Theme.of(context).scaffoldBackgroundColor,
                                   title: Text('$optionLetter. $option', style: TextStyle(fontSize: 20, color: Theme.of(context).textTheme.bodyMedium?.color)),
                                   value: multiChoiceAnswers[questionIndex][optionIndex],
                                   onChanged: (value) {
