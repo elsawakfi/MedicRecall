@@ -417,7 +417,6 @@ class MiniMockExamState extends State<MiniMockExam> {
                     ),
                     const SizedBox(width: 16),
                     Container(
-                      margin: const EdgeInsets.only(bottom: 10),
                         width: 160,
                         height: 45,
                         decoration: BoxDecoration(
