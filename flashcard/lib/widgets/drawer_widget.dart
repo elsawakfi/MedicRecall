@@ -3,6 +3,7 @@ import 'package:flashcard_x/screens/faq.dart';
 import 'package:flashcard_x/screens/feedback_screen.dart';
 import 'package:flashcard_x/screens/landing_screen.dart';
 import 'package:flashcard_x/screens/mark_scheme.dart';
+import 'package:flashcard_x/screens/minimock_landing.dart';
 import 'package:flashcard_x/screens/settings_screen.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flashcard_x/utils/authentication.dart';
@@ -103,6 +104,17 @@ class DrawMain extends StatelessWidget {
                   context,
                   MaterialPageRoute(builder: (context) => const Calendar()),
                 )),
+        ListTile(
+            key: const ValueKey('Mini-Mocks'),
+            leading: const Icon(Icons.assignment_outlined),
+            title: const Text('Mini-Mocks'),
+
+            onTap: () {
+              Navigator.push(
+                context,
+                MoveRightRoute(page: const MiniMockLanding()),
+              );
+            }),
         /*
         ListTile(
            leading: Icon(Icons.supervised_user_circle_rounded),
