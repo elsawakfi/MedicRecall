@@ -504,12 +504,12 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               _buildCheckbox(
                 checkbox1, 
                 'Official Practice Paper',
-                'The official past paper is available on the Health Education England website. It contains 22 Professional Dilemma questions with realistic scenarios and reliable rationales created by the same people who write the questions for the MSRA, making it a very valuable resource.'
+                'The official past paper is available on the Health Education England website. It contains 22 Professional Dilemma questions with realistic scenarios and reliable rationales created by the same people who write the questions for the MSRA, making it a very valuable resource. You will be prompted to specify your preferred number of practice attempts upon selection.'
               ),
               _buildCheckbox(
                 checkbox2, 
                 'Full-sized Mock Exam',
-                'Our full-sized mock exam has been designed to mimic the exact conditions you will have on exam day, helping you optimise timings while exposing you to different professional scenarios. It includes 50 questions that have been carefully created to align with official rationales and GMC guidelines.'
+                'Our full-sized mock exam has been designed to mimic the exact conditions you will have on exam day, helping you optimise timings while exposing you to different professional scenarios. It includes 50 questions that have been carefully created to align with official rationales and GMC guidelines. You will be prompted to specify your preferred number of practice attempts upon selection.'
               ),
               _buildCheckbox(
                 checkbox3, 
