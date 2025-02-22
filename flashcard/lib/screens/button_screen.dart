@@ -164,8 +164,24 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     }
   }
 
+  Future <void> shouldShowDialog() async{
+      await getTestDay();
+      if (mounted && testDayBool && _examDate == null && landingService.onLanding){
+        print("Mounted: ");
+        print(mounted);
+        print("\n");
+        print("Test Day Bool: ");
+        print(testDayBool);
+          print("\n");
+        print("Exam Date");
+        print(_examDate);
+        print("\n");
+       _showRevisionPlanDialog(context);
+       }
+  }
+
   // Revision dialog
-  void _showRevisionPlanDialog() {
+  void _showRevisionPlanDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -229,8 +245,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     super.didChangeDependencies();
     //waits for build function to complete and then calls back to call the condition checking function 
     WidgetsBinding.instance.addPostFrameCallback((_){
-       if (mounted && testDayBool && _examDate == null && landingService.onLanding){
-       _showRevisionPlanDialog();}
+      shouldShowDialog();
     });
   
   }
@@ -617,7 +632,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
           buttonPressed = true;
           getTestDay();
           if (testDayBool) {
-            _showRevisionPlanDialog();
+            _showRevisionPlanDialog(context);
           } else if (!testDayBool) {
             showDialog(
                 context: context,
