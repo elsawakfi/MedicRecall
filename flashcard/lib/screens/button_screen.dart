@@ -816,7 +816,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                       ? "Exam is Today"
                       : '${_calculateDaysUntilExam(_examDate!)} Days to Your Exam',
           style: const TextStyle(
-            color: Color.fromRGBO(21, 58, 103, 1),
+            color: Color.fromARGB(255, 98, 86, 139),
             fontSize: 14,
             fontWeight: FontWeight.w500,
           ),
