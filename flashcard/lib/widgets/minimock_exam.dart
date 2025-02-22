@@ -325,17 +325,13 @@ class MiniMockExamState extends State<MiniMockExam> {
                 ),
 
                 // Display the current question text
-                Center(
-                  child:
-                  SizedBox(
-                  width: 700,
-                  child:
+            
                   Text(
                   questions[currentQuestion]['question'],
                   style: TextStyle(fontSize: 20),
-                ))),
-                SizedBox(height: 20),
-
+                ),
+                const SizedBox(height: 30),
+               
                 // If the question is a ranking question, display a reorderable list of options
                 if (questions[currentQuestion]['type'] == "ranking") ...[
                   Expanded(
