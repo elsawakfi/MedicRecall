@@ -669,17 +669,28 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                       ),
                     // Base icon
                     Tooltip(
-                      message: description,
-                      padding: const EdgeInsets.all(16),
-                      margin: const EdgeInsets.symmetric(horizontal: 24),
+                      richMessage: WidgetSpan(
+                        alignment: PlaceholderAlignment.baseline,
+                        baseline: TextBaseline.alphabetic,
+                        child: SizedBox(
+                          width: 200,
+                          child: Text(
+                            description,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              height: 1.4,
+                            ),
+                          ),
+                        ),
+                      ),
+                      padding: const EdgeInsets.all(12),
+                      margin: const EdgeInsets.symmetric(horizontal: 12),
+                      preferBelow: true,
                       decoration: BoxDecoration(
                         color: const Color.fromRGBO(21, 58, 103, 1),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(color: Colors.white, width: 1),
-                      ),
-                      textStyle: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
                       ),
                       child: Container(
                         width: 22,
