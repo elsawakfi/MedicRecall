@@ -94,6 +94,8 @@ Widget build(BuildContext context) {
               Spacer(),
             ExpansionPanelList(
               elevation: 1,
+              dividerColor: Colors.transparent,
+              expandIconColor: Theme.of(context).textTheme.bodyMedium?.color,
               expandedHeaderPadding: EdgeInsets.all(4.0),
               expansionCallback: (i, isOpen) {
                 setState(() {
@@ -103,12 +105,12 @@ Widget build(BuildContext context) {
                 children: [
                     ExpansionPanel(
                       canTapOnHeader: true,
-                      backgroundColor: Colors.white,
+                      backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
                       headerBuilder: (context, isOpen) {
                         return Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Text('Ranking Questions (Question 1 - ${widget.rankingLength})',
-                          style: TextStyle(color: Colors.black)),
+                          style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 16)),
                         );
                       },
                       body: Padding(
@@ -130,7 +132,7 @@ Widget build(BuildContext context) {
                                       child: Icon(Icons.flag, color: Colors.black),),
                                     label: Text(
                                       '${index + 1}',
-                                      style: TextStyle(color: Colors.white,
+                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
                                       fontSize: 20),
                                     ),
                                   ),
@@ -153,7 +155,7 @@ Widget build(BuildContext context) {
                                       child: Icon(Icons.flag, color: Colors.black),),
                                     label: Text(
                                       '${index + 6}',
-                                      style: TextStyle(color: Colors.white,
+                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
                                       fontSize: 20),
                                     ),
                                   ),
@@ -176,7 +178,7 @@ Widget build(BuildContext context) {
                                       child: Icon(Icons.flag, color: Colors.black),),
                                     label: Text(
                                       '${index + 11}',
-                                      style: TextStyle(color: Colors.white,
+                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
                                       fontSize: 20),
                                     ),
                                   ),
@@ -190,12 +192,12 @@ Widget build(BuildContext context) {
                     ),
                     ExpansionPanel(
                       canTapOnHeader: true,
-                      backgroundColor: Colors.white,
+                      backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
                       headerBuilder: (context, isOpen) {
                         return Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Text('Multiple Choice Questions (Question ${widget.rankingLength + 1} - $questionLength)',
-                          style: TextStyle(color: Colors.black)),
+                          style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 16)),
                           
                         );
                       },
@@ -218,7 +220,7 @@ Widget build(BuildContext context) {
                                       child: Icon(Icons.flag, color: Colors.black),),
                                     label: Text(
                                       '${index + 14}',
-                                      style: TextStyle(color: Colors.white,
+                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
                                       fontSize: 20),
                                     ),
                                   ),
@@ -242,7 +244,7 @@ Widget build(BuildContext context) {
                                       child: Icon(Icons.flag, color: Colors.black),),
                                     label: Text(
                                       '${index + 20}',
-                                      style: TextStyle(color: Colors.white,
+                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
                                       fontSize: 20),
                                     ),
                                   ),
@@ -265,7 +267,7 @@ Widget build(BuildContext context) {
                                       child: Icon(Icons.flag, color: Colors.black),),
                                     label: Text(
                                       '${index + 25}',
-                                      style: TextStyle(color: Colors.white,
+                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
                                       fontSize: 20),
                                     ),
                                   ),
@@ -296,8 +298,8 @@ Widget build(BuildContext context) {
                         onPressed: () {
                           widget.miniMockWidget.examEnd();
                         },
-                        icon: Icon(Icons.check_outlined, color: Colors.white),
-                        label: Text('Complete Exam',  style: TextStyle(color: Colors.white, fontSize: 16)),
+                        icon: Icon(Icons.check_outlined, color: Theme.of(context).textTheme.bodyMedium?.color),
+                        label: Text('Complete Exam',  style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 16)),
                       )
                   ),
                 ],

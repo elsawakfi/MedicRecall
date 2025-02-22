@@ -36,9 +36,12 @@ class MyTheme {
       titleTextStyle: TextStyle(
         fontFamily: 'Akshar',
         color: Color.fromRGBO(21, 58, 103, 1),
-        fontSize: 21,
+        fontSize: 23,
         fontWeight: FontWeight.bold,
       ),
+    ),
+    checkboxTheme: CheckboxThemeData(
+      side:  BorderSide(color: Color.fromRGBO(21, 58, 103, 1)),
     ),
     dropdownMenuTheme: const DropdownMenuThemeData(
       // Set the color of the dropdown menu text
@@ -53,7 +56,7 @@ class MyTheme {
     colorScheme: ColorScheme.fromSwatch().copyWith(
       secondary: const Color.fromARGB(61, 71, 173, 224),
     ),
-    scaffoldBackgroundColor: Colors.white,
+    scaffoldBackgroundColor: Colors.grey[200],
     // using this for `Reset` button color
     primaryColor: const Color(0xFFE6EDF2),
     // using this for `Reset` shadow1 color
@@ -100,6 +103,9 @@ class MyTheme {
         fontSize: 23,
         fontWeight: FontWeight.bold,
       ),
+    ),
+    checkboxTheme: CheckboxThemeData(
+      side:  BorderSide(color: Colors.white),
     ),
     dropdownMenuTheme: const DropdownMenuThemeData(
       // Set the color of the dropdown menu text

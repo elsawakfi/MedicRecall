@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/minimock_scoring.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flashcard_x/screens/minimock_feedback.dart';
 import '../screens/minimock_review.dart';
 import '../utils/timer.dart';
 import 'drawer_widget.dart';
@@ -275,7 +274,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                             label: Text('Flag for review',
                               style: const TextStyle(
                                 color: Color.fromARGB(255, 98, 86, 139),
-                                fontSize: 15,
+                                fontSize: 16,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -313,7 +312,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                             child: Text('Question ${currentQuestion+1}/${questions.length}',
                               style: const TextStyle(
                                 color: Color.fromARGB(255, 98, 86, 139),
-                                fontSize: 15,
+                                fontSize: 16,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -333,6 +332,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                 if (questions[currentQuestion]['type'] == "ranking") ...[
                   Expanded(
                     child: ReorderableListView(
+                      buildDefaultDragHandles: false,
                       proxyDecorator:  (Widget child, int index, Animation<double> animation) {
                         return Material(
                           color: Colors.transparent,
@@ -359,8 +359,10 @@ class MiniMockExamState extends State<MiniMockExam> {
                             key: ValueKey(option),
                             index: optionIndex,
                             child: Card(
+                              elevation: 3,
+                              color: Color.fromARGB(255, 235, 230, 239),
                                 child: ListTile(
-                                  title: Text('${optionIndex+1}:   $optionLetter. $option', style: TextStyle(color: Colors.blueGrey, fontSize: 20)),
+                                  title: Text('${optionIndex+1}:   $optionLetter. $option', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 20)),
                                   trailing: Icon(Icons.drag_handle , color: Colors.blueGrey),
                                 )
                             )
@@ -381,7 +383,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                                 int questionIndex = currentQuestion - rankingAnswers.length;
                                 String optionLetter = options[optionIndex];
                                 return CheckboxListTile(
-                                  title: Text('$optionLetter. $option', style: TextStyle(color: Colors.white, fontSize: 20)),
+                                  title: Text('$optionLetter. $option', style: TextStyle(fontSize: 20, color: Theme.of(context).textTheme.bodyMedium?.color)),
                                   value: multiChoiceAnswers[questionIndex][optionIndex],
                                   onChanged: (value) {
                                     int checkedCount = multiChoiceAnswers[questionIndex].where((element) => element).length;
@@ -391,7 +393,6 @@ class MiniMockExamState extends State<MiniMockExam> {
                                       });
                                     }
                                   },
-                                  side: BorderSide( color: Colors.white),
                                   enableFeedback: false,
                                   controlAffinity: ListTileControlAffinity.leading,
                                 );
@@ -416,8 +417,11 @@ class MiniMockExamState extends State<MiniMockExam> {
                             currentQuestion--; // Move to previous question
                           });
                         },
-                        icon: Icon(Icons.arrow_back, color: Colors.white),
-                        label: Text('Previous', style: TextStyle(color: Colors.white, fontSize: 16)),
+                        icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 98, 86, 139)),
+                        label: Text('Previous', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 16)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color.fromARGB(255, 235, 230, 239),
+                        ),
                       ),
                     const SizedBox(width: 16),
                     if (currentQuestion < questions.length - 1)
@@ -427,8 +431,11 @@ class MiniMockExamState extends State<MiniMockExam> {
                             currentQuestion++; // Move to next question
                           });
                         },
-                        icon: Icon(Icons.arrow_forward, color: Colors.white),
-                        label: Text('Next', style: TextStyle(color: Colors.white, fontSize: 16)),
+                        icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139)),
+                        label: Text('Next', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 16)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color.fromARGB(255, 235, 230, 239),
+                        ),
                       ),
                     if (currentQuestion == questions.length - 1)
                       ElevatedButton.icon(
@@ -449,8 +456,11 @@ class MiniMockExamState extends State<MiniMockExam> {
                           }
 
                         },
-                        icon: Icon(Icons.arrow_forward, color: Colors.white),
-                        label: Text('Review', style: TextStyle(color: Colors.white, fontSize: 16)),
+                        icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139)),
+                        label: Text('Review', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 16)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color.fromARGB(255, 235, 230, 239),
+                        ),
                       ),
                   ],
                 ),
