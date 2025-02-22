@@ -766,25 +766,28 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
             ),
           ),
           Expanded(
-            child: GestureDetector(
-              onTap: () {
-                notifier.value = !notifier.value;
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      text,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Color.fromRGBO(21, 58, 103, 1),
-                        fontWeight: FontWeight.w500,
+            child: MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTap: () {
+                  notifier.value = !notifier.value;
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        text,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Color.fromRGBO(21, 58, 103, 1),
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
-                  ),
-                  _buildInfoIcon(id, description),
-                ],
+                    _buildInfoIcon(id, description),
+                  ],
+                ),
               ),
             ),
           ),
