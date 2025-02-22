@@ -256,6 +256,11 @@ class MiniMockExamState extends State<MiniMockExam> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Display question flag and timer widgets:
+                Center(
+                  child:
+                SizedBox(
+                width: 1000,
+                child: 
                 Row(
                     children: [
                       Container(
@@ -323,7 +328,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                           )
                       ),
                     ]
-                ),
+                ))),
 
                 Center(// Display the current question text
                child: Container(
@@ -410,6 +415,10 @@ class MiniMockExamState extends State<MiniMockExam> {
                 ]
                 ]),),),
                 // Buttons to change questions
+                Center(child: 
+                SizedBox(
+                width: 1000,
+                child: 
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
@@ -469,7 +478,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                         label: Text('Review', style: TextStyle(color: Colors.white, fontSize: 16)),
                       ),
                   ],
-                ),
+                ))),
               ]
             ),
           ),)
