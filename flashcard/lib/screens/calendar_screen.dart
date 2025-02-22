@@ -194,7 +194,6 @@ class CalendarStateO extends State<Calendar> {
   }
 
   // DATABASE FUNCTIONS:
-
   Future<void> getUser() async {
     NavigatorState nav = Navigator.of(context);
     if (auth.currentUser == null) {
@@ -254,14 +253,13 @@ class CalendarStateO extends State<Calendar> {
       // "firstStudyDay": data.containsKey("firstStudyDay") && data["firstStudyDay"] != null
       //   ? data["firstStudyDay"] // Keep existing firstStudyDay if it exists
       //   : DateTime.now(), // Otherwise, set it to now
-      });
+    });
 
 
-      selectedEvents[testDay]?.remove(Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
-      // update field testday to what is passed as param
-      await getTestDay();
-      setState(() {});
-
+    selectedEvents[testDay]?.remove(Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
+    // update field testday to what is passed as param
+    await getTestDay();
+    setState(() {});
   }
 
   //updates the UI with the events collected from firebase
@@ -281,10 +279,9 @@ class CalendarStateO extends State<Calendar> {
       for (var e in event["events"]) {
         events.add(Event(title: e, color: Colors.white)); // adds each
       }
-
       selectedEvents[date] = events;
-
     }
+
     if (selectedEvents[testDay] == null) {
       selectedEvents[testDay] = [Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94))];
     } else {
@@ -295,65 +292,88 @@ class CalendarStateO extends State<Calendar> {
   }
 
   //upload each event in the calendar to the database
-  Future<void> updateOneEvent(DateTime date, List<String> events, User user, {String? eventToDelete}) async {
-    // Step 1: Get the user's document ID
+  Future<void> updateOneEvent(Event oldEvent, String newTitle, DateTime newDate) async {
+    DateTime normalizedOldDate = DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
+    DateTime normalizedNewDate = DateTime(newDate.year, newDate.month, newDate.day);
+
+    // 1️⃣ Remove the old event from the local `selectedEvents` map
+    selectedEvents[normalizedOldDate]?.removeWhere((event) => event.title == oldEvent.title);
+    if (selectedEvents[normalizedOldDate]?.isEmpty ?? false) {
+      selectedEvents.remove(normalizedOldDate); // If no more events on that day, remove it
+    }
+
+    // 2️⃣ Add the updated event to the new date
+    if (selectedEvents[normalizedNewDate] != null) {
+      selectedEvents[normalizedNewDate]?.add(Event(title: newTitle, color: oldEvent.color));
+    } else {
+      selectedEvents[normalizedNewDate] = [Event(title: newTitle, color: oldEvent.color)];
+    }
+
+    // 3️⃣ Remove old event from Firestore
+    await deleteSingleEvent(normalizedOldDate, oldEvent.title, user);
+
+    // 4️⃣ Ensure Firestore is updated correctly
     QuerySnapshot u = await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
     String id = u.docs.last.id;
-
-    // Step 2: Reference the events collection for the user
     _eventsCollectionRef = FirebaseFirestore.instance.collection('users/$id/events');
 
-    // Step 3: Query Firestore for events on the given date
     QuerySnapshot querySnapshot = await _eventsCollectionRef
-        .where("date", isEqualTo: date)
+        .where("date", isEqualTo: Timestamp.fromDate(normalizedNewDate))
         .get();
 
-    // Step 4: Handle the event upload/update
+    List<String> updatedEvents = selectedEvents[normalizedNewDate]?.map((e) => e.title).toList() ?? [];
+
     if (querySnapshot.docs.isEmpty) {
-      // Case 1: No events exist for this date → Add a new document
-      _eventsCollectionRef.add({
-        "date": date,
-        "events": events,
-      });
-    } else {
-      // Case 2: Events exist for this date → Update or delete the document
-      var docId = querySnapshot.docs.first.id;
-
-      // If eventToDelete is provided, remove it from the events list
-      if (eventToDelete != null) {
-        events.remove(eventToDelete);
-      }
-
-      if (events.isEmpty) {
-        // Case 2a: Events list is empty → Delete the document
-        _eventsCollectionRef.doc(docId).delete();
-      } else {
-        // Case 2b: Events list has changed → Update the document
-        _eventsCollectionRef.doc(docId).update({
-          "date": date,
-          "events": events,
+      // If no document exists for the new date, create it
+      if (updatedEvents.isNotEmpty) {
+        await _eventsCollectionRef.add({
+          "date": Timestamp.fromDate(normalizedNewDate), // Ensure correct format
+          "events": updatedEvents,
         });
       }
+    } else {
+      // If a document exists, update it
+      String docId = querySnapshot.docs.first.id;
+      if (updatedEvents.isEmpty) {
+        await _eventsCollectionRef.doc(docId).delete();
+      } else {
+        await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
+      }
     }
+
+    // 5️⃣ Refresh UI
+    setState(() {
+      selectedDay = normalizedNewDate;
+    });
   }
 
   //When creating a new revision plan we update the database with the revision topics and dates in the calendar
   Future<void> updateEventsToDB(User user) async {
-    List<DateTime> dates = [];
-    selectedEvents.forEach((date, events) {
-      dates.add(date!);
-      List<String> eventsString = []; // holds all events as a string
-      if (events.isNotEmpty) {
-        for (var e in events) {
-          if (e.title != "Test Day") {
-            eventsString.add(e.title);
-          }
-        }
-        if (eventsString.isNotEmpty) {
-          updateOneEvent(date, eventsString, user);
+    for (var entry in selectedEvents.entries) {
+      DateTime normalizedDate = DateTime(entry.key!.year, entry.key!.month, entry.key!.day);
+      
+      // Convert events to a list of strings
+      List<String> updatedEvents = entry.value.map((e) => e.title).toList();
+      
+      if (updatedEvents.isEmpty) {
+        await deleteSingleEvent(normalizedDate, "", user);
+      } else {
+        QuerySnapshot querySnapshot = await _eventsCollectionRef
+            .where("date", isEqualTo: Timestamp.fromDate(normalizedDate))
+            .get();
+
+        if (querySnapshot.docs.isEmpty) {
+          await _eventsCollectionRef.add({
+            "date": Timestamp.fromDate(normalizedDate),
+            "events": updatedEvents,
+          });
+        } else {
+          String docId = querySnapshot.docs.first.id;
+          await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
         }
       }
-    });
+    }
+    setState(() {});
   }
 
   //deletes all events and testDay in UI calendar and firebase
@@ -422,7 +442,6 @@ class CalendarStateO extends State<Calendar> {
     });
   }
 
-
   @override
   void dispose() {
     _eventController
@@ -488,432 +507,645 @@ class CalendarStateO extends State<Calendar> {
   );
 }
 
-@override
-Widget build(BuildContext context) {
-  buildCount++;
+  @override
+  Widget build(BuildContext context) {
+    buildCount++;
 
-  return Scaffold(
-    drawer: const DrawMain(),
-    appBar: AppBar(
-      elevation: 0,
-      toolbarHeight: 60,
-      leading: Builder(
-        builder: (context) => GestureDetector(
-          onTap: () => Scaffold.of(context).openDrawer(),
-          child: const Icon(Icons.menu),
+    return Scaffold(
+      drawer: const DrawMain(),
+      appBar: AppBar(
+        elevation: 0,
+        toolbarHeight: 60,
+        leading: Builder(
+          builder: (context) => GestureDetector(
+            onTap: () => Scaffold.of(context).openDrawer(),
+            child: const Icon(Icons.menu),
+          ),
         ),
+        title: Stack(
+          children: [
+            // Centered logo and title
+            Align(
+              alignment: Alignment.center,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset(
+                    'assets/newlogo.png',
+                    fit: BoxFit.cover,
+                    height: 34, // Adjust logo size as needed
+                  ),
+                  const SizedBox(width: 8), // Spacing between logo and title
+                  const Text(
+                    'Revision Calendar',
+                    style: TextStyle(fontSize: 20),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        centerTitle: true,
       ),
-      title: Stack(
+      body: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Centered logo and title
-          Align(
-            alignment: Alignment.center,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
+          // Labels section (Left side of the page)
+          Expanded(
+            flex: 1,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              decoration: BoxDecoration(
+                color: Color.fromARGB(40, 33, 33, 33),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Labels',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  SizedBox(height: 30),
+                  _buildLabelItem('Mini Mock', StudySessionManager.kMiniMockColor),
+                  SizedBox(height: 30),
+                  _buildLabelItem('Full-Sized Mock', StudySessionManager.kFullMockColor),
+                  SizedBox(height: 30),
+                  _buildLabelItem('Official MRSA Paper', StudySessionManager.kOfficialPaperColor),
+                  SizedBox(height: 30),
+                  _buildLabelItem('Flashcards', StudySessionManager.kFlashcardColor),
+                  SizedBox(height: 30),
+                  _buildLabelItem('Test Day', const Color.fromARGB(255, 255, 89, 94)),
+                ],
+              ),
+            ),
+          ),
+          // Vertical Divider (the line between the calendar and the label)
+          Container(
+            width: 2,
+            color: Colors.grey[400],
+            height: double.infinity,
+          ),
+          // Right side of the page -> Calendar, EventsList and Buttons
+          Expanded(
+            flex: 5,
+            child: Column(
               children: [
-                Image.asset(
-                  'assets/newlogo.png',
-                  fit: BoxFit.cover,
-                  height: 34, // Adjust logo size as needed
-                ),
-                const SizedBox(width: 8), // Spacing between logo and title
-                const Text(
-                  'Revision Calendar',
-                  style: TextStyle(fontSize: 20),
+                // Calendar and Events List
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                          child: TableCalendar(
+                            firstDay: DateTime.utc(2020, 1, 1),
+                          lastDay: DateTime.utc(2030, 12, 31),
+                          focusedDay: focusedDay,
+                          calendarFormat: format,
+                          onFormatChanged: (CalendarFormat _format) {
+                            setState(() {
+                              format = _format;
+                            });
+                          },
+                          startingDayOfWeek: StartingDayOfWeek.monday,
+                          daysOfWeekVisible: true,
+                          onDaySelected: (DateTime selectDay, DateTime focusDay) {
+                            setState(() {
+                              selectedDay = selectDay;
+                              focusedDay = focusDay;
+                            });
+                          },
+                          selectedDayPredicate: (DateTime date) {
+                            return isSameDay(selectedDay, date);
+                          },
+                          eventLoader: _getEventsfromDay,
+                          calendarStyle: CalendarStyle(
+                            // Make selected day more visible with a darker blue
+                            selectedDecoration: BoxDecoration(
+                              color: Colors.blue[600],
+                              shape: BoxShape.circle,
+                            ),
+                            // Make today's date stand out with a distinct color
+                            todayDecoration: BoxDecoration(
+                              color: Color.fromARGB(255, 13, 71, 161),
+                              shape: BoxShape.circle,
+                            ),
+                            // Improve visibility of selected text
+                            selectedTextStyle: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            // Make default days more visible on dark background
+                            defaultTextStyle: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            // Make weekend days match default days
+                            weekendTextStyle: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            // Improve visibility of outside days
+                            outsideTextStyle: TextStyle(
+                              color: Colors.grey[500],
+                            ),
+                            // Custom marker settings
+                            markersMaxCount: 5, // Show up to 5 markers per day
+                            markersAnchor: 1.0,
+                            cellPadding: EdgeInsets.all(8.0),
+                            cellMargin: EdgeInsets.all(4.0),
+                          ),
+                          calendarBuilders: CalendarBuilders(
+                            markerBuilder: (context, date, events) {
+                              if (events.isEmpty) return null;
+                              return Positioned(
+                                bottom: 2,
+                                child: Container(
+                                  width: 60, // Increased container width significantly
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: events.take(3).map((event) {
+                                      return Container(
+                                        margin: const EdgeInsets.symmetric(horizontal: 1),
+                                        width: 18, // Made lines much longer
+                                        height: 3,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(1.5),
+                                          color: (event as Event).color,
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                          headerStyle: HeaderStyle(
+                            titleTextStyle: TextStyle(
+                              fontSize: 40,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white, // Changed to white for dark mode
+                            ),
+                            formatButtonTextStyle: TextStyle(
+                              color: Colors.white, // Changed to white for dark mode
+                              fontWeight: FontWeight.w600,
+                            ),
+                            // Add padding to the header
+                            headerPadding: EdgeInsets.symmetric(vertical: 16.0),
+                            // Make the format button more modern
+                            formatButtonDecoration: BoxDecoration(
+                              color: Colors.blue[600],
+                              borderRadius: BorderRadius.circular(16.0),
+                              border: Border.all(color: Colors.white),
+                            ),
+                            // center title is removed so the main title doesn't look like it's not in the center
+                            // Add margin to the header
+                            headerMargin: EdgeInsets.only(bottom: 15.0),
+                            // Enable left and right arrows
+                            leftChevronVisible: true,
+                            rightChevronVisible: true,
+                            // Style the arrows
+                            leftChevronIcon: Icon(Icons.chevron_left, size: 30, color: Colors.blue[300]),
+                            rightChevronIcon: Icon(Icons.chevron_right, size: 30, color: Colors.blue[300]),
+                          ),
+                          daysOfWeekStyle: DaysOfWeekStyle(
+                            // Style for weekday names
+                            weekdayStyle: TextStyle(
+                              // fontWeight: FontWeight.bold,
+                              fontSize: 15.0,
+                              color: Colors.white, // Changed to white for dark mode
+                            ),
+                            // Style for weekend names
+                            weekendStyle: TextStyle(
+                              // fontWeight: FontWeight.bold,
+                              fontSize: 15.0,
+                              color: Colors.grey[400], // Changed to white for dark mode
+                            ),
+                          ),
+                        ),
+                          ),
+                        const SizedBox(height: 20),
+                        const SizedBox(height: 20),
+                          ..._getEventsfromDay(selectedDay).map(
+                            (Event event) => Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16.0, vertical: 8.0),
+                              child: ListTile(
+                                title: Text(
+                                  event.title,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                leading: Container(
+                                  width: 12,
+                                  height: 12,
+                                  decoration: BoxDecoration(
+                                    color: event.color,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                                tileColor: event.color.withOpacity(0.4),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 8),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      icon: Icon(Icons.edit, color: Colors.white),
+                                      onPressed: () =>
+                                          _editEventDate(context, event),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    IconButton(
+                                      icon: Icon(Icons.link, color: Colors.white),
+                                      onPressed: () =>
+                                          _navigateToEventDetails(event),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        color:
+                                            Colors.redAccent, // Background color
+                                        shape: BoxShape
+                                            .circle, // Makes it a round button
+                                      ),
+                                      child: IconButton(
+                                        icon: Icon(Icons.delete_outlined,
+                                            color: Colors.white),
+                                        onPressed: () async {
+                                          await deleteSingleEvent(selectedDay, event.title, user);
+                                          setState(() {});
+                                        },
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                // Buttons at the bottom of the right section
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end, // Align buttons to the right
+                    children: [
+                      // Add New Event Button
+                      ElevatedButton.icon(
+                        onPressed: () => _showAddEventDialog(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.lightBlue,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        ),
+                        icon: const Icon(Icons.add, size: 25),
+                        label: const Text(
+                          "Add New Event",
+                          style: TextStyle(fontSize: 22),
+                        ),
+                      ),
+                      const SizedBox(width: 20),
+                      // Homepage Button
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => Landing()),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.lightBlue,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        ),
+                        child: const Text(
+                          "Homepage",
+                          style: TextStyle(fontSize: 22),
+                        ),
+                      ),
+                      const SizedBox(width: 20),
+                      // Delete All Events Button
+                      ElevatedButton.icon(
+                        key: const Key('deleteButton'),
+                        onPressed: () {
+                          testDay = null;
+                          testDayBool = true;
+                          deleteAllEvents();
+                          setState(() {});
+
+                          // Show confirmation popup
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              backgroundColor: const Color(0xFFE6EDF2),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(0),
+                              ),
+                              title: const Text(
+                                "All Events Deleted",
+                                style: const TextStyle(
+                                  color: Color.fromRGBO(21, 58, 103, 1),
+                                  fontSize: 21,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              content: const Text(
+                                "Go to the homepage to schedule your study schedule.",
+                                style: const TextStyle(
+                                  color: Color.fromRGBO(21, 58, 103, 1),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  style: TextButton.styleFrom(
+                                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                    minimumSize: Size(120, 45),
+                                  ),
+                                  child: Text(
+                                    'OK',
+                                    style: TextStyle(fontSize: 16),
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => Landing()),
+                                    );
+                                  },
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: Colors.white,
+                                    backgroundColor: Colors.blue,
+                                    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                    minimumSize: Size(120, 45),
+                                  ),
+                                  child: Text(
+                                    'Go to Homepage',
+                                    style: TextStyle(fontSize: 16),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.redAccent,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        ),
+                        icon: const Icon(Icons.delete, size: 25),
+                        label: const Text(
+                          "Delete All Events",
+                          style: TextStyle(fontSize: 22),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
         ],
       ),
-      centerTitle: true,
-    ),
-    body: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      floatingActionButton: const CustomFloatingButton(), // Keep your custom floating button
+      floatingActionButtonLocation: FloatingActionButtonLocation.endTop, // Position it at the top right
+          
+    );
+  }
+
+  // VoidCallback -> Signature of callbacks that have no arguments and return no data.
+  Widget _buildLabelItem(String label, Color color) {
+    return Row(
       children: [
-        // Labels section (Left side of the page)
-        Expanded(
-          flex: 1,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            decoration: BoxDecoration(
-              color: Color.fromARGB(40, 33, 33, 33),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Labels',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                SizedBox(height: 30),
-                _buildLabelItem('Mini Mock', StudySessionManager.kMiniMockColor),
-                SizedBox(height: 30),
-                _buildLabelItem('Full-Sized Mock', StudySessionManager.kFullMockColor),
-                SizedBox(height: 30),
-                _buildLabelItem('Official MRSA Paper', StudySessionManager.kOfficialPaperColor),
-                SizedBox(height: 30),
-                _buildLabelItem('Flashcards', StudySessionManager.kFlashcardColor),
-                SizedBox(height: 30),
-                _buildLabelItem('Test Day', const Color.fromARGB(255, 255, 89, 94)),
-              ],
-            ),
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
           ),
         ),
-        // Vertical Divider (the line between the calendar and the label)
-        Container(
-          width: 2,
-          color: Colors.grey[400],
-          height: double.infinity,
-        ),
-        // Right side of the page -> Calendar, EventsList and Buttons
-        Expanded(
-          flex: 5,
-          child: Column(
-            children: [
-              // Calendar and Events List
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                        child: TableCalendar(
-                          firstDay: DateTime.utc(2020, 1, 1),
-                        lastDay: DateTime.utc(2030, 12, 31),
-                        focusedDay: focusedDay,
-                        calendarFormat: format,
-                        onFormatChanged: (CalendarFormat _format) {
-                          setState(() {
-                            format = _format;
-                          });
-                        },
-                        startingDayOfWeek: StartingDayOfWeek.monday,
-                        daysOfWeekVisible: true,
-                        onDaySelected: (DateTime selectDay, DateTime focusDay) {
-                          setState(() {
-                            selectedDay = selectDay;
-                            focusedDay = focusDay;
-                          });
-                        },
-                        selectedDayPredicate: (DateTime date) {
-                          return isSameDay(selectedDay, date);
-                        },
-                        eventLoader: _getEventsfromDay,
-                        calendarStyle: CalendarStyle(
-                          // Make selected day more visible with a darker blue
-                          selectedDecoration: BoxDecoration(
-                            color: Colors.blue[600],
-                            shape: BoxShape.circle,
-                          ),
-                          // Make today's date stand out with a distinct color
-                          todayDecoration: BoxDecoration(
-                            color: Color.fromARGB(255, 13, 71, 161),
-                            shape: BoxShape.circle,
-                          ),
-                          // Improve visibility of selected text
-                          selectedTextStyle: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          // Make default days more visible on dark background
-                          defaultTextStyle: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          // Make weekend days match default days
-                          weekendTextStyle: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          // Improve visibility of outside days
-                          outsideTextStyle: TextStyle(
-                            color: Colors.grey[500],
-                          ),
-                          // Custom marker settings
-                          markersMaxCount: 5, // Show up to 5 markers per day
-                          markersAnchor: 1.0,
-                          cellPadding: EdgeInsets.all(8.0),
-                          cellMargin: EdgeInsets.all(4.0),
-                        ),
-                        calendarBuilders: CalendarBuilders(
-                          markerBuilder: (context, date, events) {
-                            if (events.isEmpty) return null;
-                            return Positioned(
-                              bottom: 2,
-                              child: Container(
-                                width: 60, // Increased container width significantly
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: events.take(3).map((event) {
-                                    return Container(
-                                      margin: const EdgeInsets.symmetric(horizontal: 1),
-                                      width: 18, // Made lines much longer
-                                      height: 3,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(1.5),
-                                        color: (event as Event).color,
-                                      ),
-                                    );
-                                  }).toList(),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                        headerStyle: HeaderStyle(
-                          titleTextStyle: TextStyle(
-                            fontSize: 40,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white, // Changed to white for dark mode
-                          ),
-                          formatButtonTextStyle: TextStyle(
-                            color: Colors.white, // Changed to white for dark mode
-                            fontWeight: FontWeight.w600,
-                          ),
-                          // Add padding to the header
-                          headerPadding: EdgeInsets.symmetric(vertical: 16.0),
-                          // Make the format button more modern
-                          formatButtonDecoration: BoxDecoration(
-                            color: Colors.blue[600],
-                            borderRadius: BorderRadius.circular(16.0),
-                            border: Border.all(color: Colors.white),
-                          ),
-                          // center title is removed so the main title doesn't look like it's not in the center
-                          // Add margin to the header
-                          headerMargin: EdgeInsets.only(bottom: 15.0),
-                          // Enable left and right arrows
-                          leftChevronVisible: true,
-                          rightChevronVisible: true,
-                          // Style the arrows
-                          leftChevronIcon: Icon(Icons.chevron_left, size: 30, color: Colors.blue[300]),
-                          rightChevronIcon: Icon(Icons.chevron_right, size: 30, color: Colors.blue[300]),
-                        ),
-                        daysOfWeekStyle: DaysOfWeekStyle(
-                          // Style for weekday names
-                          weekdayStyle: TextStyle(
-                            // fontWeight: FontWeight.bold,
-                            fontSize: 15.0,
-                            color: Colors.white, // Changed to white for dark mode
-                          ),
-                          // Style for weekend names
-                          weekendStyle: TextStyle(
-                            // fontWeight: FontWeight.bold,
-                            fontSize: 15.0,
-                            color: Colors.grey[400], // Changed to white for dark mode
-                          ),
-                        ),
-                      ),
-                        ),
-                      const SizedBox(height: 20),
-                      ..._getEventsfromDay(selectedDay).map(
-                        (Event event) => Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                          child: ListTile(
-                            title: Text(
-                              event.title,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            leading: Container(
-                              width: 12,
-                              height: 12,
-                              decoration: BoxDecoration(
-                                color: event.color,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            tileColor: event.color.withOpacity(0.4),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            trailing: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.redAccent,
-                                shape: BoxShape.circle,
-                              ),
-                              child:  IconButton(
-                              icon: Icon(Icons.delete_outlined, color: Colors.white),
-                              onPressed: () async {
-                                await updateOneEvent(
-                                  selectedDay, 
-                                  selectedEvents[selectedDay]!.map((e) => e.title).toList(), // Current events as a list of strings
-                                  user,
-                                  eventToDelete: event.title); // Call the delete function
-                              },
-                            ),
-                            )
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              // Buttons at the bottom of the right section
-              Padding(
-                padding: const EdgeInsets.all(20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end, // Align buttons to the right
-                  children: [
-                    // Add New Event Button
-                    ElevatedButton.icon(
-                      onPressed: () => _showAddEventDialog(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.lightBlue,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      ),
-                      icon: const Icon(Icons.add, size: 25),
-                      label: const Text(
-                        "Add New Event",
-                        style: TextStyle(fontSize: 22),
-                      ),
-                    ),
-                    const SizedBox(width: 20),
-                    // Homepage Button
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => Landing()),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.lightBlue,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      ),
-                      child: const Text(
-                        "Homepage",
-                        style: TextStyle(fontSize: 22),
-                      ),
-                    ),
-                    const SizedBox(width: 20),
-                    // Delete All Events Button
-                    ElevatedButton.icon(
-                      key: const Key('deleteButton'),
-                      onPressed: () {
-                        testDay = null;
-                        testDayBool = true;
-                        deleteAllEvents();
-                        setState(() {});
-
-                        // Show confirmation popup
-                        showDialog(
-                          context: context,
-                          builder: (context) => AlertDialog(
-                            backgroundColor: const Color(0xFFE6EDF2),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(0),
-                            ),
-                            title: const Text(
-                              "All Events Deleted",
-                              style: const TextStyle(
-                                color: Color.fromRGBO(21, 58, 103, 1),
-                                fontSize: 21,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            content: const Text(
-                              "Go to the homepage to schedule your study schedule.",
-                              style: const TextStyle(
-                                color: Color.fromRGBO(21, 58, 103, 1),
-                                fontSize: 16,
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.pop(context),
-                                style: TextButton.styleFrom(
-                                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                                  minimumSize: Size(120, 45),
-                                ),
-                                child: Text(
-                                  'OK',
-                                  style: TextStyle(fontSize: 16),
-                                ),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => Landing()),
-                                  );
-                                },
-                                style: TextButton.styleFrom(
-                                  foregroundColor: Colors.white,
-                                  backgroundColor: Colors.blue,
-                                  padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                                  minimumSize: Size(120, 45),
-                                ),
-                                child: Text(
-                                  'Go to Homepage',
-                                  style: TextStyle(fontSize: 16),
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.redAccent,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      ),
-                      icon: const Icon(Icons.delete, size: 25),
-                      label: const Text(
-                        "Delete All Events",
-                        style: TextStyle(fontSize: 22),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+        SizedBox(width: 12),
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 16,
           ),
         ),
       ],
-    ),
-    floatingActionButton: const CustomFloatingButton(), // Keep your custom floating button
-    floatingActionButtonLocation: FloatingActionButtonLocation.endTop, // Position it at the top right
-        
-  );
-}
+    );
+  }
 
-// VoidCallback -> Signature of callbacks that have no arguments and return no data.
-  Widget _buildLabelItem(String label, Color color) {
-  return Row(
-    children: [
-      Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: color,
-          shape: BoxShape.circle,
+  Future<void> deleteSingleEvent(DateTime date, String eventTitle, User user) async {
+    date = DateTime(date.year, date.month, date.day);
+
+    if (!selectedEvents.containsKey(date)) return;
+    
+    selectedEvents[date]?.removeWhere((event) => event.title == eventTitle);
+
+    if (selectedEvents[date]?.isEmpty ?? false) {
+      selectedEvents.remove(date);
+    }
+
+    QuerySnapshot querySnapshot = await _eventsCollectionRef.where("date", isEqualTo: Timestamp.fromDate(date)).get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      String docId = querySnapshot.docs.first.id;
+      List<String> updatedEvents = selectedEvents[date]?.map((e) => e.title).toList() ?? [];
+
+      if (updatedEvents.isEmpty) {
+        await _eventsCollectionRef.doc(docId).delete(); // ❗ Ensure deletion happens
+      } else {
+        await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
+      }
+    }
+
+    setState(() {});
+  }
+
+  void _editEventDate(BuildContext context, Event event) {
+    final TextEditingController _editEventController =
+        TextEditingController(text: event.title);
+    DateTime? _selectedDate = selectedDay;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFFE6EDF2),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(0),
         ),
-      ),
-      SizedBox(width: 12),
-      Text(
-        label,
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 16,
+        title: const Text(
+          "Edit Event",
+          style: TextStyle(
+            color: Color.fromRGBO(21, 58, 103, 1),
+            fontSize: 21,
+            fontWeight: FontWeight.w500,
+          ),
         ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Editable Event Title
+            TextFormField(
+              controller: _editEventController,
+              style: const TextStyle(
+                color: Color.fromRGBO(21, 58, 103, 1),
+                fontSize: 16,
+              ),
+              decoration: const InputDecoration(
+                labelText: "Event Title",
+                labelStyle: TextStyle(
+                  color: Color.fromRGBO(21, 58, 103, 1),
+                  fontSize: 16,
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Row with "Date:" label and button displaying the selected date
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                const Text(
+                  "Date:",
+                  style: TextStyle(
+                    color: Color.fromRGBO(21, 58, 103, 1),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                StatefulBuilder(
+                  builder: (context, setDialogState) => ElevatedButton(
+                    onPressed: () async {
+                      final DateTime? pickedDate = await showDatePicker(
+                        context: context,
+                        initialDate: _selectedDate ?? DateTime.now(),
+                        firstDate: DateTime(2000),
+                        lastDate: DateTime(2100),
+                        locale: const Locale('en', 'GB'),
+                      );
+                      if (pickedDate != null && pickedDate != _selectedDate) {
+                        setDialogState(() {
+                          _selectedDate = pickedDate;
+                        });
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromRGBO(21, 58, 103, 1),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    child: Text(
+                      _selectedDate != null
+                          ? "${_selectedDate!.day.toString().padLeft(2, '0')}-${_selectedDate!.month.toString().padLeft(2, '0')}-${_selectedDate!.year}"
+                          : "Select Date",
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(
+              foregroundColor: const Color.fromRGBO(243, 90, 90, 1),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              minimumSize: const Size(120, 45),
+            ),
+            child: const Text("Cancel", style: TextStyle(fontSize: 16)),
+          ),
+          TextButton(
+            onPressed: () {
+              if (_editEventController.text.isNotEmpty && _selectedDate != null) {
+                updateOneEvent(event, _editEventController.text, _selectedDate!);
+                Navigator.pop(context);
+              }
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white,
+              backgroundColor: const Color.fromRGBO(21, 58, 103, 1),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              minimumSize: const Size(120, 45),
+            ),
+            child: const Text("Save", style: TextStyle(fontSize: 16)),
+          ),
+        ],
       ),
-    ],
-  );
-}
+    );
+  }
+
+  void _navigateToEventDetails(Event event) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFFE6EDF2),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(0),
+          ),
+          title: Text(
+            "Coming Soon",
+            style: const TextStyle(
+              color: Color.fromRGBO(21, 58, 103, 1),
+              fontSize: 21,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          content: Text(
+            "This feature will be implemented soon.",
+            style: const TextStyle(
+              color: Color.fromRGBO(21, 58, 103, 1),
+              fontSize: 16,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: Color.fromRGBO(243, 90, 90, 1),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                minimumSize: const Size(120, 45),
+              ),
+              child: const Text(
+                'Close',
+                style: TextStyle(fontSize: 16),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
