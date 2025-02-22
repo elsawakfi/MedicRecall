@@ -596,149 +596,45 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
   }
 
   Widget _buildInfoIcon(String id, String description) {
-    return StatefulBuilder(
-      builder: (context, setState) {
-        return MouseRegion(
-          onEnter: (_) => setState(() => _isHovered[id] = true),
-          onExit: (_) => setState(() => _isHovered[id] = false),
-          child: TweenAnimationBuilder(
-            duration: const Duration(milliseconds: 300),
-            tween: Tween<double>(
-              begin: 0,
-              end: _isHovered[id] ?? false ? 1.0 : 0.0,
-            ),
-            builder: (context, double value, child) {
-              // our primary and secondary colors
-              final primaryColor = const Color(0xFF2E7D32);   // Deep green
-              final middleColor = const Color(0xFF4CAF50);    // Medium green
-              final secondaryColor = const Color(0xFF81C784); // Light green
-
-              return Stack(
-                alignment: Alignment.center,
-                children: [
-                  // Outer wave
-                  if (value > 0)
-                    Transform.scale(
-                      scale: 1.0 + (value * 0.8),
-                      child: Container(
-                        width: 32,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: Colors.transparent,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: secondaryColor.withOpacity(0.45 * value),
-                            width: 2.5,
-                          ),
-                          gradient: RadialGradient(
-                            colors: [
-                              secondaryColor.withOpacity(0.2 * value),
-                              Colors.transparent,
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  // Middle wave
-                  if (value > 0)
-                    Transform.scale(
-                      scale: 1.0 + (value * 0.5),
-                      child: Container(
-                        width: 28,
-                        height: 28,
-                        decoration: BoxDecoration(
-                          color: Colors.transparent,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: middleColor.withOpacity(0.55 * value),
-                            width: 2.5,
-                          ),
-                          gradient: RadialGradient(
-                            colors: [
-                              middleColor.withOpacity(0.25 * value),
-                              Colors.transparent,
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  // Inner wave
-                  if (value > 0)
-                    Transform.scale(
-                      scale: 1.0 + (value * 0.2),
-                      child: Container(
-                        width: 24,
-                        height: 24,
-                        decoration: BoxDecoration(
-                          color: Colors.transparent,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: primaryColor.withOpacity(0.65 * value),
-                            width: 2.5,
-                          ),
-                          gradient: RadialGradient(
-                            colors: [
-                              primaryColor.withOpacity(0.3 * value),
-                              Colors.transparent,
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  // Base icon
-                  Tooltip(
-                    message: description,
-                    padding: const EdgeInsets.all(16),
-                    margin: const EdgeInsets.symmetric(horizontal: 24),
-                    decoration: BoxDecoration(
-                      color: const Color.fromRGBO(21, 58, 103, 1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.white, width: 1),
-                    ),
-                    textStyle: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                    ),
-                    child: Container(
-                      width: 22,
-                      height: 22,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            primaryColor,    // Deep green
-                            secondaryColor,  // Light green
-                          ],
-                        ),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.8),
-                          width: 1.5,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: primaryColor.withOpacity(0.4),
-                            blurRadius: 8,
-                            spreadRadius: 0,
-                          ),
-                        ],
-                      ),
-                      child: const Center(
-                        child: FaIcon(
-                          FontAwesomeIcons.info,
-                          size: 12,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            },
+    return Tooltip(
+      message: description,
+      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(horizontal: 24),
+      decoration: BoxDecoration(
+        color: const Color.fromRGBO(21, 58, 103, 1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.white, width: 1),
+      ),
+      textStyle: const TextStyle(
+        color: Colors.white,
+        fontSize: 14,
+      ),
+      child: Container(
+        width: 22,
+        height: 22,
+        decoration: BoxDecoration(
+          color: const Color.fromRGBO(21, 58, 103, 1),
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: Colors.white.withOpacity(0.8),
+            width: 1.5,
           ),
-        );
-      },
+          boxShadow: [
+            BoxShadow(
+              color: const Color.fromRGBO(21, 58, 103, 0.4),
+              blurRadius: 8,
+              spreadRadius: 0,
+            ),
+          ],
+        ),
+        child: const Center(
+          child: FaIcon(
+            FontAwesomeIcons.info,
+            size: 12,
+            color: Colors.white,
+          ),
+        ),
+      ),
     );
   }
 
