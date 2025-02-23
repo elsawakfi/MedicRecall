@@ -266,34 +266,56 @@ class CalendarStateO extends State<Calendar> {
 
   //updates the UI with the events collected from firebase
   Future<void> getEventsFromDB() async {
-    getTestDay(); // ensure test day is initialised
-    QuerySnapshot querySnapshot = await _eventsCollectionRef.get();
-    var allEvents = querySnapshot.docs.map((doc) => doc.data()).toList();
-    //gets all the events in the events folder for the user
-
-    for (var value in allEvents) {
-      // for each event tied to the user
-      var event = Map<String, dynamic>.from(value
-          as Map<String, dynamic>); //event is a map from strings to dynamics
-      var date = (DateTime.fromMicrosecondsSinceEpoch(event["date"]
-          .microsecondsSinceEpoch)); //convert timestamp to datetime
-      List<Event> events = []; //events is an empty list to hold all events.
-      for (var e in event["events"]) {
-        events.add(Event(title: e, color: Colors.white)); // adds each
+    try {
+      QuerySnapshot u = await _userCollectionRef
+          .where("userID", isEqualTo: user.uid)
+          .get();
+      
+      if (u.docs.isEmpty) {
+        print("No user document found!");
+        return;
       }
-      selectedEvents[date] = events;
-    }
 
-    if (selectedEvents[testDay] == null) {
-      selectedEvents[testDay] = [
-        Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94))
-      ];
-    } else {
-      selectedEvents[testDay]?.add(Event(
-          title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
-    }
+      String id = u.docs.last.id;
+      print("Found user document with ID: $id");
+      
+      _eventsCollectionRef =
+          FirebaseFirestore.instance.collection('users/$id/events');
 
-    setState(() {});
+      var snapshots = await _eventsCollectionRef.get();
+      print("Found ${snapshots.docs.length} events in database");
+
+      for (var doc in snapshots.docs) {
+        var data = doc.data() as Map<String, dynamic>;
+        if (data.containsKey('date') && data.containsKey('events')) {
+          Timestamp? timestamp = data['date'] as Timestamp?;
+          List<dynamic>? eventsList = data['events'] as List<dynamic>?;
+          
+          if (timestamp != null && eventsList != null) {
+            DateTime date = timestamp.toDate();
+            date = DateTime(date.year, date.month, date.day);
+            
+            List<String> events = eventsList.map((e) => e.toString()).toList();
+            print("Loading ${events.length} events for date $date");
+            
+            selectedEvents[date] = events.map((title) => Event(
+              title: title,
+              color: _getEventColor(title),
+            )).toList();
+          }
+        }
+      }
+    } catch (e) {
+      print("Error loading events from DB: $e");
+    }
+  }
+
+  Color _getEventColor(String title) {
+    if (title == "Test Day") return const Color.fromARGB(255, 255, 89, 94);
+    if (title.contains("Mini Mock")) return StudySessionManager.kMiniMockColor;
+    if (title.contains("Full-sized Mock")) return StudySessionManager.kFullMockColor;
+    if (title.contains("Official Paper")) return StudySessionManager.kOfficialPaperColor;
+    return StudySessionManager.kFlashcardColor;
   }
 
   //When creating a new revision plan we update the database with the revision topics and dates in the calendar
@@ -438,16 +460,30 @@ class CalendarStateO extends State<Calendar> {
     await getUser();
     await getTestDay();
     if (testDay != null) {
-      // Add Test Day event
+      print("Test day is set to: $testDay");
+      
+      // First add Test Day event
       selectedEvents[testDay] = [
         Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94))
       ];
-      // Generate other events
-      await generateEventsUIChange(testDay!);
+      print("Added Test Day event");
+
+      // Then load events from database
+      await getEventsFromDB();
+      print("Loaded events from DB: ${selectedEvents.length} days have events");
+
+      // Generate study sessions
+      await generateStudySessions(user);
+      print("Generated study sessions");
+
+      // Load topics
+      await _loadTopicsList();
+      print("Loaded topics list");
+
+      setState(() {});
+    } else {
+      print("Test day is null!");
     }
-    await _loadStudySessions();
-    await _loadTopicsList();
-    setState(() {});
   }
 
   Future<void> _loadStudySessions() async {
