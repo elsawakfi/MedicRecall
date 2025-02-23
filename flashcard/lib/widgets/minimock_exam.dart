@@ -427,13 +427,20 @@ class MiniMockExamState extends State<MiniMockExam> {
                             ),
                           ],
                         ),
-                    child: TextButton.icon(onPressed: (){
-                     Navigator.push(
+                    child: TextButton.icon(onPressed: () async{
+                    int? newIndex = await Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => MiniMockReview(miniMockWidget: this, rankingLength: rankingAnswers.length, multiChoiceLength: multiChoiceAnswers.length, flaggedQuestions: flaggedQuestions,),
                             ),
                           );
+                          // statement bellow allows for faster page update
+                          // Must check for null in case user finishes exam and no value is returned
+                          if (newIndex != null && newIndex != currentQuestion){
+                            setState(() {
+                              currentQuestion = newIndex;
+                            });
+                          }
                     } , label: Text('Review Page', style: TextStyle(color:  Color.fromARGB(255, 98, 86, 139), fontSize: 16)),
                     icon: Icon(Icons.search, color:  Color.fromARGB(255, 98, 86, 139),),
                     )),
