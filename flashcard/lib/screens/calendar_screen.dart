@@ -11,6 +11,7 @@ import 'package:reviews_slider/reviews_slider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:flashcard_x/screens/study_session_manager.dart';
 import 'package:flashcard_x/screens/feed_screen.dart';
+import 'package:intl/intl.dart'; // Import the intl package
 
 /*
 Important note for devs
@@ -292,7 +293,7 @@ class CalendarStateO extends State<Calendar> {
     setState(() {});
   }
 
-  //upload each event in the calendar to the database
+  //When creating a new revision plan we update the database with the revision topics and dates in the calendar
   Future<void> updateEventsToDB(User user) async {
     for (var entry in selectedEvents.entries) {
       DateTime normalizedDate = DateTime(entry.key!.year, entry.key!.month, entry.key!.day);
@@ -321,7 +322,6 @@ class CalendarStateO extends State<Calendar> {
     setState(() {});
   }
 
-  // Restoring the updateOneEvent function that was accidentally removed in the previous edit.
   Future<void> updateOneEvent(Event oldEvent, String newTitle, DateTime newDate) async {
     DateTime normalizedOldDate = DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
     DateTime normalizedNewDate = DateTime(newDate.year, newDate.month, newDate.day);
@@ -984,6 +984,58 @@ class CalendarStateO extends State<Calendar> {
     setState(() {});
   }
 
+  void _navigateToEventDetails(Event event) {
+    if (event.title == "Test Day") {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Test Day'),
+          content: Text('Your test is scheduled for ${DateFormat('MMMM d, y').format(selectedDay)}.\n\nMake sure to:\n1. Review all your flashcards\n2. Take practice exams\n3. Get good rest\n4. Stay confident!'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    } else if (event.title.toLowerCase().contains("mini mock")) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const MinimockLanding(),
+        ),
+      );
+    } else if (event.title.toLowerCase().contains("full mock") || event.title.toLowerCase().contains("official paper")) {
+      // TODO: Navigate to full mock/official paper page once available
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(event.title),
+          content: const Text('This feature will be available soon!'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    } else {
+      // For flashcard topics, extract subtopics and navigate to AboveEverything
+      List<String> subtopics = event.title.split(',').map((e) => e.trim()).toList();
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AboveEverything(
+            subtopics: subtopics,
+            count: 0,
+          ),
+        ),
+      );
+    }
+  }
+
   void _editEventDate(BuildContext context, Event event) {
     final TextEditingController _editEventController =
         TextEditingController(text: event.title);
@@ -1103,94 +1155,5 @@ class CalendarStateO extends State<Calendar> {
         ],
       ),
     );
-  }
-
-  void _navigateToEventDetails(Event event) {
-    // If it's a Test Day event
-    if (event.title == "Test Day") {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            backgroundColor: const Color(0xFFE6EDF2),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(0),
-            ),
-            title: Text(
-              "Test Day",
-              style: const TextStyle(
-                color: Color.fromRGBO(21, 58, 103, 1),
-                fontSize: 21,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Your test is scheduled for ${testDayString}.",
-                  style: const TextStyle(
-                    color: Color.fromRGBO(21, 58, 103, 1),
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  "Make sure to review all your topics and get enough rest before the test.",
-                  style: TextStyle(
-                    color: Color.fromRGBO(21, 58, 103, 1),
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  backgroundColor: Color.fromRGBO(243, 90, 90, 1),
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  minimumSize: const Size(120, 45),
-                ),
-                child: const Text(
-                  'Close',
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
-            ],
-          );
-        },
-      );
-    } else {
-      // For topic events, navigate to feed screen
-      // Extract the main topic from the event title (before the hyphen if it exists)
-      String topic = event.title.split(" - ")[0];
-      List<String> subtopics = [];
-
-      // Find all subtopics for this topic
-      for (String fullTopic in topicsList) {
-        if (fullTopic.startsWith("${topic} - ")) {
-          subtopics.add(fullTopic.split(" - ")[1]);
-        }
-      }
-
-      // If no subtopics found, use the topic itself
-      if (subtopics.isEmpty) {
-        subtopics = [topic];
-      }
-
-      // Navigate to feed screen
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => AboveEverything(
-            subtopics: subtopics,
-            count: 0, // Start from beginning
-          ),
-        ),
-      );
-    }
   }
 }
