@@ -12,7 +12,7 @@ import 'minimock_landing.dart';
 import 'feed_screen.dart';  // Contains AboveEverything widget
 import '../widgets/drawer_widget.dart';
 import '../widgets/event.dart';
-import 'dashboard_screen.dart';  // For Landing page
+import 'package:flashcard_x/screens/dashboard_screen.dart';
 
 /*
 Important note for devs
@@ -928,7 +928,7 @@ class CalendarStateO extends State<Calendar> {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => Landing()),
+                            MaterialPageRoute(builder: (context) => const Landing()),
                           );
                         },
                         style: ElevatedButton.styleFrom(
@@ -1194,37 +1194,13 @@ class CalendarStateO extends State<Calendar> {
         break;
 
       default:
-        // For flashcard topics, navigate to flashcard tutor with the specific topic
-        String topic = event.title.split(" - ")[0].trim();
-        List<String> studyTopics = [];
-
-        // Find all subtopics for this topic from topicsList
-        for (String fullTopic in topicsList) {
-          if (fullTopic.startsWith("$topic - ")) {
-            studyTopics.add(fullTopic);
-          }
-        }
-
-        // If no subtopics found, use the topic itself
-        if (studyTopics.isEmpty && topicsList.contains(topic)) {
-          studyTopics = [topic];
-        }
-
-        // Only navigate if we have valid topics to study
-        if (studyTopics.isNotEmpty) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AboveEverything(
-                subtopics: studyTopics,
-                count: 0,
-              ),
-            ),
-          );
-        } else {
-          print("No flashcards found for topic: $topic");
-        }
-        break;
+        // For flashcard topics, navigate to the dashboard which contains the flashcard tutor interface
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const HomePage(title: ''),
+          ),
+        );
     }
   }
 
