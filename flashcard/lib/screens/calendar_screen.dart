@@ -1122,8 +1122,8 @@ class CalendarStateO extends State<Calendar> {
           builder: (context) => const MiniMockLanding(),
         ),
       );
-    } else if (event.title.toLowerCase().contains("full mock") ||
-        event.title.toLowerCase().contains("official paper")) {
+    } else if (event.title.toLowerCase().contains("full mock")) {
+      // Show "Feature not available" dialog for Full Mock
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -1140,7 +1140,7 @@ class CalendarStateO extends State<Calendar> {
             ),
           ),
           content: const Text(
-            'This feature will be available soon!',
+            'Full Mock feature will be available soon!',
             style: TextStyle(
               color: Color.fromRGBO(21, 58, 103, 1),
               fontSize: 16,
@@ -1152,8 +1152,48 @@ class CalendarStateO extends State<Calendar> {
               style: TextButton.styleFrom(
                 foregroundColor: Colors.white,
                 backgroundColor: const Color.fromRGBO(243, 90, 90, 1),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                minimumSize: const Size(120, 45),
+              ),
+              child: const Text(
+                'Close',
+                style: TextStyle(fontSize: 16),
+              ),
+            ),
+          ],
+        ),
+      );
+    } else if (event.title.toLowerCase().contains("official paper")) {
+      // Show "Feature not available" dialog for Official Paper
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: const Color(0xFFE6EDF2),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(0),
+          ),
+          title: Text(
+            event.title,
+            style: const TextStyle(
+              color: Color.fromRGBO(21, 58, 103, 1),
+              fontSize: 21,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          content: const Text(
+            'Official Paper feature will be available soon!',
+            style: TextStyle(
+              color: Color.fromRGBO(21, 58, 103, 1),
+              fontSize: 16,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: const Color.fromRGBO(243, 90, 90, 1),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 minimumSize: const Size(120, 45),
               ),
               child: const Text(
