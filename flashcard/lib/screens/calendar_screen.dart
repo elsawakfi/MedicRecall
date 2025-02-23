@@ -1059,178 +1059,164 @@ class CalendarStateO extends State<Calendar> {
     setState(() {});
   }
 
+  String _getEventType(String title) {
+    title = title.toLowerCase();
+    if (title == "test day") return "test_day";
+    if (title.contains("mini mock")) return "mini_mock";
+    if (title.contains("full mock")) return "full_mock";
+    if (title.contains("official paper")) return "official_paper";
+    return "flashcard";
+  }
+
   void _navigateToEventDetails(Event event) {
-    if (event.title == "Test Day") {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          backgroundColor: const Color(0xFFE6EDF2),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(0),
-          ),
-          title: Text(
-            "Test Day",
-            style: const TextStyle(
-              color: Color.fromRGBO(21, 58, 103, 1),
-              fontSize: 21,
-              fontWeight: FontWeight.w500,
+    switch (_getEventType(event.title)) {
+      case "test_day":
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            backgroundColor: const Color(0xFFE6EDF2),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(0),
             ),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Your test is scheduled for $testDayString.",
-                style: const TextStyle(
-                  color: Color.fromRGBO(21, 58, 103, 1),
-                  fontSize: 16,
-                ),
+            title: Text(
+              "Test Day",
+              style: const TextStyle(
+                color: Color.fromRGBO(21, 58, 103, 1),
+                fontSize: 21,
+                fontWeight: FontWeight.w500,
               ),
-              const SizedBox(height: 16),
-              const Text(
-                "Make sure to:\n1. Review all your flashcards\n2. Take practice exams\n3. Get good rest\n4. Stay confident!",
-                style: TextStyle(
-                  color: Color.fromRGBO(21, 58, 103, 1),
-                  fontSize: 16,
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Your test is scheduled for $testDayString.",
+                  style: const TextStyle(
+                    color: Color.fromRGBO(21, 58, 103, 1),
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  "Make sure to:\n1. Review all your flashcards\n2. Take practice exams\n3. Get good rest\n4. Stay confident!",
+                  style: TextStyle(
+                    color: Color.fromRGBO(21, 58, 103, 1),
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: const Color.fromRGBO(243, 90, 90, 1),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  minimumSize: const Size(120, 45),
+                ),
+                child: const Text(
+                  'Close',
+                  style: TextStyle(fontSize: 16),
                 ),
               ),
             ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: const Color.fromRGBO(243, 90, 90, 1),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                minimumSize: const Size(120, 45),
-              ),
-              child: const Text(
-                'Close',
-                style: TextStyle(fontSize: 16),
-              ),
-            ),
-          ],
-        ),
-      );
-    } else if (event.title.toLowerCase().contains("mini mock")) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const MiniMockLanding(),
-        ),
-      );
-    } else if (event.title.toLowerCase().contains("full mock")) {
-      // Show "Feature not available" dialog for Full Mock
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          backgroundColor: const Color(0xFFE6EDF2),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(0),
-          ),
-          title: Text(
-            event.title,
-            style: const TextStyle(
-              color: Color.fromRGBO(21, 58, 103, 1),
-              fontSize: 21,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          content: const Text(
-            'Full Mock feature will be available soon!',
-            style: TextStyle(
-              color: Color.fromRGBO(21, 58, 103, 1),
-              fontSize: 16,
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: const Color.fromRGBO(243, 90, 90, 1),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                minimumSize: const Size(120, 45),
-              ),
-              child: const Text(
-                'Close',
-                style: TextStyle(fontSize: 16),
-              ),
-            ),
-          ],
-        ),
-      );
-    } else if (event.title.toLowerCase().contains("official paper")) {
-      // Show "Feature not available" dialog for Official Paper
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          backgroundColor: const Color(0xFFE6EDF2),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(0),
-          ),
-          title: Text(
-            event.title,
-            style: const TextStyle(
-              color: Color.fromRGBO(21, 58, 103, 1),
-              fontSize: 21,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          content: const Text(
-            'Official Paper feature will be available soon!',
-            style: TextStyle(
-              color: Color.fromRGBO(21, 58, 103, 1),
-              fontSize: 16,
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: const Color.fromRGBO(243, 90, 90, 1),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                minimumSize: const Size(120, 45),
-              ),
-              child: const Text(
-                'Close',
-                style: TextStyle(fontSize: 16),
-              ),
-            ),
-          ],
-        ),
-      );
-    } else {
-      // For flashcard topics, navigate to Feed screen
-      String topic = event.title.split(" - ")[0].trim();
-      List<String> subtopics = [];
+        );
+        break;
 
-      // Find all subtopics for this topic from topicsList
-      for (String fullTopic in topicsList) {
-        if (fullTopic.startsWith("$topic - ")) {
-          subtopics.add(fullTopic.split(" - ")[1].trim());
+      case "mini_mock":
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const MinimockLanding(),
+          ),
+        );
+        break;
+
+      case "full_mock":
+        _showFeatureNotAvailableDialog(
+          event.title,
+          'Full Mock feature will be available soon!'
+        );
+        break;
+
+      case "official_paper":
+        _showFeatureNotAvailableDialog(
+          event.title,
+          'Official Paper feature will be available soon!'
+        );
+        break;
+
+      default:
+        // For flashcard topics, navigate to Feed screen
+        String topic = event.title.split(" - ")[0].trim();
+        List<String> subtopics = [];
+
+        // Find all subtopics for this topic from topicsList
+        for (String fullTopic in topicsList) {
+          if (fullTopic.startsWith("$topic - ")) {
+            subtopics.add(fullTopic.split(" - ")[1].trim());
+          }
         }
-      }
 
-      // If no subtopics found, use the topic itself
-      if (subtopics.isEmpty) {
-        subtopics = [topic];
-      }
+        // If no subtopics found, use the topic itself
+        if (subtopics.isEmpty) {
+          subtopics = [topic];
+        }
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => AboveEverything(
-            subtopics: subtopics,
-            count: 0,
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AboveEverything(
+              subtopics: subtopics,
+              count: 0,
+            ),
+          ),
+        );
+    }
+  }
+
+  void _showFeatureNotAvailableDialog(String title, String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFFE6EDF2),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(0),
+        ),
+        title: Text(
+          title,
+          style: const TextStyle(
+            color: Color.fromRGBO(21, 58, 103, 1),
+            fontSize: 21,
+            fontWeight: FontWeight.w500,
           ),
         ),
-      );
-    }
+        content: Text(
+          message,
+          style: const TextStyle(
+            color: Color.fromRGBO(21, 58, 103, 1),
+            fontSize: 16,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(
+              foregroundColor: const Color.fromRGBO(243, 90, 90, 1),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              minimumSize: const Size(120, 45),
+            ),
+            child: const Text(
+              'Close',
+              style: TextStyle(fontSize: 16),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _editEventDate(BuildContext context, Event event) {
