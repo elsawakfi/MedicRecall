@@ -430,17 +430,24 @@ class CalendarStateO extends State<Calendar> {
   @override
   void initState() {
     super.initState();
-    getUser();
-    getTestDay();
+    selectedEvents = {};
     initializeUserAndTestDay();
-    _loadStudySessions();
-    _loadTopicsList();
   }
 
   Future<void> initializeUserAndTestDay() async {
     await getUser();
     await getTestDay();
-    await generateEventsUIChange(testDay!);
+    if (testDay != null) {
+      // Add Test Day event
+      selectedEvents[testDay] = [
+        Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94))
+      ];
+      // Generate other events
+      await generateEventsUIChange(testDay!);
+    }
+    await _loadStudySessions();
+    await _loadTopicsList();
+    setState(() {});
   }
 
   Future<void> _loadStudySessions() async {
@@ -1061,7 +1068,7 @@ class CalendarStateO extends State<Calendar> {
 
   String _getEventType(String title) {
     title = title.toLowerCase();
-    if (title == "test day") return "test_day";
+    if (title.contains("test day")) return "test_day";
     if (title.contains("mini mock")) return "mini_mock";
     if (title.contains("full-sized mock")) return "full_mock";
     if (title.contains("official paper")) return "official_paper";
