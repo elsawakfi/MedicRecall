@@ -10,6 +10,7 @@ import 'package:flashcard_x/screens/button_screen.dart';
 import 'package:reviews_slider/reviews_slider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:flashcard_x/screens/study_session_manager.dart';
+import 'package:flashcard_x/screens/feed_screen.dart';
 
 /*
 Important note for devs
@@ -292,6 +293,35 @@ class CalendarStateO extends State<Calendar> {
   }
 
   //upload each event in the calendar to the database
+  Future<void> updateEventsToDB(User user) async {
+    for (var entry in selectedEvents.entries) {
+      DateTime normalizedDate = DateTime(entry.key!.year, entry.key!.month, entry.key!.day);
+      
+      // Convert events to a list of strings
+      List<String> updatedEvents = entry.value.map((e) => e.title).toList();
+      
+      if (updatedEvents.isEmpty) {
+        await deleteSingleEvent(normalizedDate, "", user);
+      } else {
+        QuerySnapshot querySnapshot = await _eventsCollectionRef
+            .where("date", isEqualTo: Timestamp.fromDate(normalizedDate))
+            .get();
+
+        if (querySnapshot.docs.isEmpty) {
+          await _eventsCollectionRef.add({
+            "date": Timestamp.fromDate(normalizedDate),
+            "events": updatedEvents,
+          });
+        } else {
+          String docId = querySnapshot.docs.first.id;
+          await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
+        }
+      }
+    }
+    setState(() {});
+  }
+
+  // Restoring the updateOneEvent function that was accidentally removed in the previous edit.
   Future<void> updateOneEvent(Event oldEvent, String newTitle, DateTime newDate) async {
     DateTime normalizedOldDate = DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
     DateTime normalizedNewDate = DateTime(newDate.year, newDate.month, newDate.day);
@@ -345,35 +375,6 @@ class CalendarStateO extends State<Calendar> {
     setState(() {
       selectedDay = normalizedNewDate;
     });
-  }
-
-  //When creating a new revision plan we update the database with the revision topics and dates in the calendar
-  Future<void> updateEventsToDB(User user) async {
-    for (var entry in selectedEvents.entries) {
-      DateTime normalizedDate = DateTime(entry.key!.year, entry.key!.month, entry.key!.day);
-      
-      // Convert events to a list of strings
-      List<String> updatedEvents = entry.value.map((e) => e.title).toList();
-      
-      if (updatedEvents.isEmpty) {
-        await deleteSingleEvent(normalizedDate, "", user);
-      } else {
-        QuerySnapshot querySnapshot = await _eventsCollectionRef
-            .where("date", isEqualTo: Timestamp.fromDate(normalizedDate))
-            .get();
-
-        if (querySnapshot.docs.isEmpty) {
-          await _eventsCollectionRef.add({
-            "date": Timestamp.fromDate(normalizedDate),
-            "events": updatedEvents,
-          });
-        } else {
-          String docId = querySnapshot.docs.first.id;
-          await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
-        }
-      }
-    }
-    setState(() {});
   }
 
   //deletes all events and testDay in UI calendar and firebase
@@ -1105,47 +1106,91 @@ class CalendarStateO extends State<Calendar> {
   }
 
   void _navigateToEventDetails(Event event) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: const Color(0xFFE6EDF2),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(0),
-          ),
-          title: Text(
-            "Coming Soon",
-            style: const TextStyle(
-              color: Color.fromRGBO(21, 58, 103, 1),
-              fontSize: 21,
-              fontWeight: FontWeight.w500,
+    // If it's a Test Day event
+    if (event.title == "Test Day") {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: const Color(0xFFE6EDF2),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(0),
             ),
-          ),
-          content: Text(
-            "This feature will be implemented soon.",
-            style: const TextStyle(
-              color: Color.fromRGBO(21, 58, 103, 1),
-              fontSize: 16,
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: Color.fromRGBO(243, 90, 90, 1),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                minimumSize: const Size(120, 45),
-              ),
-              child: const Text(
-                'Close',
-                style: TextStyle(fontSize: 16),
+            title: Text(
+              "Test Day",
+              style: const TextStyle(
+                color: Color.fromRGBO(21, 58, 103, 1),
+                fontSize: 21,
+                fontWeight: FontWeight.w500,
               ),
             ),
-          ],
-        );
-      },
-    );
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Your test is scheduled for ${testDayString}.",
+                  style: const TextStyle(
+                    color: Color.fromRGBO(21, 58, 103, 1),
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  "Make sure to review all your topics and get enough rest before the test.",
+                  style: TextStyle(
+                    color: Color.fromRGBO(21, 58, 103, 1),
+                    fontSize: 16,
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Color.fromRGBO(243, 90, 90, 1),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  minimumSize: const Size(120, 45),
+                ),
+                child: const Text(
+                  'Close',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      // For topic events, navigate to feed screen
+      // Extract the main topic from the event title (before the hyphen if it exists)
+      String topic = event.title.split(" - ")[0];
+      List<String> subtopics = [];
+
+      // Find all subtopics for this topic
+      for (String fullTopic in topicsList) {
+        if (fullTopic.startsWith("${topic} - ")) {
+          subtopics.add(fullTopic.split(" - ")[1]);
+        }
+      }
+
+      // If no subtopics found, use the topic itself
+      if (subtopics.isEmpty) {
+        subtopics = [topic];
+      }
+
+      // Navigate to feed screen
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AboveEverything(
+            subtopics: subtopics,
+            count: 0, // Start from beginning
+          ),
+        ),
+      );
+    }
   }
 }
