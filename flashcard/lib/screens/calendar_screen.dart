@@ -1063,7 +1063,7 @@ class CalendarStateO extends State<Calendar> {
     title = title.toLowerCase();
     if (title == "test day") return "test_day";
     if (title.contains("mini mock")) return "mini_mock";
-    if (title.contains("full mock")) return "full_mock";
+    if (title.contains("full-sized mock")) return "full_mock";
     if (title.contains("official paper")) return "official_paper";
     return "flashcard";
   }
