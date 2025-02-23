@@ -1130,7 +1130,7 @@ class CalendarStateO extends State<Calendar> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const MinimockLanding(),
+            builder: (context) => const MiniMockLanding(),
           ),
         );
         break;
