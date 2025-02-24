@@ -172,7 +172,7 @@ Future<void> fetchAverageScore() async {
     averagePercentageScore = (averageScore/ tempMaxScore) * 100;
     setState(() {
       maxScore = tempMaxScore;
-      // totalScore = totalScore;
+      totalScore = totalScore;
       // userPercentageScore = userPercentageScore;
       // averagePercentageScore = averagePercentageScore;
     });
