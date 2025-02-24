@@ -353,6 +353,213 @@ class CalendarStateO extends State<Calendar> {
     setState(() {});
   }
 
+  String _getEventType(String title) {
+    title = title.toLowerCase();
+    
+    // The 5 main event types - using contains() to be more flexible
+    if (title.contains('mini mock')) {
+      return "mini_mock";
+    }
+    if (title.contains('full-sized mock') || title.contains('full mock')) {
+      return "full_mock";
+    }
+    if (title.contains('flashcard')) {
+      return "flashcard";
+    }
+    if (title.contains('official paper')) {
+      return "official_paper";
+    }
+    if (title.contains('test day')) {
+      return "test_day";
+    }
+    
+    // If it's not one of the 5 main events, show "feature not available"
+    return "unknown";
+  }
+
+  void _showTestDayInfoDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Your MSRA Test Day',
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Test Date: ${DateFormat('EEEE, MMMM d, y').format(testDay!)}',
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  'Important Tips:',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                const Text('• Get a good night\'s sleep before the exam'),
+                const Text('• Arrive at the test center 30 minutes early'),
+                const Text('• Bring valid photo ID and test confirmation'),
+                const Text('• No phones or electronic devices allowed'),
+                const SizedBox(height: 20),
+                const Text(
+                  'Test Format:',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                const Text('• Professional Dilemma (PD): 95 minutes'),
+                const Text('• Clinical Problem Solving (CPS): 75 minutes'),
+                const Text('• Total questions: 188 (PD: 98, CPS: 90)'),
+                const SizedBox(height: 20),
+                const Text(
+                  'Last-Minute Preparation:',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                const Text('• Review your weakest topics'),
+                const Text('• Practice time management'),
+                const Text('• Focus on understanding question patterns'),
+                const Text('• Stay calm and confident!'),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _navigateToEventDetails(Event event) async {
+    String eventType = _getEventType(event.title);
+
+    if (eventType == 'official_paper') {
+      final String url = 'https://medical.hee.nhs.uk/medical-training-recruitment/medical-specialty-training/publications/multi-specialty-recruitment-assessment-%28msra%29-practice-paper/section-1--professional-dilemma-pd';
+      try {
+        if (!await launcher.launch(url)) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Could not open the official paper website'),
+              ),
+            );
+          }
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Could not open the official paper website'),
+            ),
+          );
+        }
+      }
+    } else if (eventType == 'mini_mock') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const MiniMockLanding()),
+      );
+    } else if (eventType == 'flashcard') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const HomePage(title: 'Dashboard'),
+        ),
+      );
+    } else if (eventType == 'test_day') {
+      _showTestDayInfoDialog();
+    } else if (eventType == 'full_mock') {
+      _showFeatureNotAvailableDialog(
+        'Feature Not Available',
+        'Full-sized mock feature is not available yet.',
+      );
+    } else {
+      _showFeatureNotAvailableDialog(
+        'Unknown Event Type',
+        'This event type is not recognized.',
+      );
+    }
+  }
+
+  void _showFeatureNotAvailableDialog(String title, String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFFE6EDF2),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(0),
+        ),
+        title: Text(
+          title,
+          style: const TextStyle(
+            color: Color.fromRGBO(21, 58, 103, 1),
+            fontSize: 21,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        content: Text(
+          message,
+          style: const TextStyle(
+            color: Color.fromRGBO(21, 58, 103, 1),
+            fontSize: 16,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(
+              foregroundColor: const Color.fromRGBO(243, 90, 90, 1),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              minimumSize: const Size(120, 45),
+            ),
+            child: const Text(
+              'Close',
+              style: TextStyle(fontSize: 16),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  //deletes all events and testDay in UI calendar and firebase
+  Future<void> deleteAllEvents() async {
+    selectedEvents
+        .clear(); // sets the selectedEvents list to empty - delete all events being stored locally.
+
+    QuerySnapshot u =
+        await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+    String id = u.docs.last.id;
+    _eventsCollectionRef =
+        // FirebaseFirestore.instance.collection('users/' + id + "/events");
+        FirebaseFirestore.instance.collection('users/$id/events');
+    var snapshots = await _eventsCollectionRef.get();
+    for (var doc in snapshots.docs) {
+      await doc.reference.delete();
+    }
+
+    var userFromDb = u.docs.first;
+    Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
+    CollectionReference users = FirebaseFirestore.instance.collection('users');
+
+    if (data.containsKey("TestDay") || data["TestDay"] != null) {
+      data.remove("TestDay");
+      users.doc(id).update({
+        "TestDay": FieldValue.delete()
+      }); // update field TestDay to be removed from database
+    }
+
+    selectedEvents[testDay]?.remove(Event(
+        title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
+    getTestDay();
+  }
+
   Future<void> updateOneEvent(
       Event oldEvent, String newTitle, DateTime newDate) async {
     DateTime normalizedOldDate =
@@ -418,38 +625,6 @@ class CalendarStateO extends State<Calendar> {
     setState(() {
       selectedDay = normalizedNewDate;
     });
-  }
-
-  //deletes all events and testDay in UI calendar and firebase
-  Future<void> deleteAllEvents() async {
-    selectedEvents
-        .clear(); // sets the selectedEvents list to empty - delete all events being stored locally.
-
-    QuerySnapshot u =
-        await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
-    String id = u.docs.last.id;
-    _eventsCollectionRef =
-        // FirebaseFirestore.instance.collection('users/' + id + "/events");
-        FirebaseFirestore.instance.collection('users/$id/events');
-    var snapshots = await _eventsCollectionRef.get();
-    for (var doc in snapshots.docs) {
-      await doc.reference.delete();
-    }
-
-    var userFromDb = u.docs.first;
-    Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
-    CollectionReference users = FirebaseFirestore.instance.collection('users');
-
-    if (data.containsKey("TestDay") || data["TestDay"] != null) {
-      data.remove("TestDay");
-      users.doc(id).update({
-        "TestDay": FieldValue.delete()
-      }); // update field TestDay to be removed from database
-    }
-
-    selectedEvents[testDay]?.remove(Event(
-        title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
-    getTestDay();
   }
 
   @override
@@ -1103,232 +1278,6 @@ class CalendarStateO extends State<Calendar> {
     }
 
     setState(() {});
-  }
-
-  String _getEventType(String title) {
-    title = title.toLowerCase();
-    
-    // The 5 main event types
-    if (title == 'mini mock') {
-      return "mini_mock";
-    }
-    if (title == 'full-sized mock') {
-      return "full_mock";
-    }
-    if (title == 'flashcard') {
-      return "flashcard";
-    }
-    if (title == 'official paper') {
-      return "official_paper";
-    }
-    if (title == 'test day') {
-      return "test_day";
-    }
-    
-    // If it's not one of the 5 main events, show "feature not available"
-    return "unknown";
-  }
-
-  Future<void> _navigateToEventDetails(Event event) async {
-    String eventType = _getEventType(event.title);
-
-    if (eventType == 'official_paper') {
-      final String url = 'https://medical.hee.nhs.uk/medical-training-recruitment/medical-specialty-training/publications/multi-specialty-recruitment-assessment-%28msra%29-practice-paper/section-1--professional-dilemma-pd';
-      try {
-        if (!await launcher.launch(url)) {
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Could not open the official paper website'),
-              ),
-            );
-          }
-        }
-      } catch (e) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Could not open the official paper website'),
-            ),
-          );
-        }
-      }
-    } else if (eventType == 'mini_mock') {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const MiniMockLanding()),
-      );
-    } else if (eventType == 'flashcard') {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const HomePage(title: 'Dashboard'),
-        ),
-      );
-    } else if (eventType == 'test_day') {
-      _showTestDayInfoDialog();
-    } else if (eventType == 'full_mock') {
-      _showFeatureNotAvailableDialog(
-        'Feature Not Available',
-        'Full-sized mock feature is not available yet.',
-      );
-    } else {
-      _showFeatureNotAvailableDialog(
-        'Unknown Event Type',
-        'This event type is not recognized.',
-      );
-    }
-  }
-
-  void _showTestDayInfoDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Your MSRA Test Day',
-              style: TextStyle(fontWeight: FontWeight.bold)),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Test Date: ${DateFormat('EEEE, MMMM d, y').format(testDay!)}',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                  'Important Tips:',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 10),
-                const Text('• Get a good night\'s sleep before the exam'),
-                const Text('• Arrive at the test center 30 minutes early'),
-                const Text('• Bring valid photo ID and test confirmation'),
-                const Text('• No phones or electronic devices allowed'),
-                const SizedBox(height: 20),
-                const Text(
-                  'Test Format:',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 10),
-                const Text('• Professional Dilemma (PD): 95 minutes'),
-                const Text('• Clinical Problem Solving (CPS): 75 minutes'),
-                const Text('• Total questions: 188 (PD: 98, CPS: 90)'),
-                const SizedBox(height: 20),
-                const Text(
-                  'Last-Minute Preparation:',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 10),
-                const Text('• Review your weakest topics'),
-                const Text('• Practice time management'),
-                const Text('• Focus on understanding question patterns'),
-                const Text('• Stay calm and confident!'),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Close'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> _navigateToEventDetails(Event event) async {
-    String eventType = _getEventType(event.title);
-
-    if (eventType == 'official_paper') {
-      final String url = 'https://medical.hee.nhs.uk/medical-training-recruitment/medical-specialty-training/publications/multi-specialty-recruitment-assessment-%28msra%29-practice-paper/section-1--professional-dilemma-pd';
-      try {
-        if (!await launcher.launch(url)) {
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Could not open the official paper website'),
-              ),
-            );
-          }
-        }
-      } catch (e) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Could not open the official paper website'),
-            ),
-          );
-        }
-      }
-    } else if (eventType == 'mini_mock') {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const MiniMockLanding()),
-      );
-    } else if (eventType == 'flashcard') {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const HomePage(title: 'Dashboard'),
-        ),
-      );
-    } else if (eventType == 'test_day') {
-      _showTestDayInfoDialog();
-    } else if (eventType == 'full_mock') {
-      _showFeatureNotAvailableDialog(
-        'Feature Not Available',
-        'Full-sized mock feature is not available yet.',
-      );
-    } else {
-      _showFeatureNotAvailableDialog(
-        'Unknown Event Type',
-        'This event type is not recognized.',
-      );
-    }
-  }
-
-  void _showFeatureNotAvailableDialog(String title, String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFFE6EDF2),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(0),
-        ),
-        title: Text(
-          title,
-          style: const TextStyle(
-            color: Color.fromRGBO(21, 58, 103, 1),
-            fontSize: 21,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        content: Text(
-          message,
-          style: const TextStyle(
-            color: Color.fromRGBO(21, 58, 103, 1),
-            fontSize: 16,
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            style: TextButton.styleFrom(
-              foregroundColor: const Color.fromRGBO(243, 90, 90, 1),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              minimumSize: const Size(120, 45),
-            ),
-            child: const Text(
-              'Close',
-              style: TextStyle(fontSize: 16),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   void _editEventDate(BuildContext context, Event event) {
