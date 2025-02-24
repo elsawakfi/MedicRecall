@@ -1106,19 +1106,78 @@ class CalendarStateO extends State<Calendar> {
   }
 
   String _getEventType(String title) {
-    if (title.toLowerCase().contains('official paper')) {
-      return "official_paper";
-    }
-    if (title.toLowerCase().contains('mini mock')) {
+    title = title.toLowerCase();
+    
+    // The 5 main event types
+    if (title == 'mini mock') {
       return "mini_mock";
     }
-    if (title.toLowerCase().contains('full mock')) {
+    if (title == 'full-sized mock') {
       return "full_mock";
     }
-    if (title.toLowerCase().contains('test day')) {
+    if (title == 'flashcard') {
+      return "flashcard";
+    }
+    if (title == 'official paper') {
+      return "official_paper";
+    }
+    if (title == 'test day') {
       return "test_day";
     }
-    return "flashcard";
+    
+    // If it's not one of the 5 main events, show "feature not available"
+    return "unknown";
+  }
+
+  Future<void> _navigateToEventDetails(Event event) async {
+    String eventType = _getEventType(event.title);
+
+    if (eventType == 'official_paper') {
+      final String url = 'https://medical.hee.nhs.uk/medical-training-recruitment/medical-specialty-training/publications/multi-specialty-recruitment-assessment-%28msra%29-practice-paper/section-1--professional-dilemma-pd';
+      try {
+        if (!await launcher.launch(url)) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Could not open the official paper website'),
+              ),
+            );
+          }
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Could not open the official paper website'),
+            ),
+          );
+        }
+      }
+    } else if (eventType == 'mini_mock') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const MiniMockLanding()),
+      );
+    } else if (eventType == 'flashcard') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const HomePage(title: 'Dashboard'),
+        ),
+      );
+    } else if (eventType == 'test_day') {
+      _showTestDayInfoDialog();
+    } else if (eventType == 'full_mock') {
+      _showFeatureNotAvailableDialog(
+        'Feature Not Available',
+        'Full-sized mock feature is not available yet.',
+      );
+    } else {
+      _showFeatureNotAvailableDialog(
+        'Unknown Event Type',
+        'This event type is not recognized.',
+      );
+    }
   }
 
   void _showTestDayInfoDialog() {
@@ -1225,8 +1284,8 @@ class CalendarStateO extends State<Calendar> {
       );
     } else {
       _showFeatureNotAvailableDialog(
-        'Feature Not Available',
-        'This feature is not available yet.',
+        'Unknown Event Type',
+        'This event type is not recognized.',
       );
     }
   }
