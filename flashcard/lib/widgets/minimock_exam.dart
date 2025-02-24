@@ -333,6 +333,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                 Center(// Display the current question text
                child: Container(
                 width: 1000,
+                height: 635,
                 child: Column(
                   children:[
                 Text(
