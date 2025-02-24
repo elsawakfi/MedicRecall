@@ -19,28 +19,12 @@ import 'package:flashcard_x/screens/dashboard_screen.dart';
 /*
 Important note for devs
 
-testDay is a dateTime object
-testDayString is the same, but stored as a string
-this is so that it can be stored and retrieved from the database, there was an error where dateTime couldnt be pulled
-as a result, both are used:
-testDay for the calendar on the app
-testDayString for database purposes.
-
- */
+testDay is a dateTime object that represents the user's test day
+It is used for both UI display and database storage
+*/
 
 bool loading = true;
 
-List<String> topicsListOld = [
-  //just the topics
-  "Patient focus",
-  "The remit of an FY1",
-  "Commitment to professionalism",
-  "Coping with pressure",
-  "Effective communication",
-  "Team working",
-  "Confidentiality",
-  "Who's who"
-];
 List<String> topicsList = [
   // topics with a subtopic (if it has one)
   "Patient focus - Maintaining patient focus",
@@ -72,8 +56,6 @@ List<String> topicsList = [
   "Confidentiality - Child protection rules"
 ];
 
-List<dynamic> topicsSeen = [];
-
 class Calendar extends StatefulWidget {
   const Calendar({super.key});
 
@@ -91,13 +73,10 @@ class CalendarStateO extends State<Calendar> {
   late Map<DateTime?, List<Event>> selectedEvents;
   CalendarFormat format = CalendarFormat.month;
   DateTime? testDay = DateTime.now();
-  late String testDayString = "Test day not set";
   DateTime selectedDay = DateTime(2020, 1, 1);
-  // what the user has tapped on
   DateTime focusedDay = DateTime.now();
   final DateTime today =
       DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
-  int buildCount = 0;
   final TextEditingController _eventController = TextEditingController();
   bool testDayBool = false;
   //The CalendarFormat variable format allows the user to change their view of the calendar, into weekly, biweekly and monthly.
@@ -113,7 +92,6 @@ class CalendarStateO extends State<Calendar> {
     'Sunday'
   ];
   List<String> revisionDays = [];
-  List<String> topicsList = [];
 
   CalendarStateO() {
     selectedEvents = {};
@@ -227,15 +205,10 @@ class CalendarStateO extends State<Calendar> {
     Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
     //if the Test Day field isn't null and is in the database we update the UI with it. Otherwise it is displayed as being not set.
     if ((data.containsKey("TestDay") || data["TestDay"] != null) &&
-        (buildCount <= 2 || (testDay != null && buildCount > 2))) {
+        (testDay != null)) {
       testDayBool = false;
       testDay = DateTime.fromMicrosecondsSinceEpoch(userFromDb["TestDay"]
           .microsecondsSinceEpoch); //firebase is weird. conversion from TimeStamp to DateTime object
-      String? day = testDay?.day.toString();
-      String? month = testDay?.month.toString();
-      String? year = testDay?.year.toString();
-
-      testDayString = '$day-$month-$year';
     } else {
       testDayBool = true;
     }
@@ -654,10 +627,6 @@ class CalendarStateO extends State<Calendar> {
       await generateStudySessions(user);
       print("Generated study sessions");
 
-      // Load topics
-      await _loadTopicsList();
-      print("Loaded topics list");
-
       setState(() {});
     } else {
       print("Test day is null!");
@@ -766,8 +735,6 @@ class CalendarStateO extends State<Calendar> {
 
   @override
   Widget build(BuildContext context) {
-    buildCount++;
-
     return Scaffold(
       drawer: const DrawMain(),
       appBar: AppBar(
