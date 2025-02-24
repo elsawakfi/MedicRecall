@@ -1114,7 +1114,66 @@ class CalendarStateO extends State<Calendar> {
     return "flashcard";
   }
 
-  void _navigateToEventDetails(Event event) async {
+  void _showTestDayInfoDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Your MSRA Test Day',
+              style: TextStyle(fontWeight: FontWeight.bold)),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Test Date: ${DateFormat('EEEE, MMMM d, y').format(_examDate!)}',
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  'Important Tips:',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                const Text('• Get a good night\'s sleep before the exam'),
+                const Text('• Arrive at the test center 30 minutes early'),
+                const Text('• Bring valid photo ID and test confirmation'),
+                const Text('• No phones or electronic devices allowed'),
+                const SizedBox(height: 20),
+                const Text(
+                  'Test Format:',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                const Text('• Professional Dilemma (PD): 95 minutes'),
+                const Text('• Clinical Problem Solving (CPS): 75 minutes'),
+                const Text('• Total questions: 188 (PD: 98, CPS: 90)'),
+                const SizedBox(height: 20),
+                const Text(
+                  'Last-Minute Preparation:',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 10),
+                const Text('• Review your weakest topics'),
+                const Text('• Practice time management'),
+                const Text('• Focus on understanding question patterns'),
+                const Text('• Stay calm and confident!'),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _navigateToEventDetails(Event event) async {
     String eventType = _getEventType(event.title);
 
     if (eventType == 'official_paper') {
@@ -1150,6 +1209,8 @@ class CalendarStateO extends State<Calendar> {
           builder: (context) => const HomePage(title: 'Dashboard'),
         ),
       );
+    } else if (eventType == 'test_day') {
+      _showTestDayInfoDialog();
     } else if (eventType == 'full_mock') {
       _showFeatureNotAvailableDialog(
         'Feature Not Available',
