@@ -1106,11 +1106,18 @@ class CalendarStateO extends State<Calendar> {
   }
 
   String _getEventType(String title) {
-    title = title.toLowerCase();
-    if (title.contains("test day")) return "test_day";
-    if (title.contains("mini mock")) return "mini_mock";
-    if (title.contains("full-sized mock")) return "full_mock";
-    if (title.contains("official paper")) return "official_paper";
+    if (title.toLowerCase().contains('official paper')) {
+      return "official_paper";
+    }
+    if (title.toLowerCase().contains('mini mock')) {
+      return "mini_mock";
+    }
+    if (title.toLowerCase().contains('full mock')) {
+      return "full_mock";
+    }
+    if (title.toLowerCase().contains('test day')) {
+      return "test_day";
+    }
     return "flashcard";
   }
 
@@ -1127,7 +1134,7 @@ class CalendarStateO extends State<Calendar> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Test Date: ${DateFormat('EEEE, MMMM d, y').format(_examDate!)}',
+                  'Test Date: ${DateFormat('EEEE, MMMM d, y').format(testDay!)}',
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                 ),
                 const SizedBox(height: 20),
