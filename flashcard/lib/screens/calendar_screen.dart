@@ -1146,12 +1146,14 @@ class CalendarStateO extends State<Calendar> {
     } else if (eventType == 'flashcard') {
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => const Questions()),
+        MaterialPageRoute(
+          builder: (context) => const HomePage(title: 'Dashboard'),
+        ),
       );
     } else if (eventType == 'full_mock') {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const MiniMockLanding()),
+      _showFeatureNotAvailableDialog(
+        'Feature Not Available',
+        'Full-sized mock feature is not available yet.',
       );
     } else {
       _showFeatureNotAvailableDialog(
