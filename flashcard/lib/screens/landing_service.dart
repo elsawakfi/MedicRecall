@@ -4,6 +4,7 @@ class LandingService {
   LandingService._internal();
 
   bool onLanding = false; 
+  bool stopShowing = false;
 }
 
 LandingService landingService = LandingService();

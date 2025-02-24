@@ -171,8 +171,11 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
           testDayBool && 
           _examDate == null && 
           landingService.onLanding &&
-          !stopShowing){
+          !landingService.stopShowing){
        _showRevisionPlanDialog(context);
+       print("Stop showing has the value: ");
+       print(landingService.stopShowing);
+       print("\n");
        }
   }
 
@@ -188,7 +191,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
             child: buttonPressed
                 ? Text('')
                 : Text(
-                  'If you want to stop seeing this pop up please press the red button below to pause pop ups for a day.',
+                  'If you want to stop seeing this pop up please press the red button below to pause pop up during your session',
                   style: TextStyle(fontSize: 14, color:Color.fromRGBO(21, 58, 103, 1))
                   )),
           
@@ -230,7 +233,9 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              stopShowing = true; 
+              landingService.stopShowing = true;
+              //need to save the date here and then add another condition that checks later on 
+
             },
             style: TextButton.styleFrom(
               foregroundColor: const Color.fromRGBO(243, 90, 90, 1),
