@@ -23,6 +23,9 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
   int currentQuestion = 0;
   List<Map<String, dynamic>> questions = [];
   Map<String, dynamic> userAnswers = {};
+  List<List<MapEntry<String, String>>> examOptions = []; // Correct option associated to each letter of the correct answers
+  List<List<MapEntry<String, String>>> userOptions = []; // Correct option associated to each letter of the user answers
+
   final FirebaseAuth auth = FirebaseAuth.instance;
   late User user;
   final ScrollController _optionScrollController = ScrollController();
@@ -38,9 +41,14 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
    @override
   void initState() {
     super.initState();
-    getQuestions(); // Fetch the questions on initialisation (Needed as this is not to be called in the widget build)
-    getUser();
-    fetchUserAnswers(); //Fetch the user's answers from the database
+    initialise();
+  }
+
+  Future<void> initialise() async{
+    await getQuestions(); // Fetch the questions on initialisation
+    await getUser();
+    await fetchUserAnswers(); //Fetch the user's answers from the database
+    _reorderAnswers();
   }
 
  Future<void> getUser() async {
@@ -92,6 +100,32 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
     } catch (error) {
       if (kDebugMode) {
         print('Error fetching questions: $error');
+      }
+    }
+  }
+
+  void _reorderAnswers(){
+    if(questions.isNotEmpty){
+      for(int i = 0; i < questions.length; i++ ){
+        if(questions[i]['type'] != "ranking"){
+          break;
+        }
+        List<dynamic> options = questions[i]['options'];
+        List<dynamic> examLetters = questions[i]['correct_answers'];
+        List<dynamic> userLetters = userAnswers[(i + 1).toString()];
+
+        // Assign each option a letter
+        // Generates a list where each option is paired with their associated letter
+        // These letters are then compared with the index of the correct arrangement allowing them to be reordered correctly
+        List<MapEntry<String, String>> tempExamOptions = List.generate(
+            options.length, (index) => MapEntry(String.fromCharCode(65 + index), options[index]));
+        tempExamOptions.sort((a, b) => examLetters.indexOf(a.key).compareTo(examLetters.indexOf(b.key)));
+        examOptions.add(tempExamOptions);
+
+        List<MapEntry<String, String>> tempUserOptions = List.generate(
+            options.length, (index) => MapEntry(String.fromCharCode(65 + index), options[index]));
+        tempUserOptions.sort((a, b) => userLetters.indexOf(a.key).compareTo(userLetters.indexOf(b.key)));
+        userOptions.add(tempUserOptions);
       }
     }
   }
@@ -208,7 +242,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
             ),
           ),
         ),
-      body: questions.isEmpty || userAnswers.isEmpty
+      body: examOptions.isEmpty || userOptions.isEmpty
           ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
           : Padding( //Else load the data
 
@@ -258,6 +292,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
             if (questions[currentQuestion]['type'] == "ranking") ...[
               Row(
                 children: [
+                  // USER ANSWERS
                   Expanded(
                       child: SingleChildScrollView(
                         child: Column(
@@ -265,23 +300,25 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text('  Given Answer:', style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,fontSize: 18)),
-                              ...questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
+                              ...userOptions[currentQuestion].asMap().entries.map<Widget>((entry) {
                                 int optionIndex = entry.key;
-                                String option = entry.value;
-                                String optionLetter = String.fromCharCode(optionIndex + 65);
+                                MapEntry<String, String> currentEntry = entry.value;
+                                String optionLetter = currentEntry.key;
+                                String optionText = currentEntry.value;
                                 return Card(
-                                  color: (questions[currentQuestion]['correct_answers'][optionIndex] == userAnswers[(currentQuestion+1).toString()][optionIndex])
+                                  color: (questions[currentQuestion]['correct_answers'][optionIndex] == optionLetter)
                                       ? Colors.green
                                       : Colors.red.shade400,
                                     child: ListTile(
-                                      title: Text('$optionLetter. $option', style: TextStyle(color: Colors.white,fontSize: 18))
+                                      title: Text('$optionLetter. $optionText', style: TextStyle(color: Colors.white,fontSize: 18))
                                     )
                                 );
-                              }).toList()
+                              })
                             ]
                         ),
                       )
                   ),
+                  // CORRECT ANSWERS
                   Expanded(
                     child: SingleChildScrollView(
                       child: Column(
@@ -289,17 +326,17 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text('  Correct Answer:', style: TextStyle(color:Theme.of(context).textTheme.bodyMedium?.color,fontSize: 18)),
-                            ...questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
-                              int optionIndex = entry.key;
-                              String option = entry.value;
-                              String optionLetter = String.fromCharCode(optionIndex + 65);
+                            ...examOptions[currentQuestion].asMap().entries.map<Widget>((entry) {
+                              MapEntry<String, String> currentEntry = entry.value;
+                              String optionLetter = currentEntry.key;
+                              String optionText = currentEntry.value;
                               return Card(
                                 child: ListTile(
-                                  title: Text('$optionLetter. $option',
+                                  title: Text('$optionLetter. $optionText',
                                       style: TextStyle(color: Colors.blueGrey, fontSize: 18)),
                                 )
                               );
-                            }).toList()
+                            })
                           ]
                       ),
                     )
