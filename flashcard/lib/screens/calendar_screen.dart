@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 // Internal imports
 import 'landing_screen.dart';
@@ -1112,95 +1113,42 @@ class CalendarStateO extends State<Calendar> {
     return "flashcard";
   }
 
-  void _navigateToEventDetails(Event event) {
-    switch (_getEventType(event.title)) {
-      case "test_day":
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            backgroundColor: const Color(0xFFE6EDF2),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(0),
+  void _navigateToEventDetails(Event event) async {
+    String eventType = _getEventType(event.title);
+
+    if (eventType == 'official_paper') {
+      final Uri url = Uri.parse('https://medical.hee.nhs.uk/medical-training-recruitment/medical-specialty-training/publications/multi-specialty-recruitment-assessment-%28msra%29-practice-paper/section-1--professional-dilemma-pd');
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url);
+      } else {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Could not open the official paper website'),
             ),
-            title: Text(
-              "Test Day",
-              style: const TextStyle(
-                color: Color.fromRGBO(21, 58, 103, 1),
-                fontSize: 21,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Your test is scheduled for $testDayString.",
-                  style: const TextStyle(
-                    color: Color.fromRGBO(21, 58, 103, 1),
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  "Make sure to:\n1. Review all your flashcards\n2. Take practice exams\n3. Get good rest\n4. Stay confident!",
-                  style: TextStyle(
-                    color: Color.fromRGBO(21, 58, 103, 1),
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  backgroundColor: const Color.fromRGBO(243, 90, 90, 1),
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  minimumSize: const Size(120, 45),
-                ),
-                child: const Text(
-                  'Close',
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
-            ],
-          ),
-        );
-        break;
-
-      case "mini_mock":
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const MiniMockLanding(),
-          ),
-        );
-        break;
-
-      case "full_mock":
-        _showFeatureNotAvailableDialog(
-          event.title,
-          'Full Mock feature will be available soon!'
-        );
-        break;
-
-      case "official_paper":
-        _showFeatureNotAvailableDialog(
-          event.title,
-          'Official Paper feature will be available soon!'
-        );
-        break;
-
-      default:
-        // For flashcard topics, navigate to the dashboard which contains the flashcard tutor interface
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const HomePage(title: ''),
-          ),
-        );
+          );
+        }
+      }
+    } else if (eventType == 'mini_mock') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const MiniMockLanding()),
+      );
+    } else if (eventType == 'flashcard') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const Questions()),
+      );
+    } else if (eventType == 'full_mock') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const MiniMockLanding()),
+      );
+    } else {
+      _showFeatureNotAvailableDialog(
+        'Feature Not Available',
+        'This feature is not available yet.',
+      );
     }
   }
 
