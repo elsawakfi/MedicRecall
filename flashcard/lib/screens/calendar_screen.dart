@@ -1118,9 +1118,17 @@ class CalendarStateO extends State<Calendar> {
 
     if (eventType == 'official_paper') {
       final Uri url = Uri.parse('https://medical.hee.nhs.uk/medical-training-recruitment/medical-specialty-training/publications/multi-specialty-recruitment-assessment-%28msra%29-practice-paper/section-1--professional-dilemma-pd');
-      if (await canLaunchUrl(url)) {
-        await launchUrl(url);
-      } else {
+      try {
+        if (!await launch(url.toString())) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Could not open the official paper website'),
+              ),
+            );
+          }
+        }
+      } catch (e) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
