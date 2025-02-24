@@ -62,7 +62,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
         title,
         style: const TextStyle(
           color: Color.fromRGBO(21, 58, 103, 1),
-          fontSize: 16,
+          fontSize: 21,
           fontWeight: FontWeight.w500,
         ),
       ),
@@ -349,18 +349,23 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return _buildAlertDialog(
-              title: 'How many times would you like to practice the selected resources?',   
-              content: ConstrainedBox(
-                constraints: const BoxConstraints(
-                    maxHeight: 130,
-                    maxWidth: 280,
-              ), 
-                child: SingleChildScrollView(
-                    child : Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
+            return AlertDialog(
+              backgroundColor: const Color(0xFFE6EDF2),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5.0),
+              ),
+              title: Column(
+           
                 children: [
+                  Text(
+                    'How many times would you like to practice the selected resources?',
+                    style: const TextStyle(
+                      color: Color.fromRGBO(21, 58, 103, 1),
+                      fontSize: 21,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
                   const SizedBox(height: 3), // Add spacing between lines
                   Text.rich(
                     TextSpan(
@@ -387,10 +392,10 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                   ),
                     ...repetitionOptions.map((int value) {
                       return Padding(
-                        padding: const EdgeInsets.symmetric(),
+                        padding: const EdgeInsets.symmetric(vertical : 5.0),
                         child: RadioListTile<int>(
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5.0),
+                            borderRadius: BorderRadius.circular(15.0),
                           ),
                           tileColor: const Color.fromRGBO(21, 58, 103, 1),
                           title: Text(
@@ -410,7 +415,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                       );
                     }),
                   ],
-                ))),
+                ),
               actions: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -421,8 +426,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     },
                     style: TextButton.styleFrom(
                       foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
-                      // backgroundColor: const Color.fromRGBO(243, 90, 90, 1),
-                      //padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+                      //backgroundColor: const Color.fromRGBO(243, 90, 90, 1),
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                       minimumSize: const Size(30, 30), // Sets minimum width and height
                       maximumSize: const Size (120,45),
                     ),
