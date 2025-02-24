@@ -36,6 +36,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
   int buildCount = 0;
   bool testDayBool = true;
   bool buttonPressed = false;
+  bool stopShowing = false; 
   late String testDayString = "Test day not set";
 
   @override
@@ -166,7 +167,11 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
 
   Future <void> shouldShowDialog() async{
       await getTestDay();
-      if (mounted && testDayBool && _examDate == null && landingService.onLanding){
+      if (mounted && 
+          testDayBool && 
+          _examDate == null && 
+          landingService.onLanding &&
+          !stopShowing){
        _showRevisionPlanDialog(context);
        }
   }
@@ -225,6 +230,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               TextButton(
             onPressed: () {
               Navigator.of(context).pop();
+              stopShowing = true; 
             },
             style: TextButton.styleFrom(
               foregroundColor: const Color.fromRGBO(243, 90, 90, 1),
