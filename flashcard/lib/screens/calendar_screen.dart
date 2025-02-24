@@ -3,13 +3,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher.dart' as launcher;
 
 // Internal imports
 import 'landing_screen.dart';
 import 'sign_in_screen.dart';
 import 'study_session_manager.dart';
 import 'minimock_landing.dart';
+import 'quiz_choice_screen.dart';
 import 'feed_screen.dart';  // Contains AboveEverything widget
 import '../widgets/drawer_widget.dart';
 import '../widgets/event.dart';
@@ -1117,9 +1118,9 @@ class CalendarStateO extends State<Calendar> {
     String eventType = _getEventType(event.title);
 
     if (eventType == 'official_paper') {
-      final Uri url = Uri.parse('https://medical.hee.nhs.uk/medical-training-recruitment/medical-specialty-training/publications/multi-specialty-recruitment-assessment-%28msra%29-practice-paper/section-1--professional-dilemma-pd');
+      final String url = 'https://medical.hee.nhs.uk/medical-training-recruitment/medical-specialty-training/publications/multi-specialty-recruitment-assessment-%28msra%29-practice-paper/section-1--professional-dilemma-pd';
       try {
-        if (!await launch(url.toString())) {
+        if (!await launcher.launch(url)) {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
