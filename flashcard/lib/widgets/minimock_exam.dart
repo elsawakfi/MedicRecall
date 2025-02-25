@@ -255,8 +255,8 @@ class MiniMockExamState extends State<MiniMockExam> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                     SizedBox(
-                        child: Center(
+                    Center(
+                        child: SizedBox(
                     child: (
                         
                     Row(
@@ -405,9 +405,9 @@ class MiniMockExamState extends State<MiniMockExam> {
                   ],
                   // Buttons to change questions
                   SizedBox(height: 20),
-                  SizedBox(
-                    child:
                   Center(
+                    child:
+                  SizedBox(
                     child:
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
