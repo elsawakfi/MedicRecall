@@ -245,7 +245,8 @@ class MiniMockExamState extends State<MiniMockExam> {
                 double maxScreenWidth = constraints.maxWidth * 0.5;
                 double maxPreferredWidth = 960; // 1920/2
 
-                return Center(
+                return 
+                Center(
                 child: Container(
                 constraints: BoxConstraints(
                   maxWidth: maxScreenWidth > maxPreferredWidth ? maxScreenWidth : maxPreferredWidth,
@@ -254,6 +255,10 @@ class MiniMockExamState extends State<MiniMockExam> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    SingleChildScrollView(
+                    child:
+                    Center(
+                      child:
                     Row(
                       children: [
                         Container(
@@ -321,7 +326,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                             )
                         ),
                       ]
-                    ),
+                    ))),
                   Text(
                     questions[currentQuestion]['question'],
                     style: TextStyle(fontSize: 20),
@@ -400,6 +405,10 @@ class MiniMockExamState extends State<MiniMockExam> {
                   ],
                   // Buttons to change questions
                   SizedBox(height: 20),
+                  SingleChildScrollView(
+                    child:
+                  Center(
+                    child:
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
@@ -459,7 +468,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                           label: Text('Review', style: TextStyle(color: Colors.white, fontSize: 16)),
                         ),
                     ],
-                  ),
+                  ))),
                 ]
               ),
             )
