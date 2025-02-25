@@ -47,12 +47,6 @@ class MiniMockExamState extends State<MiniMockExam> {
         setState(() {
           _displayTime = time;
           remainingSeconds -= 1;
-
-          //   // Parse time string "MM:SS" to seconds
-          // List<String> parts = time.split(":");
-          // int minutes = int.parse(parts[0]);
-          // int seconds = int.parse(parts[1]);
-          // remainingSeconds = (minutes * 60) + seconds;// Update display every second
         });
       },
       onTimerComplete: () {
@@ -224,8 +218,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                   height: 40.31,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
-                    color:
-                    const Color.fromARGB(255, 216, 136, 238),
+                    color: const Color.fromARGB(255, 235, 230, 239),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.2),
@@ -238,10 +231,9 @@ class MiniMockExamState extends State<MiniMockExam> {
                   child: Center(
                       child: Text('Time Remaining: $_displayTime',
                         style: TextStyle(
-                          color:
-                            Color.fromARGB(255, 255, 255, 255),
+                          color: const Color.fromARGB(255, 98, 86, 139),
                           fontSize: 18.5,
-                          fontWeight: FontWeight.bold,//FontWeight.w500,
+                          fontWeight: FontWeight.w500,//FontWeight.w500,
                         ),
                       )),
                 )
