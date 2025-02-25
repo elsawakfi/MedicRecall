@@ -61,8 +61,6 @@ class LandingState extends State<Landing> {
     setState(() {});
   }
 
- 
-
   Future<void> _setFirstStudyDay() async {
     QuerySnapshot u = await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
     var id = u.docs.last.id;

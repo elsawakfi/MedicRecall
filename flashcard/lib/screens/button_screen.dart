@@ -279,14 +279,14 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
 
             },
             style: TextButton.styleFrom(
-              foregroundColor: const Color.fromRGBO(243, 90, 90, 1),
-               backgroundColor: const Color.fromRGBO(243, 90, 90, 1),
+              foregroundColor: const Color.fromARGB(255, 160, 160, 160),
+               backgroundColor:  Colors.transparent,
               //padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               //minimumSize: const Size(120, 45), // Sets minimum width and height
             ),
             child: const Text(
-              '',
-              style: TextStyle(fontSize: 1),
+              'Don\'t Show Again',
+              style: TextStyle(fontSize: 16),
             ),
           ),
           ],
@@ -303,10 +303,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       builder: (BuildContext context) {
         return _buildAlertDialog(
           title: 'When is your exam date?',
-          content: SizedBox(
-            width: 300,
-            height: 130,
-          child : 
+          content: 
           Column(
             mainAxisSize: MainAxisSize.max,
             children: [
@@ -335,8 +332,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.white, // Text color
                   backgroundColor: const Color.fromRGBO(51, 178, 73, 1), // Same color as 'Yes' button
-                 // padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  minimumSize: const Size(100, 45),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  minimumSize: const Size(120, 45),
                 ),
                 child: const Text(
                   'Select Exam Date',
@@ -355,7 +352,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                 ),
               ),
             ],
-          ),),
+          ),
           actions: [],
         );
       },
@@ -383,19 +380,14 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       "firstStudyDay":
           DateTime.now(), // Save the current date as first study day
     });
-
-
     // Optionally, retrieve the first study day
     await getFirstStudyDay();
   }
-
-
 
   // Show dialog to ask for number of repetitions
   void _showRepetitionDialog(BuildContext context) {
     final List<int> repetitionOptions = [2, 3, 4, 5, 6];
     int? selectedRepetition;
-
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -407,7 +399,6 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                 borderRadius: BorderRadius.circular(5.0),
               ),
               title: Column(
-           
                 children: [
                   Text(
                     'How many times would you like to practice the selected resources?',
@@ -417,8 +408,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  const SizedBox(height: 3), // Add spacing between lines
+                  const SizedBox(height: 11),
+                  // Add spacing between lines
                   Text.rich(
                     TextSpan(
                       children: [
@@ -539,7 +530,6 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     final checkbox2 = ValueNotifier<bool>(false);
     final checkbox3 = ValueNotifier<bool>(false);
     final checkbox4 = ValueNotifier<bool>(false);
-
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -587,23 +577,18 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                   );
                   return; // Stop execution if no resources are selected
                 }
-
                 QuerySnapshot u = await _userCollectionRef
                     .where("userID", isEqualTo: user?.uid)
                     .get();
-
                 // Update Firestore with selected resources
                 var id = u.docs.last.id;
                 _userCollectionRef.doc(id).update({
                   'selectedResources': selectedResources,
                 });
-
                 // Start study session
                 StudySessionManager().startStudySession(selectedResources);
-
                 // Close current dialog
                 Navigator.of(context).pop();
-
                 // If either Official Paper or Full-sized Mock is selected, show Repetition Dialog
                 if (checkbox1.value || checkbox2.value) {
                   _showRepetitionDialog(context);
