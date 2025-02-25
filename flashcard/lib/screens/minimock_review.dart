@@ -79,10 +79,13 @@ Widget build(BuildContext context) {
     child:Scaffold(
     drawer: const DrawMain(),
     appBar: AppBar(
+      automaticallyImplyLeading: false,
       elevation: 0,
-      title: Align(
-        alignment: const Alignment(-0.05, 0),
-        child: Stack(
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Stack(
           children: [
             Positioned(
               top: 2.3,
@@ -99,7 +102,7 @@ Widget build(BuildContext context) {
             ),
           ],
         ),
-      ),
+      ]),
       centerTitle: true,
       leading: Builder(
         builder: (context) => GestureDetector(
@@ -108,7 +111,8 @@ Widget build(BuildContext context) {
         ),
       ),
       actions: [
-        Container(margin: const EdgeInsets.only(right: 16),
+        Container(
+          margin: const EdgeInsets.only(right: 16),
         width: 210,
         height: 40.31,
         decoration: BoxDecoration(
@@ -120,29 +124,31 @@ Widget build(BuildContext context) {
                 spreadRadius: 0,
                 blurRadius: 5,
                 offset: const Offset(0, 3), // changes position of shadow
+            ),
+          ],
         ),
-      ],
-    ),
-    child: Center(
-              child: Text(
-                'Time Remaining: $_displayTime',
-                style: TextStyle(
-                  color: Color.fromARGB(255, 98, 86, 139),
-                  fontSize: 18.5,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+        child: Center(
+          child: Text(
+            'Time Remaining: $_displayTime',
+            style: TextStyle(
+              color: Color.fromARGB(255, 98, 86, 139),
+              fontSize: 18.5,
+              fontWeight: FontWeight.w500,
             ),
           ),
-        ],
-      ),
-    body: Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Center(
-        child: SizedBox(
-           width: 1000,
-      child:
-          Column(
+        )),
+      ],
+    ),
+    body: LayoutBuilder( builder: (context, constraints) {
+      double maxScreenWidth = constraints.maxWidth * 0.5;
+      double maxPreferredWidth = 960; // 1920/2
+      return Center(
+        child: Container(
+          constraints: BoxConstraints(
+            maxWidth: maxScreenWidth > maxPreferredWidth ? maxScreenWidth : maxPreferredWidth,
+          ),
+          padding: EdgeInsets.all(16),
+          child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Spacer(),
@@ -356,24 +362,8 @@ Widget build(BuildContext context) {
                   ),
                 ],
               )
-        ],
-      ),
-
-    )
-      )
-    ),
-
-
-    // floatingActionButton:SizedBox(
-    //   height: 50,
-    //   width: 200,
-    //   child:
-    //     FloatingActionButton.extended(onPressed: () {
-    //       widget.miniMockWidget.examEnd();
-    //   }, label: Text('Complete Exam',  style: TextStyle(color: Colors.white, fontSize: 16))
-    //   )),
-    //   floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-    ),
-  );
-}
+            ],
+        )));
+    })));
+  }
 }

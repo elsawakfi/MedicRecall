@@ -254,9 +254,17 @@ Future<void> fetchAverageScore() async {
         ),
         body: answerScores.isEmpty || (maxScore == 0)
             ? Center(child: CircularProgressIndicator(),) // If data is still being fetched, show loading circle
-            : Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
+            : LayoutBuilder( builder: (context, constraints) {
+            double maxScreenWidth = constraints.maxWidth * 0.5;
+            double maxPreferredWidth = 960; // 1920/2
+
+            return Center(
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth: maxScreenWidth > maxPreferredWidth ? maxScreenWidth : maxPreferredWidth,
+              ),
+            padding: EdgeInsets.all(16),
+            child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Spacer(),
@@ -313,7 +321,7 @@ Future<void> fetchAverageScore() async {
             ],
           )
         )
-      ),
-    );
+      );
+    })));
   }
 }
