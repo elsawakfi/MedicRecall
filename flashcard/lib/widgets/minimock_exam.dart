@@ -255,10 +255,10 @@ class MiniMockExamState extends State<MiniMockExam> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SingleChildScrollView(
-                    child:
-                    Center(
-                      child:
+                     SizedBox(
+                        child: Center(
+                    child: (
+                        
                     Row(
                       children: [
                         Container(
@@ -325,7 +325,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                               ),
                             )
                         ),
-                      ]
+                      ])
                     ))),
                   Text(
                     questions[currentQuestion]['question'],
@@ -405,7 +405,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                   ],
                   // Buttons to change questions
                   SizedBox(height: 20),
-                  SingleChildScrollView(
+                  SizedBox(
                     child:
                   Center(
                     child:
