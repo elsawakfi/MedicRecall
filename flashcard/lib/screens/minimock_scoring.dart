@@ -155,7 +155,7 @@ Future<void> fetchAverageScore() async {
           answerScores[questionIndex] = userScore;
           break;
         case 'multiple choice':
-          tempMaxScore += 1;
+          tempMaxScore += 12;
           if (questions[questionIndex]['type'] == "multiple choice" &&
               UnorderedIterableEquality().equals(questions[questionIndex]['correct_answers'], userAnswer)){
             answerScores[questionIndex] = 1;
@@ -171,7 +171,7 @@ Future<void> fetchAverageScore() async {
     averagePercentageScore = (averageScore/ tempMaxScore) * 100;
     setState(() {
       maxScore = tempMaxScore;
-      // totalScore = totalScore;
+      totalScore = totalScore;
       // userPercentageScore = userPercentageScore;
       // averagePercentageScore = averagePercentageScore;
     });

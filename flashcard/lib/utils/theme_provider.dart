@@ -85,7 +85,7 @@ class MyTheme {
     fontFamily: 'Akshar',
     hintColor: Colors.blueGrey[200],
   ).copyWith(
-    listTileTheme: const ListTileThemeData(iconColor: Colors.white),
+    listTileTheme: const ListTileThemeData(iconColor: Colors.white, textColor: Colors.white),
     // to change list tile icons in navbar
     elevatedButtonTheme: ElevatedButtonThemeData(
         style: ButtonStyle(
@@ -101,20 +101,23 @@ class MyTheme {
         fontWeight: FontWeight.bold,
       ),
     ),
-    dropdownMenuTheme: const DropdownMenuThemeData(
-      // Set the color of the dropdown menu text
-      textStyle: TextStyle(color: Colors.white),
-  inputDecorationTheme: InputDecorationTheme(
-  // Set the color of the underline for the dropdown menu
-  enabledBorder: UnderlineInputBorder(
-  borderSide: BorderSide(color: Colors.white), // Set underline color to white
-  ),
-  ),
+  dropdownMenuTheme: const DropdownMenuThemeData(
+    // Set the color of the dropdown menu text
+    textStyle: TextStyle(color: Colors.white),
+    inputDecorationTheme: InputDecorationTheme(
+      // Set the color of the underline for the dropdown menu
+      enabledBorder: UnderlineInputBorder(
+        borderSide: BorderSide(color: Colors.white), // Set underline color to white
+      ),
     ),
+  ),
     colorScheme: ColorScheme.fromSwatch().copyWith(
       secondary: const Color.fromARGB(255, 255, 255, 255),
     ),
     scaffoldBackgroundColor: const Color.fromARGB(255, 47, 106, 161),
+    drawerTheme: const DrawerThemeData(
+      backgroundColor: Color.fromARGB(255, 47, 106, 161),
+    ),
     // using this for `Reset` button color
     primaryColor: const Color.fromARGB(255, 47, 106, 161),
     // using this for `Reset` shadow1 color

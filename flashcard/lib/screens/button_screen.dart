@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flashcard_x/screens/sign_in_screen.dart';
-import 'calendar_screen.dart';
-import 'study_session_manager.dart';
-import 'landing_service.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
+// Internal imports
+import 'package:flashcard_x/screens/sign_in_screen.dart';
+import 'package:flashcard_x/screens/calendar_screen.dart';
+import 'package:flashcard_x/screens/study_session_manager.dart';
+import 'package:flashcard_x/screens/landing_service.dart';
 
 /*import 'package:flashcard_x/widgets/drawer_widget.dart';
 import 'package:flashcard_x/widgets/event.dart';
@@ -37,6 +39,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
   bool testDayBool = true;
   late String testDayString = "Test day not set";
 
+  final Map<String, bool> _isHovered = {};
+
   @override
   void initState() {
     super.initState();
@@ -44,6 +48,10 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     getTestDay();
     getFirstStudyDay();
     setState(() {});
+    _isHovered['checkbox1'] = false;
+    _isHovered['checkbox2'] = false;
+    _isHovered['checkbox3'] = false;
+    _isHovered['checkbox4'] = false;
   }
 
   // Helper method
@@ -493,10 +501,26 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildCheckbox(checkbox1, 'Official MRSA Exam Paper'),
-              _buildCheckbox(checkbox2, 'Full-sized Mock Exam'),
-              _buildCheckbox(checkbox3, 'Mini-Mocks'),
-              _buildCheckbox(checkbox4, 'Flashcards'),
+              _buildCheckbox(
+                checkbox1, 
+                'Official Practice Paper',
+                'The official past paper is available on the Health Education England website. It contains 22 Professional Dilemma questions with realistic scenarios and reliable rationales created by the same people who write the questions for the MSRA, making it a very valuable resource. You will be prompted to specify your preferred number of practice attempts upon selection.'
+              ),
+              _buildCheckbox(
+                checkbox2, 
+                'Full-sized Mock Exam',
+                'Our full-sized mock exam has been designed to mimic the exact conditions you will have on exam day, helping you optimise timings while exposing you to different professional scenarios. It includes 50 questions that have been carefully created to align with official rationales and GMC guidelines. You will be prompted to specify your preferred number of practice attempts upon selection.'
+              ),
+              _buildCheckbox(
+                checkbox3, 
+                'Mini-mocks',
+                'We have two mini-mocks available on the platform, which each contain 25 reliable questions. They have been created to help track your progress, fine-tune exam timings and increase your exposure to different professional scenarios.'
+              ),
+              _buildCheckbox(
+                checkbox4, 
+                'Flashcard Decks',
+                'Our pre-made flashcard decks contain high-yield principles derived from GMC guidelines and official rationales. This resource uses our unique, evidence-based algorithms to help you harness the power of spaced repetition and active recall!'
+              ),
             ],
           ),
           actions: [
@@ -571,31 +595,204 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     );
   }
 
-  // Helper method to create checkbox rows
-  Widget _buildCheckbox(ValueNotifier<bool> notifier, String text) {
-    return Row(
-      children: [
-        ValueListenableBuilder(
-          valueListenable: notifier,
-          builder: (context, value, child) {
-            return Checkbox(
-              value: value,
-              onChanged: (newValue) {
-                notifier.value = newValue!;
-              },
-            );
-          },
-        ),
-        GestureDetector(
-          onTap: () {
-            notifier.value = !notifier.value;
-          },
-          child: Text(
-            text,
-            style: TextStyle(color: Colors.black),
+  Widget _buildInfoIcon(String id, String description) {
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return MouseRegion(
+          onEnter: (_) => setState(() => _isHovered[id] = true),
+          onExit: (_) => setState(() => _isHovered[id] = false),
+          child: TweenAnimationBuilder(
+            duration: const Duration(milliseconds: 300),
+            tween: Tween<double>(
+              begin: 0,
+              end: _isHovered[id] ?? false ? 1.0 : 0.0,
+            ),
+            builder: (context, double value, child) {
+              final primaryColor = const Color.fromRGBO(21, 58, 103, 1);
+
+              return SizedBox(
+                width: 32,
+                height: 32,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Outer wave
+                    if (value > 0)
+                      Transform.scale(
+                        scale: 1.0 + (value * 0.8),
+                        child: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: primaryColor.withOpacity(0.45 * value),
+                              width: 2.5,
+                            ),
+                          ),
+                        ),
+                      ),
+                    // Middle wave
+                    if (value > 0)
+                      Transform.scale(
+                        scale: 1.0 + (value * 0.5),
+                        child: Container(
+                          width: 28,
+                          height: 28,
+                          decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: primaryColor.withOpacity(0.55 * value),
+                              width: 2.5,
+                            ),
+                          ),
+                        ),
+                      ),
+                    // Inner wave
+                    if (value > 0)
+                      Transform.scale(
+                        scale: 1.0 + (value * 0.2),
+                        child: Container(
+                          width: 24,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: primaryColor.withOpacity(0.65 * value),
+                              width: 2.5,
+                            ),
+                          ),
+                        ),
+                      ),
+                    // Base icon
+                    Tooltip(
+                      richMessage: WidgetSpan(
+                        alignment: PlaceholderAlignment.baseline,
+                        baseline: TextBaseline.alphabetic,
+                        child: SizedBox(
+                          width: 200,
+                          child: Text(
+                            description,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              height: 1.4,
+                            ),
+                          ),
+                        ),
+                      ),
+                      padding: const EdgeInsets.all(12),
+                      margin: const EdgeInsets.symmetric(horizontal: 12),
+                      preferBelow: true,
+                      decoration: BoxDecoration(
+                        color: const Color.fromRGBO(21, 58, 103, 1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.white, width: 1),
+                      ),
+                      child: Container(
+                        width: 22,
+                        height: 22,
+                        decoration: BoxDecoration(
+                          color: const Color.fromRGBO(21, 58, 103, 1),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.8),
+                            width: 1.5,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color.fromRGBO(21, 58, 103, 0.4),
+                              blurRadius: 8,
+                              spreadRadius: 0,
+                            ),
+                          ],
+                        ),
+                        child: const Center(
+                          child: FaIcon(
+                            FontAwesomeIcons.info,
+                            size: 12,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
-        ),
-      ],
+        );
+      },
+    );
+  }
+
+  Widget _buildCheckbox(ValueNotifier<bool> notifier, String text, String description) {
+    String id = text.toLowerCase().replaceAll(' ', '_');
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.all(12.0),
+      child: Row(
+        children: [
+          Container(
+            margin: const EdgeInsets.only(right: 16.0),
+            child: Theme(
+              data: ThemeData(
+                unselectedWidgetColor: const Color.fromRGBO(21, 58, 103, 1),
+                checkboxTheme: CheckboxThemeData(
+                  side: const BorderSide(color: Color.fromRGBO(21, 58, 103, 1), width: 2),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4.0),
+                  ),
+                ),
+              ),
+              child: ValueListenableBuilder<bool>(
+                valueListenable: notifier,
+                builder: (context, value, child) {
+                  return Transform.scale(
+                    scale: 1.2,
+                    child: Checkbox(
+                      value: value,
+                      onChanged: (bool? newValue) {
+                        notifier.value = newValue ?? false;
+                      },
+                      activeColor: const Color.fromRGBO(51, 178, 73, 1),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+          Expanded(
+            child: MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTap: () {
+                  notifier.value = !notifier.value;
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        text,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Color.fromRGBO(21, 58, 103, 1),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    _buildInfoIcon(id, description),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
