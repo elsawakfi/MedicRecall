@@ -54,30 +54,35 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     'stopShowing': value,
     'popUpTime': FieldValue.serverTimestamp(), 
   }, SetOptions(merge: true));
-  print("Set stop showing to true\n"); // Merge to avoid overwriting other fields
+   // Merge to avoid overwriting other fields
 }
 
   Future<void> getStopShowing(User user) async {
   DocumentSnapshot doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
 
   if (doc.exists) {
-    stopShowing = doc['stopShowing'];
+    
     Timestamp? timestamp = doc['popUpTime'];
 
     if (doc['stopShowing'] != null && timestamp != null) {
       DateTime savedTime = timestamp.toDate();
       DateTime currentTime = DateTime.now();
+      // print("Saved time");
+      // print(savedTime);
+      // print("Current time");
+      // print(currentTime);
 
-      if (currentTime.difference(savedTime).inHours >= 24) {
+      if (currentTime.difference(savedTime).inMinutes >= 1) {
         await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
           'stopShowing': false,
         });
-        print("Set stop showing to false\n");
+       
       }
     }
   else{
     setStopShowing(user);
   }
+  stopShowing = doc['stopShowing'];
   }
 }
 
@@ -204,19 +209,14 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
   Future <void> shouldShowDialog() async{
       await getTestDay();
       await getStopShowing(user!);
-      print("This is the value of stop showing");
-      print(stopShowing);
-      print("\n");
+      
+     
       if (mounted && 
           testDayBool && 
           _examDate == null && 
           landingService.onLanding &&
-          !landingService.stopShowing &&
           !stopShowing){
        _showRevisionPlanDialog(context);
-       print("Stop showing has the value: ");
-       print(landingService.stopShowing);
-       print("\n");
        }
   }
 
@@ -274,7 +274,6 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              landingService.stopShowing = true;
               setStopShowing(user!,true);
               //need to save the date here and then add another condition that checks later on 
 
