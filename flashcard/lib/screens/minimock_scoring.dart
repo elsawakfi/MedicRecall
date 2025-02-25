@@ -10,6 +10,8 @@ import 'package:collection/collection.dart';
 import 'package:flashcard_x/widgets/circular_percentage_indicator.dart';
 import 'package:http/http.dart' as http;
 
+import '../widgets/drawer_widget.dart';
+
 
 class MiniMockScoring extends StatefulWidget {
   final String title;
@@ -172,7 +174,7 @@ Future<void> fetchAverageScore() async {
     averagePercentageScore = (averageScore/ tempMaxScore) * 100;
     setState(() {
       maxScore = tempMaxScore;
-      // totalScore = totalScore;
+      totalScore = totalScore;
       // userPercentageScore = userPercentageScore;
       // averagePercentageScore = averagePercentageScore;
     });
@@ -215,6 +217,7 @@ Future<void> fetchAverageScore() async {
     return PopScope(
         canPop: false,
         child: Scaffold(
+        drawer: const DrawMain(),
         appBar: AppBar(
           // backgroundColor: Colors.blue,
           elevation: 0,
@@ -251,9 +254,17 @@ Future<void> fetchAverageScore() async {
         ),
         body: answerScores.isEmpty || (maxScore == 0)
             ? Center(child: CircularProgressIndicator(),) // If data is still being fetched, show loading circle
-            : Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
+            : LayoutBuilder( builder: (context, constraints) {
+            double maxScreenWidth = constraints.maxWidth * 0.5;
+            double maxPreferredWidth = 960; // 1920/2
+
+            return Center(
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth: maxScreenWidth > maxPreferredWidth ? maxScreenWidth : maxPreferredWidth,
+              ),
+            padding: EdgeInsets.all(16),
+            child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Spacer(),
@@ -310,7 +321,7 @@ Future<void> fetchAverageScore() async {
             ],
           )
         )
-      ),
-    );
+      );
+    })));
   }
 }
