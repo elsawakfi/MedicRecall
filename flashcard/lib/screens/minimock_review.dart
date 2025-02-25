@@ -108,7 +108,9 @@ Widget build(BuildContext context) {
                         return Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Text('Ranking Questions (Question 1 - ${widget.rankingLength})',
-                          style: TextStyle(color: Colors.black)),
+                          style: TextStyle(color: Colors.black, 
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold)),
                         );
                       },
                       body: Padding(
@@ -195,7 +197,9 @@ Widget build(BuildContext context) {
                         return Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Text('Multiple Choice Questions (Question ${widget.rankingLength + 1} - $questionLength)',
-                          style: TextStyle(color: Colors.black)),
+                          style: TextStyle(color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold)),
                           
                         );
                       },
@@ -286,6 +290,19 @@ Widget build(BuildContext context) {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: MiniMockHelpButton(),
+                  ),
+                  const SizedBox(width: 20),
+                   SizedBox(
+                    height: 50,
+                    width: 120,
+                    child:
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        icon: Icon(Icons.arrow_back, color: Colors.white),
+                        label: Text('Back',  style: TextStyle(color: Colors.white, fontSize: 16)),
+                      )
                   ),
                   const Spacer(),
                   SizedBox(
