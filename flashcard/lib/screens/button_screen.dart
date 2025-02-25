@@ -44,9 +44,42 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     super.initState();
     getUser();
     getTestDay();
+    getStopShowing(user!);
     getFirstStudyDay();
     setState(() {});
   }
+
+  Future<void> setStopShowing(User user, [bool value = false]) async {
+  await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+    'stopShowing': value,
+    'popUpTime': FieldValue.serverTimestamp(), 
+  }, SetOptions(merge: true));
+  print("Set stop showing to true\n"); // Merge to avoid overwriting other fields
+}
+
+  Future<void> getStopShowing(User user) async {
+  DocumentSnapshot doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+
+  if (doc.exists) {
+    stopShowing = doc['stopShowing'];
+    Timestamp? timestamp = doc['popUpTime'];
+
+    if (doc['stopShowing'] != null && timestamp != null) {
+      DateTime savedTime = timestamp.toDate();
+      DateTime currentTime = DateTime.now();
+
+      if (currentTime.difference(savedTime).inHours >= 24) {
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+          'stopShowing': false,
+        });
+        print("Set stop showing to false\n");
+      }
+    }
+  else{
+    setStopShowing(user);
+  }
+  }
+}
 
   // Helper method
   Widget _buildAlertDialog({
@@ -144,7 +177,10 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       }
     } else {
       user = auth.currentUser!;
+     
     }
+    getStopShowing(user!);
+    
   }
 
   Future<void> getFirstStudyDay() async {
@@ -167,11 +203,16 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
 
   Future <void> shouldShowDialog() async{
       await getTestDay();
+      await getStopShowing(user!);
+      print("This is the value of stop showing");
+      print(stopShowing);
+      print("\n");
       if (mounted && 
           testDayBool && 
           _examDate == null && 
           landingService.onLanding &&
-          !landingService.stopShowing){
+          !landingService.stopShowing &&
+          !stopShowing){
        _showRevisionPlanDialog(context);
        print("Stop showing has the value: ");
        print(landingService.stopShowing);
@@ -234,6 +275,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
             onPressed: () {
               Navigator.of(context).pop();
               landingService.stopShowing = true;
+              setStopShowing(user!,true);
               //need to save the date here and then add another condition that checks later on 
 
             },
