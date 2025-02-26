@@ -242,7 +242,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                 ? Text('')
                 : Text(
                   'If you want to stop seeing this pop up please press the "Don\'t Show Again" below to pause pop up during your session',
-                  style: TextStyle(fontSize: 14, color:Color.fromRGBO(21, 58, 103, 1))
+                  style: TextStyle(fontSize: 16, color:Color.fromRGBO(21, 58, 103, 1))
                   )),
           actions :  
            [       
@@ -433,7 +433,6 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
             },
             style: TextButton.styleFrom(
               foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
-              // backgroundColor: const Color.fromRGBO(243, 90, 90, 1),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               minimumSize: const Size(120, 45), // Sets minimum width and height
             ),
@@ -471,6 +470,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                 StudySessionManager().startStudySession(selectedResources);
                 // Close current dialog
                 Navigator.of(context).pop();
+                _scheduleCompleteDialog(context);
                 // If either Official Paper or Full-sized Mock is selected, show Repetition Dialog
                 if (checkbox1.value || checkbox2.value) {
                   _showRepetitionDialog(context);
@@ -570,7 +570,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                 ),
               actions: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
                     onPressed: () {
@@ -589,6 +589,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                       style: TextStyle(fontSize: 16),
                     ),
                   ),
+                  const SizedBox(width: 10,),
                     TextButton(
                       onPressed: () async {
                         if (selectedRepetition != null) {
@@ -604,6 +605,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
 
                           if (context.mounted) {
                             Navigator.of(context).pop();
+                            _scheduleCompleteDialog(context);
                           }
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -629,6 +631,60 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               ],
             );
           },
+        );
+      },
+    );
+  }
+
+  void _scheduleCompleteDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return _buildAlertDialog(
+          title: 'Schedule Complete!',
+          content: const Text(
+            'Your study schedule has been successfully generated.\n'
+            'You can view it in the calendar page.',
+            style: TextStyle(
+              fontSize: 16,
+              color: Color.fromRGBO(21, 58, 103, 1),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: const Color.fromARGB(255, 160, 160, 160),
+                backgroundColor: Colors.transparent,
+              ),
+              child: const Text(
+                'Ok',
+                style: TextStyle(fontSize: 16),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Calendar(),
+                  ),
+                );
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                minimumSize: const Size(120, 45),
+              ),
+              child: const Text(
+                'View Schedule',
+                style: TextStyle(fontSize: 16),
+              ),
+            ),
+          ],
         );
       },
     );
