@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart' as launcher;
+import 'button_screen.dart';
 
 // Internal imports
 import 'landing_screen.dart';
@@ -1181,12 +1182,8 @@ class CalendarStateO extends State<Calendar> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddEventDialog(context),
-        backgroundColor: const Color.fromRGBO(21, 58, 103, 1),
-        child: const Icon(Icons.add),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButton: const CustomFloatingButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
     );
   }
 

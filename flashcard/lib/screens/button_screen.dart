@@ -9,6 +9,7 @@ import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flashcard_x/screens/calendar_screen.dart';
 import 'package:flashcard_x/screens/study_session_manager.dart';
 import 'package:flashcard_x/screens/landing_service.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 /*import 'package:flashcard_x/widgets/drawer_widget.dart';
 import 'package:flashcard_x/widgets/event.dart';
@@ -114,7 +115,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
         ),
       ),
       content: SizedBox(
-        height: 130,
+        // height: 130,
         width: 300,
         child: content,
       ),
@@ -240,10 +241,9 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
             child: buttonPressed
                 ? Text('')
                 : Text(
-                  'If you want to stop seeing this pop up please press the red button below to pause pop up during your session',
-                  style: TextStyle(fontSize: 14, color:Color.fromRGBO(21, 58, 103, 1))
+                  'If you want to stop seeing this pop up please press the "Don\'t Show Again" below to pause pop up during your session',
+                  style: TextStyle(fontSize: 16, color:Color.fromRGBO(21, 58, 103, 1))
                   )),
-          
           actions :  
            [       
              TextButton(
@@ -252,9 +252,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
             },
             style: TextButton.styleFrom(
               foregroundColor: const Color.fromRGBO(243, 90, 90, 1),
-              // backgroundColor: const Color.fromRGBO(243, 90, 90, 1),
-              //padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              //minimumSize: const Size(120, 45), // Sets minimum width and height
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
             child: const Text(
               'No',
@@ -313,7 +311,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
           title: 'When is your exam date?',
           content: 
           Column(
-            mainAxisSize: MainAxisSize.max,
+            mainAxisSize: MainAxisSize.min,
             children: [
               ElevatedButton(
                 onPressed: () async {
@@ -390,6 +388,109 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     });
     // Optionally, retrieve the first study day
     await getFirstStudyDay();
+  }
+
+  void _showOptionsDialog(BuildContext context) {
+    final checkbox1 = ValueNotifier<bool>(false);
+    final checkbox2 = ValueNotifier<bool>(false);
+    final checkbox3 = ValueNotifier<bool>(false);
+    final checkbox4 = ValueNotifier<bool>(false);
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return _buildAlertDialog(
+          title: 'Which resources would you like to use?',
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildCheckbox(
+                checkbox1, 
+                'Official Practice Paper',
+                'The official past paper is available on the Health Education England website. It contains 22 Professional Dilemma questions with realistic scenarios and reliable rationales created by the same people who write the questions for the MSRA, making it a very valuable resource. \n\nYou will be prompted to specify your preferred number of practice attempts upon selection.'
+              ),
+              _buildCheckbox(
+                checkbox2, 
+                'Full-sized Mock Exam',
+                'Our full-sized mock exam has been designed to mimic the exact conditions you will have on exam day, helping you optimise timings while exposing you to different professional scenarios. It includes 50 questions that have been carefully created to align with official rationales and GMC guidelines. \n\nYou will be prompted to specify your preferred number of practice attempts upon selection.'
+              ),
+              _buildCheckbox(
+                checkbox3, 
+                'Mini-mocks',
+                'We have two mini-mocks available on the platform, which each contain 25 reliable questions. They have been created to help track your progress, fine-tune exam timings and increase your exposure to different professional scenarios.'
+              ),
+              _buildCheckbox(
+                checkbox4, 
+                'Flashcard Decks',
+                'Our pre-made flashcard decks contain high-yield principles derived from GMC guidelines and official rationales. This resource uses our unique, evidence-based algorithms to help you harness the power of spaced repetition and active recall!'
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              _showExamDateDialog(context);
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              minimumSize: const Size(120, 45), // Sets minimum width and height
+            ),
+            child: const Text(
+              'Previous',
+              style: TextStyle(fontSize: 16),
+            ),
+          ),
+            TextButton(
+              onPressed: () async {
+                // Check which resources were selected
+                List<String> selectedResources = [];
+                if (checkbox1.value) selectedResources.add('Official paper');
+                if (checkbox2.value) selectedResources.add('Full-sized mock exam');
+                if (checkbox3.value) selectedResources.add('Mini-mocks');
+                if (checkbox4.value) selectedResources.add('Flashcards');
+
+                if (selectedResources.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please select at least one resource'),
+                    ),
+                  );
+                  return; // Stop execution if no resources are selected
+                }
+                QuerySnapshot u = await _userCollectionRef
+                    .where("userID", isEqualTo: user?.uid)
+                    .get();
+                // Update Firestore with selected resources
+                var id = u.docs.last.id;
+                _userCollectionRef.doc(id).update({
+                  'selectedResources': selectedResources,
+                });
+                // Start study session
+                StudySessionManager().startStudySession(selectedResources);
+                // Close current dialog
+                Navigator.of(context).pop();
+                _scheduleCompleteDialog(context);
+                // If either Official Paper or Full-sized Mock is selected, show Repetition Dialog
+                if (checkbox1.value || checkbox2.value) {
+                  _showRepetitionDialog(context);
+                }
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                // minimumSize: const Size(120, 45), // Sets minimum width and height
+              ),
+              child: const Text(
+              'Submit',
+              style: TextStyle(fontSize: 16),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   // Show dialog to ask for number of repetitions
@@ -469,11 +570,12 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                 ),
               actions: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
                     onPressed: () {
                       Navigator.of(context).pop();
+                       _showOptionsDialog(context);
                     },
                     style: TextButton.styleFrom(
                       foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
@@ -487,6 +589,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                       style: TextStyle(fontSize: 16),
                     ),
                   ),
+                  const SizedBox(width: 10,),
                     TextButton(
                       onPressed: () async {
                         if (selectedRepetition != null) {
@@ -502,6 +605,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
 
                           if (context.mounted) {
                             Navigator.of(context).pop();
+                            _scheduleCompleteDialog(context);
                           }
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -515,7 +619,6 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                       style: TextButton.styleFrom(
                         foregroundColor: Colors.white,
                         backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
-                        //padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
                         minimumSize: const Size(120, 45), // Sets minimum width and height
                       ),
                       child: const Text(
@@ -533,100 +636,52 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     );
   }
 
-  void _showOptionsDialog(BuildContext context) {
-    final checkbox1 = ValueNotifier<bool>(false);
-    final checkbox2 = ValueNotifier<bool>(false);
-    final checkbox3 = ValueNotifier<bool>(false);
-    final checkbox4 = ValueNotifier<bool>(false);
+  void _scheduleCompleteDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return _buildAlertDialog(
-          title: 'Which resources would you like to use?',
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildCheckbox(
-                checkbox1, 
-                'Official Practice Paper',
-                'The official past paper is available on the Health Education England website. It contains 22 Professional Dilemma questions with realistic scenarios and reliable rationales created by the same people who write the questions for the MSRA, making it a very valuable resource. You will be prompted to specify your preferred number of practice attempts upon selection.'
-              ),
-              _buildCheckbox(
-                checkbox2, 
-                'Full-sized Mock Exam',
-                'Our full-sized mock exam has been designed to mimic the exact conditions you will have on exam day, helping you optimise timings while exposing you to different professional scenarios. It includes 50 questions that have been carefully created to align with official rationales and GMC guidelines. You will be prompted to specify your preferred number of practice attempts upon selection.'
-              ),
-              _buildCheckbox(
-                checkbox3, 
-                'Mini-mocks',
-                'We have two mini-mocks available on the platform, which each contain 25 reliable questions. They have been created to help track your progress, fine-tune exam timings and increase your exposure to different professional scenarios.'
-              ),
-              _buildCheckbox(
-                checkbox4, 
-                'Flashcard Decks',
-                'Our pre-made flashcard decks contain high-yield principles derived from GMC guidelines and official rationales. This resource uses our unique, evidence-based algorithms to help you harness the power of spaced repetition and active recall!'
-              ),
-            ],
+          title: 'Schedule Complete!',
+          content: const Text(
+            'Your study schedule has been successfully generated.\n'
+            'You can view it in the calendar page.',
+            style: TextStyle(
+              fontSize: 16,
+              color: Color.fromRGBO(21, 58, 103, 1),
+            ),
           ),
           actions: [
             TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
-              // backgroundColor: const Color.fromRGBO(243, 90, 90, 1),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              minimumSize: const Size(120, 45), // Sets minimum width and height
-            ),
-            child: const Text(
-              'Previous',
-              style: TextStyle(fontSize: 16),
-            ),
-          ),
-            TextButton(
-              onPressed: () async {
-                // Check which resources were selected
-                List<String> selectedResources = [];
-                if (checkbox1.value) selectedResources.add('Official paper');
-                if (checkbox2.value) selectedResources.add('Full-sized mock exam');
-                if (checkbox3.value) selectedResources.add('Mini-mocks');
-                if (checkbox4.value) selectedResources.add('Flashcards');
-
-                if (selectedResources.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Please select at least one resource'),
-                    ),
-                  );
-                  return; // Stop execution if no resources are selected
-                }
-                QuerySnapshot u = await _userCollectionRef
-                    .where("userID", isEqualTo: user?.uid)
-                    .get();
-                // Update Firestore with selected resources
-                var id = u.docs.last.id;
-                _userCollectionRef.doc(id).update({
-                  'selectedResources': selectedResources,
-                });
-                // Start study session
-                StudySessionManager().startStudySession(selectedResources);
-                // Close current dialog
+              onPressed: () {
                 Navigator.of(context).pop();
-                // If either Official Paper or Full-sized Mock is selected, show Repetition Dialog
-                if (checkbox1.value || checkbox2.value) {
-                  _showRepetitionDialog(context);
-                }
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: const Color.fromARGB(255, 160, 160, 160),
+                backgroundColor: Colors.transparent,
+              ),
+              child: const Text(
+                'Ok',
+                style: TextStyle(fontSize: 16),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Calendar(),
+                  ),
+                );
               },
               style: TextButton.styleFrom(
                 foregroundColor: Colors.white,
                 backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                minimumSize: const Size(120, 45), // Sets minimum width and height
+                minimumSize: const Size(120, 45),
               ),
               child: const Text(
-              'Submit',
-              style: TextStyle(fontSize: 16),
+                'View Schedule',
+                style: TextStyle(fontSize: 16),
               ),
             ),
           ],
