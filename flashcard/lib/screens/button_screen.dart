@@ -9,6 +9,7 @@ import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flashcard_x/screens/calendar_screen.dart';
 import 'package:flashcard_x/screens/study_session_manager.dart';
 import 'package:flashcard_x/screens/landing_service.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 /*import 'package:flashcard_x/widgets/drawer_widget.dart';
 import 'package:flashcard_x/widgets/event.dart';
@@ -114,7 +115,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
         ),
       ),
       content: SizedBox(
-        height: 130,
+        // height: 130,
         width: 300,
         child: content,
       ),
@@ -240,10 +241,9 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
             child: buttonPressed
                 ? Text('')
                 : Text(
-                  'If you want to stop seeing this pop up please press the red button below to pause pop up during your session',
+                  'If you want to stop seeing this pop up please press the "Don\'t Show Again" below to pause pop up during your session',
                   style: TextStyle(fontSize: 14, color:Color.fromRGBO(21, 58, 103, 1))
                   )),
-          
           actions :  
            [       
              TextButton(
@@ -252,9 +252,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
             },
             style: TextButton.styleFrom(
               foregroundColor: const Color.fromRGBO(243, 90, 90, 1),
-              // backgroundColor: const Color.fromRGBO(243, 90, 90, 1),
-              //padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              //minimumSize: const Size(120, 45), // Sets minimum width and height
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
             child: const Text(
               'No',
@@ -313,7 +311,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
           title: 'When is your exam date?',
           content: 
           Column(
-            mainAxisSize: MainAxisSize.max,
+            mainAxisSize: MainAxisSize.min,
             children: [
               ElevatedButton(
                 onPressed: () async {
@@ -549,12 +547,12 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               _buildCheckbox(
                 checkbox1, 
                 'Official Practice Paper',
-                'The official past paper is available on the Health Education England website. It contains 22 Professional Dilemma questions with realistic scenarios and reliable rationales created by the same people who write the questions for the MSRA, making it a very valuable resource. You will be prompted to specify your preferred number of practice attempts upon selection.'
+                'The official past paper is available on the Health Education England website. It contains 22 Professional Dilemma questions with realistic scenarios and reliable rationales created by the same people who write the questions for the MSRA, making it a very valuable resource. \n\nYou will be prompted to specify your preferred number of practice attempts upon selection.'
               ),
               _buildCheckbox(
                 checkbox2, 
                 'Full-sized Mock Exam',
-                'Our full-sized mock exam has been designed to mimic the exact conditions you will have on exam day, helping you optimise timings while exposing you to different professional scenarios. It includes 50 questions that have been carefully created to align with official rationales and GMC guidelines. You will be prompted to specify your preferred number of practice attempts upon selection.'
+                'Our full-sized mock exam has been designed to mimic the exact conditions you will have on exam day, helping you optimise timings while exposing you to different professional scenarios. It includes 50 questions that have been carefully created to align with official rationales and GMC guidelines. \n\nYou will be prompted to specify your preferred number of practice attempts upon selection.'
               ),
               _buildCheckbox(
                 checkbox3, 
@@ -622,7 +620,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                 foregroundColor: Colors.white,
                 backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                minimumSize: const Size(120, 45), // Sets minimum width and height
+                // minimumSize: const Size(120, 45), // Sets minimum width and height
               ),
               child: const Text(
               'Submit',
