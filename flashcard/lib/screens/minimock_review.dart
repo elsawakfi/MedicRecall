@@ -110,7 +110,9 @@ Widget build(BuildContext context) {
                         return Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Text('Ranking Questions (Question 1 - ${widget.rankingLength})',
-                          style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 16)),
+                          style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold)),
                         );
                       },
                       body: Padding(
@@ -197,8 +199,9 @@ Widget build(BuildContext context) {
                         return Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Text('Multiple Choice Questions (Question ${widget.rankingLength + 1} - $questionLength)',
-                          style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 16)),
-                          
+                          style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold)),
                         );
                       },
                       body: Padding(
@@ -288,6 +291,19 @@ Widget build(BuildContext context) {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: MiniMockHelpButton(),
+                  ),
+                  const SizedBox(width: 20),
+                   SizedBox(
+                    height: 50,
+                    width: 120,
+                    child:
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        icon: Icon(Icons.arrow_back, color: Theme.of(context).textTheme.bodyMedium?.color),
+                        label: Text('Back',  style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 16)),
+                      )
                   ),
                   const Spacer(),
                   SizedBox(
