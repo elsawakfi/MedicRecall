@@ -314,8 +314,11 @@ Future<void> fetchAverageScore() async {
                       ),
                     )
                   },
-                  icon:Icon(Icons.arrow_forward, color: Colors.white),
-                  label: const Text('Feedback', style:TextStyle(color: Colors.white, fontSize: 16)),
+                  icon:Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139)),
+                  label: Text('Feedback', style:TextStyle(fontSize: 16, color: Color.fromARGB(255, 98, 86, 139))),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color.fromARGB(255, 235, 230, 239),
+                  ),
                 ),
               ),
             ],

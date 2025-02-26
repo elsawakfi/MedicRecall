@@ -310,7 +310,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text('  Given Answer:', style: TextStyle(color: Colors.white,fontSize: 18)),
+                              Text('  Given Answer:', style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,fontSize: 18)),
                               ...userOptions[currentQuestion].asMap().entries.map<Widget>((entry) {
                                 int optionIndex = entry.key;
                                 MapEntry<String, String> currentEntry = entry.value;
@@ -328,32 +328,32 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                 );
                               })
                             ]
-                          )),
-                        // CORRECT ANSWERS
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text('  Correct Answer:', style: TextStyle(color: Colors.white,fontSize: 18)),
-                              ...examOptions[currentQuestion].asMap().entries.map<Widget>((entry) {
-                                MapEntry<String, String> currentEntry = entry.value;
-                                String optionLetter = currentEntry.key;
-                                String optionText = currentEntry.value;
-                                return Card(
-                                  child: SizedBox(
-                                    width: double.infinity, // Define the width
-                                    child: ListTile(
-                                    title: Text('$optionLetter. $optionText',
-                                        style: TextStyle(color: Colors.blueGrey, fontSize: 18)),
-                                  ))
-                                );
-                              })
-                            ]
-                          ))
+                        )),
+                  // CORRECT ANSWERS
+                  Expanded(
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('  Correct Answer:', style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,fontSize: 18)),
+                            ...examOptions[currentQuestion].asMap().entries.map<Widget>((entry) {
+                              MapEntry<String, String> currentEntry = entry.value;
+                              String optionLetter = currentEntry.key;
+                              String optionText = currentEntry.value;
+                              return Card(
+                                child: SizedBox(
+                                width: double.infinity,
+                                child: ListTile(
+                                  title: Text('$optionLetter. $optionText',
+                                      style: TextStyle(color: Colors.blueGrey, fontSize: 18)),
+                                ))
+                              );
+                            })
+                          ]
+                      ))
                       ])
-                  ])
-                ))
+                    ])
+                  ))
               )
             ]
             // If the question is a multiple choice question, display checkboxes
@@ -371,19 +371,14 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                             int optionIndex = entry.key;
                             String option = entry.value;
                             String optionLetter = String.fromCharCode(optionIndex + 65);
-                            return CheckboxListTile(
-                              title: Text('$optionLetter. $option', style: TextStyle(color: Colors.white, fontSize: 18)),
-                              value: false,
-                              onChanged: null,
-                              side: BorderSide( color: Colors.white),
+                            return ListTile(
+                              title: Text('$optionLetter. $option', style: TextStyle(fontSize: 18, color: Theme.of(context).textTheme.bodyMedium?.color)),
                               enabled: false,
-                              controlAffinity: ListTileControlAffinity.leading,
                             );
                           }).toList()
                       )
                   )
-              )
-              ),
+              )),
               SizedBox(height: 10),
               //display the selected answers and the correct answers
               Align(
@@ -396,7 +391,6 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                         ? Colors.green
                         : Colors.red.shade400, // Dark background for contrast
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.white), // White border
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -438,8 +432,11 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                     onPressed: () {
                       Navigator.pop(context);
                     },
-                    icon: Icon(Icons.arrow_back, color: Colors.white),
-                    label: Text('Scoring', style: TextStyle(color: Colors.white)),
+                    icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 98, 86, 139)),
+                    label: Text('Scoring', style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 98, 86, 139))),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color.fromARGB(255, 235, 230, 239),
+                    ),
                   ),
                 if (currentQuestion > 0) //Prevents button being shown if no previous questions available
                   ElevatedButton.icon(
@@ -448,8 +445,11 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                         currentQuestion--; // Move to previous question
                       });
                     },
-                    icon: Icon(Icons.arrow_back, color: Colors.white),
-                    label: Text('Previous', style: TextStyle(color: Colors.white)),
+                    icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 98, 86, 139)),
+                    label: Text('Previous', style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 98, 86, 139))),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color.fromARGB(255, 235, 230, 239),
+                    ),
                   ),
                 const SizedBox(width: 16),
                 if (currentQuestion < questions.length - 1)
@@ -459,8 +459,11 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                         currentQuestion++; // Move to next question
                       });
                     },
-                    icon: Icon(Icons.arrow_forward, color: Colors.white),
-                    label: Text('Next', style: TextStyle(color: Colors.white)),
+                    icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139)),
+                    label: Text('Next', style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 98, 86, 139))),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color.fromARGB(255, 235, 230, 239),
+                    ),
                   ),
                 if (currentQuestion == questions.length - 1)
                   ElevatedButton.icon(
@@ -471,8 +474,11 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                         ),
                       );
                     },
-                    icon: Icon(Icons.arrow_forward, color: Colors.white),
-                    label: Text('Mini-Mock Menu', style: TextStyle(color: Colors.white)),
+                    icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139)),
+                    label: Text('Mini-Mock Menu', style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 98, 86, 139))),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color.fromARGB(255, 235, 230, 239),
+                    ),
                   ),
               ],
             )),

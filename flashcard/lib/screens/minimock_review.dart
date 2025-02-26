@@ -154,6 +154,8 @@ Widget build(BuildContext context) {
               Spacer(),
             ExpansionPanelList(
               elevation: 1,
+              dividerColor: Colors.transparent,
+              expandIconColor: Theme.of(context).textTheme.bodyMedium?.color,
               expandedHeaderPadding: EdgeInsets.all(4.0),
               expansionCallback: (i, isOpen) {
                 setState(() {
@@ -163,14 +165,14 @@ Widget build(BuildContext context) {
                 children: [
                     ExpansionPanel(
                       canTapOnHeader: true,
-                      backgroundColor: Colors.white,
+                      backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
                       headerBuilder: (context, isOpen) {
                         return Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Text('Ranking Questions (Question 1 - ${widget.rankingLength})',
-                          style: TextStyle(color: Colors.black,
+                          style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
                           fontSize: 16,
-                          fontWeight: FontWeight .bold)),
+                          fontWeight: FontWeight.w500)),
                         );
                       },
                       body: Padding(
@@ -192,9 +194,8 @@ Widget build(BuildContext context) {
                                       child: Icon(Icons.flag, color: Colors.black),),
                                     label: Text(
                                       '${index + 1}',
-                                      style: TextStyle(color: Colors.white,
-                                      fontSize: 20,
-        ),
+                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
+                                      fontSize: 20),
                                     ),
                                   ),
                                 ),
@@ -216,7 +217,7 @@ Widget build(BuildContext context) {
                                       child: Icon(Icons.flag, color: Colors.black),),
                                     label: Text(
                                       '${index + 6}',
-                                      style: TextStyle(color: Colors.white,
+                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
                                       fontSize: 20),
                                     ),
                                   ),
@@ -239,7 +240,7 @@ Widget build(BuildContext context) {
                                       child: Icon(Icons.flag, color: Colors.black),),
                                     label: Text(
                                       '${index + 11}',
-                                      style: TextStyle(color: Colors.white,
+                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
                                       fontSize: 20),
                                     ),
                                   ),
@@ -253,15 +254,14 @@ Widget build(BuildContext context) {
                     ),
                     ExpansionPanel(
                       canTapOnHeader: true,
-                      backgroundColor: Colors.white,
+                      backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
                       headerBuilder: (context, isOpen) {
                         return Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Text('Multiple Choice Questions (Question ${widget.rankingLength + 1} - $questionLength)',
-                          style: TextStyle(color: Colors.black,
+                          style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
                           fontSize: 16,
-                          fontWeight: FontWeight .bold)),
-                          
+                          fontWeight: FontWeight.w500)),
                         );
                       },
                       body: Padding(
@@ -283,7 +283,7 @@ Widget build(BuildContext context) {
                                       child: Icon(Icons.flag, color: Colors.black),),
                                     label: Text(
                                       '${index + 14}',
-                                      style: TextStyle(color: Colors.white,
+                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
                                       fontSize: 20),
                                     ),
                                   ),
@@ -307,7 +307,7 @@ Widget build(BuildContext context) {
                                       child: Icon(Icons.flag, color: Colors.black),),
                                     label: Text(
                                       '${index + 20}',
-                                      style: TextStyle(color: Colors.white,
+                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
                                       fontSize: 20),
                                     ),
                                   ),
@@ -330,7 +330,7 @@ Widget build(BuildContext context) {
                                       child: Icon(Icons.flag, color: Colors.black),),
                                     label: Text(
                                       '${index + 25}',
-                                      style: TextStyle(color: Colors.white,
+                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
                                       fontSize: 20),
                                     ),
                                   ),
@@ -352,18 +352,32 @@ Widget build(BuildContext context) {
                     alignment: Alignment.centerLeft,
                     child: MiniMockHelpButton(),
                   ),
-                  const SizedBox(width: 20),
-                   SizedBox(
-                    height: 50,
-                    width: 120,
-                    child:
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        icon: Icon(Icons.arrow_back, color: Colors.white),
-                        label: Text('Back',  style: TextStyle(color: Colors.white, fontSize: 16)),
-                      )
+                  const SizedBox(width: 16),
+                  Container(
+                    width: 160,
+                    height: 45,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      color: const Color.fromARGB(255, 235, 230, 239),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          spreadRadius: 0,
+                          blurRadius: 6,
+                          offset: const Offset(0, 6), // changes position of shadow
+                        ),
+                      ],
+                    ),
+                    child: TextButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 98, 86, 139)),
+                      label: Text('Back',  style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 16)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color.fromARGB(255, 235, 230, 239),
+                      ),
+                    )
                   ),
                   const Spacer(),
                   SizedBox(
@@ -374,8 +388,8 @@ Widget build(BuildContext context) {
                         onPressed: () {
                           widget.miniMockWidget.examEnd();
                         },
-                        icon: Icon(Icons.check_outlined, color: Colors.white),
-                        label: Text('Complete Exam',  style: TextStyle(color: Colors.white, fontSize: 16)),
+                        icon: Icon(Icons.check_outlined, color: Theme.of(context).textTheme.bodyMedium?.color),
+                        label: Text('Complete Exam',  style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 16)),
                       )
                   ),
                 ],

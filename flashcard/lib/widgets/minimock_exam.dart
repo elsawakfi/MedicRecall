@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/minimock_scoring.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flashcard_x/screens/minimock_feedback.dart';
 import '../screens/minimock_review.dart';
 import '../utils/timer.dart';
 import 'drawer_widget.dart';
@@ -165,11 +164,10 @@ class MiniMockExamState extends State<MiniMockExam> {
         answerDirectory: widget.answerDirectory
         ),
       ),
-      );
+    );
   }
 
   @override
-
   Widget build(BuildContext context) {
     return PopScope(
         canPop: true,
@@ -218,7 +216,9 @@ class MiniMockExamState extends State<MiniMockExam> {
                   height: 40.31,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
-                    color: const Color.fromARGB(255, 235, 230, 239),
+                    color:  (remainingSeconds <= 600)
+                    ? Colors.red.shade400
+                    : const Color.fromARGB(255, 235, 230, 239),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.2),
@@ -231,9 +231,11 @@ class MiniMockExamState extends State<MiniMockExam> {
                   child: Center(
                       child: Text('Time Remaining: $_displayTime',
                         style: TextStyle(
-                          color: const Color.fromARGB(255, 98, 86, 139),
+                          color: (remainingSeconds <= 600)
+                              ? Colors.white
+                              : Color.fromARGB(255, 98, 86, 139),
                           fontSize: 18.5,
-                          fontWeight: FontWeight.w500,//FontWeight.w500,
+                          fontWeight: FontWeight.w500,
                         ),
                       )),
                 )
@@ -245,23 +247,63 @@ class MiniMockExamState extends State<MiniMockExam> {
                 double maxScreenWidth = constraints.maxWidth * 0.5;
                 double maxPreferredWidth = 960; // 1920/2
 
-                return 
+                return
                 Center(
-                child: Container(
-                constraints: BoxConstraints(
-                  maxWidth: maxScreenWidth > maxPreferredWidth ? maxScreenWidth : maxPreferredWidth,
-                ),
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
+                  child: Container(
+                  constraints: BoxConstraints(
+                    maxWidth: maxScreenWidth > maxPreferredWidth ? maxScreenWidth : maxPreferredWidth,
+                  ),
+                  padding: EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
                         child: SizedBox(
                     child: (
-                        
+
                     Row(
-                      children: [
-                        Container(
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 10),
+                        width: 160,
+                        height: 40.31,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          color: const Color.fromARGB(255, 235, 230, 239),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              spreadRadius: 0,
+                              blurRadius: 5,
+                              offset: const Offset(0, 3), // changes position of shadow
+                            ),
+                          ],
+                        ),
+                        child:TextButton.icon(
+                            label: Text(flaggedQuestions[currentQuestion]
+                            ? 'Flagged'
+                            : 'Flag for review',
+                              style: const TextStyle(
+                                color: Color.fromARGB(255, 98, 86, 139),
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            onPressed: () {
+                              setState((){
+                                flaggedQuestions[currentQuestion] = !flaggedQuestions[currentQuestion];
+                              });
+                            },
+                            icon: Icon(
+                              flaggedQuestions[currentQuestion]
+                                  ? Icons.flag
+                                  : Icons.flag_outlined,
+                              color: Color.fromARGB(255, 98, 86, 139),
+                            )
+                        ),
+                      ),
+                      Spacer(),
+                      Container(
                           margin: const EdgeInsets.only(bottom: 10),
                           width: 160,
                           height: 40.31,
@@ -277,204 +319,229 @@ class MiniMockExamState extends State<MiniMockExam> {
                               ),
                             ],
                           ),
-                          child:TextButton.icon(
-                              label: Text('Flag for review',
-                                style: const TextStyle(
-                                  color: Color.fromARGB(255, 98, 86, 139),
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              onPressed: () {
-                                setState((){
-                                  flaggedQuestions[currentQuestion] = !flaggedQuestions[currentQuestion];
-                                });
-                              },
-                              icon: Icon(
-                                flaggedQuestions[currentQuestion]
-                                    ? Icons.flag
-                                    : Icons.flag_outlined,
+                          child: Center(
+                            child: Text('Question ${currentQuestion+1}/${questions.length}',
+                              style: const TextStyle(
                                 color: Color.fromARGB(255, 98, 86, 139),
-                              )
-                          ),
-                        ),
-                        Spacer(),
-                        Container(
-                            margin: const EdgeInsets.only(bottom: 10),
-                            width: 160,
-                            height: 40.31,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              color: const Color.fromARGB(255, 235, 230, 239),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
-                                  spreadRadius: 0,
-                                  blurRadius: 5,
-                                  offset: const Offset(0, 3), // changes position of shadow
-                                ),
-                              ],
-                            ),
-                            child: Center(
-                              child: Text('Question ${currentQuestion+1}/${questions.length}',
-                                style: const TextStyle(
-                                  color: Color.fromARGB(255, 98, 86, 139),
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
                               ),
-                            )
-                        ),
-                      ])
-                    ))),
+                            ),
+                          )
+                      ),
+                    ])
+                ))),
+                // Display the current question text
                   Text(
-                    questions[currentQuestion]['question'],
-                    style: TextStyle(fontSize: 20),
-                  ),
-                  SizedBox(height: 20),
-                  // If the question is a ranking question, display a reorderable list of options
-                  if(questions[currentQuestion]['type'] == "ranking") ...[
-                    Expanded(
-                      child: ReorderableListView(
-                        proxyDecorator:  (Widget child, int index, Animation<double> animation) {
-                          return Material(
-                            color: Colors.transparent,
-                            child: child,
+                  questions[currentQuestion]['question'],
+                  style: TextStyle(fontSize: 20),
+                ),
+                const SizedBox(height: 20),
+
+                // If the question is a ranking question, display a reorderable list of options
+                if (questions[currentQuestion]['type'] == "ranking") ...[
+                  Expanded(
+                    child: ReorderableListView(
+                      buildDefaultDragHandles: false,
+                      proxyDecorator:  (Widget child, int index, Animation<double> animation) {
+                        return Material(
+                          color: Colors.transparent,
+                          child: child,
+                        );
+                      },
+                      onReorder: (oldIndex, newIndex) {
+                        setState(() {
+                          if(newIndex > oldIndex) newIndex --; // Adjust the list based on movement of item
+                          // Update position of option in answer list
+                          final ranking = rankingAnswers[currentQuestion].removeAt(oldIndex);
+                          rankingAnswers[currentQuestion].insert(newIndex, ranking);
+                          // Update position of option text in question list
+                          final option = questions[currentQuestion]['options'].removeAt(oldIndex);
+                          questions[currentQuestion]['options'].insert(newIndex, option);
+                        });
+                      },
+                      // Create children for the reorderable list using questions
+                      children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
+                        int optionIndex = entry.key;
+                        String option = entry.value;
+                        String optionLetter = rankingAnswers[currentQuestion][optionIndex];
+                        return ReorderableDragStartListener(
+                            key: ValueKey(option),
+                            index: optionIndex,
+                            child: Card(
+                              elevation: 3,
+                              color: Color.fromARGB(255, 235, 230, 239),
+                                child: ListTile(
+                                  title: Text('${optionIndex+1}:   $optionLetter. $option', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 20)),
+                                  trailing: Icon(Icons.drag_handle , color: Color.fromARGB(255, 98, 86, 139), size: 30),
+                                )
+                            )
+                        );
+                      }).toList(),
+                    ),
+                  )
+                ]
+                // If the question is a multiple choice question, display checkboxes
+                else if(questions[currentQuestion]['type'] == "multiple choice") ...[
+                  //Line below takes the result of the map() and spreads its widgets into the children of Column
+                  Expanded(
+                      child: SingleChildScrollView(
+                          child: Column(
+                              children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
+                                int optionIndex = entry.key;
+                                String option = entry.value;
+                                int questionIndex = currentQuestion - rankingAnswers.length;
+                                String optionLetter = options[optionIndex];
+                                return CheckboxListTile(
+                                  fillColor: WidgetStateProperty.resolveWith<Color?>(
+                                        (states) {
+                                      if (states.contains(WidgetState.selected)) {
+                                        return Theme.of(context).textTheme.bodyMedium?.color; // Color when the checkbox is checked
+                                      }
+                                      return Colors.transparent; // Transparent when unchecked
+                                    },
+                                  ),
+                                  checkColor: Theme.of(context).scaffoldBackgroundColor,
+                                  title: Text('$optionLetter. $option', style: TextStyle(fontSize: 20, color: Theme.of(context).textTheme.bodyMedium?.color)),
+                                  value: multiChoiceAnswers[questionIndex][optionIndex],
+                                  onChanged: (value) {
+                                    int checkedCount = multiChoiceAnswers[questionIndex].where((element) => element).length;
+                                    if (checkedCount < 3 || value == false) {
+                                      setState(() {
+                                        multiChoiceAnswers[questionIndex][optionIndex] = value!;
+                                      });
+                                    }
+                                  },
+                                  enableFeedback: false,
+                                  controlAffinity: ListTileControlAffinity.leading,
+                                );
+                              }).toList()
+                          )
+                      )
+                  )
+                ],
+                // Buttons to change questions
+                SizedBox(height: 20),
+                Center(
+                    child:
+                    SizedBox(
+                        child:
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Align(
+                        alignment: Alignment.centerLeft,
+                        child: MiniMockHelpButton(),
+                    ),
+                    const SizedBox(width: 16),
+                    Container(
+                        width: 160,
+                        height: 45,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          color: const Color.fromARGB(255, 235, 230, 239),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              spreadRadius: 0,
+                              blurRadius: 6,
+                              offset: const Offset(0, 6), // changes position of shadow
+                            ),
+                          ],
+                        ),
+                        child: TextButton.icon(onPressed: () async{
+                          int? newIndex = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MiniMockReview(
+                                miniMockWidget: this,
+                                rankingLength: rankingAnswers.length,
+                                multiChoiceLength: multiChoiceAnswers.length,
+                                flaggedQuestions: flaggedQuestions,
+                                displayTime: _displayTime,
+                                remainingSeconds: remainingSeconds,
+                              ),
+                            ),
                           );
+                          // statement bellow allows for faster page update
+                          // Must check for null in case user finishes exam and no value is returned
+                          if (newIndex != null && newIndex != currentQuestion){
+                            setState(() {
+                              currentQuestion = newIndex;
+                            });
+                          }
                         },
-                        onReorder: (oldIndex, newIndex) {
+                        label: Text('Review Page', style: TextStyle(color:  Color.fromARGB(255, 98, 86, 139), fontSize: 16)),
+                        icon: Icon(Icons.search, color:  Color.fromARGB(255, 98, 86, 139),),
+                    )),
+                    const Spacer(),
+                    if (currentQuestion > 0) //Prevents button being shown if no previous questions available
+                      ElevatedButton.icon(
+                        onPressed: () {
                           setState(() {
-                            if(newIndex > oldIndex) newIndex --; // Adjust the list based on movement of item
-                            // Update position of option in answer list
-                            final ranking = rankingAnswers[currentQuestion].removeAt(oldIndex);
-                            rankingAnswers[currentQuestion].insert(newIndex, ranking);
-                            // Update position of option text in question list
-                            final option = questions[currentQuestion]['options'].removeAt(oldIndex);
-                            questions[currentQuestion]['options'].insert(newIndex, option);
+                            currentQuestion--; // Move to previous question
                           });
                         },
-                        // Create children for the reorderable list using questions
-                        children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
-                          int optionIndex = entry.key;
-                          String option = entry.value;
-                          String optionLetter = rankingAnswers[currentQuestion][optionIndex];
-                          return ReorderableDragStartListener(
-                              key: ValueKey(option),
-                              index: optionIndex,
-                              child: Card(
-                                  child: ListTile(
-                                    title: Text('${optionIndex+1}:   $optionLetter. $option', style: TextStyle(color: Colors.blueGrey, fontSize: 20)),
-                                    trailing: Icon(Icons.drag_handle , color: Colors.blueGrey),
-                                  ),
+                        icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 98, 86, 139)),
+                        label: Text('Previous', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 16)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color.fromARGB(255, 235, 230, 239),
+                        ),
+                      ),
+                    const SizedBox(width: 16),
+                    if (currentQuestion < questions.length - 1)
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            currentQuestion++; // Move to next question
+                          });
+                        },
+                        icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139)),
+                        label: Text('Next', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 16)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color.fromARGB(255, 235, 230, 239),
+                        ),
+                      ),
+                    if (currentQuestion == questions.length - 1)
+                      ElevatedButton.icon(
+                        onPressed: () async {
+                          // On pressed load new page and wait for a returned value
+                          int? newIndex = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MiniMockReview(
+                                miniMockWidget: this,
+                                rankingLength: rankingAnswers.length,
+                                multiChoiceLength: multiChoiceAnswers.length,
+                                flaggedQuestions: flaggedQuestions,
+                                displayTime: _displayTime,
+                                remainingSeconds: remainingSeconds,
                               ),
+                            ),
                           );
-                        }).toList(),
-                      ),
-                    )
-                  ]
-                  // If the question is a multiple choice question, display checkboxes
-                  else if(questions[currentQuestion]['type'] == "multiple choice") ...[
-                    //Line below takes the result of the map() and spreads its widgets into the children of Column
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Column(
-                            children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
-                              int optionIndex = entry.key;
-                              String option = entry.value;
-                              int questionIndex = currentQuestion - rankingAnswers.length;
-                              String optionLetter = options[optionIndex];
-                              return CheckboxListTile(
-                                title: Text('$optionLetter. $option', style: TextStyle(color: Colors.white, fontSize: 20)),
-                                value: multiChoiceAnswers[questionIndex][optionIndex],
-                                onChanged: (value) {
-                                  int checkedCount = multiChoiceAnswers[questionIndex].where((element) => element).length;
-                                  if (checkedCount < 3 || value == false) {
-                                    setState(() {
-                                      multiChoiceAnswers[questionIndex][optionIndex] = value!;
-                                    });
-                                  }
-                                },
-                                side: BorderSide( color: Colors.white),
-                                enableFeedback: false,
-                                controlAffinity: ListTileControlAffinity.leading,
-                              );
-                            }).toList()
-                        )
-                      )
-                    )
-                  ],
-                  // Buttons to change questions
-                  SizedBox(height: 20),
-                  Center(
-                    child:
-                  SizedBox(
-                    child:
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Align(
-                          alignment: Alignment.centerLeft,
-                          child: MiniMockHelpButton(),
-                      ),
-                      const Spacer(),
-                      if (currentQuestion > 0) //Prevents button being shown if no previous questions available
-                        ElevatedButton.icon(
-                          onPressed: () {
+                          // statement bellow allows for faster page update
+                          // Must check for null in case user finishes exam and no value is returned
+                          if (newIndex != null && newIndex != currentQuestion){
                             setState(() {
-                              currentQuestion--; // Move to previous question
+                              currentQuestion = newIndex;
                             });
-                          },
-                          icon: Icon(Icons.arrow_back, color: Colors.white),
-                          label: Text('Previous', style: TextStyle(color: Colors.white, fontSize: 16)),
-                        ),
-                      const SizedBox(width: 16),
-                      if (currentQuestion < questions.length - 1)
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            setState(() {
-                              currentQuestion++; // Move to next question
-                            });
-                          },
-                          icon: Icon(Icons.arrow_forward, color: Colors.white),
-                          label: Text('Next', style: TextStyle(color: Colors.white, fontSize: 16)),
-                        ),
-                      if (currentQuestion == questions.length - 1)
-                        ElevatedButton.icon(
-                          onPressed: () async {
-                            // On pressed load new page and wait for a returned value
-                            int? newIndex = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => MiniMockReview(
-                                  miniMockWidget: this,
-                                  rankingLength: rankingAnswers.length,
-                                  multiChoiceLength: multiChoiceAnswers.length,
-                                  flaggedQuestions: flaggedQuestions,
-                                  displayTime: _displayTime,
-                                  remainingSeconds: remainingSeconds,
-                                  ),
-                              ),
-                            );
-                            // statement bellow allows for faster page update
-                            // Must check for null in case user finishes exam and no value is returned
-                            if (newIndex != null && newIndex != currentQuestion){
-                              setState(() {
-                                currentQuestion = newIndex;
-                              });
-                            }
+                          }
 
-                          },
-                          icon: Icon(Icons.arrow_forward, color: Colors.white),
-                          label: Text('Review', style: TextStyle(color: Colors.white, fontSize: 16)),
+                        },
+                        icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139)),
+                        label: Text('Review', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 16)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color.fromARGB(255, 235, 230, 239),
                         ),
+                      ),
                     ],
                   ))),
                 ]
               ),
             )
-            );
-          })
-        )
+          );
+        })
+      )
     );
   }
 }
