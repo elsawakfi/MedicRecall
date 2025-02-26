@@ -10,6 +10,8 @@ import 'package:collection/collection.dart';
 import 'package:flashcard_x/widgets/circular_percentage_indicator.dart';
 import 'package:http/http.dart' as http;
 
+import '../widgets/drawer_widget.dart';
+
 
 class MiniMockScoring extends StatefulWidget {
   final String title;
@@ -214,6 +216,7 @@ Future<void> fetchAverageScore() async {
     return PopScope(
         canPop: false,
         child: Scaffold(
+        drawer: const DrawMain(),
         appBar: AppBar(
           // backgroundColor: Colors.blue,
           elevation: 0,
@@ -302,8 +305,8 @@ Future<void> fetchAverageScore() async {
                       ),
                     )
                   },
-                  icon:Icon(Icons.arrow_forward, color: Colors.white),
-                  label: const Text('Feedback', style:TextStyle(color: Colors.white, fontSize: 16)),
+                  icon:Icon(Icons.arrow_forward, color: Theme.of(context).textTheme.bodyMedium?.color),
+                  label: Text('Feedback', style:TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 16)),
                 ),
               ),
             ],
