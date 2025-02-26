@@ -46,12 +46,6 @@ class MiniMockExamState extends State<MiniMockExam> {
         setState(() {
           _displayTime = time;
           remainingSeconds -= 1;
-
-          //   // Parse time string "MM:SS" to seconds
-          // List<String> parts = time.split(":");
-          // int minutes = int.parse(parts[0]);
-          // int seconds = int.parse(parts[1]);
-          // remainingSeconds = (minutes * 60) + seconds;// Update display every second
         });
       },
       onTimerComplete: () {
@@ -165,7 +159,10 @@ class MiniMockExamState extends State<MiniMockExam> {
     updateExamResults(finalAnswerList);
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => MiniMockScoring(title: widget.title, questionDirectory: widget.questionDirectory, answerDirectory: widget.answerDirectory),
+        builder: (context) => MiniMockScoring(title: widget.title,
+        questionDirectory: widget.questionDirectory,
+        answerDirectory: widget.answerDirectory
+        ),
       ),
     );
   }
@@ -215,7 +212,7 @@ class MiniMockExamState extends State<MiniMockExam> {
               actions: [
                 Container(
                   margin: const EdgeInsets.only(right: 16),
-                  width: 160,
+                  width: 210,
                   height: 40.31,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
@@ -237,7 +234,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                           color: (remainingSeconds <= 600)
                               ? Colors.white
                               : Color.fromARGB(255, 98, 86, 139),
-                          fontSize: 15,
+                          fontSize: 18.5,
                           fontWeight: FontWeight.w500,
                         ),
                       )),
@@ -246,13 +243,25 @@ class MiniMockExamState extends State<MiniMockExam> {
           ),
           body: questions.isEmpty
               ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
-              : Padding( //Else load the data
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Display question flag and timer widgets:
-                Row(
+              : LayoutBuilder( builder: (context, constraints) {
+                double maxScreenWidth = constraints.maxWidth * 0.5;
+                double maxPreferredWidth = 960; // 1920/2
+
+                return
+                Center(
+                  child: Container(
+                  constraints: BoxConstraints(
+                    maxWidth: maxScreenWidth > maxPreferredWidth ? maxScreenWidth : maxPreferredWidth,
+                  ),
+                  padding: EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: SizedBox(
+                    child: (
+
+                    Row(
                     children: [
                       Container(
                         margin: const EdgeInsets.only(bottom: 10),
@@ -320,17 +329,15 @@ class MiniMockExamState extends State<MiniMockExam> {
                             ),
                           )
                       ),
-                    ]
-                ),
-
+                    ])
+                ))),
                 // Display the current question text
-            
                   Text(
                   questions[currentQuestion]['question'],
                   style: TextStyle(fontSize: 20),
                 ),
-                const SizedBox(height: 30),
-               
+                const SizedBox(height: 20),
+
                 // If the question is a ranking question, display a reorderable list of options
                 if (questions[currentQuestion]['type'] == "ranking") ...[
                   Expanded(
@@ -414,6 +421,11 @@ class MiniMockExamState extends State<MiniMockExam> {
                   )
                 ],
                 // Buttons to change questions
+                SizedBox(height: 20),
+                Center(
+                    child:
+                    SizedBox(
+                        child:
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
@@ -437,11 +449,18 @@ class MiniMockExamState extends State<MiniMockExam> {
                             ),
                           ],
                         ),
-                    child: TextButton.icon(onPressed: () async{
-                    int? newIndex = await Navigator.push(
+                        child: TextButton.icon(onPressed: () async{
+                          int? newIndex = await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => MiniMockReview(miniMockWidget: this, rankingLength: rankingAnswers.length, multiChoiceLength: multiChoiceAnswers.length, flaggedQuestions: flaggedQuestions,),
+                              builder: (context) => MiniMockReview(
+                                miniMockWidget: this,
+                                rankingLength: rankingAnswers.length,
+                                multiChoiceLength: multiChoiceAnswers.length,
+                                flaggedQuestions: flaggedQuestions,
+                                displayTime: _displayTime,
+                                remainingSeconds: remainingSeconds,
+                              ),
                             ),
                           );
                           // statement bellow allows for faster page update
@@ -451,8 +470,9 @@ class MiniMockExamState extends State<MiniMockExam> {
                               currentQuestion = newIndex;
                             });
                           }
-                    } , label: Text('Review Page', style: TextStyle(color:  Color.fromARGB(255, 98, 86, 139), fontSize: 16)),
-                    icon: Icon(Icons.search, color:  Color.fromARGB(255, 98, 86, 139),),
+                        },
+                        label: Text('Review Page', style: TextStyle(color:  Color.fromARGB(255, 98, 86, 139), fontSize: 16)),
+                        icon: Icon(Icons.search, color:  Color.fromARGB(255, 98, 86, 139),),
                     )),
                     const Spacer(),
                     if (currentQuestion > 0) //Prevents button being shown if no previous questions available
@@ -489,7 +509,14 @@ class MiniMockExamState extends State<MiniMockExam> {
                           int? newIndex = await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => MiniMockReview(miniMockWidget: this, rankingLength: rankingAnswers.length, multiChoiceLength: multiChoiceAnswers.length, flaggedQuestions: flaggedQuestions,),
+                              builder: (context) => MiniMockReview(
+                                miniMockWidget: this,
+                                rankingLength: rankingAnswers.length,
+                                multiChoiceLength: multiChoiceAnswers.length,
+                                flaggedQuestions: flaggedQuestions,
+                                displayTime: _displayTime,
+                                remainingSeconds: remainingSeconds,
+                              ),
                             ),
                           );
                           // statement bellow allows for faster page update
@@ -507,13 +534,14 @@ class MiniMockExamState extends State<MiniMockExam> {
                           backgroundColor: Color.fromARGB(255, 235, 230, 239),
                         ),
                       ),
-                  ],
-                ),
-              ]
-            ),
-          ),
-
-        )
+                    ],
+                  ))),
+                ]
+              ),
+            )
+          );
+        })
+      )
     );
   }
 }

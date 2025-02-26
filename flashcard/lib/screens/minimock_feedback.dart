@@ -203,36 +203,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
               )
             ],
           ),
-
           centerTitle: true,
-          actions:[
-            Container(
-                margin: const EdgeInsets.only(right: 16),
-                width: 160,
-                height: 40.31,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  color: const Color.fromARGB(255, 235, 230, 239),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      spreadRadius: 0,
-                      blurRadius: 5,
-                      offset: const Offset(0, 3), // changes position of shadow
-                    ),
-                  ],
-                ),
-                child: Center(
-                  child: Text('Question ${currentQuestion+1}/${questions.length}',
-                    style: const TextStyle(
-                      color: Color.fromARGB(255, 98, 86, 139),
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                )
-            )
-          ],
           leading: Builder(
             builder: (context) => GestureDetector(
               onTap: () => Scaffold.of(context).openDrawer(),
@@ -243,16 +214,47 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
           ),
         ),
       body: examOptions.isEmpty || userOptions.isEmpty
-          ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
-          : Padding( //Else load the data
+        ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
+        : LayoutBuilder( builder: (context, constraints) {
+        double maxScreenWidth = constraints.maxWidth * 0.5;
+        double maxPreferredWidth = 960; // 1920/2
 
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+        return Center(
+        child: Container(
+        constraints: BoxConstraints(
+          maxWidth: maxScreenWidth > maxPreferredWidth ? maxScreenWidth : maxPreferredWidth,
+        ),
+        padding: EdgeInsets.all(16),
+        child:  Column(
           children: [
             Row(
               children: [
+                Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    width: 160,
+                    height: 40.31,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      color: const Color.fromARGB(255, 235, 230, 239),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          spreadRadius: 0,
+                          blurRadius: 5,
+                          offset: const Offset(0, 3), // changes position of shadow
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Text('Question ${currentQuestion+1}/${questions.length}',
+                        style: const TextStyle(
+                          color: Color.fromARGB(255, 98, 86, 139),
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    )
+                ),
                 Spacer(),
                 Container(
                     margin: const EdgeInsets.only(bottom: 10),
@@ -282,6 +284,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                 )
               ]
             ),
+            Expanded(child: Column(children: [
             // Display the current question text
             Text(
               questions[currentQuestion]['question'],
@@ -290,12 +293,20 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
             SizedBox(height: 20),
             // If the question is a ranking question, display a reorderable list of options
             if (questions[currentQuestion]['type'] == "ranking") ...[
-              Row(
-                children: [
-                  // USER ANSWERS
-                  Expanded(
-                      child: SingleChildScrollView(
-                        child: Column(
+              Flexible(
+                flex: 3,
+                child: Scrollbar(
+                controller: _optionScrollController,
+                thumbVisibility: true,
+                  child: SingleChildScrollView(
+                    controller: _optionScrollController,
+                    child: Column( children: [
+                      Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        // USER ANSWERS
+                        Expanded(
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -309,44 +320,47 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                   color: (questions[currentQuestion]['correct_answers'][optionIndex] == optionLetter)
                                       ? Colors.green
                                       : Colors.red.shade400,
+                                    child: SizedBox(
+                                    width: double.infinity, // Define the width
                                     child: ListTile(
                                       title: Text('$optionLetter. $optionText', style: TextStyle(color: Colors.white,fontSize: 18))
-                                    )
+                                    ))
                                 );
                               })
                             ]
-                        ),
-                      )
-                  ),
+                        )),
                   // CORRECT ANSWERS
                   Expanded(
-                    child: SingleChildScrollView(
                       child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text('  Correct Answer:', style: TextStyle(color:Theme.of(context).textTheme.bodyMedium?.color,fontSize: 18)),
+                            Text('  Correct Answer:', style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,fontSize: 18)),
                             ...examOptions[currentQuestion].asMap().entries.map<Widget>((entry) {
                               MapEntry<String, String> currentEntry = entry.value;
                               String optionLetter = currentEntry.key;
                               String optionText = currentEntry.value;
                               return Card(
+                                child: SizedBox(
+                                width: double.infinity,
                                 child: ListTile(
                                   title: Text('$optionLetter. $optionText',
                                       style: TextStyle(color: Colors.blueGrey, fontSize: 18)),
-                                )
+                                ))
                               );
                             })
                           ]
-                      ),
-                    )
-                  ),
-              ])
+                      ))
+                      ])
+                    ])
+                  ))
+              )
             ]
             // If the question is a multiple choice question, display checkboxes
             else if(questions[currentQuestion]['type'] == "multiple choice") ...[
               //Line below takes the result of the map() and spreads its widgets into the children of Column
-              Expanded(
+              Flexible(
+                flex: 1,
                 child: Scrollbar(
                   controller: _optionScrollController,
                   thumbVisibility: true,
@@ -367,7 +381,9 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
               )),
               SizedBox(height: 10),
               //display the selected answers and the correct answers
-              Container(
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Container(
                 padding: EdgeInsets.all(16),
                 margin: EdgeInsets.symmetric(vertical: 8),
                 decoration: BoxDecoration(
@@ -383,37 +399,44 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                     Text("Correct Answer: ${questions[currentQuestion]['correct_answers']}", style: TextStyle(color: Colors.white,fontSize: 18))
                   ]
                 )
-              ),
+              ))
             ],
             SizedBox(height: 10),
-            Expanded(
-              child: Scrollbar(
-                controller: _explanationScrollController,
-                thumbVisibility: true,
-                child: SingleChildScrollView(
+            Flexible(
+                fit: FlexFit.tight,
+                child: Scrollbar(
                   controller: _explanationScrollController,
-                 //Display the explanation of the question
-                  child: Text(
-                    questions[currentQuestion]['explanation'],
-                    style: TextStyle(fontSize: 18),
+                  thumbVisibility: true,
+                  child: SingleChildScrollView(
+                    controller: _explanationScrollController,
+                   //Display the explanation of the question
+                    child: Text(
+                      questions[currentQuestion]['explanation'],
+                      style: TextStyle(fontSize: 18),
+                    )
                   )
-                )
               )
-            ),
+            )])),
             //compare the answers keys and the user's answers and provided
             //format tbd
 
             // Buttons to change questions
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+            SizedBox(height: 10),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 if (currentQuestion == 0) //Prevents button being shown if no previous questions available
                   ElevatedButton.icon(
                     onPressed: () {
                       Navigator.pop(context);
                     },
-                    icon: Icon(Icons.arrow_back, color: Theme.of(context).textTheme.bodyMedium?.color),
-                    label: Text('Scoring', style: TextStyle(fontSize: 16, color: Theme.of(context).textTheme.bodyMedium?.color)),
+                    icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 98, 86, 139)),
+                    label: Text('Scoring', style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 98, 86, 139))),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color.fromARGB(255, 235, 230, 239),
+                    ),
                   ),
                 if (currentQuestion > 0) //Prevents button being shown if no previous questions available
                   ElevatedButton.icon(
@@ -422,8 +445,11 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                         currentQuestion--; // Move to previous question
                       });
                     },
-                    icon: Icon(Icons.arrow_back, color: Theme.of(context).textTheme.bodyMedium?.color),
-                    label: Text('Previous', style: TextStyle(fontSize: 16, color: Theme.of(context).textTheme.bodyMedium?.color)),
+                    icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 98, 86, 139)),
+                    label: Text('Previous', style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 98, 86, 139))),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color.fromARGB(255, 235, 230, 239),
+                    ),
                   ),
                 const SizedBox(width: 16),
                 if (currentQuestion < questions.length - 1)
@@ -433,8 +459,11 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                         currentQuestion++; // Move to next question
                       });
                     },
-                    icon: Icon(Icons.arrow_forward, color: Theme.of(context).textTheme.bodyMedium?.color),
-                    label: Text('Next', style: TextStyle(fontSize: 16, color: Theme.of(context).textTheme.bodyMedium?.color)),
+                    icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139)),
+                    label: Text('Next', style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 98, 86, 139))),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color.fromARGB(255, 235, 230, 239),
+                    ),
                   ),
                 if (currentQuestion == questions.length - 1)
                   ElevatedButton.icon(
@@ -445,16 +474,21 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                         ),
                       );
                     },
-                    icon: Icon(Icons.arrow_forward, color: Theme.of(context).textTheme.bodyMedium?.color),
-                    label: Text('Mini-Mock Menu', style: TextStyle(fontSize: 16, color: Theme.of(context).textTheme.bodyMedium?.color)),
+                    icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139)),
+                    label: Text('Mini-Mock Menu', style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 98, 86, 139))),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color.fromARGB(255, 235, 230, 239),
+                    ),
                   ),
               ],
-            ),
+            )),
           ],
         ),
       ),
-    )
+        );
+      })
+      )
     );
-  }      
   }
+}
 

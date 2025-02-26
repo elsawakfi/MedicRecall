@@ -157,15 +157,16 @@ Future<void> fetchAverageScore() async {
           answerScores[questionIndex] = userScore;
           break;
         case 'multiple choice':
-          tempMaxScore += 12;
-          if (questions[questionIndex]['type'] == "multiple choice" &&
-              UnorderedIterableEquality().equals(questions[questionIndex]['correct_answers'], userAnswer)){
-            answerScores[questionIndex] = 1;
-          } else{
-            answerScores[questionIndex] = 0;
-          }
+          tempMaxScore += 12; // Each multiple choice question is worth a max of 12 marks.
+          int userScore = 0;
+          List correctAnswers = questions[questionIndex]['correct_answers'];
+          for(int i = 0; i < correctAnswers.length; i++){
+            if (userAnswer.contains(correctAnswers[i])){
+              userScore += 4; // Each correct answer is worth 4 marks.
+            }}
+          answerScores[questionIndex] = userScore;
           break;
-        default:
+        default:  
       }
     });
     totalScore = answerScores.reduce((value, element) => value + element);
@@ -253,9 +254,17 @@ Future<void> fetchAverageScore() async {
         ),
         body: answerScores.isEmpty || (maxScore == 0)
             ? Center(child: CircularProgressIndicator(),) // If data is still being fetched, show loading circle
-            : Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
+            : LayoutBuilder( builder: (context, constraints) {
+            double maxScreenWidth = constraints.maxWidth * 0.5;
+            double maxPreferredWidth = 960; // 1920/2
+
+            return Center(
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth: maxScreenWidth > maxPreferredWidth ? maxScreenWidth : maxPreferredWidth,
+              ),
+            padding: EdgeInsets.all(16),
+            child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Spacer(),
@@ -305,14 +314,17 @@ Future<void> fetchAverageScore() async {
                       ),
                     )
                   },
-                  icon:Icon(Icons.arrow_forward, color: Theme.of(context).textTheme.bodyMedium?.color),
-                  label: Text('Feedback', style:TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 16)),
+                  icon:Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139)),
+                  label: Text('Feedback', style:TextStyle(fontSize: 16, color: Color.fromARGB(255, 98, 86, 139))),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color.fromARGB(255, 235, 230, 239),
+                  ),
                 ),
               ),
             ],
           )
         )
-      ),
-    );
+      );
+    })));
   }
 }
