@@ -272,7 +272,9 @@ class MiniMockExamState extends State<MiniMockExam> {
                           ],
                         ),
                         child:TextButton.icon(
-                            label: Text('Flag for review',
+                            label: Text(flaggedQuestions[currentQuestion]
+                            ? 'Flagged'
+                            : 'Flag for review',
                               style: const TextStyle(
                                 color: Color.fromARGB(255, 98, 86, 139),
                                 fontSize: 15,
@@ -323,12 +325,13 @@ class MiniMockExamState extends State<MiniMockExam> {
                 ),
 
                 // Display the current question text
-                Text(
+            
+                  Text(
                   questions[currentQuestion]['question'],
                   style: TextStyle(fontSize: 20),
                 ),
-                SizedBox(height: 20),
-
+                const SizedBox(height: 30),
+               
                 // If the question is a ranking question, display a reorderable list of options
                 if (questions[currentQuestion]['type'] == "ranking") ...[
                   Expanded(
@@ -408,6 +411,39 @@ class MiniMockExamState extends State<MiniMockExam> {
                         alignment: Alignment.centerLeft,
                         child: MiniMockHelpButton(),
                     ),
+                    const SizedBox(width: 16),
+                    Container(
+                        width: 160,
+                        height: 45,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          color: const Color.fromARGB(255, 235, 230, 239),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              spreadRadius: 0,
+                              blurRadius: 6,
+                              offset: const Offset(0, 6), // changes position of shadow
+                            ),
+                          ],
+                        ),
+                    child: TextButton.icon(onPressed: () async{
+                    int? newIndex = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MiniMockReview(miniMockWidget: this, rankingLength: rankingAnswers.length, multiChoiceLength: multiChoiceAnswers.length, flaggedQuestions: flaggedQuestions,),
+                            ),
+                          );
+                          // statement bellow allows for faster page update
+                          // Must check for null in case user finishes exam and no value is returned
+                          if (newIndex != null && newIndex != currentQuestion){
+                            setState(() {
+                              currentQuestion = newIndex;
+                            });
+                          }
+                    } , label: Text('Review Page', style: TextStyle(color:  Color.fromARGB(255, 98, 86, 139), fontSize: 16)),
+                    icon: Icon(Icons.search, color:  Color.fromARGB(255, 98, 86, 139),),
+                    )),
                     const Spacer(),
                     if (currentQuestion > 0) //Prevents button being shown if no previous questions available
                       ElevatedButton.icon(
