@@ -37,6 +37,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
 
   int buildCount = 0;
   bool testDayBool = true;
+  bool buttonPressed = false;
+  bool stopShowing = false; 
   late String testDayString = "Test day not set";
 
   final Map<String, bool> _isHovered = {};
@@ -46,6 +48,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     super.initState();
     getUser();
     getTestDay();
+    getStopShowing(user!);
     getFirstStudyDay();
     setState(() {});
     _isHovered['checkbox1'] = false;
@@ -53,6 +56,43 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     _isHovered['checkbox3'] = false;
     _isHovered['checkbox4'] = false;
   }
+
+  Future<void> setStopShowing(User user, [bool value = false]) async {
+  await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+    'stopShowing': value,
+    'popUpTime': FieldValue.serverTimestamp(), 
+  }, SetOptions(merge: true));
+   // Merge to avoid overwriting other fields
+}
+
+  Future<void> getStopShowing(User user) async {
+  DocumentSnapshot doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+
+  if (doc.exists) {
+    
+    Timestamp? timestamp = doc['popUpTime'];
+
+    if (doc['stopShowing'] != null && timestamp != null) {
+      DateTime savedTime = timestamp.toDate();
+      DateTime currentTime = DateTime.now();
+      // print("Saved time");
+      // print(savedTime);
+      // print("Current time");
+      // print(currentTime);
+
+      if (currentTime.difference(savedTime).inMinutes >= 1) {
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+          'stopShowing': false,
+        });
+       
+      }
+    }
+  else{
+    setStopShowing(user);
+  }
+  stopShowing = doc['stopShowing'];
+  }
+}
 
   // Helper method
   Widget _buildAlertDialog({
@@ -74,6 +114,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
         ),
       ),
       content: SizedBox(
+        height: 130,
         width: 300,
         child: content,
       ),
@@ -149,7 +190,10 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       }
     } else {
       user = auth.currentUser!;
+     
     }
+    getStopShowing(user!);
+    
   }
 
   Future<void> getFirstStudyDay() async {
@@ -170,6 +214,20 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     }
   }
 
+  Future <void> shouldShowDialog() async{
+      await getTestDay();
+      await getStopShowing(user!);
+      
+     
+      if (mounted && 
+          testDayBool && 
+          _examDate == null && 
+          landingService.onLanding &&
+          !stopShowing){
+       _showRevisionPlanDialog(context);
+       }
+  }
+
   // Revision dialog
   void _showRevisionPlanDialog(BuildContext context) {
     showDialog(
@@ -177,17 +235,26 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       builder: (BuildContext context) {
         return _buildAlertDialog(
           title: 'Do you want to start your revision plan today?',
-          content: const SizedBox(), // Empty content for this dialog
-          actions: [
-            TextButton(
+          content: 
+          SizedBox(
+            child: buttonPressed
+                ? Text('')
+                : Text(
+                  'If you want to stop seeing this pop up please press the red button below to pause pop up during your session',
+                  style: TextStyle(fontSize: 14, color:Color.fromRGBO(21, 58, 103, 1))
+                  )),
+          
+          actions :  
+           [       
+             TextButton(
             onPressed: () {
               Navigator.of(context).pop();
             },
             style: TextButton.styleFrom(
               foregroundColor: const Color.fromRGBO(243, 90, 90, 1),
               // backgroundColor: const Color.fromRGBO(243, 90, 90, 1),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              minimumSize: const Size(120, 45), // Sets minimum width and height
+              //padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              //minimumSize: const Size(120, 45), // Sets minimum width and height
             ),
             child: const Text(
               'No',
@@ -211,81 +278,42 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               'Yes',
               style: TextStyle(fontSize: 16),
             ),
+          ),  
+              TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              setStopShowing(user!,true);
+              //need to save the date here and then add another condition that checks later on 
+
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: const Color.fromARGB(255, 160, 160, 160),
+               backgroundColor:  Colors.transparent,
+              //padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              //minimumSize: const Size(120, 45), // Sets minimum width and height
+            ),
+            child: const Text(
+              'Don\'t Show Again',
+              style: TextStyle(fontSize: 16),
+            ),
           ),
-            
           ],
         );
       },
-    );
-  }
-    Future<void> shouldShowDialog() async{
-      await getTestDay();
-      
-      if (mounted && testDayBool && _examDate == null && landingService.onLanding){
-         showDialog(context: context,
-         builder: (BuildContext context){
-          return _buildAlertDialog(
-          title: 'Do you want to start your revision plan today?',
-          content: const SizedBox(), // Empty content for this dialog
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                 _setFirstStudyDay();
-                _showExamDateDialog(context); // Call to show exam date dialog
-              },
-              child: const Text('Yes'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('No'),
-            ),
-          ],
-        );
-      },
-    );setState(() {}); } else {}
-  
+    
+    );setState(() {});
   }
 
-   @override
-  void didChangeDependencies(){
-    super.didChangeDependencies();
-    //waits for build function to complete and then calls back to call the condition checking function 
-    WidgetsBinding.instance.addPostFrameCallback((_){
-       shouldShowDialog();
-    });
-  
-  }
-
-  // Method to save firstStudyDay
-  Future<void> _setFirstStudyDay() async {
-    QuerySnapshot u =
-        await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
-    var id = u.docs.last.id;
-
-    // Save the first study day only once when the revision plan starts
-    await _userCollectionRef.doc(id).update({
-      "firstStudyDay":
-          DateTime.now(), // Save the current date as first study day
-    });
-
-
-    // Optionally, retrieve the first study day
-    await getFirstStudyDay();
-  }
-
-  // Show the date picker dialog to select exam date
+    // Show the date picker dialog to select exam date
   void _showExamDateDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return _buildAlertDialog(
           title: 'When is your exam date?',
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            // If statement to check if firebase already has exam date in database
+          content: 
+          Column(
+            mainAxisSize: MainAxisSize.max,
             children: [
               ElevatedButton(
                 onPressed: () async {
@@ -320,7 +348,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                   style: TextStyle(fontSize: 16),
                   ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(),
               Text(
                 _examDate != null
                     ? 'Selected Date: ${DateFormat('dd MMM, yyyy').format(_examDate!)}' // UK Format
@@ -339,11 +367,35 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     );
   }
 
+   @override
+  void didChangeDependencies(){
+    super.didChangeDependencies();
+    //waits for build function to complete and then calls back to call the condition checking function 
+    WidgetsBinding.instance.addPostFrameCallback((_){
+      shouldShowDialog();
+    });
+  
+  }
+
+  // Method to save firstStudyDay
+  Future<void> _setFirstStudyDay() async {
+    QuerySnapshot u =
+        await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
+    var id = u.docs.last.id;
+
+    // Save the first study day only once when the revision plan starts
+    await _userCollectionRef.doc(id).update({
+      "firstStudyDay":
+          DateTime.now(), // Save the current date as first study day
+    });
+    // Optionally, retrieve the first study day
+    await getFirstStudyDay();
+  }
+
   // Show dialog to ask for number of repetitions
   void _showRepetitionDialog(BuildContext context) {
     final List<int> repetitionOptions = [2, 3, 4, 5, 6];
     int? selectedRepetition;
-
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -352,10 +404,9 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
             return AlertDialog(
               backgroundColor: const Color(0xFFE6EDF2),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(0),
+                borderRadius: BorderRadius.circular(5.0),
               ),
               title: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'How many times would you like to practice the selected resources?',
@@ -365,7 +416,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const SizedBox(height: 8), // Add spacing between lines
+                  const SizedBox(height: 11),
+                  // Add spacing between lines
                   Text.rich(
                     TextSpan(
                       children: [
@@ -389,15 +441,9 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                       ],
                     ),
                   ),
-                ],
-              ),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
                     ...repetitionOptions.map((int value) {
                       return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 5.0),
+                        padding: const EdgeInsets.symmetric(vertical : 5.0),
                         child: RadioListTile<int>(
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15.0),
@@ -421,7 +467,6 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     }),
                   ],
                 ),
-              ),
               actions: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -432,9 +477,10 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     },
                     style: TextButton.styleFrom(
                       foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
-                      // backgroundColor: const Color.fromRGBO(243, 90, 90, 1),
+                      //backgroundColor: const Color.fromRGBO(243, 90, 90, 1),
                       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      minimumSize: const Size(120, 45), // Sets minimum width and height
+                      minimumSize: const Size(30, 30), // Sets minimum width and height
+                      maximumSize: const Size (120,45),
                     ),
                     child: const Text(
                       'Previous',
@@ -469,7 +515,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                       style: TextButton.styleFrom(
                         foregroundColor: Colors.white,
                         backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        //padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
                         minimumSize: const Size(120, 45), // Sets minimum width and height
                       ),
                       child: const Text(
@@ -492,7 +538,6 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     final checkbox2 = ValueNotifier<bool>(false);
     final checkbox3 = ValueNotifier<bool>(false);
     final checkbox4 = ValueNotifier<bool>(false);
-
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -556,23 +601,18 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                   );
                   return; // Stop execution if no resources are selected
                 }
-
                 QuerySnapshot u = await _userCollectionRef
                     .where("userID", isEqualTo: user?.uid)
                     .get();
-
                 // Update Firestore with selected resources
                 var id = u.docs.last.id;
                 _userCollectionRef.doc(id).update({
                   'selectedResources': selectedResources,
                 });
-
                 // Start study session
                 StudySessionManager().startStudySession(selectedResources);
-
                 // Close current dialog
                 Navigator.of(context).pop();
-
                 // If either Official Paper or Full-sized Mock is selected, show Repetition Dialog
                 if (checkbox1.value || checkbox2.value) {
                   _showRepetitionDialog(context);
@@ -836,6 +876,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
           ),
         ),
         onPressed: () {
+          buttonPressed = true;
           getTestDay();
           if (testDayBool) {
             _showRevisionPlanDialog(context);
