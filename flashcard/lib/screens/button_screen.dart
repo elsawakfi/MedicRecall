@@ -403,47 +403,56 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildCheckbox(checkbox1, 
-              'Official Practice Paper', 
-              description: 'The official past paper is available on the Health Education England website. It contains 22 Professional Dilemma questions with realistic scenarios and reliable rationales created by the same people who write the questions for the MSRA, making it a very valuable resource. \n\n You will be prompted to specify your preferred number of practice attempts upon selection.',
-              showInfo: true
+              _buildCheckbox(
+                checkbox1, 
+                'Official Practice Paper', 
+                description: 'The official past paper is available on the Health Education England website. '
+                'It contains 22 Professional Dilemma questions with realistic scenarios and reliable rationales created '
+                'by the same people who write the questions for the MSRA, making it a very valuable resource.\n\n'
+                'You will be prompted to specify your preferred number of practice attempts upon selection.',
+                showInfo: true,
               ),
               _buildCheckbox(
                 checkbox2, 
                 'Full-sized Mock Exam',
-                description: 'Our full-sized mock exam has been designed to mimic the exact conditions you will have on exam day, helping you optimise timings while exposing you to different professional scenarios. It includes 50 questions that have been carefully created to align with official rationales and GMC guidelines. \n\nYou will be prompted to specify your preferred number of practice attempts upon selection.',
-                showInfo: true
+                description: 'Our full-sized mock exam has been designed to mimic the exact conditions you will have on exam day, '
+                'helping you optimize timings while exposing you to different professional scenarios. It includes 50 questions that '
+                'have been carefully created to align with official rationales and GMC guidelines.\n\n'
+                'You will be prompted to specify your preferred number of practice attempts upon selection.',
+                showInfo: true,
               ),
               _buildCheckbox(
                 checkbox3, 
                 'Mini-mocks',
-                description: 'We have two mini-mocks available on the platform, which each contain 25 reliable questions. They have been created to help track your progress, fine-tune exam timings and increase your exposure to different professional scenarios.', 
-                showInfo: true
+                description: 'We have two mini-mocks available on the platform, which each contain 25 reliable questions. '
+                'They have been created to help track your progress, fine-tune exam timings and increase your exposure to different professional scenarios.', 
+                showInfo: true,
               ),
               _buildCheckbox(
                 checkbox4, 
                 'Flashcard Decks',
-                description: 'Our pre-made flashcard decks contain high-yield principles derived from GMC guidelines and official rationales. This resource uses our unique, evidence-based algorithms to help you harness the power of spaced repetition and active recall!',
-                showInfo: true
+                description: 'Our pre-made flashcard decks contain high-yield principles derived from GMC guidelines and official rationales. '
+                'This resource uses our unique, evidence-based algorithms to help you harness the power of spaced repetition and active recall!',
+                showInfo: true,
               ),
             ],
           ),
           actions: [
             TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _showExclusionDialog(context);
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              minimumSize: const Size(120, 45), // Sets minimum width and height
+              onPressed: () {
+                Navigator.of(context).pop();
+                _showExclusionDialog(context);
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                minimumSize: const Size(120, 45),
+              ),
+              child: const Text(
+                'Previous',
+                style: TextStyle(fontSize: 16),
+              ),
             ),
-            child: const Text(
-              'Previous',
-              style: TextStyle(fontSize: 16),
-            ),
-          ),
             TextButton(
               onPressed: () async {
                 // Check which resources were selected
@@ -466,7 +475,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     .get();
                 // Update Firestore with selected resources
                 var id = u.docs.last.id;
-                _userCollectionRef.doc(id).update({
+                await _userCollectionRef.doc(id).update({
                   'selectedResources': selectedResources,
                 });
                 // Start study session
@@ -483,11 +492,10 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                 foregroundColor: Colors.white,
                 backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                // minimumSize: const Size(120, 45), // Sets minimum width and height
               ),
               child: const Text(
-              'Submit',
-              style: TextStyle(fontSize: 16),
+                'Submit',
+                style: TextStyle(fontSize: 16),
               ),
             ),
           ],
