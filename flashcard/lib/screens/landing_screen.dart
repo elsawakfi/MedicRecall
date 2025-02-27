@@ -1,4 +1,5 @@
 import 'dart:core';
+import 'package:flashcard_x/screens/full_mock_rule.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/calendar_screen.dart';
@@ -451,7 +452,55 @@ class LandingState extends State<Landing> {
                                 
                             ),
                           ),
-                        
+                           const SizedBox(height: 40),
+                          Center(
+                            child: Container(
+                              constraints: const BoxConstraints(maxWidth: 400),
+                              child: TextButton(
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+                                  foregroundColor: Colors.blueGrey,
+                                  backgroundColor: Colors.blueGrey,
+                                  side: const BorderSide(color: Colors.blueGrey, width: 2),
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.all(Radius.circular(100)),
+                                  ),
+                                ),
+                                onPressed: () {
+                                  landingService.onLanding = false;
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const FullMockRules(),
+                                  ),
+                                );
+                                },
+                                
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: const [
+                                    Icon(
+                                      Icons.assignment_outlined,
+                                      color: Colors.white,
+                                    ),
+                                    SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(
+                                        'Full Mock',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 34,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ), 
+                                
+                            ),
+                          ),
                           const SizedBox(height: 40),
                           Center(
                             child: Container(
