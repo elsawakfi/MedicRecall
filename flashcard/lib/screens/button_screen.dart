@@ -653,15 +653,12 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return AlertDialog(
-              title: const Text(
-                'Select Days to Exclude from Study',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
+            return _buildAlertDialog(
+              title: 'Select Days to Exclude from Study',
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: selectedDays.keys.map((day) {
-                  return _buildCheckbox(selectedDays[day]!, day, showInfo: false); // Hide info icon
+                  return _buildCheckbox(selectedDays[day]!, day, showInfo: false); // ✅ Hide info icon
                 }).toList(),
               ),
               actions: [
@@ -670,7 +667,12 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     Navigator.of(context).pop(); // Close dialog
                     _showExamDateDialog(context);
                   },
-                  child: const Text('Previous'),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  ),
+                  child: const Text(
+                    'Previous',
+                    style: TextStyle(fontSize: 16),),
                 ),
                 TextButton(
                   onPressed: () async {
@@ -697,8 +699,13 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                   style: TextButton.styleFrom(
                     foregroundColor: Colors.white,
                     backgroundColor: Colors.green,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    minimumSize: const Size(120, 45),
                   ),
-                  child: const Text('Next'),
+                  child: const Text(
+                    'Next',
+                    style: TextStyle(fontSize: 16),
+                    ),
                 ),
               ],
             );
