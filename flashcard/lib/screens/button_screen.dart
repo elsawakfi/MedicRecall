@@ -331,7 +331,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
 
                     if (context.mounted) {
                       Navigator.of(context).pop();
-                      _showOptionsDialog(context); // Proceed to next dialog
+                      _showExclusionDialog(context); // Proceed to next dialog
                     }
                   }
                 },
@@ -403,25 +403,28 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildCheckbox(
-                checkbox1, 
-                'Official Practice Paper',
-                'The official past paper is available on the Health Education England website. It contains 22 Professional Dilemma questions with realistic scenarios and reliable rationales created by the same people who write the questions for the MSRA, making it a very valuable resource. \n\nYou will be prompted to specify your preferred number of practice attempts upon selection.'
+              _buildCheckbox(checkbox1, 
+              'Official Practice Paper', 
+              description: 'The official past paper is available on the Health Education England website. It contains 22 Professional Dilemma questions with realistic scenarios and reliable rationales created by the same people who write the questions for the MSRA, making it a very valuable resource. \n\n You will be prompted to specify your preferred number of practice attempts upon selection.',
+              showInfo: true
               ),
               _buildCheckbox(
                 checkbox2, 
                 'Full-sized Mock Exam',
-                'Our full-sized mock exam has been designed to mimic the exact conditions you will have on exam day, helping you optimise timings while exposing you to different professional scenarios. It includes 50 questions that have been carefully created to align with official rationales and GMC guidelines. \n\nYou will be prompted to specify your preferred number of practice attempts upon selection.'
+                description: 'Our full-sized mock exam has been designed to mimic the exact conditions you will have on exam day, helping you optimise timings while exposing you to different professional scenarios. It includes 50 questions that have been carefully created to align with official rationales and GMC guidelines. \n\nYou will be prompted to specify your preferred number of practice attempts upon selection.',
+                showInfo: true
               ),
               _buildCheckbox(
                 checkbox3, 
                 'Mini-mocks',
-                'We have two mini-mocks available on the platform, which each contain 25 reliable questions. They have been created to help track your progress, fine-tune exam timings and increase your exposure to different professional scenarios.'
+                description: 'We have two mini-mocks available on the platform, which each contain 25 reliable questions. They have been created to help track your progress, fine-tune exam timings and increase your exposure to different professional scenarios.', 
+                showInfo: true
               ),
               _buildCheckbox(
                 checkbox4, 
                 'Flashcard Decks',
-                'Our pre-made flashcard decks contain high-yield principles derived from GMC guidelines and official rationales. This resource uses our unique, evidence-based algorithms to help you harness the power of spaced repetition and active recall!'
+                description: 'Our pre-made flashcard decks contain high-yield principles derived from GMC guidelines and official rationales. This resource uses our unique, evidence-based algorithms to help you harness the power of spaced repetition and active recall!',
+                showInfo: true
               ),
             ],
           ),
@@ -429,7 +432,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
             TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              _showExamDateDialog(context);
+              _showExclusionDialog(context);
             },
             style: TextButton.styleFrom(
               foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
@@ -636,6 +639,75 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     );
   }
 
+  void _showExclusionDialog(BuildContext context) {
+    List<String> daysOfTheWeek = [
+      "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
+    ];
+
+    Map<String, ValueNotifier<bool>> selectedDays = {
+      for (var day in daysOfTheWeek) day: ValueNotifier<bool>(false),
+    };
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: const Text(
+                'Select Days to Exclude from Study',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: selectedDays.keys.map((day) {
+                  return _buildCheckbox(selectedDays[day]!, day, showInfo: false); // Hide info icon
+                }).toList(),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Close dialog
+                    _showExamDateDialog(context);
+                  },
+                  child: const Text('Previous'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    List<String> excludedDays = selectedDays.entries
+                        .where((entry) => entry.value.value)
+                        .map((entry) => entry.key)
+                        .toList();
+
+                    // Save excluded days to Firestore or local storage
+                    QuerySnapshot u = await _userCollectionRef
+                        .where("userID", isEqualTo: user?.uid)
+                        .get();
+
+                    var id = u.docs.last.id;
+                    await _userCollectionRef.doc(id).update({
+                      'excludedDays': excludedDays,
+                    });
+
+                    if (context.mounted) {
+                      Navigator.of(context).pop(); // Close dialog after saving
+                      _showOptionsDialog(context);
+                    }
+                  },
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.green,
+                  ),
+                  child: const Text('Next'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   void _scheduleCompleteDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -824,8 +896,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     );
   }
 
-  Widget _buildCheckbox(ValueNotifier<bool> notifier, String text, String description) {
-    String id = text.toLowerCase().replaceAll(' ', '_');
+  Widget _buildCheckbox(ValueNotifier<bool> notifier, String text, {String? description, bool showInfo = true}) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       padding: const EdgeInsets.all(12.0),
@@ -880,7 +951,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                         ),
                       ),
                     ),
-                    _buildInfoIcon(id, description),
+                    if (showInfo && description != null) _buildInfoIcon(text, description), // Show only if required
                   ],
                 ),
               ),
