@@ -213,7 +213,7 @@ class FullMockRulesState extends State<FullMockRules> {
                   onPressed: (){
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => const MiniMockExam1(),
+                        builder: (context) => const FullMockExam(),
                       ),
                     );
                   },

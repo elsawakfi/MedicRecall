@@ -17,3 +17,13 @@ class MiniMockExam2 extends MiniMockExam {
       time: 2700,
   );
 }
+
+
+class FullMockExam extends MiniMockExam {
+  const FullMockExam({super.key}): super(
+      title: "Full Mock Exam",
+      questionDirectory: "full-mock-1",
+      answerDirectory: "full-mock-1-answers",
+      time: 3600,
+  );
+} 
