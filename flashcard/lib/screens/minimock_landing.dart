@@ -20,14 +20,24 @@ class MiniMockLanding extends StatefulWidget {
 
 class MiniMockLandingState extends State<MiniMockLanding> {
   final FirebaseAuth auth = FirebaseAuth.instance;
+  final CollectionReference _userCollectionRef =
+    FirebaseFirestore.instance.collection('users');
   late User user;
-  int? daysUntilTest;
+  DateTime? _examDate;
+  DateTime? _firstStudyDate;
+  bool? halfway;
 
   @override
   void initState() {
     super.initState();
-    getUser();
-    getTestDay();
+    initialise();
+  }
+
+  Future<void> initialise() async{
+    await getUser();
+    await getFirstStudyDay();
+    await getTestDay();
+    dateDifference();
   }
 
   Future<void> getUser() async {
@@ -53,24 +63,44 @@ class MiniMockLandingState extends State<MiniMockLanding> {
   // Function from calendar_screen
   Future<void> getTestDay() async {
     QuerySnapshot querySnapshot =
-    await FirebaseFirestore.instance.collection("users").where("userID", isEqualTo: user.uid).get();
+      await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
 
     var userFromDb = querySnapshot.docs.first;
     Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
     //if the Test Day field isn't null and is in the database we update the UI with it. Otherwise it is displayed as being not set.
     if (data.containsKey("TestDay") || data["TestDay"] != null) {
-      var testDay = DateTime.fromMicrosecondsSinceEpoch(userFromDb["TestDay"]
+      _examDate = DateTime.fromMicrosecondsSinceEpoch(userFromDb["TestDay"]
           .microsecondsSinceEpoch); //firebase is weird. conversion from TimeStamp to DateTime object
-      final DateTime today =
-      DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
-      setState(() {
-        daysUntilTest = (testDay.difference(today).inHours/24).round();
-      });
-    } else {
-      setState(() {
-        daysUntilTest = -1;
-      });
     }
+  }
+
+  Future<void> getFirstStudyDay() async {
+    QuerySnapshot u = await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+    var userFromDb = u.docs.first;
+    Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
+    // If the Test Day field isn't null and is in the database we update the UI with it. Otherwise it is displayed as being not set.
+    if (data.containsKey("firstStudyDay") && data["firstStudyDay"] != null) {
+      // firstDayBool = false;
+      _firstStudyDate = (data["firstStudyDay"] as Timestamp).toDate();
+    }
+
+    setState(() {});
+    }
+
+  void dateDifference(){
+    final DateTime today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    Duration? difference = _examDate?.difference(_firstStudyDate!);
+    DateTime? halfwayDate = _firstStudyDate?.add(Duration(seconds: difference!.inSeconds ~/ 2));
+    halfwayDate = DateTime(halfwayDate!.year, halfwayDate.month, halfwayDate.day); // Normalise
+    print(halfwayDate);
+    setState(() {
+      // If statement checks for if the current date is greater than or equal to the halfway date
+      if (!today.isBefore(halfwayDate!)) {
+        halfway = true;
+      } else {
+        halfway = false;
+      }
+    });
   }
 
   @override
@@ -78,7 +108,7 @@ class MiniMockLandingState extends State<MiniMockLanding> {
     return Scaffold(
       drawer: const DrawMain(),
       appBar: CustomAppBar(title: "Mini-Mocks"),
-      body: daysUntilTest == null
+      body: halfway == null
           ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
           : Container(
         //color:Color.fromARGB(255, 33, 100, 159), 
@@ -92,8 +122,7 @@ class MiniMockLandingState extends State<MiniMockLanding> {
                 height: 50,
                 width: 1000, // Set a fixed width for the button
                 child: ElevatedButton.icon(
-                  onPressed: daysUntilTest! > -1
-                    ? () {
+                  onPressed: _firstStudyDate != null ? () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) => const MiniMock1Rules(),
@@ -107,7 +136,7 @@ class MiniMockLandingState extends State<MiniMockLanding> {
                     padding: const EdgeInsets.symmetric(vertical: 15),
                   ),
                   icon: Icon(
-                    daysUntilTest! > -1 ? Icons.lock_open_sharp: Icons.lock_clock_sharp,
+                    _firstStudyDate != null ? Icons.lock_open_sharp: Icons.lock_clock_sharp,
                     size: 30,
                     color: Colors.black,
                   ),
@@ -122,8 +151,7 @@ class MiniMockLandingState extends State<MiniMockLanding> {
                 height: 50,
                 width: 1000, // Set a fixed width for the button
                 child: ElevatedButton.icon(
-                  onPressed: daysUntilTest! < 7 && daysUntilTest! > -1
-                    ? () {
+                  onPressed: halfway! ? () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) => const MiniMock2Rules(),
@@ -137,7 +165,7 @@ class MiniMockLandingState extends State<MiniMockLanding> {
                     padding: const EdgeInsets.symmetric(vertical: 15),
                   ),
                   icon: Icon(
-                    daysUntilTest! < 7 && daysUntilTest! > -1 ? Icons.lock_open_sharp: Icons.lock_clock_sharp,
+                    halfway! ? Icons.lock_open_sharp: Icons.lock_clock_sharp,
                     size: 30,
                     color: Colors.black,
                   ),
