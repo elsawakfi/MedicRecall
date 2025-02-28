@@ -25,6 +25,7 @@ class MiniMockLandingState extends State<MiniMockLanding> {
   late User user;
   DateTime? _examDate;
   DateTime? _firstStudyDate;
+  bool? examSet;
   bool? halfway;
 
   @override
@@ -71,6 +72,13 @@ class MiniMockLandingState extends State<MiniMockLanding> {
     if (data.containsKey("TestDay") || data["TestDay"] != null) {
       _examDate = DateTime.fromMicrosecondsSinceEpoch(userFromDb["TestDay"]
           .microsecondsSinceEpoch); //firebase is weird. conversion from TimeStamp to DateTime object
+      setState(() {
+        examSet = true;
+      });
+    }else{
+      setState(() {
+        examSet = false;
+      });
     }
   }
 
@@ -88,19 +96,22 @@ class MiniMockLandingState extends State<MiniMockLanding> {
     }
 
   void dateDifference(){
-    final DateTime today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
-    Duration? difference = _examDate?.difference(_firstStudyDate!);
-    DateTime? halfwayDate = _firstStudyDate?.add(Duration(seconds: difference!.inSeconds ~/ 2));
-    halfwayDate = DateTime(halfwayDate!.year, halfwayDate.month, halfwayDate.day); // Normalise
-    print(halfwayDate);
-    setState(() {
-      // If statement checks for if the current date is greater than or equal to the halfway date
-      if (!today.isBefore(halfwayDate!)) {
-        halfway = true;
-      } else {
-        halfway = false;
-      }
-    });
+    if(_examDate != null && _firstStudyDate != null){
+      final DateTime today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+      Duration? difference = _examDate?.difference(_firstStudyDate!);
+      DateTime? halfwayDate = _firstStudyDate?.add(Duration(seconds: difference!.inSeconds ~/ 2));
+      halfwayDate = DateTime(halfwayDate!.year, halfwayDate.month, halfwayDate.day); // Normalise
+      setState(() {
+        // If statement checks for if the current date is greater than or equal to the halfway date
+        if (!today.isBefore(halfwayDate!)) {
+          halfway = true;
+        } else {
+          halfway = false;
+        }
+      });
+    } else {
+      halfway = false;
+    }
   }
 
   @override
@@ -108,7 +119,7 @@ class MiniMockLandingState extends State<MiniMockLanding> {
     return Scaffold(
       drawer: const DrawMain(),
       appBar: CustomAppBar(title: "Mini-Mocks"),
-      body: halfway == null
+      body: examSet == null || halfway == null
           ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
           : Container(
         //color:Color.fromARGB(255, 33, 100, 159),
@@ -117,11 +128,12 @@ class MiniMockLandingState extends State<MiniMockLanding> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              const Spacer(),
               SizedBox(
                 height: 50,
                 width: 960, // Set a fixed width for the button
                 child: ElevatedButton.icon(
-                  onPressed: _firstStudyDate != null ? () {
+                  onPressed: examSet! ? () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) => const MiniMock1Rules(),
@@ -135,7 +147,7 @@ class MiniMockLandingState extends State<MiniMockLanding> {
                     padding: const EdgeInsets.symmetric(vertical: 15),
                   ),
                   icon: Icon(
-                    _firstStudyDate != null ? Icons.lock_open_sharp: Icons.lock_clock_sharp,
+                    examSet! ? Icons.lock_open_sharp: Icons.lock_clock_sharp,
                     size: 30,
                     color: Colors.black,
                   ),
@@ -174,6 +186,7 @@ class MiniMockLandingState extends State<MiniMockLanding> {
                   ),
                 ),
               ),
+              const Spacer(),
               Align(
                 alignment: Alignment.bottomLeft,
                 child: Container(
@@ -232,22 +245,11 @@ void _helpPopup(BuildContext context){
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-
-                  },
-                  child: const Text('Navigation',
-                      style: TextStyle(fontSize: 16))
-              ),
-              TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-
-                  },
-                  child: const Text('Flagging/Review System',
-                      style: TextStyle(fontSize: 16))
-              ),
+              const Text(
+                'To use the mini-mocks please first set an exam date using the \'Set Your Exam Date\' button.\nThe first mini-mock is unlocked immediately whilst the second one is unlocked halfway\nthrough your revision schedule, as seen on the calendar.\nTo start a mini-mock please click one of the unlocked options.',
+                style: TextStyle(color: Color.fromRGBO(21, 58, 103, 1), fontSize: 16),
+                softWrap: true,
+              )
             ],
           ),
           actions: [
