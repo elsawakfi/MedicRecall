@@ -111,16 +111,15 @@ class MiniMockLandingState extends State<MiniMockLanding> {
       body: halfway == null
           ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
           : Container(
-        //color:Color.fromARGB(255, 33, 100, 159), 
+        //color:Color.fromARGB(255, 33, 100, 159),
         padding: const EdgeInsets.all(16.0), // Add some padding
         child: Center( // Center the column vertically and horizontally
           child: Column(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(height: 10),
               SizedBox(
                 height: 50,
-                width: 1000, // Set a fixed width for the button
+                width: 960, // Set a fixed width for the button
                 child: ElevatedButton.icon(
                   onPressed: _firstStudyDate != null ? () {
                     Navigator.of(context).push(
@@ -149,7 +148,7 @@ class MiniMockLandingState extends State<MiniMockLanding> {
               const SizedBox(height: 50),
               SizedBox(
                 height: 50,
-                width: 1000, // Set a fixed width for the button
+                width: 960, // Set a fixed width for the button
                 child: ElevatedButton.icon(
                   onPressed: halfway! ? () {
                     Navigator.of(context).push(
@@ -175,6 +174,31 @@ class MiniMockLandingState extends State<MiniMockLanding> {
                   ),
                 ),
               ),
+              Align(
+                alignment: Alignment.bottomLeft,
+                child: Container(
+                  height: 56,
+                    width: 56,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      color: const Color.fromARGB(255, 235, 230, 239),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          spreadRadius: 0,
+                          blurRadius: 6,
+                          offset: const Offset(0, 6), // changes position of shadow
+                        ),
+                      ],
+                    ),
+                    child: IconButton(
+                      onPressed: (){
+                        _helpPopup(context);
+                      },
+                      icon: Icon(Icons.question_mark, color:  Color.fromARGB(255, 98, 86, 139),),
+                    )
+                ),
+              ),
             ],
           ),
         ),
@@ -183,4 +207,64 @@ class MiniMockLandingState extends State<MiniMockLanding> {
       floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
     );
   }
+}
+
+// HELP BUTTON
+void _helpPopup(BuildContext context){
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+          backgroundColor: const Color(0xFFE6EDF2),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(0),
+          ),
+          title: Center(
+              child:Text(
+                'Mini-Mock Help Menu',
+                style: const TextStyle(
+                  color: Color.fromRGBO(21, 58, 103, 1),
+                  fontSize: 21,
+                  fontWeight: FontWeight.w500,
+                ),
+              )
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+
+                  },
+                  child: const Text('Navigation',
+                      style: TextStyle(fontSize: 16))
+              ),
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+
+                  },
+                  child: const Text('Flagging/Review System',
+                      style: TextStyle(fontSize: 16))
+              ),
+            ],
+          ),
+          actions: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+
+                  },
+                  child: const Text('Close'),
+                ),
+              ],
+            )
+          ]
+      );
+    },
+  );
 }
