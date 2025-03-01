@@ -12,6 +12,7 @@ import 'package:flashcard_x/screens/minimock_landing.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'feedback_screen.dart';
+import 'landing_service.dart';
 import 'mark_scheme.dart';
 import 'package:flashcard_x/screens/settings_screen.dart' as setting;
 // import 'package:flashcard_x/screens/exam_guide_screen.dart';
@@ -42,6 +43,7 @@ class LandingState extends State<Landing> {
   DateTime? hasDate;
   DateTime? _examDate;
   DateTime? _firstStudyDate;
+  bool onLanding = true;
   int buildCount = 0;
   final CollectionReference _userCollectionRef =
       FirebaseFirestore.instance.collection('users');
@@ -55,9 +57,9 @@ class LandingState extends State<Landing> {
     super.initState();
     getUser();
     getFirstStudyDay();
+    landingService.onLanding = true;
     setState(() {});
   }
-
 
   Future<void> _setFirstStudyDay() async {
     QuerySnapshot u = await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
@@ -68,60 +70,9 @@ class LandingState extends State<Landing> {
       "firstStudyDay": DateTime.now(), // Save the current date as first study day
     });
 
-    
-
     // Optionally, retrieve the first study day
     await getFirstStudyDay();
   }
-
-  Future<void> shouldShowDialog() async{
-      await getTestDay();
-      if (mounted && testDayBool_ && _examDate == null){
-         showDialog(context: context,
-         builder: (BuildContext context){
-          return _buildAlertDialog(
-          title: 'Do you want to start your revision plan today?',
-          content: const SizedBox(), // Empty content for this dialog
-          actions: [
-            TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: const Color.fromRGBO(243, 90, 90, 1),
-              // backgroundColor: const Color.fromRGBO(243, 90, 90, 1),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              minimumSize: const Size(120, 45), // Sets minimum width and height
-            ),
-            child: const Text(
-              'No',
-              style: TextStyle(fontSize: 16),
-            ),
-          ),
-            TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _setFirstStudyDay(); // Ensure this function is defined
-              _showExamDateDialog(context); // Ensure this function is defined
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.white,
-              backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              minimumSize: const Size(120, 45), // Sets minimum width and height
-            ),
-            child: const Text(
-              'Yes',
-              style: TextStyle(fontSize: 16),
-            ),
-          ),
-          ],
-        );
-      },
-    );setState(() {}); } else {}
-  
-  }
-
 
   Future<void> getUser() async {
     NavigatorState nav = Navigator.of(context);
@@ -204,6 +155,7 @@ class LandingState extends State<Landing> {
 
   @override
   Widget build(BuildContext context) {
+    
     buildCount ++;
     return Scaffold(
       key: const ValueKey('Welcome bar'),
@@ -339,6 +291,7 @@ class LandingState extends State<Landing> {
                                   ),
                                 ),
                                 onPressed: () {
+                                  landingService.onLanding = false;
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
@@ -463,12 +416,16 @@ class LandingState extends State<Landing> {
                                     borderRadius: BorderRadius.all(Radius.circular(100)),
                                   ),
                                 ),
-                                onPressed: () => Navigator.push(
+                                onPressed: () {
+                                  landingService.onLanding = false;
+                                Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => const MiniMockLanding(),
                                   ),
-                                ),
+                                );
+                                },
+                                
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: const [
@@ -479,7 +436,7 @@ class LandingState extends State<Landing> {
                                     SizedBox(width: 10),
                                     Expanded(
                                       child: Text(
-                                        'Mini-mock',
+                                        'Mini-Mocks',
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontSize: 34,
@@ -490,7 +447,8 @@ class LandingState extends State<Landing> {
                                     ),
                                   ],
                                 ),
-                              ),
+                              ), 
+                                
                             ),
                           ),
                         
@@ -508,12 +466,14 @@ class LandingState extends State<Landing> {
                                     borderRadius: BorderRadius.all(Radius.circular(100)),
                                   ),
                                 ),
-                                onPressed: () => Navigator.push(
+                                onPressed: (){
+                                  landingService.onLanding = false;
+                                  Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => const FeedbackScreen(),
                                   ),
-                                ),
+                                );},
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
@@ -559,12 +519,14 @@ class LandingState extends State<Landing> {
                                     borderRadius: BorderRadius.all(Radius.circular(100)),
                                   ),
                                 ),
-                                onPressed: () => Navigator.push(
+                                onPressed: (){
+                                  landingService.onLanding = false;
+                                  Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => const setting.Settings(),
                                   ),
-                                ),
+                                );},
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: const [
@@ -604,12 +566,14 @@ class LandingState extends State<Landing> {
                                     borderRadius: BorderRadius.all(Radius.circular(100)),
                                   ),
                                 ),
-                                onPressed: () => Navigator.push(
+                                onPressed: () {
+                                  landingService.onLanding = false;
+                                  Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => const FAQScreen(),
                                   ),
-                                ),
+                                );},
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
@@ -653,15 +617,7 @@ class LandingState extends State<Landing> {
   }
 
 
-  @override
-  void didChangeDependencies(){
-    super.didChangeDependencies();
-    //waits for build function to complete and then calls back to call the condition checking function 
-    WidgetsBinding.instance.addPostFrameCallback((_){
-       shouldShowDialog();
-    });
-  
-  }
+ 
 
   Future<void> triggerSignIn(String screen) async{
     NavigatorState nav = Navigator.of(context);
@@ -671,6 +627,8 @@ class LandingState extends State<Landing> {
           .first;
      
       if (tmp == null) {
+        //whenever nav.push is called, the onLanding variable needs to be set to false to make
+        landingService.onLanding = false; 
         nav.push(
             MaterialPageRoute(
               builder: (context) => const SignInScreen(),
@@ -681,6 +639,7 @@ class LandingState extends State<Landing> {
       }
     } else {
       if (screen == 'HomePage'){
+       landingService.onLanding = false; 
         nav.push(
             MaterialPageRoute(
               builder: (context) => const HomePage(title: 'Home'),
@@ -688,6 +647,7 @@ class LandingState extends State<Landing> {
         );
       }
       else if (screen == 'FlashcardEditor'){
+       landingService.onLanding = false; 
         nav.push(
             MaterialPageRoute(
               builder: (context) => const FlashcardEditor(),
@@ -695,6 +655,7 @@ class LandingState extends State<Landing> {
         );
       }
       else if (screen == 'Calendar'){
+       landingService.onLanding = false; 
         nav.push(
             MaterialPageRoute(
               builder: (context) => const Calendar(),
@@ -713,215 +674,6 @@ class LandingState extends State<Landing> {
       //       )),
       // );
     }
-  }
- 
- void _showExamDateDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return _buildAlertDialog(
-          title: 'When is your exam date?',
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-
-            //if statement to check if firebase already has exam date in database
-            children: [
-              ElevatedButton(
-                onPressed: () async {
-                  final DateTime? picked = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime.now(),
-                    lastDate: DateTime.now().add(const Duration(days: 365)),
-                    locale: const Locale('en', 'GB'),
-                  );
-                  if (picked != null) {
-                    setState(() {
-                      _examDate = picked;
-                      updateTestDay(picked); // Update parent state
-                      testDayBool_ = false;
-                    });
-                    if (context.mounted) {
-                      Navigator.of(context).pop();
-                      _showOptionsDialog(context);
-                    }
-                  }
-        
-                },
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.white, // Text color
-                  backgroundColor: const Color.fromRGBO(51, 178, 73, 1), // Same color as 'Yes' button
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  minimumSize: const Size(120, 45),
-                ),
-                child: const Text(
-                  'Select Exam Date',
-                  style: TextStyle(fontSize: 16),
-                  ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                hasDate != null
-                    ? 'Selected Date: ${DateFormat('dd MMM, yyyy', 'en_GB').format(_examDate!)}'
-                    : 'No Date Selected',
-                style: TextStyle(
-                  color: _examDate != null
-                      ? Colors.black
-                      : const Color.fromRGBO(21, 58, 103, 1),
-                ),
-              ),
-            ],
-          ),
-          actions: [],
-        );
-      },
-    );
-  }
-
- // Show dialog to ask for number of repetitions
-  void _showRepetitionDialog(BuildContext context) {
-    final List<int> repetitionOptions = [2, 3, 4, 5, 6];
-    int? selectedRepetition;
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return AlertDialog(
-              backgroundColor: const Color(0xFFE6EDF2),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(0),
-              ),
-              title: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'How many times would you like to practice the selected resources?',
-                    style: const TextStyle(
-                      color: Color.fromRGBO(21, 58, 103, 1),
-                      fontSize: 21,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 8), // Add spacing between lines
-                  Text.rich(
-                    TextSpan(
-                      children: [
-                        const TextSpan(
-                          text: 'It is recommended to practice at least three times.\nYour chosen number of repetition will apply to both the ',
-                          style: TextStyle(
-                            color: Color.fromRGBO(21, 58, 103, 1),
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400, // Regular font weight
-                          ),
-                        ),
-                        TextSpan(
-                          text: 'Official Paper and Full-sized Mock Exam.',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold, // Make it bold
-                            color: Color.fromRGBO(21, 58, 103, 1),
-                            fontSize: 16,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ...repetitionOptions.map((int value) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 5.0),
-                        child: RadioListTile<int>(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15.0),
-                          ),
-                          tileColor: const Color.fromRGBO(21, 58, 103, 1),
-                          title: Text(
-                            '$value',
-                            style: const TextStyle(
-                              color: Colors.white,
-                            ),
-                          ),
-                          value: value,
-                          groupValue: selectedRepetition,
-                          onChanged: (int? newValue) {
-                            setState(() {
-                              selectedRepetition = newValue;
-                            });
-                          },
-                        ),
-                      );
-                    }),
-                  ],
-                ),
-              ),
-              actions: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    style: TextButton.styleFrom(
-                      foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
-                      // backgroundColor: const Color.fromRGBO(243, 90, 90, 1),
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      minimumSize: const Size(120, 45), // Sets minimum width and height
-                    ),
-                    child: const Text(
-                      'Previous',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  ),
-                    TextButton(
-                      onPressed: () async {
-                        if (selectedRepetition != null) {
-                          // Save selectedRepetition to the database
-                          QuerySnapshot u = await _userCollectionRef
-                              .where("userID", isEqualTo: user?.uid)
-                              .get();
-
-                          var id = u.docs.last.id;
-                          await _userCollectionRef.doc(id).update({
-                            'selectedRepetition': selectedRepetition,
-                          });
-
-                          if (context.mounted) {
-                            Navigator.of(context).pop();
-                          }
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Please enter number of repetitions'),
-                            ),
-                          );
-                        }
-                      },
-                      style: TextButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                        minimumSize: const Size(120, 45), // Sets minimum width and height
-                      ),
-                      child: const Text(
-                      'Submit',
-                      style: TextStyle(fontSize: 16),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
   }
 
 
@@ -949,125 +701,7 @@ class LandingState extends State<Landing> {
     );
   }
 
-  void _showOptionsDialog(BuildContext context) {
-    final checkbox1 = ValueNotifier<bool>(false);
-    final checkbox2 = ValueNotifier<bool>(false);
-    final checkbox3 = ValueNotifier<bool>(false);
-    final checkbox4 = ValueNotifier<bool>(false);
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return _buildAlertDialog(
-          title: 'Which resources would you like to use?',
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildCheckbox(checkbox1, 'Official MRSA Exam Paper'),
-              _buildCheckbox(checkbox2, 'Full-sized Mock Exam'),
-              _buildCheckbox(checkbox3, 'Mini-Mocks'),
-              _buildCheckbox(checkbox4, 'Flashcards'),
-            ],
-          ),
-          actions: [
-            TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
-              // backgroundColor: const Color.fromRGBO(243, 90, 90, 1),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              minimumSize: const Size(120, 45), // Sets minimum width and height
-            ),
-            child: const Text(
-              'Previous',
-              style: TextStyle(fontSize: 16),
-            ),
-          ),
-            TextButton(
-              onPressed: () async {
-                // Check which resources were selected
-                List<String> selectedResources = [];
-                if (checkbox1.value) selectedResources.add('Official paper');
-                if (checkbox2.value) selectedResources.add('Full-sized mock exam');
-                if (checkbox3.value) selectedResources.add('Mini-mocks');
-                if (checkbox4.value) selectedResources.add('Flashcards');
-
-                if (selectedResources.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Please select at least one resource'),
-                    ),
-                  );
-                  return; // Stop execution if no resources are selected
-                }
-
-                QuerySnapshot u = await _userCollectionRef
-                    .where("userID", isEqualTo: user?.uid)
-                    .get();
-
-                // Update Firestore with selected resources
-                var id = u.docs.last.id;
-                _userCollectionRef.doc(id).update({
-                  'selectedResources': selectedResources,
-                });
-
-                // Start study session
-                StudySessionManager().startStudySession(selectedResources);
-
-                // Close current dialog
-                Navigator.of(context).pop();
-
-                // If either Official Paper or Full-sized Mock is selected, show Repetition Dialog
-                if (checkbox1.value || checkbox2.value) {
-                  _showRepetitionDialog(context);
-                }
-              },
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                minimumSize: const Size(120, 45), // Sets minimum width and height
-              ),
-              child: const Text(
-              'Submit',
-              style: TextStyle(fontSize: 16),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // Helper method to create checkbox rows
-  Widget _buildCheckbox(ValueNotifier<bool> notifier, String text) {
-    return Row(
-      children: [
-        ValueListenableBuilder(
-          valueListenable: notifier,
-          builder: (context, value, child) {
-            return Checkbox(
-              value: value,
-              onChanged: (newValue) {
-                notifier.value = newValue!;
-              },
-            );
-          },
-        ),
-        GestureDetector(
-          onTap: () {
-            notifier.value = !notifier.value;
-          },
-          child: Text(
-            text,
-            style: TextStyle(color: Colors.black),
-          ),
-        ),
-      ],
-    );
-  }
 
    Future<void> updateTestDay(DateTime date) async {
     CollectionReference users = FirebaseFirestore.instance.collection('users');

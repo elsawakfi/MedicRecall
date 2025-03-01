@@ -3,9 +3,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/minimock_scoring.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flashcard_x/screens/minimock_feedback.dart';
 import '../screens/minimock_review.dart';
 import '../utils/timer.dart';
+import 'drawer_widget.dart';
+import 'minimock_help_button.dart';
 
 abstract class MiniMockExam extends StatefulWidget {
   final String title;
@@ -21,8 +22,8 @@ abstract class MiniMockExam extends StatefulWidget {
 class MiniMockExamState extends State<MiniMockExam> {
   final FirebaseAuth auth = FirebaseAuth.instance;
   late User user;
-
   int currentQuestion = 0;
+  int remainingSeconds = 2700; // Temp fix for late initialisation error
   List<List<bool>> multiChoiceAnswers = []; // For each question store selected options as a list of booleans
   List<List<String>> rankingAnswers = [];
   List<Map<String, dynamic>> questions = []; // Store question data with the question number as key e.g Q14
@@ -38,11 +39,13 @@ class MiniMockExamState extends State<MiniMockExam> {
     getUser();
     getQuestions(); // Fetch the questions on initialisation (Needed as this is not to be called in the widget build)
     // Below defines the exam timer and what happens on each tick / end of exam
+    remainingSeconds = widget.time;
     _timerController = TimerController(
       startTime: widget.time, //measured in seconds
       onTimeUpdate: (time) {
         setState(() {
-          _displayTime = time; // Update display every second
+          _displayTime = time;
+          remainingSeconds -= 1;
         });
       },
       onTimerComplete: () {
@@ -156,7 +159,10 @@ class MiniMockExamState extends State<MiniMockExam> {
     updateExamResults(finalAnswerList);
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => MiniMockScoring(title: widget.title, questionDirectory: widget.questionDirectory, answerDirectory: widget.answerDirectory),
+        builder: (context) => MiniMockScoring(title: widget.title,
+        questionDirectory: widget.questionDirectory,
+        answerDirectory: widget.answerDirectory
+        ),
       ),
     );
   }
@@ -164,41 +170,55 @@ class MiniMockExamState extends State<MiniMockExam> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-        canPop: false,
-        child: Scaffold( //Widget made to prevent necessary repetition
+        canPop: true,
+        child: Scaffold(
           key: ValueKey(widget.title),
+          drawer: const DrawMain(),
           appBar: AppBar(
               automaticallyImplyLeading: false,
               elevation: 0,
-              title: Align(
-                alignment: const Alignment(-0.05, 0),
-                child: Stack(
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Positioned(
-                      top: 2.3,
-                      child: Image.asset(
-                        'assets/newlogo.png',
-                        fit: BoxFit.cover,
-                        height: 34,
-                      ),
-                    ),
-                    Container(
-                        margin: const EdgeInsets.only(left: 32),
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(widget.title)
-                    ),
-                  ],
-                ),
+                    Stack(
+                        children: [
+                          Positioned(
+                            top: 2.3,
+                            child: Image.asset(
+                              'assets/newlogo.png',
+                              fit: BoxFit.cover,
+                              height: 34,
+                            ),
+                          ),
+                          Container(
+                              margin: const EdgeInsets.only(left: 32),
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(widget.title)
+                          ),
+                        ],
+                      )
+                  ]
               ),
               centerTitle: true,
+              leading: Builder(
+                builder: (context) => GestureDetector(
+                  onTap: () => Scaffold.of(context).openDrawer(),
+                  child: const Icon(
+                    Icons.menu,
+                  ),
+                ),
+              ),
               actions: [
                 Container(
                   margin: const EdgeInsets.only(right: 16),
-                  width: 160,
+                  width: 210,
                   height: 40.31,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
-                    color: const Color.fromARGB(255, 235, 230, 239),
+                    color:  (remainingSeconds <= 600)
+                    ? Colors.red.shade400
+                    : const Color.fromARGB(255, 235, 230, 239),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.2),
@@ -210,24 +230,38 @@ class MiniMockExamState extends State<MiniMockExam> {
                   ),
                   child: Center(
                       child: Text('Time Remaining: $_displayTime',
-                        style: const TextStyle(
-                          color: Color.fromARGB(255, 98, 86, 139),
-                          fontSize: 15,
+                        style: TextStyle(
+                          color: (remainingSeconds <= 600)
+                              ? Colors.white
+                              : Color.fromARGB(255, 98, 86, 139),
+                          fontSize: 18.5,
                           fontWeight: FontWeight.w500,
                         ),
                       )),
                 )
-              ]
+              ],
           ),
           body: questions.isEmpty
               ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
-              : Padding( //Else load the data
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Display question flag and timer widgets:
-                Row(
+              : LayoutBuilder( builder: (context, constraints) {
+                double maxScreenWidth = constraints.maxWidth * 0.5;
+                double maxPreferredWidth = 960; // 1920/2
+
+                return
+                Center(
+                  child: Container(
+                  constraints: BoxConstraints(
+                    maxWidth: maxScreenWidth > maxPreferredWidth ? maxScreenWidth : maxPreferredWidth,
+                  ),
+                  padding: EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: SizedBox(
+                    child: (
+
+                    Row(
                     children: [
                       Container(
                         margin: const EdgeInsets.only(bottom: 10),
@@ -246,10 +280,12 @@ class MiniMockExamState extends State<MiniMockExam> {
                           ],
                         ),
                         child:TextButton.icon(
-                            label: Text('Flag for review',
+                            label: Text(flaggedQuestions[currentQuestion]
+                            ? 'Flagged'
+                            : 'Flag for review',
                               style: const TextStyle(
                                 color: Color.fromARGB(255, 98, 86, 139),
-                                fontSize: 15,
+                                fontSize: 16,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -287,26 +323,32 @@ class MiniMockExamState extends State<MiniMockExam> {
                             child: Text('Question ${currentQuestion+1}/${questions.length}',
                               style: const TextStyle(
                                 color: Color.fromARGB(255, 98, 86, 139),
-                                fontSize: 15,
+                                fontSize: 16,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
                           )
                       ),
-                    ]
-                ),
-
+                    ])
+                ))),
                 // Display the current question text
-                Text(
+                  Text(
                   questions[currentQuestion]['question'],
                   style: TextStyle(fontSize: 20),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
 
                 // If the question is a ranking question, display a reorderable list of options
                 if (questions[currentQuestion]['type'] == "ranking") ...[
                   Expanded(
                     child: ReorderableListView(
+                      buildDefaultDragHandles: false,
+                      proxyDecorator:  (Widget child, int index, Animation<double> animation) {
+                        return Material(
+                          color: Colors.transparent,
+                          child: child,
+                        );
+                      },
                       onReorder: (oldIndex, newIndex) {
                         setState(() {
                           if(newIndex > oldIndex) newIndex --; // Adjust the list based on movement of item
@@ -327,9 +369,11 @@ class MiniMockExamState extends State<MiniMockExam> {
                             key: ValueKey(option),
                             index: optionIndex,
                             child: Card(
+                              elevation: 3,
+                              color: Color.fromARGB(255, 235, 230, 239),
                                 child: ListTile(
-                                  title: Text('${optionIndex+1}:   $optionLetter. $option', style: TextStyle(color: Colors.blueGrey, fontSize: 20)),
-                                  trailing: Icon(Icons.drag_handle , color: Colors.blueGrey),
+                                  title: Text('${optionIndex+1}:   $optionLetter. $option', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 20)),
+                                  trailing: Icon(Icons.drag_handle , color: Color.fromARGB(255, 98, 86, 139), size: 30),
                                 )
                             )
                         );
@@ -348,31 +392,89 @@ class MiniMockExamState extends State<MiniMockExam> {
                                 String option = entry.value;
                                 int questionIndex = currentQuestion - rankingAnswers.length;
                                 String optionLetter = options[optionIndex];
-                                return ListTile(
-                                  title: Text('$optionLetter. $option', style: TextStyle(color: Colors.white, fontSize: 16)),
-                                  leading: Checkbox(
-                                    value: multiChoiceAnswers[questionIndex][optionIndex],
-                                    onChanged: (value) {
-                                      int checkedCount = multiChoiceAnswers[questionIndex].where((element) => element).length;
-                                      if (checkedCount < 3 || value == false) {
-                                        setState(() {
-                                          multiChoiceAnswers[questionIndex][optionIndex] = value!;
-                                        });
+                                return CheckboxListTile(
+                                  fillColor: WidgetStateProperty.resolveWith<Color?>(
+                                        (states) {
+                                      if (states.contains(WidgetState.selected)) {
+                                        return Theme.of(context).textTheme.bodyMedium?.color; // Color when the checkbox is checked
                                       }
+                                      return Colors.transparent; // Transparent when unchecked
                                     },
-                                    side: BorderSide( color: Colors.white),
                                   ),
+                                  checkColor: Theme.of(context).scaffoldBackgroundColor,
+                                  title: Text('$optionLetter. $option', style: TextStyle(fontSize: 20, color: Theme.of(context).textTheme.bodyMedium?.color)),
+                                  value: multiChoiceAnswers[questionIndex][optionIndex],
+                                  onChanged: (value) {
+                                    int checkedCount = multiChoiceAnswers[questionIndex].where((element) => element).length;
+                                    if (checkedCount < 3 || value == false) {
+                                      setState(() {
+                                        multiChoiceAnswers[questionIndex][optionIndex] = value!;
+                                      });
+                                    }
+                                  },
+                                  enableFeedback: false,
+                                  controlAffinity: ListTileControlAffinity.leading,
                                 );
                               }).toList()
                           )
                       )
                   )
                 ],
-
                 // Buttons to change questions
+                SizedBox(height: 20),
+                Center(
+                    child:
+                    SizedBox(
+                        child:
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
+                    Align(
+                        alignment: Alignment.centerLeft,
+                        child: MiniMockHelpButton(),
+                    ),
+                    const SizedBox(width: 16),
+                    Container(
+                        width: 160,
+                        height: 45,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          color: const Color.fromARGB(255, 235, 230, 239),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              spreadRadius: 0,
+                              blurRadius: 6,
+                              offset: const Offset(0, 6), // changes position of shadow
+                            ),
+                          ],
+                        ),
+                        child: TextButton.icon(onPressed: () async{
+                          int? newIndex = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MiniMockReview(
+                                miniMockWidget: this,
+                                rankingLength: rankingAnswers.length,
+                                multiChoiceLength: multiChoiceAnswers.length,
+                                flaggedQuestions: flaggedQuestions,
+                                displayTime: _displayTime,
+                                remainingSeconds: remainingSeconds,
+                              ),
+                            ),
+                          );
+                          // statement bellow allows for faster page update
+                          // Must check for null in case user finishes exam and no value is returned
+                          if (newIndex != null && newIndex != currentQuestion){
+                            setState(() {
+                              currentQuestion = newIndex;
+                            });
+                          }
+                        },
+                        label: Text('Review Page', style: TextStyle(color:  Color.fromARGB(255, 98, 86, 139), fontSize: 16)),
+                        icon: Icon(Icons.search, color:  Color.fromARGB(255, 98, 86, 139),),
+                    )),
+                    const Spacer(),
                     if (currentQuestion > 0) //Prevents button being shown if no previous questions available
                       ElevatedButton.icon(
                         onPressed: () {
@@ -380,8 +482,11 @@ class MiniMockExamState extends State<MiniMockExam> {
                             currentQuestion--; // Move to previous question
                           });
                         },
-                        icon: Icon(Icons.arrow_back, color: Colors.white),
-                        label: Text('Previous', style: TextStyle(color: Colors.white, fontSize: 16)),
+                        icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 98, 86, 139)),
+                        label: Text('Previous', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 16)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color.fromARGB(255, 235, 230, 239),
+                        ),
                       ),
                     const SizedBox(width: 16),
                     if (currentQuestion < questions.length - 1)
@@ -391,8 +496,11 @@ class MiniMockExamState extends State<MiniMockExam> {
                             currentQuestion++; // Move to next question
                           });
                         },
-                        icon: Icon(Icons.arrow_forward, color: Colors.white),
-                        label: Text('Next', style: TextStyle(color: Colors.white, fontSize: 16)),
+                        icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139)),
+                        label: Text('Next', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 16)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color.fromARGB(255, 235, 230, 239),
+                        ),
                       ),
                     if (currentQuestion == questions.length - 1)
                       ElevatedButton.icon(
@@ -401,7 +509,14 @@ class MiniMockExamState extends State<MiniMockExam> {
                           int? newIndex = await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => MiniMockReview(miniMockWidget: this, rankingLength: rankingAnswers.length, multiChoiceLength: multiChoiceAnswers.length, flaggedQuestions: flaggedQuestions,),
+                              builder: (context) => MiniMockReview(
+                                miniMockWidget: this,
+                                rankingLength: rankingAnswers.length,
+                                multiChoiceLength: multiChoiceAnswers.length,
+                                flaggedQuestions: flaggedQuestions,
+                                displayTime: _displayTime,
+                                remainingSeconds: remainingSeconds,
+                              ),
                             ),
                           );
                           // statement bellow allows for faster page update
@@ -413,15 +528,20 @@ class MiniMockExamState extends State<MiniMockExam> {
                           }
 
                         },
-                        icon: Icon(Icons.arrow_forward, color: Colors.white),
-                        label: Text('Review', style: TextStyle(color: Colors.white, fontSize: 16)),
+                        icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139)),
+                        label: Text('Review', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 16)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color.fromARGB(255, 235, 230, 239),
+                        ),
                       ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        )
+                    ],
+                  ))),
+                ]
+              ),
+            )
+          );
+        })
+      )
     );
   }
 }

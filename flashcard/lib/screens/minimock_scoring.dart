@@ -10,6 +10,8 @@ import 'package:collection/collection.dart';
 import 'package:flashcard_x/widgets/circular_percentage_indicator.dart';
 import 'package:http/http.dart' as http;
 
+import '../widgets/drawer_widget.dart';
+
 
 class MiniMockScoring extends StatefulWidget {
   final String title;
@@ -32,10 +34,12 @@ class MiniMockScoringState extends State<MiniMockScoring> {
 
   List<Map<String, dynamic>> questions = [];
   Map<String, dynamic> userAnswers = {};
+  late final int totalQuestions;
+
   List<int> answerScores = [];
   int totalScore = 0;
-  double percentageScore = 0;
-  late final int totalQuestions;
+  double userPercentageScore = 0;
+  double averagePercentageScore = 0;
   int maxScore = 0;
   double averageScore = 0;
   final scoringIndicator = ScoreIndicator;
@@ -153,23 +157,26 @@ Future<void> fetchAverageScore() async {
           answerScores[questionIndex] = userScore;
           break;
         case 'multiple choice':
-          tempMaxScore += 1;
-          if (questions[questionIndex]['type'] == "multiple choice" &&
-              UnorderedIterableEquality().equals(questions[questionIndex]['correct_answers'], userAnswer)){
-            answerScores[questionIndex] = 1;
-          } else{
-            answerScores[questionIndex] = 0;
-          }
+          tempMaxScore += 12; // Each multiple choice question is worth a max of 12 marks.
+          int userScore = 0;
+          List correctAnswers = questions[questionIndex]['correct_answers'];
+          for(int i = 0; i < correctAnswers.length; i++){
+            if (userAnswer.contains(correctAnswers[i])){
+              userScore += 4; // Each correct answer is worth 4 marks.
+            }}
+          answerScores[questionIndex] = userScore;
           break;
-        default:
+        default:  
       }
     });
     totalScore = answerScores.reduce((value, element) => value + element);
-    percentageScore = (totalScore / tempMaxScore) * 100;
+    userPercentageScore = (totalScore / tempMaxScore) * 100;
+    averagePercentageScore = (averageScore/ tempMaxScore) * 100;
     setState(() {
       maxScore = tempMaxScore;
       totalScore = totalScore;
-      percentageScore = percentageScore;
+      // userPercentageScore = userPercentageScore;
+      // averagePercentageScore = averagePercentageScore;
     });
     _updateScore(totalScore);
   }
@@ -206,6 +213,7 @@ Future<void> fetchAverageScore() async {
     return PopScope(
         canPop: false,
         child: Scaffold(
+        drawer: const DrawMain(),
         appBar: AppBar(
           // backgroundColor: Colors.blue,
           elevation: 0,
@@ -242,37 +250,48 @@ Future<void> fetchAverageScore() async {
         ),
         body: answerScores.isEmpty || (maxScore == 0)
             ? Center(child: CircularProgressIndicator(),) // If data is still being fetched, show loading circle
-            : Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
+            : LayoutBuilder( builder: (context, constraints) {
+            double maxScreenWidth = constraints.maxWidth * 0.5;
+            double maxPreferredWidth = 960; // 1920/2
+
+            return Center(
+            child: Container(
+              constraints: BoxConstraints(
+                maxWidth: maxScreenWidth > maxPreferredWidth ? maxScreenWidth : maxPreferredWidth,
+              ),
+            padding: EdgeInsets.all(16),
+            child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(height: 150),
+              const Spacer(),
               Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SizedBox(width: 300),
-                Align(
-                  alignment: Alignment.center,
+                  Align(
+                    alignment: Alignment.center,
+                    child: ScoreIndicator(
+                      title: 'Your Score: ',
+                      totalScore: '$totalScore/$maxScore',
+                      percentageScore: userPercentageScore,
+                      radius: 130.0,
+                      lineWidth: 30.0,
+                      progressColor: Colors.red,
+                      backgroundColor: Colors.green
+                    ),
                   ),
-                  ScoreIndicator(
-                    title: 'Your Score: ',
-                    totalScore: '$totalScore/$maxScore',
-                    percentageScore: percentageScore,
-                    radius: 130.0,
-                    lineWidth: 30.0,
-                    progressColor: Colors.red,
-                    backgroundColor: Colors.green
-                ),
-                
-                SizedBox(width: 200),
-                Align(alignment: Alignment(5,5)
-                ),
-                ScoreIndicator(title: 'Average Score: ', 
-                totalScore: '$averageScore/$maxScore',
-                percentageScore: percentageScore,
-                radius: 130.0, 
-                lineWidth:  30.0, 
-                progressColor: Colors.red, 
-                backgroundColor:  Colors.green),
+                  SizedBox(width: 60),
+                  Align(
+                    alignment: Alignment.center,
+                    child: ScoreIndicator(
+                      title: 'Average Score: ',
+                      totalScore: '$averageScore/$maxScore',
+                      percentageScore: averagePercentageScore,
+                      radius: 130.0,
+                      lineWidth:  30.0,
+                      progressColor: Colors.red,
+                      backgroundColor:  Colors.green
+                    ),
+                  ),
                 ]
               ),
               const Spacer(),
@@ -291,14 +310,17 @@ Future<void> fetchAverageScore() async {
                       ),
                     )
                   },
-                  icon:Icon(Icons.arrow_forward, color: Colors.white),
-                  label: const Text('Feedback', style:TextStyle(color: Colors.white, fontSize: 16)),
+                  icon:Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139)),
+                  label: Text('Feedback', style:TextStyle(fontSize: 16, color: Color.fromARGB(255, 98, 86, 139))),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color.fromARGB(255, 235, 230, 239),
+                  ),
                 ),
               ),
             ],
           )
         )
-      ),
-    );
+      );
+    })));
   }
 }

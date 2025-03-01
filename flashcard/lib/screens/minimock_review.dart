@@ -2,11 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/drawer_widget.dart';
 import 'package:flashcard_x/screens/minimock_exams.dart';
 
+import '../utils/timer.dart';
+import '../widgets/minimock_help_button.dart';
+
 class MiniMockReview extends StatefulWidget {
   final int rankingLength;
   final int multiChoiceLength;
   final dynamic miniMockWidget;
   final List<dynamic> flaggedQuestions; 
+  final String displayTime;
+  final int remainingSeconds;
 
   const MiniMockReview({
     super.key,
@@ -14,6 +19,8 @@ class MiniMockReview extends StatefulWidget {
     required this.rankingLength,
     required this.multiChoiceLength,
     required this.flaggedQuestions,
+    required this.remainingSeconds,
+    required this.displayTime,
   });
 
   @override
@@ -24,11 +31,32 @@ class MiniMockReviewState extends State<MiniMockReview> {
   List<bool> _isOpen = [false, false];
   late int questionLength;
 
+  late TimerController _timerController;
+  String _displayTime = '';
+  late int remainingSeconds;
+
   @override
   void initState(){
     super.initState();
     questionLength = widget.rankingLength + widget.multiChoiceLength;
+    _displayTime = widget.displayTime;
+    remainingSeconds = widget.remainingSeconds;
+    _timerController = TimerController(
+      startTime: widget.remainingSeconds, //measured in seconds
+      onTimeUpdate: (time) {
+        setState(() {
+          _displayTime = time;
+          remainingSeconds -= 1;
+        });
+      }, onTimerComplete: () {  },
+    );
+    _timerController.startTimer(); // Start defined timer
+  }
 
+  @override
+  void dispose() {
+    _timerController.stopTimer(); // REQUIRED! Makes sure timer doesn't continue when page is left
+    super.dispose();
   }
 
   // Function to pop this screen and return the value (reduces dry code)
@@ -51,10 +79,13 @@ Widget build(BuildContext context) {
     child:Scaffold(
     drawer: const DrawMain(),
     appBar: AppBar(
+      automaticallyImplyLeading: false,
       elevation: 0,
-      title: Align(
-        alignment: const Alignment(-0.05, 0),
-        child: Stack(
+      title: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Stack(
           children: [
             Positioned(
               top: 2.3,
@@ -71,7 +102,7 @@ Widget build(BuildContext context) {
             ),
           ],
         ),
-      ),
+      ]),
       centerTitle: true,
       leading: Builder(
         builder: (context) => GestureDetector(
@@ -79,16 +110,52 @@ Widget build(BuildContext context) {
           child: const Icon(Icons.menu),
         ),
       ),
+      actions: [
+        Container(
+          margin: const EdgeInsets.only(right: 16),
+        width: 210,
+        height: 40.31,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          color: const Color.fromARGB(255, 235, 230, 239),
+          boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                spreadRadius: 0,
+                blurRadius: 5,
+                offset: const Offset(0, 3), // changes position of shadow
+            ),
+          ],
+        ),
+        child: Center(
+          child: Text(
+            'Time Remaining: $_displayTime',
+            style: TextStyle(
+              color: Color.fromARGB(255, 98, 86, 139),
+              fontSize: 18.5,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        )),
+      ],
     ),
-    body: Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Column(
+    body: LayoutBuilder( builder: (context, constraints) {
+      double maxScreenWidth = constraints.maxWidth * 0.5;
+      double maxPreferredWidth = 960; // 1920/2
+      return Center(
+        child: Container(
+          constraints: BoxConstraints(
+            maxWidth: maxScreenWidth > maxPreferredWidth ? maxScreenWidth : maxPreferredWidth,
+          ),
+          padding: EdgeInsets.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              Spacer(),
             ExpansionPanelList(
               elevation: 1,
+              dividerColor: Colors.transparent,
+              expandIconColor: Theme.of(context).textTheme.bodyMedium?.color,
               expandedHeaderPadding: EdgeInsets.all(4.0),
               expansionCallback: (i, isOpen) {
                 setState(() {
@@ -98,12 +165,14 @@ Widget build(BuildContext context) {
                 children: [
                     ExpansionPanel(
                       canTapOnHeader: true,
-                      backgroundColor: Colors.white,
+                      backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
                       headerBuilder: (context, isOpen) {
                         return Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Text('Ranking Questions (Question 1 - ${widget.rankingLength})',
-                          style: TextStyle(color: Colors.black)),
+                          style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500)),
                         );
                       },
                       body: Padding(
@@ -125,7 +194,7 @@ Widget build(BuildContext context) {
                                       child: Icon(Icons.flag, color: Colors.black),),
                                     label: Text(
                                       '${index + 1}',
-                                      style: TextStyle(color: Colors.white,
+                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
                                       fontSize: 20),
                                     ),
                                   ),
@@ -148,7 +217,7 @@ Widget build(BuildContext context) {
                                       child: Icon(Icons.flag, color: Colors.black),),
                                     label: Text(
                                       '${index + 6}',
-                                      style: TextStyle(color: Colors.white,
+                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
                                       fontSize: 20),
                                     ),
                                   ),
@@ -171,7 +240,7 @@ Widget build(BuildContext context) {
                                       child: Icon(Icons.flag, color: Colors.black),),
                                     label: Text(
                                       '${index + 11}',
-                                      style: TextStyle(color: Colors.white,
+                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
                                       fontSize: 20),
                                     ),
                                   ),
@@ -185,13 +254,14 @@ Widget build(BuildContext context) {
                     ),
                     ExpansionPanel(
                       canTapOnHeader: true,
-                      backgroundColor: Colors.white,
+                      backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
                       headerBuilder: (context, isOpen) {
                         return Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Text('Multiple Choice Questions (Question ${widget.rankingLength + 1} - $questionLength)',
-                          style: TextStyle(color: Colors.black)),
-                          
+                          style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500)),
                         );
                       },
                       body: Padding(
@@ -213,7 +283,7 @@ Widget build(BuildContext context) {
                                       child: Icon(Icons.flag, color: Colors.black),),
                                     label: Text(
                                       '${index + 14}',
-                                      style: TextStyle(color: Colors.white,
+                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
                                       fontSize: 20),
                                     ),
                                   ),
@@ -237,7 +307,7 @@ Widget build(BuildContext context) {
                                       child: Icon(Icons.flag, color: Colors.black),),
                                     label: Text(
                                       '${index + 20}',
-                                      style: TextStyle(color: Colors.white,
+                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
                                       fontSize: 20),
                                     ),
                                   ),
@@ -260,7 +330,7 @@ Widget build(BuildContext context) {
                                       child: Icon(Icons.flag, color: Colors.black),),
                                     label: Text(
                                       '${index + 25}',
-                                      style: TextStyle(color: Colors.white,
+                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
                                       fontSize: 20),
                                     ),
                                   ),
@@ -274,20 +344,58 @@ Widget build(BuildContext context) {
                     ),
                   ],
                 ),
-              ],
-            ),
-        ],
-      ),
-    ),
-    floatingActionButton:SizedBox(
-      height: 50,
-      width: 200,
-      child: 
-        FloatingActionButton.extended(onPressed: () {
-          widget.miniMockWidget.examEnd();
-      }, label: Text('Complete Exam',  style: TextStyle(color: Colors.white, fontSize: 16)))),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-    ),
-  );
-}
+              Spacer(),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: MiniMockHelpButton(),
+                  ),
+                  const SizedBox(width: 16),
+                  Container(
+                    width: 160,
+                    height: 45,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      color: const Color.fromARGB(255, 235, 230, 239),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          spreadRadius: 0,
+                          blurRadius: 6,
+                          offset: const Offset(0, 6), // changes position of shadow
+                        ),
+                      ],
+                    ),
+                    child: TextButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 98, 86, 139)),
+                      label: Text('Back',  style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 16)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color.fromARGB(255, 235, 230, 239),
+                      ),
+                    )
+                  ),
+                  const Spacer(),
+                  SizedBox(
+                    height: 50,
+                    width: 200,
+                    child:
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          widget.miniMockWidget.examEnd();
+                        },
+                        icon: Icon(Icons.check_outlined, color: Theme.of(context).textTheme.bodyMedium?.color),
+                        label: Text('Complete Exam',  style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 16)),
+                      )
+                  ),
+                ],
+              )
+            ],
+        )));
+    })));
+  }
 }

@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
+// Internal imports
 import 'package:flashcard_x/screens/sign_in_screen.dart';
-import 'calendar_screen.dart';
-import 'study_session_manager.dart';
+import 'package:flashcard_x/screens/calendar_screen.dart';
+import 'package:flashcard_x/screens/study_session_manager.dart';
+import 'package:flashcard_x/screens/landing_service.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 /*import 'package:flashcard_x/widgets/drawer_widget.dart';
 import 'package:flashcard_x/widgets/event.dart';
@@ -33,16 +38,62 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
 
   int buildCount = 0;
   bool testDayBool = true;
+  bool buttonPressed = false;
+  bool stopShowing = false; 
   late String testDayString = "Test day not set";
+
+  final Map<String, bool> _isHovered = {};
 
   @override
   void initState() {
     super.initState();
     getUser();
     getTestDay();
+    getStopShowing(user!);
     getFirstStudyDay();
     setState(() {});
+    _isHovered['checkbox1'] = false;
+    _isHovered['checkbox2'] = false;
+    _isHovered['checkbox3'] = false;
+    _isHovered['checkbox4'] = false;
   }
+
+  Future<void> setStopShowing(User user, [bool value = false]) async {
+  await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+    'stopShowing': value,
+    'popUpTime': FieldValue.serverTimestamp(), 
+  }, SetOptions(merge: true));
+   // Merge to avoid overwriting other fields
+}
+
+  Future<void> getStopShowing(User user) async {
+  DocumentSnapshot doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+
+  if (doc.exists) {
+    
+    Timestamp? timestamp = doc['popUpTime'];
+
+    if (doc['stopShowing'] != null && timestamp != null) {
+      DateTime savedTime = timestamp.toDate();
+      DateTime currentTime = DateTime.now();
+      // print("Saved time");
+      // print(savedTime);
+      // print("Current time");
+      // print(currentTime);
+
+      if (currentTime.difference(savedTime).inMinutes >= 1) {
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+          'stopShowing': false,
+        });
+       
+      }
+    }
+  else{
+    setStopShowing(user);
+  }
+  stopShowing = doc['stopShowing'];
+  }
+}
 
   // Helper method
   Widget _buildAlertDialog({
@@ -64,6 +115,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
         ),
       ),
       content: SizedBox(
+        // height: 130,
         width: 300,
         child: content,
       ),
@@ -115,14 +167,12 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
 
     _userCollectionRef.doc(id).update({
       "TestDay": _examDate,
-      "firstStudyDay": data.containsKey("firstStudyDay") &&
-              data["firstStudyDay"] != null
-          ? data["firstStudyDay"] // Keep existing firstStudyDay if it exists
-          : DateTime.now(), // Otherwise, set it to now
-    });
 
-    print('Added firstStudyDay to Document:');
-    print(_firstStudyDate);
+      "firstStudyDay": data.containsKey("firstStudyDay") && data["firstStudyDay"] != null
+        ? data["firstStudyDay"] // Keep existing firstStudyDay if it exists
+        : DateTime.now(), // Otherwise, set it to now
+      });
+
     // update field testday to what is passed as param
     await getTestDay();
     setState(() {});
@@ -141,7 +191,10 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       }
     } else {
       user = auth.currentUser!;
+     
     }
+    getStopShowing(user!);
+    
   }
 
   Future<void> getFirstStudyDay() async {
@@ -162,6 +215,20 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     }
   }
 
+  Future <void> shouldShowDialog() async{
+      await getTestDay();
+      await getStopShowing(user!);
+      
+     
+      if (mounted && 
+          testDayBool && 
+          _examDate == null && 
+          landingService.onLanding &&
+          !stopShowing){
+       _showRevisionPlanDialog(context);
+       }
+  }
+
   // Revision dialog
   void _showRevisionPlanDialog(BuildContext context) {
     showDialog(
@@ -169,24 +236,31 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       builder: (BuildContext context) {
         return _buildAlertDialog(
           title: 'Do you want to start your revision plan today?',
-          content: const SizedBox(), // Empty content for this dialog
-          actions: [
-            TextButton(
+          content: 
+          SizedBox(
+            child: buttonPressed
+                ? Text('')
+                : Text(
+                  'If you want to stop seeing this pop up please press the "Don\'t Show Again" below to pause pop up during your session',
+                  style: TextStyle(fontSize: 16, color:Color.fromRGBO(21, 58, 103, 1))
+                  )),
+          actions :  
+           [       
+             TextButton(
             onPressed: () {
               Navigator.of(context).pop();
             },
             style: TextButton.styleFrom(
               foregroundColor: const Color.fromRGBO(243, 90, 90, 1),
-              // backgroundColor: const Color.fromRGBO(243, 90, 90, 1),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              minimumSize: const Size(120, 45), // Sets minimum width and height
             ),
             child: const Text(
               'No',
               style: TextStyle(fontSize: 16),
             ),
           ),
-            TextButton(
+          TextButton(
+            key: const Key('yesButton'),
             onPressed: () {
               Navigator.of(context).pop();
               _setFirstStudyDay(); // Ensure this function is defined
@@ -202,42 +276,42 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               'Yes',
               style: TextStyle(fontSize: 16),
             ),
+          ),  
+              TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              setStopShowing(user!,true);
+              //need to save the date here and then add another condition that checks later on 
+
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: const Color.fromARGB(255, 160, 160, 160),
+               backgroundColor:  Colors.transparent,
+              //padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              //minimumSize: const Size(120, 45), // Sets minimum width and height
+            ),
+            child: const Text(
+              'Don\'t Show Again',
+              style: TextStyle(fontSize: 16),
+            ),
           ),
-            
           ],
         );
       },
-    );
+    
+    );setState(() {});
   }
 
-  // Method to save firstStudyDay
-  Future<void> _setFirstStudyDay() async {
-    QuerySnapshot u =
-        await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
-    var id = u.docs.last.id;
-
-    // Save the first study day only once when the revision plan starts
-    await _userCollectionRef.doc(id).update({
-      "firstStudyDay":
-          DateTime.now(), // Save the current date as first study day
-    });
-
-    print('WE BEEN ADDING IT THO \n');
-
-    // Optionally, retrieve the first study day
-    await getFirstStudyDay();
-  }
-
-  // Show the date picker dialog to select exam date
+    // Show the date picker dialog to select exam date
   void _showExamDateDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return _buildAlertDialog(
           title: 'When is your exam date?',
-          content: Column(
+          content: 
+          Column(
             mainAxisSize: MainAxisSize.min,
-            // If statement to check if firebase already has exam date in database
             children: [
               ElevatedButton(
                 onPressed: () async {
@@ -272,7 +346,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                   style: TextStyle(fontSize: 16),
                   ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(),
               Text(
                 _examDate != null
                     ? 'Selected Date: ${DateFormat('dd MMM, yyyy').format(_examDate!)}' // UK Format
@@ -291,152 +365,29 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     );
   }
 
-  // Show dialog to ask for number of repetitions
-  void _showRepetitionDialog(BuildContext context) {
-    final List<int> repetitionOptions = [2, 3, 4, 5, 6];
-    int? selectedRepetition;
+   @override
+  void didChangeDependencies(){
+    super.didChangeDependencies();
+    //waits for build function to complete and then calls back to call the condition checking function 
+    WidgetsBinding.instance.addPostFrameCallback((_){
+      shouldShowDialog();
+    });
+  
+  }
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return AlertDialog(
-              backgroundColor: const Color(0xFFE6EDF2),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(0),
-              ),
-              title: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'How many times would you like to practice the selected resources?',
-                    style: const TextStyle(
-                      color: Color.fromRGBO(21, 58, 103, 1),
-                      fontSize: 21,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 8), // Add spacing between lines
-                  Text.rich(
-                    TextSpan(
-                      children: [
-                        const TextSpan(
-                          text:
-                              'It is recommended to practice at least three times.\nYour chosen number of repetition will apply to both the ',
-                          style: TextStyle(
-                            color: Color.fromRGBO(21, 58, 103, 1),
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400, // Regular font weight
-                          ),
-                        ),
-                        TextSpan(
-                          text: 'Official Paper and Full-sized Mock Exam.',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold, // Make it bold
-                            color: Color.fromRGBO(21, 58, 103, 1),
-                            fontSize: 16,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ...repetitionOptions.map((int value) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 5.0),
-                        child: RadioListTile<int>(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15.0),
-                          ),
-                          tileColor: const Color.fromRGBO(21, 58, 103, 1),
-                          title: Text(
-                            '$value',
-                            style: const TextStyle(
-                              color: Colors.white,
-                            ),
-                          ),
-                          value: value,
-                          groupValue: selectedRepetition,
-                          onChanged: (int? newValue) {
-                            setState(() {
-                              selectedRepetition = newValue;
-                            });
-                          },
-                        ),
-                      );
-                    }),
-                  ],
-                ),
-              ),
-              actions: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    style: TextButton.styleFrom(
-                      foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
-                      // backgroundColor: const Color.fromRGBO(243, 90, 90, 1),
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      minimumSize: const Size(120, 45), // Sets minimum width and height
-                    ),
-                    child: const Text(
-                      'Previous',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  ),
-                    TextButton(
-                      onPressed: () async {
-                        if (selectedRepetition != null) {
-                          // Save selectedRepetition to the database
-                          QuerySnapshot u = await _userCollectionRef
-                              .where("userID", isEqualTo: user?.uid)
-                              .get();
+  // Method to save firstStudyDay
+  Future<void> _setFirstStudyDay() async {
+    QuerySnapshot u =
+        await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
+    var id = u.docs.last.id;
 
-                          var id = u.docs.last.id;
-                          await _userCollectionRef.doc(id).update({
-                            'selectedRepetition': selectedRepetition,
-                          });
-
-                          if (context.mounted) {
-                            Navigator.of(context).pop();
-                          }
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content:
-                                  Text('Please enter number of repetitions'),
-                            ),
-                          );
-                        }
-                      },
-                      style: TextButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                        minimumSize: const Size(120, 45), // Sets minimum width and height
-                      ),
-                      child: const Text(
-                      'Submit',
-                      style: TextStyle(fontSize: 16),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
+    // Save the first study day only once when the revision plan starts
+    await _userCollectionRef.doc(id).update({
+      "firstStudyDay":
+          DateTime.now(), // Save the current date as first study day
+    });
+    // Optionally, retrieve the first study day
+    await getFirstStudyDay();
   }
 
   void _showOptionsDialog(BuildContext context) {
@@ -444,7 +395,6 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     final checkbox2 = ValueNotifier<bool>(false);
     final checkbox3 = ValueNotifier<bool>(false);
     final checkbox4 = ValueNotifier<bool>(false);
-
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -453,20 +403,36 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildCheckbox(checkbox1, 'Official MRSA Exam Paper'),
-              _buildCheckbox(checkbox2, 'Full-sized Mock Exam'),
-              _buildCheckbox(checkbox3, 'Mini-Mocks'),
-              _buildCheckbox(checkbox4, 'Flashcards'),
+              _buildCheckbox(
+                checkbox1, 
+                'Official Practice Paper',
+                'The official past paper is available on the Health Education England website. It contains 22 Professional Dilemma questions with realistic scenarios and reliable rationales created by the same people who write the questions for the MSRA, making it a very valuable resource. \n\nYou will be prompted to specify your preferred number of practice attempts upon selection.'
+              ),
+              _buildCheckbox(
+                checkbox2, 
+                'Full-sized Mock Exam',
+                'Our full-sized mock exam has been designed to mimic the exact conditions you will have on exam day, helping you optimise timings while exposing you to different professional scenarios. It includes 50 questions that have been carefully created to align with official rationales and GMC guidelines. \n\nYou will be prompted to specify your preferred number of practice attempts upon selection.'
+              ),
+              _buildCheckbox(
+                checkbox3, 
+                'Mini-mocks',
+                'We have two mini-mocks available on the platform, which each contain 25 reliable questions. They have been created to help track your progress, fine-tune exam timings and increase your exposure to different professional scenarios.'
+              ),
+              _buildCheckbox(
+                checkbox4, 
+                'Flashcard Decks',
+                'Our pre-made flashcard decks contain high-yield principles derived from GMC guidelines and official rationales. This resource uses our unique, evidence-based algorithms to help you harness the power of spaced repetition and active recall!'
+              ),
             ],
           ),
           actions: [
             TextButton(
             onPressed: () {
               Navigator.of(context).pop();
+              _showExamDateDialog(context);
             },
             style: TextButton.styleFrom(
               foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
-              // backgroundColor: const Color.fromRGBO(243, 90, 90, 1),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               minimumSize: const Size(120, 45), // Sets minimum width and height
             ),
@@ -492,23 +458,19 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                   );
                   return; // Stop execution if no resources are selected
                 }
-
                 QuerySnapshot u = await _userCollectionRef
                     .where("userID", isEqualTo: user?.uid)
                     .get();
-
                 // Update Firestore with selected resources
                 var id = u.docs.last.id;
                 _userCollectionRef.doc(id).update({
                   'selectedResources': selectedResources,
                 });
-
                 // Start study session
                 StudySessionManager().startStudySession(selectedResources);
-
                 // Close current dialog
                 Navigator.of(context).pop();
-
+                _scheduleCompleteDialog(context);
                 // If either Official Paper or Full-sized Mock is selected, show Repetition Dialog
                 if (checkbox1.value || checkbox2.value) {
                   _showRepetitionDialog(context);
@@ -518,7 +480,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                 foregroundColor: Colors.white,
                 backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                minimumSize: const Size(120, 45), // Sets minimum width and height
+                // minimumSize: const Size(120, 45), // Sets minimum width and height
               ),
               child: const Text(
               'Submit',
@@ -531,31 +493,401 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     );
   }
 
-  // Helper method to create checkbox rows
-  Widget _buildCheckbox(ValueNotifier<bool> notifier, String text) {
-    return Row(
-      children: [
-        ValueListenableBuilder(
-          valueListenable: notifier,
-          builder: (context, value, child) {
-            return Checkbox(
-              value: value,
-              onChanged: (newValue) {
-                notifier.value = newValue!;
-              },
+  // Show dialog to ask for number of repetitions
+  void _showRepetitionDialog(BuildContext context) {
+    final List<int> repetitionOptions = [2, 3, 4, 5, 6];
+    int? selectedRepetition;
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              backgroundColor: const Color(0xFFE6EDF2),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5.0),
+              ),
+              title: Column(
+                children: [
+                  Text(
+                    'How many times would you like to practice the selected resources?',
+                    style: const TextStyle(
+                      color: Color.fromRGBO(21, 58, 103, 1),
+                      fontSize: 21,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 11),
+                  // Add spacing between lines
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        const TextSpan(
+                          text:
+                              'It is recommended to practice at least three times.\nYour chosen number of repetition will apply to both the ',
+                          style: TextStyle(
+                            color: Color.fromRGBO(21, 58, 103, 1),
+                            fontSize: 16,
+                            fontWeight: FontWeight.w400, // Regular font weight
+                          ),
+                        ),
+                        TextSpan(
+                          text: 'Official Paper and Full-sized Mock Exam.',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold, // Make it bold
+                            color: Color.fromRGBO(21, 58, 103, 1),
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                    ...repetitionOptions.map((int value) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical : 5.0),
+                        child: RadioListTile<int>(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15.0),
+                          ),
+                          tileColor: const Color.fromRGBO(21, 58, 103, 1),
+                          title: Text(
+                            '$value',
+                            style: const TextStyle(
+                              color: Colors.white,
+                            ),
+                          ),
+                          value: value,
+                          groupValue: selectedRepetition,
+                          onChanged: (int? newValue) {
+                            setState(() {
+                              selectedRepetition = newValue;
+                            });
+                          },
+                        ),
+                      );
+                    }),
+                  ],
+                ),
+              actions: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                       _showOptionsDialog(context);
+                    },
+                    style: TextButton.styleFrom(
+                      foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
+                      //backgroundColor: const Color.fromRGBO(243, 90, 90, 1),
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      minimumSize: const Size(30, 30), // Sets minimum width and height
+                      maximumSize: const Size (120,45),
+                    ),
+                    child: const Text(
+                      'Previous',
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ),
+                  const SizedBox(width: 10,),
+                    TextButton(
+                      onPressed: () async {
+                        if (selectedRepetition != null) {
+                          // Save selectedRepetition to the database
+                          QuerySnapshot u = await _userCollectionRef
+                              .where("userID", isEqualTo: user?.uid)
+                              .get();
+
+                          var id = u.docs.last.id;
+                          await _userCollectionRef.doc(id).update({
+                            'selectedRepetition': selectedRepetition,
+                          });
+
+                          if (context.mounted) {
+                            Navigator.of(context).pop();
+                            _scheduleCompleteDialog(context);
+                          }
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content:
+                                  Text('Please enter number of repetitions'),
+                            ),
+                          );
+                        }
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
+                        minimumSize: const Size(120, 45), // Sets minimum width and height
+                      ),
+                      child: const Text(
+                      'Submit',
+                      style: TextStyle(fontSize: 16),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             );
           },
-        ),
-        GestureDetector(
-          onTap: () {
-            notifier.value = !notifier.value;
-          },
-          child: Text(
-            text,
-            style: TextStyle(color: Colors.black),
+        );
+      },
+    );
+  }
+
+  void _scheduleCompleteDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return _buildAlertDialog(
+          title: 'Schedule Complete!',
+          content: const Text(
+            'Your study schedule has been successfully generated.\n'
+            'You can view it in the calendar page.',
+            style: TextStyle(
+              fontSize: 16,
+              color: Color.fromRGBO(21, 58, 103, 1),
+            ),
           ),
-        ),
-      ],
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: const Color.fromARGB(255, 160, 160, 160),
+                backgroundColor: Colors.transparent,
+              ),
+              child: const Text(
+                'Ok',
+                style: TextStyle(fontSize: 16),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Calendar(),
+                  ),
+                );
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                minimumSize: const Size(120, 45),
+              ),
+              child: const Text(
+                'View Schedule',
+                style: TextStyle(fontSize: 16),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildInfoIcon(String id, String description) {
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return MouseRegion(
+          onEnter: (_) => setState(() => _isHovered[id] = true),
+          onExit: (_) => setState(() => _isHovered[id] = false),
+          child: TweenAnimationBuilder(
+            duration: const Duration(milliseconds: 300),
+            tween: Tween<double>(
+              begin: 0,
+              end: _isHovered[id] ?? false ? 1.0 : 0.0,
+            ),
+            builder: (context, double value, child) {
+              final primaryColor = const Color.fromRGBO(21, 58, 103, 1);
+
+              return SizedBox(
+                width: 32,
+                height: 32,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Outer wave
+                    if (value > 0)
+                      Transform.scale(
+                        scale: 1.0 + (value * 0.8),
+                        child: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: primaryColor.withOpacity(0.45 * value),
+                              width: 2.5,
+                            ),
+                          ),
+                        ),
+                      ),
+                    // Middle wave
+                    if (value > 0)
+                      Transform.scale(
+                        scale: 1.0 + (value * 0.5),
+                        child: Container(
+                          width: 28,
+                          height: 28,
+                          decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: primaryColor.withOpacity(0.55 * value),
+                              width: 2.5,
+                            ),
+                          ),
+                        ),
+                      ),
+                    // Inner wave
+                    if (value > 0)
+                      Transform.scale(
+                        scale: 1.0 + (value * 0.2),
+                        child: Container(
+                          width: 24,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: primaryColor.withOpacity(0.65 * value),
+                              width: 2.5,
+                            ),
+                          ),
+                        ),
+                      ),
+                    // Base icon
+                    Tooltip(
+                      richMessage: WidgetSpan(
+                        alignment: PlaceholderAlignment.baseline,
+                        baseline: TextBaseline.alphabetic,
+                        child: SizedBox(
+                          width: 200,
+                          child: Text(
+                            description,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              height: 1.4,
+                            ),
+                          ),
+                        ),
+                      ),
+                      padding: const EdgeInsets.all(12),
+                      margin: const EdgeInsets.symmetric(horizontal: 12),
+                      preferBelow: true,
+                      decoration: BoxDecoration(
+                        color: const Color.fromRGBO(21, 58, 103, 1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.white, width: 1),
+                      ),
+                      child: Container(
+                        width: 22,
+                        height: 22,
+                        decoration: BoxDecoration(
+                          color: const Color.fromRGBO(21, 58, 103, 1),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.8),
+                            width: 1.5,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color.fromRGBO(21, 58, 103, 0.4),
+                              blurRadius: 8,
+                              spreadRadius: 0,
+                            ),
+                          ],
+                        ),
+                        child: const Center(
+                          child: FaIcon(
+                            FontAwesomeIcons.info,
+                            size: 12,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildCheckbox(ValueNotifier<bool> notifier, String text, String description) {
+    String id = text.toLowerCase().replaceAll(' ', '_');
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.all(12.0),
+      child: Row(
+        children: [
+          Container(
+            margin: const EdgeInsets.only(right: 16.0),
+            child: Theme(
+              data: ThemeData(
+                unselectedWidgetColor: const Color.fromRGBO(21, 58, 103, 1),
+                checkboxTheme: CheckboxThemeData(
+                  side: const BorderSide(color: Color.fromRGBO(21, 58, 103, 1), width: 2),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4.0),
+                  ),
+                ),
+              ),
+              child: ValueListenableBuilder<bool>(
+                valueListenable: notifier,
+                builder: (context, value, child) {
+                  return Transform.scale(
+                    scale: 1.2,
+                    child: Checkbox(
+                      value: value,
+                      onChanged: (bool? newValue) {
+                        notifier.value = newValue ?? false;
+                      },
+                      activeColor: const Color.fromRGBO(51, 178, 73, 1),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+          Expanded(
+            child: MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTap: () {
+                  notifier.value = !notifier.value;
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        text,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Color.fromRGBO(21, 58, 103, 1),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                    _buildInfoIcon(id, description),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -599,6 +931,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
           ),
         ),
         onPressed: () {
+          buttonPressed = true;
           getTestDay();
           if (testDayBool) {
             _showRevisionPlanDialog(context);
