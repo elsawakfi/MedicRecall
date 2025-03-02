@@ -61,11 +61,11 @@
 
 ## Project Structure
 An overview of the important files contained within the project structure:
-- [Root Directory](#root-directory)
+- [Root](#root-directory)
 - [./.github](#github)
 - [./flashcard](#flashcard)
 
-### Root Directory
+### Root
 The root directory contains essential files for project setup, documentation, and configuration.
 ```
 2024-MedicRecall2
@@ -75,7 +75,7 @@ The root directory contains essential files for project setup, documentation, an
 └── README.md        # General overview
 ```
 
-### .github
+### ./.github
 The `.github` directory houses our GitHub configurations, such as Continuous Integration/ Deployment pipelines, issue templates, and pull request guidelines.
 ```
 .github/
@@ -88,7 +88,7 @@ The `.github` directory houses our GitHub configurations, such as Continuous Int
 ```
 
 
-### flashcard
+### ./flashcard
 The `flashcard/` directory contains the main code for the app, which includes the Flutter source code, Firebase functions for the backend, and platform-specific configurations (Android, iOS, and Web).
 ```
 flashcard/
