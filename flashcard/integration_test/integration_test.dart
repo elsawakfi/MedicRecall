@@ -4,10 +4,11 @@ import 'package:integration_test/integration_test.dart';
 import 'app_test.dart';
 
 void main() {
-  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-  binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
 
-  testWidgets("Log into the app",
+  group('Login/Exam Button Test:', () {
+    IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+      testWidgets("Log into the app",
           (WidgetTester tester) async {
         await tester.pump(const Duration(seconds: 1));
         tester.printToConsole('Testing login');
@@ -15,7 +16,7 @@ void main() {
         await tester.pumpAndSettle();
       });
 
-  testWidgets("Set Exam Date",
+    testWidgets("Set Exam Date",
           (WidgetTester tester) async {
         await tester.pump(const Duration(seconds: 1));
         tester.printToConsole('Testing exam date feature');
@@ -26,7 +27,10 @@ void main() {
             FloatingActionButton));
         tester.printToConsole('Loading popup');
         await tester.pumpAndSettle();
-        bool examDateSet = find.text('Change Exam Date').evaluate().isNotEmpty;
+        bool examDateSet = find
+            .text('Change Exam Date')
+            .evaluate()
+            .isNotEmpty;
         await tester.pump(const Duration(seconds: 2));
         if (examDateSet) {
           // DELETE CURRENT DATE TO PROCEED WITH TEST
@@ -36,7 +40,8 @@ void main() {
           // DELETE ALL BUTTON
           await tester.pump(const Duration(seconds: 2));
           var deleteButton = find.byWidgetPredicate((widget) {
-            return widget is ElevatedButton && widget.key == Key('deleteButton');
+            return widget is ElevatedButton &&
+                widget.key == Key('deleteButton');
           });
 
           expect(deleteButton, findsOneWidget);
@@ -46,7 +51,10 @@ void main() {
           await tester.tap(find.text('Go to Homepage'));
           await tester.pumpAndSettle();
 
-          bool isPopUp = find.text('Yes').evaluate().isNotEmpty;
+          bool isPopUp = find
+              .text('Yes')
+              .evaluate()
+              .isNotEmpty;
           if (!isPopUp) {
             await tester.tap(find.byType(
                 FloatingActionButton));
@@ -57,10 +65,15 @@ void main() {
         await tester.pumpAndSettle();
 
         // Start entering exam details
-        if(find.text('Yes').evaluate().isNotEmpty) tester.printToConsole("yes found");
+        if (find
+            .text('Yes')
+            .evaluate()
+            .isNotEmpty) tester.printToConsole("yes found");
         tester.printToConsole('${find.text('Yes').evaluate()}');
         expect(find.byKey(Key('yesButton')), findsAny);
-        await tester.tap(find.byKey(Key('yesButton')).first);
+        await tester.tap(find
+            .byKey(Key('yesButton'))
+            .first);
         await tester.pumpAndSettle();
 
         expect(find.text('Select Exam Date'), findsOneWidget);
@@ -131,4 +144,5 @@ void main() {
       await tester.pumpAndSettle();
       tester.printToConsole('User data reset');
     });
+  });
 }

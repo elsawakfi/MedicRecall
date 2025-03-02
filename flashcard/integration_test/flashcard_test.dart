@@ -4,7 +4,7 @@ import 'package:integration_test/integration_test.dart';
 import 'app_test.dart';
 
 void main() {
-  group('Whole App Test:', () {
+  group('Flashcard Test:', () {
     IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
     testWidgets("Pick a topic and revise",
@@ -37,6 +37,8 @@ void main() {
           await tester.tap(find.byKey(
             const ValueKey('Revise'),
           ));
+          await tester.pumpAndSettle();
+          await tester.pump(const Duration(seconds: 7));
           await tester.pumpAndSettle();
           expect(find.byKey(
               const ValueKey('Settings')), findsNothing);
@@ -103,7 +105,7 @@ void main() {
             const ValueKey('Revise'),
           ));
           await tester.pumpAndSettle();
-          await tester.pump(const Duration(seconds: 6));
+          await tester.pump(const Duration(seconds: 7));
           expect(find.byKey(
               const ValueKey('Settings')), findsNothing);
           expect(find.byIcon(
@@ -184,7 +186,8 @@ void main() {
             const ValueKey('Revise'),
           ));
           await tester.pumpAndSettle();
-          await tester.pump(const Duration(seconds: 6));
+          await tester.pump(const Duration(seconds: 7));
+          await tester.pumpAndSettle();
 
           expect(find.byKey(
               const ValueKey('Settings')), findsNothing);

@@ -6,7 +6,7 @@ import 'flashcard_test.dart' as flashcard;
 
 void main() {
   integration.main();
-  flashcard.main();
+  // flashcard.main();
 }
 
 // Reusable test function for logging in
@@ -16,9 +16,8 @@ Future<void> loginTest(WidgetTester tester) async{
   // Run App
   app.main();
   tester.printToConsole('App started');
-  await tester.pumpAndSettle();
   await tester.pump(const Duration(seconds: 5));
-
+  await tester.pumpAndSettle();
 
   // Finding the email is really on and off for some reason
   var emailFinder = find.byKey(const ValueKey('emailSignUpField'));
