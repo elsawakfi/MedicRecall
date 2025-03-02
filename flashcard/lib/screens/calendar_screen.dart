@@ -80,6 +80,7 @@ class CalendarStateO extends State<Calendar> {
       DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
   final TextEditingController _eventController = TextEditingController();
   bool testDayBool = false;
+  ValueNotifier<Map<DateTime, List<Event>>> selectedEventsNotifier = ValueNotifier({});
   //The CalendarFormat variable format allows the user to change their view of the calendar, into weekly, biweekly and monthly.
   // for some reason, events need to have their time as being midnight to be shown on the calendar. So need to set the today constant to be midnight today.
   // therefore today isn't just datetime.now it is calibrated to midnight.
@@ -699,25 +700,25 @@ class CalendarStateO extends State<Calendar> {
           TextButton(
             onPressed: () {
               if (_eventController.text.isNotEmpty) {
-                if (selectedEvents[selectedDay] != null) {
-                  selectedEvents[selectedDay]?.add(
-                    Event(
+                Event newEvent =  Event(
                         title: _eventController.text,
-                        color: const Color.fromARGB(255, 253, 252, 220)),
-                  );
+                        color: const Color.fromARGB(255, 253, 252, 220));
+                 Map<DateTime, List<Event>> updatedEvents = Map.from(selectedEventsNotifier.value);
+                setState((){if (selectedEvents[selectedDay] != null) {
+                  selectedEvents[selectedDay]?.add(newEvent);
                 } else {
-                  selectedEvents[selectedDay] = [
-                    Event(
-                        title: _eventController.text,
-                        color: const Color.fromARGB(255, 253, 252, 220)),
-                  ];
+                  selectedEvents[selectedDay] = [];
+                  selectedEvents[selectedDay]?.add(newEvent);
+                    
+                  setState((){});
                 }
                 updateEventsToDB(user);
                 Navigator.pop(context);
+                selectedEventsNotifier.value = updatedEvents; 
                 _eventController.clear();
                 setState(() {});
-              }
-            },
+              });
+            }},
             style: TextButton.styleFrom(
               foregroundColor: Colors.white,
               backgroundColor: Colors.blue,
@@ -729,6 +730,7 @@ class CalendarStateO extends State<Calendar> {
               style: TextStyle(fontSize: 16),
             ),
           ),
+
         ],
       ),
     );
@@ -736,6 +738,9 @@ class CalendarStateO extends State<Calendar> {
 
   @override
   Widget build(BuildContext context) {
+   return ValueListenableBuilder<Map<DateTime, List<Event>>>(
+    valueListenable: selectedEventsNotifier,
+    builder: (context, events, child) {
     return Scaffold(
       drawer: const DrawMain(),
       appBar: AppBar(
@@ -1185,7 +1190,7 @@ class CalendarStateO extends State<Calendar> {
       floatingActionButton: const CustomFloatingButton(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
     );
-  }
+  });}
 
   // VoidCallback -> Signature of callbacks that have no arguments and return no data.
   Widget _buildLabelItem(String label, Color color) {
@@ -1242,6 +1247,17 @@ class CalendarStateO extends State<Calendar> {
     }
 
     setState(() {});
+  }
+
+   @override
+  void didChangeDependencies(){
+    super.didChangeDependencies();
+    //waits for build function to complete and then calls back to call the condition checking function 
+    WidgetsBinding.instance.addPostFrameCallback((_){
+      getEventsFromDB();
+      setState((){});
+    });
+  
   }
 
   void _editEventDate(BuildContext context, Event event) {
