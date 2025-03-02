@@ -1,46 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:flashcard_x/main.dart' as app;
-
-Future<void> loginTest(WidgetTester tester) async{
-  await tester.pump(const Duration(seconds: 1));
-  tester.printToConsole('Starting app');
-  // Run App
-  app.main();
-  tester.printToConsole('App started');
-  await tester.pumpAndSettle();
-  await tester.pump(const Duration(seconds: 5));
-
-
-  // Finding the email is really on and off for some reason
-  var emailFinder = find.byKey(const ValueKey('emailSignUpField'));
-  if(emailFinder.evaluate().isNotEmpty) {
-    tester.printToConsole('Found email field');
-  } else {
-    tester.printToConsole("No email field found");
-  }
-  expect(emailFinder, findsOneWidget);
-  await tester.enterText(emailFinder,
-      'xecovop602@deligy.com');
-  tester.printToConsole('Entered email text');
-
-  await tester.enterText(
-      find.byKey(
-          const ValueKey('passwordSignUpField')), 'password');
-  tester.printToConsole('entered password');
-  await tester.tap(find.byKey(
-    const ValueKey('Log In Button'),
-  ));
-  await tester.pumpAndSettle();
-
-  //CLOSE POP UP
-  bool isPopUp = find.text('No').evaluate().isNotEmpty;
-  if(isPopUp){
-    await tester.tap(find.text('No'));
-    await tester.pumpAndSettle();
-  }
-}
+import 'app_test.dart';
 
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -48,6 +9,7 @@ void main() {
 
   testWidgets("Log into the app",
           (WidgetTester tester) async {
+        await tester.pump(const Duration(seconds: 1));
         tester.printToConsole('Testing login');
         await loginTest(tester);
         await tester.pumpAndSettle();
@@ -55,6 +17,7 @@ void main() {
 
   testWidgets("Set Exam Date",
           (WidgetTester tester) async {
+        await tester.pump(const Duration(seconds: 1));
         tester.printToConsole('Testing exam date feature');
         await loginTest(tester);
         await tester.pumpAndSettle();
@@ -108,46 +71,64 @@ void main() {
         await tester.tap(find.text('OK'));
         await tester.pumpAndSettle();
 
-        // await tester.tap(find.byWidgetPredicate((widget) {
-        //   return widget is RadioListTile<int> && widget.value == 2;
-        // }));
-        // tester.printToConsole('Entered number of repetitions');
-        // await tester.pumpAndSettle();
-        // expect(find.text('Next'), findsOneWidget);
-        // await tester.tap(find.text('Next'));
-        // await tester.pumpAndSettle();
-
         await tester.tap((find.byWidgetPredicate((widget) {
           return widget is Checkbox && widget.value == false;
         })).first);
         await tester.tap(find.text('Submit'));
         tester.printToConsole('Exam date set');
         await tester.pumpAndSettle();
-        //
-        // expect(find.text('Revision Calendar'), findsOneWidget);
-        // await tester.tap(find.text('Revision Calendar'));
-        // await tester.pumpAndSettle();
-        // // DELETE ALL BUTTON
-        // var deleteButton = find.byWidgetPredicate((widget) {
-        //   return widget is ElevatedButton && widget.key == Key('deleteButton');
-        // });
-        // expect(deleteButton, findsOneWidget);
-        // await tester.tap(deleteButton);
-        // tester.printToConsole('Exam date deleted');
-        // await tester.pumpAndSettle();
-        //
-        // // Log out
-        // await tester.tap(find.byIcon(
-        //     Icons.menu));
-        // await tester.pumpAndSettle();
-        // expect(find.byKey(
-        //     const ValueKey('Settings')), findsOneWidget);
-        // tester.printToConsole('Menu opens');
-        // // Logging out
-        // await tester.tap(find.byKey(
-        //   const ValueKey('Log Out Button'),
-        // ));
-        // await tester.pumpAndSettle();
-        // tester.printToConsole('Logged out');
       });
+
+    testWidgets('Logging in and reset data', (WidgetTester tester) async {
+      await tester.pump(const Duration(seconds: 4));
+      await loginTest(tester);
+      await tester.pumpAndSettle();
+
+      tester.printToConsole('HomePage screen opens');
+      // Dashboard
+      expect(find.byKey(
+          const ValueKey('Settings')), findsNothing);
+      await tester.tap(find.byKey(
+        const ValueKey('Flashcards'),
+      ));
+      await tester.pumpAndSettle();
+      expect(find.byKey(
+          const ValueKey('Settings')), findsNothing);
+      expect(find.byKey(
+          const ValueKey('Revise')), findsOneWidget);
+      tester.printToConsole('Dashboard opens');
+
+      // Menu
+      expect(find.byKey(
+          const ValueKey('Settings')), findsNothing);
+      await tester.tap(find.byIcon(
+          Icons.menu));
+      await tester.pumpAndSettle();
+      expect(find.byKey(
+          const ValueKey('Settings')), findsOneWidget);
+      tester.printToConsole('Menu opens');
+
+      // User Details
+      await tester.tap(find.byKey(
+        const ValueKey('Settings'),
+      ));
+      await tester.pumpAndSettle();
+      expect(find.byKey(
+          const ValueKey('User Details')), findsOneWidget);
+      tester.printToConsole('Settings opens');
+      await tester.tap(find.byKey(
+        const ValueKey('User Details'),
+      ));
+      await tester.pumpAndSettle();
+      expect(find.byKey(
+          const ValueKey('Reset Userdata')), findsOneWidget);
+      tester.printToConsole('User Details opens');
+
+      // Reset User Data
+      await tester.tap(find.byKey(
+        const ValueKey('Reset Userdata'),
+      ));
+      await tester.pumpAndSettle();
+      tester.printToConsole('User data reset');
+    });
 }
