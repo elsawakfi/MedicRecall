@@ -254,13 +254,13 @@ class CalendarStateO extends State<Calendar> {
       }
 
       String id = u.docs.last.id;
-      print("Found user document with ID: $id");
+     
       
       _eventsCollectionRef =
           FirebaseFirestore.instance.collection('users/$id/events');
 
       var snapshots = await _eventsCollectionRef.get();
-      print("Found ${snapshots.docs.length} events in database");
+     
 
       for (var doc in snapshots.docs) {
         var data = doc.data() as Map<String, dynamic>;
@@ -273,7 +273,7 @@ class CalendarStateO extends State<Calendar> {
             date = DateTime(date.year, date.month, date.day);
             
             List<String> events = eventsList.map((e) => e.toString()).toList();
-            print("Loading ${events.length} events for date $date");
+            
             
             selectedEvents[date] = events.map((title) => Event(
               title: title,
@@ -292,6 +292,8 @@ class CalendarStateO extends State<Calendar> {
     if (title.contains("Mini Mock")) return StudySessionManager.kMiniMockColor;
     if (title.contains("Full-sized Mock")) return StudySessionManager.kFullMockColor;
     if (title.contains("Official Paper")) return StudySessionManager.kOfficialPaperColor;
+    //need to add code that checks if the title is taken from the flashcard decks, if it is, set 
+    //it to yellow otheriwse, it must be a custom event so give we give it a custom colour
     return StudySessionManager.kFlashcardColor;
   }
 
@@ -575,15 +577,23 @@ class CalendarStateO extends State<Calendar> {
 
     List<String> updatedEvents =
         selectedEvents[normalizedNewDate]?.map((e) => e.title).toList() ?? [];
+    
 
+    //Turns out, you need to ensure that the code on line 592 is run if you want the UI
+    //to update correctly, I think that was the only thing that was wrong. I do not understand the 
+    //rest of your code if you want to remove the bits that are unnecessary now. 
     if (querySnapshot.docs.isEmpty) {
       // If no document exists for the new date, create it
+      
+       String docId = querySnapshot.docs.first.id;
+      await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
       if (updatedEvents.isNotEmpty) {
         await _eventsCollectionRef.add({
           "date":
               Timestamp.fromDate(normalizedNewDate), // Ensure correct format
           "events": updatedEvents,
         });
+      await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
       }
     } else {
       // If a document exists, update it
@@ -593,7 +603,9 @@ class CalendarStateO extends State<Calendar> {
       } else {
         await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
       }
+      await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
     }
+    
 
     // 5️⃣ Refresh UI
     setState(() {
@@ -612,21 +624,21 @@ class CalendarStateO extends State<Calendar> {
     await getUser();
     await getTestDay();
     if (testDay != null) {
-      print("Test day is set to: $testDay");
+      
       
       // First add Test Day event
       selectedEvents[testDay] = [
         Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94))
       ];
-      print("Added Test Day event");
+      
 
       // Then load events from database
       await getEventsFromDB();
-      print("Loaded events from DB: ${selectedEvents.length} days have events");
+     
 
       // Generate study sessions
       await generateStudySessions(user);
-      print("Generated study sessions");
+      
 
       setState(() {});
     } else {
@@ -1225,21 +1237,18 @@ class CalendarStateO extends State<Calendar> {
       DateTime date, String eventTitle, User user) async {
     date = DateTime(date.year, date.month, date.day);
 
-    //if (!selectedEvents.containsKey(date)) return;
+    //The delete single event function updates the UI in real time so I just copied the structure of that function 
     Event newEvent =  Event(
                         title: eventTitle,
                         color: const Color.fromARGB(0, 239, 252, 0));
    
-
     if (selectedEvents[date] == null) {
       selectedEvents[date] = [];
       selectedEvents[date]?.add(newEvent);
-      print("ADDING NEW EVENT \n");
+      
     } else{
-       selectedEvents[date]?.add(newEvent);
-        print("ADDING NEW EVENT \n");
+       selectedEvents[date]?.add(newEvent); 
     }
-
     QuerySnapshot querySnapshot = await _eventsCollectionRef
         .where("date", isEqualTo: Timestamp.fromDate(date))
         .get();
@@ -1248,15 +1257,8 @@ class CalendarStateO extends State<Calendar> {
       String docId = querySnapshot.docs.first.id;
       List<String> updatedEvents =
           selectedEvents[date]?.map((e) => e.title).toList() ?? [];
-      print("Here are the updated events $updatedEvents ");
-      // if (updatedEvents.isEmpty) {
-      //   // await _eventsCollectionRef
-      //   //     .doc(docId)
-      //   //     .delete(); // ❗ Ensure deletion happens
-      // } else {
       await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
-      print("Updated document with new events \n");
-      // }
+     
     }
 
     setState(() {});
