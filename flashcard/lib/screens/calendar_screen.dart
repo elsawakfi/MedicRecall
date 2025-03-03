@@ -79,7 +79,7 @@ class CalendarStateO extends State<Calendar> {
       DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
   final TextEditingController _eventController = TextEditingController();
   bool testDayBool = false;
-  ValueNotifier<Map<DateTime, List<Event>>> selectedEventsNotifier = ValueNotifier({});
+  
   //The CalendarFormat variable format allows the user to change their view of the calendar, into weekly, biweekly and monthly.
   // for some reason, events need to have their time as being midnight to be shown on the calendar. So need to set the today constant to be midnight today.
   // therefore today isn't just datetime.now it is calibrated to midnight.
@@ -678,9 +678,6 @@ class CalendarStateO extends State<Calendar> {
 
   // helper function for adding new events
   void _showAddEventDialog(BuildContext context) {
-   Event newEvent =  Event(
-                        title: _eventController.text,
-                        color: const Color.fromARGB(255, 253, 252, 220));
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -703,8 +700,8 @@ class CalendarStateO extends State<Calendar> {
             onPressed: () {
               if (_eventController.text.isNotEmpty) {
 
-                 Map<DateTime, List<Event>> updatedEvents = Map.from(selectedEventsNotifier.value);
-                 addSingleEvent(selectedDay, newEvent.title, user);
+                
+                 addSingleEvent(selectedDay, _eventController.text, user);
                 // if (selectedEvents[selectedDay] != null) {
                 //   selectedEvents[selectedDay]?.add(newEvent);
                 // } else {
@@ -714,7 +711,6 @@ class CalendarStateO extends State<Calendar> {
                 // }
                 updateEventsToDB(user);
                 Navigator.pop(context);
-                selectedEventsNotifier.value = updatedEvents; 
                 _eventController.clear();
                 setState(() {});
               
@@ -736,15 +732,15 @@ class CalendarStateO extends State<Calendar> {
     );
   }
 
-  @override
-  void didChangeDependencies(){
-    super.didChangeDependencies();
-    //waits for build function to complete and then calls back to call the condition checking function 
-    WidgetsBinding.instance.addPostFrameCallback((_){
-     getEventsFromDB();
-    });
+  // @override
+  // void didChangeDependencies(){
+  //   super.didChangeDependencies();
+  //   //waits for build function to complete and then calls back to call the condition checking function 
+  //   WidgetsBinding.instance.addPostFrameCallback((_){
+  //    getEventsFromDB();
+  //   });
   
-  }
+  // }
 
   @override
   Widget build(BuildContext context) {
