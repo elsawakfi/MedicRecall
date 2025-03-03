@@ -512,6 +512,7 @@ class CalendarStateO extends State<Calendar> {
     QuerySnapshot u =
         await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
     String id = u.docs.last.id;
+    String docID = u.docs.first.id;
     _eventsCollectionRef =
         // FirebaseFirestore.instance.collection('users/' + id + "/events");
         FirebaseFirestore.instance.collection('users/$id/events');
@@ -534,84 +535,11 @@ class CalendarStateO extends State<Calendar> {
     selectedEvents[testDay]?.remove(Event(
         title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
     getTestDay();
+    
+    await  _eventsCollectionRef.doc(docID).update({"events": []});
   }
 
-  Future<void> updateOneEvent(
-      Event oldEvent, String newTitle, DateTime newDate) async {
-    DateTime normalizedOldDate =
-        DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
-    DateTime normalizedNewDate =
-        DateTime(newDate.year, newDate.month, newDate.day);
-
-    // 1️⃣ Remove the old event from the local `selectedEvents` map
-    selectedEvents[normalizedOldDate]
-        ?.removeWhere((event) => event.title == oldEvent.title);
-    if (selectedEvents[normalizedOldDate]?.isEmpty ?? false) {
-      selectedEvents.remove(
-          normalizedOldDate); // If no more events on that day, remove it
-    }
-
-    // 2️⃣ Add the updated event to the new date
-    if (selectedEvents[normalizedNewDate] != null) {
-      selectedEvents[normalizedNewDate]
-          ?.add(Event(title: newTitle, color: oldEvent.color));
-    } else {
-      selectedEvents[normalizedNewDate] = [
-        Event(title: newTitle, color: oldEvent.color)
-      ];
-    }
-
-    // 3️⃣ Remove old event from Firestore
-    await deleteSingleEvent(normalizedOldDate, oldEvent.title, user);
-
-    // 4️⃣ Ensure Firestore is updated correctly
-    QuerySnapshot u =
-        await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
-    String id = u.docs.last.id;
-    _eventsCollectionRef =
-        FirebaseFirestore.instance.collection('users/$id/events');
-
-    QuerySnapshot querySnapshot = await _eventsCollectionRef
-        .where("date", isEqualTo: Timestamp.fromDate(normalizedNewDate))
-        .get();
-
-    List<String> updatedEvents =
-        selectedEvents[normalizedNewDate]?.map((e) => e.title).toList() ?? [];
-    
-
-    //Turns out, you need to ensure that the code on line 592 is run if you want the UI
-    //to update correctly, I think that was the only thing that was wrong. I do not understand the 
-    //rest of your code if you want to remove the bits that are unnecessary now. 
-    if (querySnapshot.docs.isEmpty) {
-      // If no document exists for the new date, create it
-      
-       String docId = querySnapshot.docs.first.id;
-      await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
-      if (updatedEvents.isNotEmpty) {
-        await _eventsCollectionRef.add({
-          "date":
-              Timestamp.fromDate(normalizedNewDate), // Ensure correct format
-          "events": updatedEvents,
-        });
-      await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
-      }
-    } else {
-      // If a document exists, update it
-      String docId = querySnapshot.docs.first.id;
-      if (updatedEvents.isEmpty) {
-        await _eventsCollectionRef.doc(docId).delete();
-      } else {
-        await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
-      }
-      await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
-    }
-    
-
-    // 5️⃣ Refresh UI
-    setState(() {
-      selectedDay = normalizedNewDate;
-    });
-  }
+  
 
   @override
   void initState() {
@@ -689,7 +617,7 @@ class CalendarStateO extends State<Calendar> {
   // so get object from databse, then .toString or as String
 
   // helper function for adding new events
-  void _showAddEventDialog(BuildContext context) {
+  void _showAddEventDialog(BuildContext context)  {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -709,11 +637,11 @@ class CalendarStateO extends State<Calendar> {
             ),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               if (_eventController.text.isNotEmpty) {
 
                 
-                 addSingleEvent(selectedDay, _eventController.text, user);
+                await addSingleEvent(selectedDay, _eventController.text, user);
                 // if (selectedEvents[selectedDay] != null) {
                 //   selectedEvents[selectedDay]?.add(newEvent);
                 // } else {
@@ -744,15 +672,16 @@ class CalendarStateO extends State<Calendar> {
     );
   }
 
-  // @override
-  // void didChangeDependencies(){
-  //   super.didChangeDependencies();
-  //   //waits for build function to complete and then calls back to call the condition checking function 
-  //   WidgetsBinding.instance.addPostFrameCallback((_){
-  //    getEventsFromDB();
-  //   });
+  @override
+  void didChangeDependencies(){
+    super.didChangeDependencies();
+    //waits for build function to complete and then calls back to call the condition checking function 
+    WidgetsBinding.instance.addPostFrameCallback((_){
+     getEventsFromDB();
+     setState((){});
+    });
   
-  // }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1244,23 +1173,30 @@ class CalendarStateO extends State<Calendar> {
    
     if (selectedEvents[date] == null) {
       selectedEvents[date] = [];
-      selectedEvents[date]?.add(newEvent);
       
-    } else{
-       selectedEvents[date]?.add(newEvent); 
     }
+    selectedEvents[date]?.add(newEvent);
+    
     QuerySnapshot querySnapshot = await _eventsCollectionRef
         .where("date", isEqualTo: Timestamp.fromDate(date))
         .get();
 
-    if (querySnapshot.docs.isNotEmpty) {
+    if (querySnapshot.docs.isEmpty) {
+      print("Is empty!\n");
       String docId = querySnapshot.docs.first.id;
       List<String> updatedEvents =
           selectedEvents[date]?.map((e) => e.title).toList() ?? [];
       await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
+      print("Porque?????\n");
      
     }
-
+    else{
+      print("No esta empty \n");
+      String docId = querySnapshot.docs.first.id;
+      List<String> updatedEvents =
+          selectedEvents[date]?.map((e) => e.title).toList() ?? [];
+      await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
+    }
     setState(() {});
   }
 
@@ -1299,7 +1235,83 @@ class CalendarStateO extends State<Calendar> {
     setState(() {});
   }
 
-  
+  Future<void> updateOneEvent(
+      Event oldEvent, String newTitle, DateTime newDate) async {
+    DateTime normalizedOldDate =
+        DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
+    DateTime normalizedNewDate =
+        DateTime(newDate.year, newDate.month, newDate.day);
+
+    // 1️⃣ Remove the old event from the local `selectedEvents` map
+    // selectedEvents[normalizedOldDate]
+    //     ?.removeWhere((event) => event.title == oldEvent.title);
+    // if (selectedEvents[normalizedOldDate]?.isEmpty ?? false) {
+    //   selectedEvents.remove(
+    //       normalizedOldDate); // If no more events on that day, remove it
+    // }
+
+    // 2️⃣ Add the updated event to the new date
+    // if (selectedEvents[normalizedNewDate] != null) {
+    //   selectedEvents[normalizedNewDate]
+    //       ?.add(Event(title: newTitle, color: oldEvent.color));
+    // } else {
+    //   selectedEvents[normalizedNewDate] = [
+    //     Event(title: newTitle, color: oldEvent.color)
+    //   ];
+    // }
+
+    // 3️⃣ Remove old event from Firestore
+    await deleteSingleEvent(normalizedOldDate, oldEvent.title, user);
+    await addSingleEvent(normalizedNewDate, newTitle, user);
+
+    // // 4️⃣ Ensure Firestore is updated correctly
+    // QuerySnapshot u =
+    //     await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+    // String id = u.docs.last.id;
+    // _eventsCollectionRef =
+    //     FirebaseFirestore.instance.collection('users/$id/events');
+
+    // QuerySnapshot querySnapshot = await _eventsCollectionRef
+    //     .where("date", isEqualTo: Timestamp.fromDate(normalizedNewDate))
+    //     .get();
+
+    // List<String> updatedEvents =
+    //     selectedEvents[normalizedNewDate]?.map((e) => e.title).toList() ?? [];
+    
+
+    // //Turns out, you need to ensure that the code on line 592 is run if you want the UI
+    // //to update correctly, I think that was the only thing that was wrong. I do not understand the 
+    // //rest of your code if you want to remove the bits that are unnecessary now. 
+    // if (querySnapshot.docs.isEmpty) {
+    //   // If no document exists for the new date, create it
+      
+    //    String docId = querySnapshot.docs.first.id;
+    //   await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
+    //   if (updatedEvents.isNotEmpty) {
+    //     await _eventsCollectionRef.add({
+    //       "date":
+    //           Timestamp.fromDate(normalizedNewDate), // Ensure correct format
+    //       "events": updatedEvents,
+    //     });
+    //   await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
+    //   }
+    // } else {
+    //   // If a document exists, update it
+    //   String docId = querySnapshot.docs.first.id;
+    //   if (updatedEvents.isEmpty) {
+    //     await _eventsCollectionRef.doc(docId).delete();
+    //   } else {
+    //     await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
+    //   }
+    //   await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
+    // }
+    
+
+    // 5️⃣ Refresh UI
+    setState(() {
+      selectedDay = normalizedNewDate;
+    });
+  }
 
   void _editEventDate(BuildContext context, Event event) {
     final TextEditingController _editEventController =
@@ -1406,7 +1418,7 @@ class CalendarStateO extends State<Calendar> {
             onPressed: () {
               if (_editEventController.text.isNotEmpty &&
                   _selectedDate != null) {
-                updateOneEvent(
+                 updateOneEvent(
                     event, _editEventController.text, _selectedDate!);
                 Navigator.pop(context);
               }
