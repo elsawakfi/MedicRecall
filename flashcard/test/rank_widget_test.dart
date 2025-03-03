@@ -56,7 +56,7 @@ void main() {
               String option = entry.value;
               String optionLetter = rankingAnswers[currentQuestion][optionIndex];
               return ReorderableDragStartListener(
-                  key: ValueKey(option),
+                  key: ValueKey(optionLetter),
                   index: optionIndex,
                   child: Card(
                       elevation: 3,
@@ -81,5 +81,44 @@ void main() {
     expect(find.text('3:   C. Option 3'), findsOneWidget);
     expect(find.text('4:   D. Option 4'), findsOneWidget);
     expect(find.text('5:   E. Option 5'), findsOneWidget);
+  });
+
+  testWidgets('Ranking options can be moved', (WidgetTester tester) async {
+    Offset optionPosition;
+    Offset targetPosition;
+    double yOffset;
+    late dynamic optionSize;
+
+    await tester.pumpWidget(rankWidget);
+    await tester.pumpAndSettle();
+    expect(rankingAnswers, [['A','B','C','D','E']]);
+    optionSize = tester.getSize(find.byKey(ValueKey('A')));
+
+    // Move A to B: ['A','B','C','D','E'] -> ['B','A','C','D','E']
+    optionPosition = tester.getCenter(find.byKey(ValueKey('A')));
+    targetPosition = tester.getBottomLeft(find.byKey(ValueKey('B')));
+    // Calculate the required distance for the drag function (requires offset of a tile's height)
+    yOffset = targetPosition.dy - (optionPosition.dy - optionSize.height);
+    // Simulate dragging option 1 from its position to the position of option 2
+    await tester.dragFrom(optionPosition, Offset(0, yOffset));
+    await tester.pumpAndSettle();
+    expect(rankingAnswers, [['B','A','C','D','E']]);
+
+    // Move C to E: ['B','A','C','D','E'] -> ['B','A','D','E','C']
+    optionPosition = tester.getCenter(find.byKey(ValueKey('C')));
+    targetPosition = tester.getBottomLeft(find.byKey(ValueKey('E')));
+    yOffset = targetPosition.dy - (optionPosition.dy - optionSize.height);
+    await tester.dragFrom(optionPosition, Offset(0, yOffset));
+    await tester.pumpAndSettle();
+    expect(rankingAnswers, [['B','A','D','E','C']]);
+
+    // Move E to B: ['B','A','D','E','C'] -> ['E','B','A','D','C']
+    optionPosition = tester.getCenter(find.byKey(ValueKey('E')));
+    targetPosition = tester.getTopLeft(find.byKey(ValueKey('B')));
+    yOffset = targetPosition.dy - (optionPosition.dy - optionSize.height);
+    await tester.dragFrom(optionPosition, Offset(0, yOffset));
+    await tester.pumpAndSettle();
+    expect(rankingAnswers, [['E','B','A','D','C']]);
+
   });
 }
