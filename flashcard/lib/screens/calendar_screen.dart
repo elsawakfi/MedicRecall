@@ -1165,38 +1165,50 @@ class CalendarStateO extends State<Calendar> {
   Future<void> addSingleEvent(
       DateTime date, String eventTitle, User user) async {
     date = DateTime(date.year, date.month, date.day);
+    print("This is our date $date \n");
+
 
     //The delete single event function updates the UI in real time so I just copied the structure of that function 
     Event newEvent =  Event(
                         title: eventTitle,
                         color: const Color.fromARGB(0, 239, 252, 0));
+    print("And this is our event $newEvent");
    
     if (selectedEvents[date] == null) {
       selectedEvents[date] = [];
       
     }
     selectedEvents[date]?.add(newEvent);
-    
     QuerySnapshot querySnapshot = await _eventsCollectionRef
         .where("date", isEqualTo: Timestamp.fromDate(date))
         .get();
+   
+    
+     List<String> updatedEvents =
+        selectedEvents[date]?.map((e) => e.title).toList() ?? [];
+    
+    if (querySnapshot.docs.isNotEmpty) {
+    String docId = querySnapshot.docs.first.id;
+   
+   
 
-    if (querySnapshot.docs.isEmpty) {
-      print("Is empty!\n");
-      String docId = querySnapshot.docs.first.id;
-      List<String> updatedEvents =
-          selectedEvents[date]?.map((e) => e.title).toList() ?? [];
-      await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
-      print("Porque?????\n");
-     
-    }
-    else{
-      print("No esta empty \n");
-      String docId = querySnapshot.docs.first.id;
-      List<String> updatedEvents =
-          selectedEvents[date]?.map((e) => e.title).toList() ?? [];
-      await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
-    }
+    // Update Firestore document
+    await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
+    
+  } else {
+    print("No document found for this date, creating a new one...");
+
+    // If no document exists, create a new one
+    DocumentReference newDoc = await _eventsCollectionRef.add({
+      "date": Timestamp.fromDate(date),
+      "events": [eventTitle] // Start with just the new event
+    });
+    
+    String newDocId = newDoc.id;
+    await _eventsCollectionRef.doc(newDocId).update({"events": updatedEvents});
+
+  }
+ 
     setState(() {});
   }
 
