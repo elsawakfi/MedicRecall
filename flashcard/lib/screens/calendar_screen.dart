@@ -69,7 +69,6 @@ class CalendarStateO extends State<Calendar> {
   final CollectionReference _userCollectionRef =
       FirebaseFirestore.instance.collection('users');
   final FirebaseAuth auth = FirebaseAuth.instance;
-
   late User user;
   late Map<DateTime?, List<Event>> selectedEvents;
   CalendarFormat format = CalendarFormat.month;
@@ -679,6 +678,9 @@ class CalendarStateO extends State<Calendar> {
 
   // helper function for adding new events
   void _showAddEventDialog(BuildContext context) {
+   Event newEvent =  Event(
+                        title: _eventController.text,
+                        color: const Color.fromARGB(255, 253, 252, 220));
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -700,24 +702,22 @@ class CalendarStateO extends State<Calendar> {
           TextButton(
             onPressed: () {
               if (_eventController.text.isNotEmpty) {
-                Event newEvent =  Event(
-                        title: _eventController.text,
-                        color: const Color.fromARGB(255, 253, 252, 220));
+
                  Map<DateTime, List<Event>> updatedEvents = Map.from(selectedEventsNotifier.value);
-                setState((){if (selectedEvents[selectedDay] != null) {
-                  selectedEvents[selectedDay]?.add(newEvent);
-                } else {
-                  selectedEvents[selectedDay] = [];
-                  selectedEvents[selectedDay]?.add(newEvent);
-                    
-                  setState((){});
-                }
+                 addSingleEvent(selectedDay, newEvent.title, user);
+                // if (selectedEvents[selectedDay] != null) {
+                //   selectedEvents[selectedDay]?.add(newEvent);
+                // } else {
+                //   selectedEvents[selectedDay] = [];
+                //   selectedEvents[selectedDay]?.add(newEvent);
+
+                // }
                 updateEventsToDB(user);
                 Navigator.pop(context);
                 selectedEventsNotifier.value = updatedEvents; 
                 _eventController.clear();
                 setState(() {});
-              });
+              
             }},
             style: TextButton.styleFrom(
               foregroundColor: Colors.white,
@@ -737,10 +737,17 @@ class CalendarStateO extends State<Calendar> {
   }
 
   @override
+  void didChangeDependencies(){
+    super.didChangeDependencies();
+    //waits for build function to complete and then calls back to call the condition checking function 
+    WidgetsBinding.instance.addPostFrameCallback((_){
+     getEventsFromDB();
+    });
+  
+  }
+
+  @override
   Widget build(BuildContext context) {
-   return ValueListenableBuilder<Map<DateTime, List<Event>>>(
-    valueListenable: selectedEventsNotifier,
-    builder: (context, events, child) {
     return Scaffold(
       drawer: const DrawMain(),
       appBar: AppBar(
@@ -982,6 +989,8 @@ class CalendarStateO extends State<Calendar> {
                         const SizedBox(height: 20),
                         const SizedBox(height: 20),
                         ..._getEventsfromDay(selectedDay).map(
+                          //This block of code will need to be re run if we are to have live updates, 
+                          //This is necessary for both the add and edit event functions 
                           (Event event) => Padding(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 16.0, vertical: 8.0),
@@ -1190,7 +1199,7 @@ class CalendarStateO extends State<Calendar> {
       floatingActionButton: const CustomFloatingButton(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
     );
-  });}
+  }
 
   // VoidCallback -> Signature of callbacks that have no arguments and return no data.
   Widget _buildLabelItem(String label, Color color) {
@@ -1215,6 +1224,49 @@ class CalendarStateO extends State<Calendar> {
       ],
     );
   }
+
+  Future<void> addSingleEvent(
+      DateTime date, String eventTitle, User user) async {
+    date = DateTime(date.year, date.month, date.day);
+
+    //if (!selectedEvents.containsKey(date)) return;
+    Event newEvent =  Event(
+                        title: eventTitle,
+                        color: const Color.fromARGB(0, 239, 252, 0));
+   
+
+    if (selectedEvents[date] == null) {
+      selectedEvents[date] = [];
+      selectedEvents[date]?.add(newEvent);
+      print("ADDING NEW EVENT \n");
+    } else{
+       selectedEvents[date]?.add(newEvent);
+        print("ADDING NEW EVENT \n");
+    }
+
+    QuerySnapshot querySnapshot = await _eventsCollectionRef
+        .where("date", isEqualTo: Timestamp.fromDate(date))
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      String docId = querySnapshot.docs.first.id;
+      List<String> updatedEvents =
+          selectedEvents[date]?.map((e) => e.title).toList() ?? [];
+      print("Here are the updated events $updatedEvents ");
+      // if (updatedEvents.isEmpty) {
+      //   // await _eventsCollectionRef
+      //   //     .doc(docId)
+      //   //     .delete(); // ❗ Ensure deletion happens
+      // } else {
+      await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
+      print("Updated document with new events \n");
+      // }
+    }
+
+    setState(() {});
+  }
+
+
 
   Future<void> deleteSingleEvent(
       DateTime date, String eventTitle, User user) async {
@@ -1249,16 +1301,7 @@ class CalendarStateO extends State<Calendar> {
     setState(() {});
   }
 
-   @override
-  void didChangeDependencies(){
-    super.didChangeDependencies();
-    //waits for build function to complete and then calls back to call the condition checking function 
-    WidgetsBinding.instance.addPostFrameCallback((_){
-      getEventsFromDB();
-      setState((){});
-    });
   
-  }
 
   void _editEventDate(BuildContext context, Event event) {
     final TextEditingController _editEventController =
