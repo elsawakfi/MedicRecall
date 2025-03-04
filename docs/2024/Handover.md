@@ -30,7 +30,7 @@
 ## 🚀 Installation & Setup
 This guide will walk you through setting up and running MedicRecall on your local machine.
 
-<b>🔗 Quick Links</b>
+**🔗 Quick Links**
 - [Prerequisites](#-prerequisites)
 - [Setup Guide](#️-setup-guide)
 
@@ -40,13 +40,13 @@ This guide will walk you through setting up and running MedicRecall on your loca
 
 ### 📌 Prerequisites
 Before you begin, make sure you have the following installed:
-- <b>Flutter SDK version 3.24.3</b> ([Flutter Install Guide](https://docs.flutter.dev/release/archive))
-  - Running <b>Dart v3.5.3</b> ([Dart Install Guide](https://dart.dev/get-dart))
-- <b>Firebase CLI</b> ([Firebase Setup Guide](https://firebase.google.com/docs/cli))
-- <b>Node.js</b> (Required for Firebase functions): 
+- **Flutter SDK version 3.24.3** ([Flutter Install Guide](https://docs.flutter.dev/release/archive))
+  - Running **Dart v3.5.3** ([Dart Install Guide](https://dart.dev/get-dart))
+- **Firebase CLI** ([Firebase Setup Guide](https://firebase.google.com/docs/cli))
+- **Node.js** (Required for Firebase functions): 
   - macOS: `brew install node`
   - Windows: `choco install nodejs`
-- <b>Chromedriver</b> (Required for local CI testing): 
+- **Chromedriver** (Required for local CI testing): 
   - macOS: `brew install chromedriver`
   - Windows: `choco install chromedriver`
 - Android Studio (For mobile development): ([Android Studio Install Guide](https://developer.android.com/studio/install))
@@ -56,6 +56,7 @@ Before you begin, make sure you have the following installed:
 > - `google-services.json` (Android)
 > - `GoogleService-Info.plist` (iOS/macOS)
 > Without these files, Firebase-related features will not function properly.
+<p align="right">(<a href="#contents">back to top</a>)</p>
 
 ### ⚙️ Setup Guide
 1. Clone the repository using either HTTPS or SSH:
@@ -74,19 +75,19 @@ Before you begin, make sure you have the following installed:
    ```
 3. Build the app:
   Run the appropriate command to build the app for your desired platform:
-   - <b>📱 Android:</b>
+   - **📱 Android:**
    ```sh 
    flutter build apk
    ```
-   - <b> 🍏 iOS: </b>
+   - **🍏 iOS:**
    ```sh
    flutter build ios --release --no-codesign
    ```
-   - <b> 💻 macOS: </b>
+   - **💻 macOS:**
    ```sh
    flutter create --platforms=macos && flutter build macos
    ```
-   - <b> 🌍 Web browser: </b>
+   - **🌍 Web browser:**
    ```sh
    flutter build web
    ```
@@ -112,7 +113,7 @@ This section provides an overview of the important files contained within the pr
 - [./flashcard](#-flashcard)
 
 ### 🏠 Root Directory
-The root directory contains essential files for <b>project setup, documentation, and configuration</b>.
+The root directory contains essential files for **project setup, documentation, and configuration**.
 ```
 2024-MedicRecall2
 ├── .github/         # GitHub files
@@ -122,7 +123,7 @@ The root directory contains essential files for <b>project setup, documentation,
 ```
 
 ### ⚙️ ./.github
-The `.github` directory houses our GitHub configurations, such as <b>Continuous Integration/ Deployment pipelines, issue templates, and pull request guidelines</b>.
+The `.github` directory houses our GitHub configurations, such as **Continuous Integration/ Deployment pipelines, issue templates, and pull request guidelines**.
 ```
 .github/
 ├── workflows/                       # CI/CD pipelines (GitHub Actions)
@@ -133,19 +134,21 @@ The `.github` directory houses our GitHub configurations, such as <b>Continuous 
 └── pull_request_template.md         # Standard PR guidelines
 ```
 
-<b> 📝 ./.github/ISSUE_TEMPLATE </b>
-This directory contains pre-defined issue templates that help </b>streamline issue reporting</b> and ensure consistency in bug reports and feature requests.
+**📝 ./.github/ISSUE_TEMPLATE**
+This directory contains pre-defined issue templates that help **streamline issue reporting** and ensure consistency in bug reports and feature requests.
 
 To keep things clear, we recommend maintaining two separate templates:
 - 🔹 Bug Report Template – For reporting software defects, crashes, or unexpected behavior.
 - 🔹 Feature Request Template – For suggesting new enhancements or functionalities.
 
-> <b>📌 Tip:</b> Well-defined issue templates improve collaboration by providing maintainers with all necessary details upfront.
+> **📌 Tip:** Well-defined issue templates improve collaboration by providing maintainers with all necessary details upfront.
 
 📖 More Info: [GitHub Issue Templates Guide](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/manually-creating-a-single-issue-template-for-your-repository).
 
+<p align="right">(<a href="#contents">back to top</a>)</p>
+
 ### 📱 ./flashcard
-The `flashcard/` directory contains the <b>main source code</b> for the app, which includes the Flutter source code, Firebase functions for the backend, and platform-specific configurations (Android, iOS, and Web).
+The `flashcard/` directory contains the **main source code** for the app, which includes the Flutter source code, Firebase functions for the backend, and platform-specific configurations (Android, iOS, and Web).
 ```
 flashcard/
 ├── integration_test/   # Contains integration tests for the entire app
@@ -159,14 +162,14 @@ flashcard/
 └── pubspec.yaml        # Flutter dependencies
 ```
 
-<b>📌 Key Components:</b>
+**📌 Key Components:**
 - ✅ `lib/screens/` – All UI screens and page layouts.
 - ✅ `lib/widgets/` – Modular, reusable UI components.
 - ✅ `lib/models/` – Data structures and app logic.
 - ✅ `lib/services/ `– API requests, Firebase interactions, and authentication handling.
 - ✅ `test/` & `integration_test/` – Unit and integration tests for app stability.
 
-> <b>💡 Best Practice:</b> Write clean, well-organized, and well-documented code to ensure scalability and maintainability.
+> **💡 Best Practice:** Write clean, well-organized, and well-documented code to ensure scalability and maintainability.
 >
 > <i>📖 We have included comments throughout the code to explain functionality, making it easier to understand and modify when needed.</i>
 <p align="right">(<a href="#contents">back to top</a>)</p>
