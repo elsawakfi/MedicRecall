@@ -146,6 +146,7 @@ class FullMockRulesState extends State<FullMockRules> {
               textAlign: TextAlign.center,
             ),
           )),
+    
           Center(
             child: 
             SizedBox(
@@ -167,11 +168,11 @@ class FullMockRulesState extends State<FullMockRules> {
               child: 
            Text.rich( 
               TextSpan(
-                text: 'Part 1: Ranking Questions (Q1-13).',
+                text: 'Part 1: Ranking Questions (Q1-29).',
                 style: TextStyle(fontSize: 21, decoration:TextDecoration.underline,),
                 children: <TextSpan>[
-                  TextSpan(text:' In this part you are presented with scenarios followed by a number of possible options. For each scenario you are required to rank each option in order from the most '
-                    'appropriate to the least appropriate given the circumstances described in the scenario. \n',
+                  TextSpan(text:' In this part you are presented with scenarios followed by a number of possible options. For each scenario select the 3 options which together are the most '  
+                    'appropriate to the least appropriate given the circumstances described. \n',
                     style: TextStyle(fontSize: 21,decoration:TextDecoration.none)),
                 ],),
             ),
@@ -183,7 +184,7 @@ class FullMockRulesState extends State<FullMockRules> {
               child: 
            Text.rich( 
               TextSpan(
-                text: 'Part 2: Rating Questions (Q14-25).',
+                text: 'Part 2: Multiple Choice Questions (Q30-50).',
                 style: TextStyle(fontSize: 21, decoration:TextDecoration.underline,),
                 children: <TextSpan>[
                   TextSpan(text:' In this part you are presented with scenarios followed by a number of possible options. For each scenario select the 3 options which together are the most '
@@ -198,7 +199,7 @@ class FullMockRulesState extends State<FullMockRules> {
               width: 800,
               child: 
           Text(
-              'The paper contains 25 questions in total. You have 45 minutes to complete the exam. This is to '
+              'The paper contains 50 questions in total. You have 90 minutes to complete the exam. This is to '
               'simulate the amount of time you will have to complete the exam on the day. \n',
               style: TextStyle(fontSize: 21),
             ),
