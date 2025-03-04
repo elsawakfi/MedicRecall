@@ -13,21 +13,30 @@ void main() {
       'question': 'Question 1 Text',
       'explanation': 'Explanation 1',
       'options': ['Option 1', 'Option 2', 'Option 3', 'Option 4', 'Option 5'],
-      'correct_answers': ['A', 'B', 'E', 'C', 'D'],
+      'correct_answers': ['A', 'B', 'C', 'D', 'E'],
       'questionNumber': 1,
       'type': "ranking"
     };
 
     Map<String, dynamic> question2 = {
+      'question': 'Question 1 Text',
+      'explanation': 'Explanation 1',
+      'options': ['Option 1', 'Option 2', 'Option 3', 'Option 4', 'Option 5'],
+      'correct_answers': ['E','B','A','D','C'],
+      'questionNumber': 2,
+      'type': "ranking"
+    };
+
+    Map<String, dynamic> question3 = {
       'question': 'Question 2 Text',
       'explanation': 'Explanation 2',
       'options': ['Option 1', 'Option 2', 'Option 3', 'Option 4', 'Option 5', 'Option 6', 'Option 7'],
       'correctAnswers': ['A', 'B', 'C'],
-      'questionNumber': 2,
+      'questionNumber': 3,
       'type': "multiple choice",
     };
     questions = [question1, question2];
-    rankingAnswers = [['A','B','C','D','E']];
+    rankingAnswers = [['A','B','C','D','E'], ['A','B','C','D','E']];
 
     rankWidget = MaterialApp(
         home: StatefulBuilder(builder: (context, setState) {
@@ -91,7 +100,7 @@ void main() {
 
     await tester.pumpWidget(rankWidget);
     await tester.pumpAndSettle();
-    expect(rankingAnswers, [['A','B','C','D','E']]);
+    expect(rankingAnswers[currentQuestion], ['A','B','C','D','E']);
     optionSize = tester.getSize(find.byKey(ValueKey('A')));
 
     // Move A to B: ['A','B','C','D','E'] -> ['B','A','C','D','E']
@@ -102,7 +111,7 @@ void main() {
     // Simulate dragging option 1 from its position to the position of option 2
     await tester.dragFrom(optionPosition, Offset(0, yOffset));
     await tester.pumpAndSettle();
-    expect(rankingAnswers, [['B','A','C','D','E']]);
+    expect(rankingAnswers[currentQuestion], ['B','A','C','D','E']);
 
     // Move C to E: ['B','A','C','D','E'] -> ['B','A','D','E','C']
     optionPosition = tester.getCenter(find.byKey(ValueKey('C')));
@@ -110,7 +119,7 @@ void main() {
     yOffset = targetPosition.dy - (optionPosition.dy - optionSize.height);
     await tester.dragFrom(optionPosition, Offset(0, yOffset));
     await tester.pumpAndSettle();
-    expect(rankingAnswers, [['B','A','D','E','C']]);
+    expect(rankingAnswers[currentQuestion], ['B','A','D','E','C']);
 
     // Move E to B: ['B','A','D','E','C'] -> ['E','B','A','D','C']
     optionPosition = tester.getCenter(find.byKey(ValueKey('E')));
@@ -118,7 +127,9 @@ void main() {
     yOffset = targetPosition.dy - (optionPosition.dy - optionSize.height);
     await tester.dragFrom(optionPosition, Offset(0, yOffset));
     await tester.pumpAndSettle();
-    expect(rankingAnswers, [['E','B','A','D','C']]);
+    expect(rankingAnswers[currentQuestion], ['E','B','A','D','C']);
 
+    // Ensure it hasn't changed the second question's order
+    expect(rankingAnswers, [['E','B','A','D','C'],['A','B','C','D','E']]);
   });
 }
