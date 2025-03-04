@@ -9,9 +9,9 @@ import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flashcard_x/utils/authentication.dart';
 import 'package:flashcard_x/utils/page_transition.dart';
 import 'package:flutter/material.dart';
-
 import '../screens/calendar_screen.dart';
 import '../screens/flashcard_editor_screen.dart';
+import 'package:flashcard_x/screens/fullmock_landing.dart';
 
 class DrawMain extends StatelessWidget {
   const DrawMain({super.key});
@@ -113,6 +113,17 @@ class DrawMain extends StatelessWidget {
               Navigator.push(
                 context,
                 MoveRightRoute(page: const MiniMockLanding()),
+              );
+            }),
+         ListTile(
+            key: const ValueKey('Full Mocks'),
+            leading: const Icon(Icons.assignment_outlined),
+            title: const Text('Full Mocks'),
+
+            onTap: () {
+              Navigator.push(
+                context,
+                MoveRightRoute(page: const FullMockLanding()),
               );
             }),
         /*
