@@ -33,8 +33,7 @@ class FullMockRulesState extends State<FullMockRules> {
                   Container(
                     margin: const EdgeInsets.only(left: 32),
                     padding: const EdgeInsets.all(8.0),
-                    child: const Text('Mini-Mock Exam 1',
-                    
+                    child: const Text('Full Mock Exam 1',
                     ),
                   ),
                 ],
@@ -130,7 +129,7 @@ class FullMockRulesState extends State<FullMockRules> {
         children: [
           Center(
             child: const Text(
-              'MedicRecall Mini-Mock 1 Exam Instructions: \n',
+              'MedicRecall Full Mock 1 Exam Instructions: \n',
               style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
             ),
           ),

@@ -13,6 +13,7 @@ import 'package:flashcard_x/screens/minimock_landing.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'feedback_screen.dart';
+import 'fullmock_landing.dart';
 import 'landing_service.dart';
 import 'mark_scheme.dart';
 import 'package:flashcard_x/screens/settings_screen.dart' as setting;
@@ -471,7 +472,7 @@ class LandingState extends State<Landing> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => const FullMockRules(),
+                                    builder: (context) => const FullMockLanding(),
                                   ),
                                 );
                                 },

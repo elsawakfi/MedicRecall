@@ -91,11 +91,7 @@ class FullMockLandingState extends State<FullMockLanding> {
                     ? () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => FullMockLanding(
-                          
-                          // title: 'Full Mock 1',
-                          // nextPage: const FullMockRules(),
-                        ),
+                        builder: (context) => const FullMockRules()
                       ),
                     );
                   }
