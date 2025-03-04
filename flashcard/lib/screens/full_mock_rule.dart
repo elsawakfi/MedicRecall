@@ -199,7 +199,7 @@ class FullMockRulesState extends State<FullMockRules> {
               width: 800,
               child: 
           Text(
-              'The paper contains 50 questions in total. You have 90 minutes to complete the exam. This is to '
+              'The paper contains 50 questions in total. You have 95 minutes to complete the exam. This is to '
               'simulate the amount of time you will have to complete the exam on the day. \n',
               style: TextStyle(fontSize: 21),
             ),

@@ -24,6 +24,6 @@ class FullMockExam extends MiniMockExam {
       title: "Full Mock Exam",
       questionDirectory: "full-mock-1",
       answerDirectory: "full-mock-1-answers",
-      time: 3600,
+      time: 5700,
   );
 } 
