@@ -2,6 +2,11 @@
 
 ## Contents
 - [Project Overview](#project-overview)
+- [Repository Details](#repository-details)
+- [Installation & Setup](#installation--setup)
+- [Architecture Diagram](#architecture-diagram)
+- [Project Structure](#project-structure)
+- [Testing & Debugging](#testing--debugging)
 
 ## Project Overview
 - **Project Name:** MedicRecall
@@ -20,6 +25,14 @@
   - Firebase access is managed via Firebase Console (Google Cloud IAM roles required).
 
 ## Installation & Setup
+Quick Links
+- [Prerequisites](#prerequisites)
+- [Setup Guide](#setup-guide)
+
+> [!WARNING]
+> We highly recommend using the specified Flutter, Dart, and Firebase versions mentioned below. 
+> Using different versions may lead to compatibility issues. Additionally, ensure that all dependencies are properly installed before running the application.
+
 ### Prerequisites
 - Install - Flutter SDK version 3.24.3 ([Flutter Install Guide](https://docs.flutter.dev/release/archive))
   - Running Dart v3.5.3 ([Dart Install Guide](https://dart.dev/get-dart))
@@ -28,14 +41,17 @@
 - Chromedriver (for local CI testing): `brew install chromedriver` (Mac) / `choco install chromedriver` (Windows) 
 - Android Studio (For mobile development): ([Android Studio Install Guide](https://developer.android.com/studio/install))
 
-### Setup Steps
+[!NOTE]
+Ensure you have set up Firebase correctly by adding the ``google-services.json`` (Android) or ``GoogleService-Info.plist`` (iOS/macOS) files in the respective directories. Without these files, Firebase-related features will not work.
+
+### Setup Guide
 1. Clone the repository via:
    ```sh
-   git clone https://github.com/spe-uob/2024-MedicRecall2.git
+   git clone https://github.com/spe-uob/2024-MedicRecall2.git #https
    ``` 
    or 
    ```sh
-   git clone git@github.com:spe-uob/2024-MedicRecall2.git
+   git clone git@github.com:spe-uob/2024-MedicRecall2.git #ssh
    ```
 2. Install dependencies:
    ```sh
