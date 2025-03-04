@@ -253,14 +253,11 @@ class CalendarStateO extends State<Calendar> {
         return;
       }
 
-      String id = u.docs.last.id;
-      print("Found user document with ID: $id");
-      
+      String id = u.docs.last.id;      
       _eventsCollectionRef =
           FirebaseFirestore.instance.collection('users/$id/events');
 
       var snapshots = await _eventsCollectionRef.get();
-      print("Found ${snapshots.docs.length} events in database");
 
       for (var doc in snapshots.docs) {
         var data = doc.data() as Map<String, dynamic>;
@@ -612,21 +609,13 @@ class CalendarStateO extends State<Calendar> {
     await getUser();
     await getTestDay();
     if (testDay != null) {
-      print("Test day is set to: $testDay");
-      
       // First add Test Day event
       selectedEvents[testDay] = [
         Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94))
       ];
-      print("Added Test Day event");
 
-      // Then load events from database
-      await getEventsFromDB();
-      print("Loaded events from DB: ${selectedEvents.length} days have events");
-
-      // Generate study sessions
-      await generateStudySessions(user);
-      print("Generated study sessions");
+      await getEventsFromDB(); // Then load events from database
+      await generateStudySessions(user); // Generate study sessions
 
       setState(() {});
     } else {
