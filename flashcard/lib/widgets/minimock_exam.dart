@@ -340,8 +340,12 @@ class MiniMockExamState extends State<MiniMockExam> {
 
                 // If the question is a ranking question, display a reorderable list of options
                 if (questions[currentQuestion]['type'] == "ranking") ...[
+                  // Row(children: [
+
+                    const SizedBox(width: 16),
                   Container(
                     height:40,
+                    
                   child: ListView.builder(scrollDirection: Axis.horizontal,
                   itemCount: rankingAnswers[currentQuestion].length,
                   itemBuilder: (context, index){
@@ -367,9 +371,10 @@ class MiniMockExamState extends State<MiniMockExam> {
                         style: TextStyle(
                           color: Color.fromARGB(255, 98, 86, 139),
                           fontSize: 20,
-                          fontWeight: FontWeight.bold,),),
+                          fontWeight: FontWeight.w500,),),
                     );
                   },),),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: ReorderableListView(
                       buildDefaultDragHandles: false,
@@ -381,7 +386,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                       },
                       onReorder: (oldIndex, newIndex) {
                         setState(() {
-                          if(newIndex > oldIndex) newIndex --; // Adjust the list based on movement of item
+                          // if(newIndex > oldIndex) newIndex --; // Adjust the list based on movement of item
                           // Update position of option in answer list
                           final ranking = rankingAnswers[currentQuestion].removeAt(oldIndex);
                           rankingAnswers[currentQuestion].insert(newIndex, ranking);
@@ -402,15 +407,17 @@ class MiniMockExamState extends State<MiniMockExam> {
                               elevation: 3,
                               color: Color.fromARGB(255, 235, 230, 239),
                                 child: ListTile(
-                                  title: Text('${optionIndex+1}:   $optionLetter. $option', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 20)),
+                                  title: Text('  $optionLetter. $option', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 20)),
                                   trailing: Icon(Icons.drag_handle , color: Color.fromARGB(255, 98, 86, 139), size: 30),
                                 )
                             )
                         );
                       }).toList(),
                     ),
-                  )
+                  ),
                 ]
+                // )
+                // ]
                 // If the question is a multiple choice question, display checkboxes
                 else if(questions[currentQuestion]['type'] == "multiple choice") ...[
                   //Line below takes the result of the map() and spreads its widgets into the children of Column
