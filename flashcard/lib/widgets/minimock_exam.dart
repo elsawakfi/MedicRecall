@@ -340,6 +340,36 @@ class MiniMockExamState extends State<MiniMockExam> {
 
                 // If the question is a ranking question, display a reorderable list of options
                 if (questions[currentQuestion]['type'] == "ranking") ...[
+                  Container(
+                    height:40,
+                  child: ListView.builder(scrollDirection: Axis.horizontal,
+                  itemCount: rankingAnswers[currentQuestion].length,
+                  itemBuilder: (context, index){
+                    return Container(
+                      width:40,
+                      height: 40,
+                      alignment: Alignment.center,
+                      margin: EdgeInsets.symmetric(
+                        horizontal: 4),
+                        decoration: BoxDecoration(
+                          color: Color.fromARGB(255, 235, 230, 239),
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              spreadRadius: 0,
+                              blurRadius: 5,
+                              offset: const Offset(0, 3), // changes position of shadow
+                            ),
+                          ],
+                        ),
+                        child: Text('${index + 1}',
+                        style: TextStyle(
+                          color: Color.fromARGB(255, 98, 86, 139),
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,),),
+                    );
+                  },),),
                   Expanded(
                     child: ReorderableListView(
                       buildDefaultDragHandles: false,
