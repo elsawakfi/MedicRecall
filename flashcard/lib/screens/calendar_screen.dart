@@ -288,10 +288,10 @@ class CalendarStateO extends State<Calendar> {
   Color _getEventColor(String title)  {
     List <String> flashcards = [
       "Team working",
-      "Effective Communication",
+      "Effective communication",
       "Acting within your remit",
       "Patient focus",
-      "Commitment to profesionalism",
+      "Commitment to professionalism",
       "Coping with pressure",
       "Confidentiality"
     ];
@@ -360,9 +360,6 @@ class CalendarStateO extends State<Calendar> {
     if (title.contains('test day')) {
       return "test_day";
     }
-
-
-    
     // If it's not one of the 5 main events, show "feature not available"
     return "unknown";
   }
@@ -566,13 +563,23 @@ class CalendarStateO extends State<Calendar> {
     await getUser();
     await getTestDay();
     if (testDay != null) {
+      await getEventsFromDB(); // Then load events from database
+      if (selectedEvents.isEmpty){
+          await generateStudySessions(user); // Generate study sessions
+      }
+      
       // First add Test Day event
       selectedEvents[testDay] = [
         Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94))
       ];
 
-      await getEventsFromDB(); // Then load events from database
-      await generateStudySessions(user); // Generate study sessions
+      
+
+      //If the user already selected their resources, generate study session should not be called 
+      //it should only be called the first time they choose their test day and resources 
+
+      
+      
 
 
       setState(() {});
