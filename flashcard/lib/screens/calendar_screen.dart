@@ -5,6 +5,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart' as launcher;
 import 'button_screen.dart';
+import 'dashboard_screen.dart';
 
 // Internal imports
 import 'landing_screen.dart';
@@ -287,14 +288,28 @@ class CalendarStateO extends State<Calendar> {
     }
   }
 
-  Color _getEventColor(String title) {
+  Color _getEventColor(String title)  {
+    List <String> flashcards = [
+      "Team working",
+      "Effective Communication",
+      "Acting within your remit",
+      "Patient focus",
+      "Commitment to profesionalism",
+      "Coping with pressure",
+      "Confidentiality"
+    ];
     if (title == "Test Day") return const Color.fromARGB(255, 255, 89, 94);
     if (title.contains("Mini Mock")) return StudySessionManager.kMiniMockColor;
     if (title.contains("Full-sized Mock")) return StudySessionManager.kFullMockColor;
     if (title.contains("Official Paper")) return StudySessionManager.kOfficialPaperColor;
-    //need to add code that checks if the title is taken from the flashcard decks, if it is, set 
-    //it to yellow otheriwse, it must be a custom event so give we give it a custom colour
-    return StudySessionManager.kFlashcardColor;
+    
+    
+    for (String flashcard in flashcards){
+        if(title.contains(flashcard)) return StudySessionManager.kFlashcardColor;
+      }
+    
+  
+    return Color.fromARGB(200, 0, 0, 100);
   }
 
   //When creating a new revision plan we update the database with the revision topics and dates in the calendar
@@ -348,6 +363,8 @@ class CalendarStateO extends State<Calendar> {
     if (title.contains('test day')) {
       return "test_day";
     }
+
+
     
     // If it's not one of the 5 main events, show "feature not available"
     return "unknown";
@@ -746,6 +763,9 @@ class CalendarStateO extends State<Calendar> {
                   ),
                   SizedBox(height: 30),
                   _buildLabelItem(
+                      'Custom Events', Color.fromARGB(200, 0, 0, 100)),
+                  SizedBox(height: 30),
+                  _buildLabelItem(
                       'Mini Mock', StudySessionManager.kMiniMockColor),
                   SizedBox(height: 30),
                   _buildLabelItem(
@@ -759,6 +779,7 @@ class CalendarStateO extends State<Calendar> {
                   SizedBox(height: 30),
                   _buildLabelItem(
                       'Test Day', const Color.fromARGB(255, 255, 89, 94)),
+                  
                 ],
               ),
             ),
@@ -837,7 +858,7 @@ class CalendarStateO extends State<Calendar> {
                               ),
                               // Custom marker settings
                               markersMaxCount:
-                                  5, // Show up to 5 markers per day
+                                  6, // Show up to 5 markers per day
                               markersAnchor: 1.0,
                               cellPadding: EdgeInsets.all(8.0),
                               cellMargin: EdgeInsets.all(4.0),
@@ -1165,14 +1186,12 @@ class CalendarStateO extends State<Calendar> {
   Future<void> addSingleEvent(
       DateTime date, String eventTitle, User user) async {
     date = DateTime(date.year, date.month, date.day);
-    print("This is our date $date \n");
-
-
+    
     //The delete single event function updates the UI in real time so I just copied the structure of that function 
     Event newEvent =  Event(
                         title: eventTitle,
-                        color: const Color.fromARGB(0, 239, 252, 0));
-    print("And this is our event $newEvent");
+                        color: _getEventColor(eventTitle));
+    
    
     if (selectedEvents[date] == null) {
       selectedEvents[date] = [];
@@ -1196,7 +1215,7 @@ class CalendarStateO extends State<Calendar> {
     await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
     
   } else {
-    print("No document found for this date, creating a new one...");
+    
 
     // If no document exists, create a new one
     DocumentReference newDoc = await _eventsCollectionRef.add({
