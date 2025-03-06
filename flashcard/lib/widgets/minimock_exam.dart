@@ -342,6 +342,8 @@ class MiniMockExamState extends State<MiniMockExam> {
                 if (questions[currentQuestion]['type'] == "ranking") ...[
                   
                 //  Row(
+                // Row(crossAxisAlignment: CrossAxisAlignment.start,
+                // children: [
                     Column( 
                       
                     children: List.generate(rankingAnswers[ currentQuestion].length, (index) {
@@ -415,6 +417,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                     ),
                   ),
                 ]
+                
                 
                 
                 // If the question is a multiple choice question, display checkboxes
