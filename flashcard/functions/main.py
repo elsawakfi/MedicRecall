@@ -184,14 +184,22 @@ def gmail_send_message(service, sender, receiver, subject, body):
 def update_exam_score(event: Event[Change[DocumentSnapshot]]) -> None:
     db = firestore.Client()
     """Triggered when an exam answer is updated and updates the median score."""
-    after = event.data.after.get("score")
-    before = event.data.before.get("score")
+
+    # Check if the doc has only just been created or deleted
+    try:
+        after = (event.data.after.get("score") if event.data.after is not None else None)
+    except:
+        after = None
+    try:
+        before = (event.data.before.get("score") if event.data.before is not None else None)
+    except:
+        before = None
 
     # Only proceed if the score was changed
-    if before == after or after is None:
+    if before == after:
         return
 
-    mock_id = event.params["mock"]
+    mock_id = event.params["mock"].replace("-answers", "")
     stats_ref = db.collection("mini-mock-stats").document(mock_id)
 
     # Fetch the current scores array from the document
@@ -203,7 +211,7 @@ def update_exam_score(event: Event[Change[DocumentSnapshot]]) -> None:
         scores = []
 
     # Remove the old score if it exists
-    if before in scores:
+    if before in scores and before is not None:
         scores.remove(before)
 
     # Add the new score
