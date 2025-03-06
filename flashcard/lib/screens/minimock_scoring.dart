@@ -107,7 +107,7 @@ class MiniMockScoringState extends State<MiniMockScoring> {
     var id = snapshot.docs.last.id;
     DocumentSnapshot<
         Map<String, dynamic>> userAnswers = await FirebaseFirestore.instance
-        .collection('users').doc(id).collection('Exam answers').doc(
+        .collection('users').doc(id).collection('examAnswers').doc(
         widget.answerDirectory).get();
     Map<String, dynamic> userAnswerMap = userAnswers.get('answers');
     return userAnswerMap;
@@ -189,23 +189,15 @@ Future<void> fetchAverageScore() async {
     QuerySnapshot u =
     await users.where("userID", isEqualTo: user.uid).get();
     var id = u.docs.last.id;
+    DocumentReference userDocRef = FirebaseFirestore.instance.collection(
+        'users').doc(id);
+    DocumentReference scoreDocRef = userDocRef.collection(
+        'examAnswers').doc(widget.answerDirectory);
 
-    try {
-      http.Response response = await http.post(
-        Uri.parse('https://us-central1-flashcard-6edc2.cloudfunctions.net/update_exam_score'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          "userId": id,
-          "score": score,
-          "directory": widget.questionDirectory
-        }),
-      );
-      print(response.body);
-    }catch(er){
-      print(er);
-    }
+    // Add user's score to user score field
+    await scoreDocRef.update({
+      'score': score,
+    });
   }
 
   @override
