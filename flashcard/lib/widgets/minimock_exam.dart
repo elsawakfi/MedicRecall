@@ -4,6 +4,7 @@ import 'package:flashcard_x/screens/minimock_scoring.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
 import '../screens/minimock_review.dart';
+import '../screens/fullmock_review.dart';
 import '../utils/timer.dart';
 import 'drawer_widget.dart';
 import 'minimock_help_button.dart';
@@ -509,8 +510,8 @@ class MiniMockExamState extends State<MiniMockExam> {
                           int? newIndex = await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => MiniMockReview(
-                                miniMockWidget: this,
+                              builder: (context) => FullMockReview(
+                                fullMockWidget: this,
                                 rankingLength: rankingAnswers.length,
                                 multiChoiceLength: multiChoiceAnswers.length,
                                 flaggedQuestions: flaggedQuestions,

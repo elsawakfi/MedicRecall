@@ -5,8 +5,6 @@ import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/drawer_widget.dart';
-import 'package:flashcard_x/screens/fullmock_landing.dart'; // Import the new landing page
-
 import 'fullmock_rules_page.dart';
 
 class FullMockLanding extends StatefulWidget {

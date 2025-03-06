@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/drawer_widget.dart';
-import 'package:flashcard_x/screens/minimock_exams.dart';
+// import 'package:flashcard_x/screens/minimock_exams.dart';
 
 import '../utils/timer.dart';
 import '../widgets/minimock_help_button.dart';

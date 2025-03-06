@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/drawer_widget.dart';
-import 'package:flashcard_x/screens/minimock_exams.dart';
+// import 'package:flashcard_x/screens/minimock_exams.dart';
 
 import '../utils/timer.dart';
 import '../widgets/minimock_help_button.dart';
@@ -8,14 +8,14 @@ import '../widgets/minimock_help_button.dart';
 class FullMockReview extends StatefulWidget {
   final int rankingLength;
   final int multiChoiceLength;
-  final dynamic miniMockWidget;
+  final dynamic fullMockWidget;
   final List<dynamic> flaggedQuestions; 
   final String displayTime;
   final int remainingSeconds;
 
   const FullMockReview({
     super.key,
-    required this.miniMockWidget,
+    required this.fullMockWidget,
     required this.rankingLength,
     required this.multiChoiceLength,
     required this.flaggedQuestions,
@@ -277,12 +277,12 @@ Widget build(BuildContext context) {
                                   height: 50, // Set the desired height
                                   child: ElevatedButton.icon(
                                     onPressed: () {
-                                      _returnToFullMock(context, index+13);
+                                      _returnToFullMock(context, index+25);
                                     },
-                                    icon: Visibility( visible: widget.flaggedQuestions[index+13],
+                                    icon: Visibility( visible: widget.flaggedQuestions[index+25],
                                       child: Icon(Icons.flag, color: Colors.black),),
                                     label: Text(
-                                      '${index + 14}',
+                                      '${index + 26}',
                                       style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
                                       fontSize: 20),
                                     ),
@@ -324,12 +324,12 @@ Widget build(BuildContext context) {
                                   height: 50, // Set the desired height
                                   child: ElevatedButton.icon(
                                     onPressed: () {
-                                      _returnToFullMock(context, index+24);
+                                      _returnToFullMock(context, index+50);
                                     },
-                                    icon: Visibility( visible: widget.flaggedQuestions[index+24],
+                                    icon: Visibility( visible: widget.flaggedQuestions[index+50],
                                       child: Icon(Icons.flag, color: Colors.black),),
                                     label: Text(
-                                      '${index + 25}',
+                                      '${index + 51}',
                                       style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
                                       fontSize: 20),
                                     ),
@@ -386,7 +386,7 @@ Widget build(BuildContext context) {
                     child:
                       ElevatedButton.icon(
                         onPressed: () {
-                          widget.miniMockWidget.examEnd();
+                          widget.fullMockWidget.examEnd();
                         },
                         icon: Icon(Icons.check_outlined, color: Theme.of(context).textTheme.bodyMedium?.color),
                         label: Text('Complete Exam',  style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 16)),
