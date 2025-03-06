@@ -5,7 +5,7 @@ import 'package:flashcard_x/screens/minimock_exams.dart';
 import '../utils/timer.dart';
 import '../widgets/minimock_help_button.dart';
 
-class MiniMockReview extends StatefulWidget {
+class FullMockReview extends StatefulWidget {
   final int rankingLength;
   final int multiChoiceLength;
   final dynamic miniMockWidget;
@@ -13,7 +13,7 @@ class MiniMockReview extends StatefulWidget {
   final String displayTime;
   final int remainingSeconds;
 
-  const MiniMockReview({
+  const FullMockReview({
     super.key,
     required this.miniMockWidget,
     required this.rankingLength,
@@ -24,10 +24,10 @@ class MiniMockReview extends StatefulWidget {
   });
 
   @override
-  State<MiniMockReview> createState() => MiniMockReviewState();
+  State<FullMockReview> createState() => FullMockReviewState();
 }
 
-class MiniMockReviewState extends State<MiniMockReview> {
+class FullMockReviewState extends State<FullMockReview> {
   List<bool> _isOpen = [false, false];
   late int questionLength;
 
@@ -60,7 +60,7 @@ class MiniMockReviewState extends State<MiniMockReview> {
   }
 
   // Function to pop this screen and return the value (reduces dry code)
-  void _returnToMiniMock(BuildContext context, int questionNumber){
+  void _returnToFullMock(BuildContext context, int questionNumber){
     Navigator.pop(
         context,
         questionNumber // As the question list is an array (starts at index 0), 2 = Q3
@@ -73,7 +73,7 @@ Widget build(BuildContext context) {
       canPop: false,
       onPopInvokedWithResult: (didPop, result){
     if (!didPop){
-      _returnToMiniMock(context, questionLength-1);
+      _returnToFullMock(context, questionLength-1);
     }
   },
     child:Scaffold(
@@ -188,7 +188,7 @@ Widget build(BuildContext context) {
                                   height: 50, // Set the desired height
                                   child: ElevatedButton.icon(
                                     onPressed: () {
-                                      _returnToMiniMock(context, index);
+                                      _returnToFullMock(context, index);
                                     },
                                     icon: Visibility( visible: widget.flaggedQuestions[index],
                                       child: Icon(Icons.flag, color: Colors.black),),
@@ -211,7 +211,7 @@ Widget build(BuildContext context) {
                                   height: 50, // Set the desired height
                                   child: ElevatedButton.icon(
                                     onPressed: () {
-                                      _returnToMiniMock(context, index+5);
+                                      _returnToFullMock(context, index+5);
                                     },
                                     icon: Visibility( visible: widget.flaggedQuestions[index+5],
                                       child: Icon(Icons.flag, color: Colors.black),),
@@ -234,7 +234,7 @@ Widget build(BuildContext context) {
                                   height: 50, // Set the desired height
                                   child: ElevatedButton.icon(
                                     onPressed: () {
-                                      _returnToMiniMock(context, index+10);
+                                      _returnToFullMock(context, index+10);
                                     },
                                     icon: Visibility( visible: widget.flaggedQuestions[index+10],
                                       child: Icon(Icons.flag, color: Colors.black),),
@@ -277,7 +277,7 @@ Widget build(BuildContext context) {
                                   height: 50, // Set the desired height
                                   child: ElevatedButton.icon(
                                     onPressed: () {
-                                      _returnToMiniMock(context, index+13);
+                                      _returnToFullMock(context, index+13);
                                     },
                                     icon: Visibility( visible: widget.flaggedQuestions[index+13],
                                       child: Icon(Icons.flag, color: Colors.black),),
@@ -300,7 +300,7 @@ Widget build(BuildContext context) {
                                   height: 50, // Set the desired height
                                   child: ElevatedButton.icon(
                                     onPressed: () {
-                                      _returnToMiniMock(context, index+19);
+                                      _returnToFullMock(context, index+19);
                                     },
           
                                     icon: Visibility( visible: widget.flaggedQuestions[index+19],
@@ -324,7 +324,7 @@ Widget build(BuildContext context) {
                                   height: 50, // Set the desired height
                                   child: ElevatedButton.icon(
                                     onPressed: () {
-                                      _returnToMiniMock(context, index+24);
+                                      _returnToFullMock(context, index+24);
                                     },
                                     icon: Visibility( visible: widget.flaggedQuestions[index+24],
                                       child: Icon(Icons.flag, color: Colors.black),),
