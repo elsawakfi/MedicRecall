@@ -340,21 +340,16 @@ class MiniMockExamState extends State<MiniMockExam> {
 
                 // If the question is a ranking question, display a reorderable list of options
                 if (questions[currentQuestion]['type'] == "ranking") ...[
-                  // Row(children: [
-
-                    const SizedBox(width: 16),
-                  Container(
-                    height:40,
-                    
-                  child: ListView.builder(scrollDirection: Axis.horizontal,
-                  itemCount: rankingAnswers[currentQuestion].length,
-                  itemBuilder: (context, index){
-                    return Container(
-                      width:40,
-                      height: 40,
-                      alignment: Alignment.center,
-                      margin: EdgeInsets.symmetric(
-                        horizontal: 4),
+                  
+                //  Row(
+                    Column( 
+                      
+                    children: List.generate(rankingAnswers[ currentQuestion].length, (index) {
+                      return Container(
+                        width: 40,
+                        height: 40,
+                        alignment: Alignment.center,
+                        margin: EdgeInsets.symmetric(horizontal: 4),
                         decoration: BoxDecoration(
                           color: Color.fromARGB(255, 235, 230, 239),
                           borderRadius: BorderRadius.circular(8),
@@ -368,12 +363,16 @@ class MiniMockExamState extends State<MiniMockExam> {
                           ],
                         ),
                         child: Text('${index + 1}',
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 98, 86, 139),
-                          fontSize: 20,
-                          fontWeight: FontWeight.w500,),),
-                    );
-                  },),),
+                          style: TextStyle(
+                            color: Color.fromARGB(255, 98, 86, 139),
+                            fontSize: 20,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      );
+                    }),
+                    ),
+                 
                   const SizedBox(width: 16),
                   Expanded(
                     child: ReorderableListView(
@@ -407,7 +406,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                               elevation: 3,
                               color: Color.fromARGB(255, 235, 230, 239),
                                 child: ListTile(
-                                  title: Text('  $optionLetter. $option', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 20)),
+                                  title: Text('   $optionLetter. $option', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 20)),
                                   trailing: Icon(Icons.drag_handle , color: Color.fromARGB(255, 98, 86, 139), size: 30),
                                 )
                             )
@@ -416,8 +415,8 @@ class MiniMockExamState extends State<MiniMockExam> {
                     ),
                   ),
                 ]
-                // )
-                // ]
+                
+                
                 // If the question is a multiple choice question, display checkboxes
                 else if(questions[currentQuestion]['type'] == "multiple choice") ...[
                   //Line below takes the result of the map() and spreads its widgets into the children of Column
