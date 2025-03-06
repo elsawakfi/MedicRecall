@@ -1,11 +1,8 @@
 import 'dart:core';
-import 'package:flashcard_x/screens/full_mock_rule.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/calendar_screen.dart';
 import 'package:flashcard_x/screens/dashboard_screen.dart';
-import 'package:flashcard_x/screens/study_session_manager.dart';
-import 'package:intl/intl.dart';
 import 'package:flashcard_x/screens/faq.dart';
 import 'package:flashcard_x/screens/flashcard_editor_screen.dart';
 import 'package:flashcard_x/screens/button_screen.dart';
@@ -26,11 +23,9 @@ import 'package:flashcard_x/screens/settings_screen.dart' as setting;
 
 /* TO DO
 Build the new landing page that comes after logging in and before the main dashboard.
-
 Do i need to pass the user's name over?
-
-
 */
+
 class Landing extends StatefulWidget {
   static String id = 'landing';
 
