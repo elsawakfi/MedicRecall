@@ -148,10 +148,14 @@ Widget build(BuildContext context) {
             maxWidth: maxScreenWidth > maxPreferredWidth ? maxScreenWidth : maxPreferredWidth,
           ),
           padding: EdgeInsets.all(16),
-          child: Column(
+             
+            child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Spacer(),
+            Spacer(),
+            Expanded(child: 
+            SingleChildScrollView(
+              child:
             ExpansionPanelList(
               elevation: 1,
               dividerColor: Colors.transparent,
@@ -363,7 +367,7 @@ Widget build(BuildContext context) {
                             SizedBox(height: 10),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(1, (index) => Padding(
+                              children: List.generate(5, (index) => Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                                 child: SizedBox(
                                   width: 100, // Set the desired width
@@ -413,7 +417,7 @@ Widget build(BuildContext context) {
                       isExpanded: _isOpen[1],
                     ),
                   ],
-                ),
+                ))),
               Spacer(),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
