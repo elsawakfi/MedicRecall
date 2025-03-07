@@ -70,27 +70,69 @@ class StudySessionManager {
     }
   }
 
+  /// Helper function to check if a date falls on an excluded day
+  Future<bool> _isExcludedDay(DateTime date, String userId) async {
+    try {
+      QuerySnapshot querySnapshot = await _userCollectionRef.where("userID", isEqualTo: userId).get();
+      if (querySnapshot.docs.isEmpty) return false;
+
+      var userData = querySnapshot.docs.last.data() as Map<String, dynamic>;
+      if (!userData.containsKey('excludedDays')) return false;
+
+      List<String> excludedDays = List<String>.from(userData['excludedDays']);
+      String dayName = _getDayName(date.weekday);
+      return excludedDays.contains(dayName);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error checking excluded day: $e');
+      }
+      return false;
+    }
+  }
+
+  /// Helper function to convert weekday number to name
+  String _getDayName(int weekday) {
+    switch (weekday) {
+      case 1: return "Monday";
+      case 2: return "Tuesday";
+      case 3: return "Wednesday";
+      case 4: return "Thursday";
+      case 5: return "Friday";
+      case 6: return "Saturday";
+      case 7: return "Sunday";
+      default: return "";
+    }
+  }
+
   /// Helper function to find the nearest available date for an event
-  DateTime findNearestFreeDate(
+  Future<DateTime> findNearestFreeDate(
       DateTime targetDate,
       int maxDaysToMove,
       DateTime testDay,
       DateTime today,
-      Map<DateTime, List<Event>> generatedEvents) {
-    if (generatedEvents[targetDate] == null) return targetDate;
+      Map<DateTime, List<Event>> generatedEvents,
+      String userId) async {
+    // First check if the target date is free and not excluded
+    if (generatedEvents[targetDate] == null && !await _isExcludedDay(targetDate, userId)) {
+      return targetDate;
+    }
 
     for (int i = 1; i <= maxDaysToMove; i++) {
       // Try future date first
       DateTime futureDate = DateTime(
           targetDate.year, targetDate.month, targetDate.day + i, 0, 0, 0, 0);
-      if (generatedEvents[futureDate] == null && futureDate.isBefore(testDay)) {
+      if (futureDate.isBefore(testDay) && 
+          generatedEvents[futureDate] == null && 
+          !await _isExcludedDay(futureDate, userId)) {
         return futureDate;
       }
 
       // Then try past date
       DateTime pastDate = DateTime(
           targetDate.year, targetDate.month, targetDate.day - i, 0, 0, 0, 0);
-      if (generatedEvents[pastDate] == null && pastDate.isAfter(today)) {
+      if (pastDate.isAfter(today) && 
+          generatedEvents[pastDate] == null && 
+          !await _isExcludedDay(pastDate, userId)) {
         return pastDate;
       }
     }
@@ -184,19 +226,25 @@ class StudySessionManager {
   /// Schedule mini-mock events
   Future<void> _scheduleMiniMocks(DateTime firstStudyDay, DateTime testDay,
       int daysUntilTest, Map<DateTime, List<Event>> generatedEvents) async {
-    // First mini mock
-    DateTime firstMockDate = DateTime(firstStudyDay.year,firstStudyDay.month,firstStudyDay.day,0,0,0,0);
-    if (generatedEvents[firstMockDate] == null) {
+    final userId = auth.currentUser!.uid;
+    
+    // First mini mock - always on first study day or next available day
+    DateTime firstMockDate = DateTime(firstStudyDay.year, firstStudyDay.month, firstStudyDay.day, 0, 0, 0, 0);
+    firstMockDate = await findNearestFreeDate(firstMockDate, 7, testDay, firstStudyDay, generatedEvents, userId);
+    
+    if (firstMockDate.isBefore(testDay)) {
       generatedEvents[firstMockDate] = [
         Event(title: "First Mini Mock", color: kMiniMockColor)
       ];
     }
 
-    // Second mini mock halfway
+    // Second mini mock halfway through study period
     if (daysUntilTest > 3) {
       DateTime halfwayDate = firstStudyDay.add(Duration(days: daysUntilTest ~/ 2));
-      halfwayDate = DateTime(halfwayDate.year,halfwayDate.month,halfwayDate.day,0,0,0,0);
-      if (generatedEvents[halfwayDate] == null) {
+      halfwayDate = DateTime(halfwayDate.year, halfwayDate.month, halfwayDate.day, 0, 0, 0, 0);
+      halfwayDate = await findNearestFreeDate(halfwayDate, 7, testDay, firstStudyDay, generatedEvents, userId);
+      
+      if (testDay.isAfter(halfwayDate) && halfwayDate.isAfter(firstMockDate)) {
         generatedEvents[halfwayDate] = [
           Event(title: "Second Mini Mock", color: kMiniMockColor)
         ];
@@ -212,25 +260,22 @@ class StudySessionManager {
       int repetitions,
       Map<DateTime, List<Event>> generatedEvents) async {
     repetitions = repetitions.clamp(1, 6);
+    final userId = auth.currentUser!.uid;
+    
     for (int i = 0; i < repetitions; i++) {
       int interval = ((daysUntilTest / 3) - 2 + (i * 4)).round();
       if (interval >= daysUntilTest) continue;
 
       DateTime mockExamDate = firstStudyDay.add(Duration(days: interval));
-      mockExamDate = DateTime(mockExamDate.year,mockExamDate.month,mockExamDate.day,0,0,0,0);
-      final now = DateTime.now();
-      final today = DateTime(now.year, now.month, now.day, 0, 0, 0, 0);
-      
-      while (generatedEvents[mockExamDate] != null) {
-         
-        mockExamDate =  DateTime(mockExamDate.year,mockExamDate.month,mockExamDate.day+1,0,0,0,0);
-      }
-      if (testDay.isAfter(mockExamDate) && mockExamDate.isAfter(today)){
-      generatedEvents[mockExamDate] = [
+      mockExamDate = DateTime(mockExamDate.year, mockExamDate.month, mockExamDate.day, 0, 0, 0, 0);
+      mockExamDate = await findNearestFreeDate(mockExamDate, 7, testDay, firstStudyDay, generatedEvents, userId);
+
+      if (testDay.isAfter(mockExamDate) && mockExamDate.isAfter(firstStudyDay)) {
+        generatedEvents[mockExamDate] = [
           Event(title: "Full-sized Mock Exam ${i + 1}", color: kFullMockColor)
         ];
-      
-    }}
+      }
+    }
   }
 
   /// Schedule official paper events
@@ -241,18 +286,18 @@ class StudySessionManager {
       int repetitions,
       Map<DateTime, List<Event>> generatedEvents) async {
     repetitions = repetitions.clamp(1, 6);
+    final userId = auth.currentUser!.uid;
+    
     for (int i = 0; i < repetitions; i++) {
       int interval = (daysUntilTest * i / repetitions).round();
       if (interval >= daysUntilTest) continue;
 
       DateTime officialPaperDate = today.add(Duration(days: interval));
-      officialPaperDate = DateTime(officialPaperDate.year,officialPaperDate.month,officialPaperDate.day,0,0,0,0);
+      officialPaperDate = DateTime(officialPaperDate.year, officialPaperDate.month, officialPaperDate.day, 0, 0, 0, 0);
+      officialPaperDate = await findNearestFreeDate(officialPaperDate, 7, testDay, today, generatedEvents, userId);
 
-      while (generatedEvents[officialPaperDate] != null) {
-         officialPaperDate = DateTime(officialPaperDate.year,officialPaperDate.month,officialPaperDate.day+1,0,0,0,0);
-      }
-      if(testDay.isAfter(officialPaperDate)){
-          generatedEvents[officialPaperDate] = [
+      if (testDay.isAfter(officialPaperDate)) {
+        generatedEvents[officialPaperDate] = [
           Event(title: "Official Paper ${i + 1}", color: kOfficialPaperColor)
         ];
       }
@@ -269,83 +314,49 @@ class StudySessionManager {
     try {
       final CollectionReference<Map<String, dynamic>> flashcards =
           FirebaseFirestore.instance.collection('flashcards');
-      final List<String> topics = [];
       List<String> unscheduledTopics = [];
 
-      // Collect seen flashcard topics
+      // Helper function to get review interval based on study duration
+      int getReviewInterval(int daysUntilTest) {
+        if (daysUntilTest >= 60) return 3;
+        if (daysUntilTest >= 30) return 2;
+        return 1;
+      }
+
+      // Schedule seen flashcards
       final seenFlashcards = await Algo().getFlashcards(userId);
       for (final flashcard in seenFlashcards) {
-       if(!unscheduledTopics.contains(flashcard["topic"])){
-       unscheduledTopics.add(flashcard["topic"]);
-            
-            DateTime nextReviewDate =
-                DateTime(today.year, today.month, today.day + 1, 0, 0, 0, 0);
-            if (daysUntilTest >= 30 && daysUntilTest < 60) {
-              while (generatedEvents[nextReviewDate] != null) {
-                nextReviewDate = DateTime(nextReviewDate.year,
-                    nextReviewDate.month, nextReviewDate.day + 2, 0, 0, 0, 0);
-              }
-            }
-            if (daysUntilTest > 60) {
-              while (generatedEvents[nextReviewDate] != null) {
-                nextReviewDate = DateTime(nextReviewDate.year,
-                    nextReviewDate.month, nextReviewDate.day + 3, 0, 0, 0, 0);
-              }
-            }
-            if (daysUntilTest < 30) {
-              while (generatedEvents[nextReviewDate] != null) {
-                nextReviewDate = DateTime(nextReviewDate.year,
-                    nextReviewDate.month, nextReviewDate.day + 1, 0, 0, 0, 0);
-              }
-            }
-            if (testDay.isAfter(nextReviewDate)) {
-              generatedEvents[nextReviewDate] = [];
-              generatedEvents[nextReviewDate]!
-                  .add(Event(title: flashcard["topic"] + " Flashcards",color: Color.fromARGB(255, 255, 202, 58)));
-            }
-          }}
-        
+        if (!unscheduledTopics.contains(flashcard["topic"])) {
+          unscheduledTopics.add(flashcard["topic"]);
+          
+          DateTime nextReviewDate = DateTime(today.year, today.month, today.day + getReviewInterval(daysUntilTest), 0, 0, 0, 0);
+          nextReviewDate = await findNearestFreeDate(nextReviewDate, 7, testDay, today, generatedEvents, userId);
+          
+          if (testDay.isAfter(nextReviewDate)) {
+            generatedEvents[nextReviewDate] = [
+              Event(title: "${flashcard["topic"]} Flashcards", color: kFlashcardColor)
+            ];
+          }
+        }
+      }
 
-      // Collect unseen flashcard topics
-      final QuerySnapshot<Map<String, dynamic>> flashcardDeck =
-          await flashcards.get();
+      // Schedule unseen flashcards
+      final QuerySnapshot<Map<String, dynamic>> flashcardDeck = await flashcards.get();
       for (final doc in flashcardDeck.docs) {
         final Map<String, dynamic> flashcard = doc.data();
-         if(!unscheduledTopics.contains(flashcard["topic"])){
-         unscheduledTopics.add(flashcard["topic"]);
-
-            DateTime nextReviewDate =
-                DateTime(today.year, today.month, today.day + 1, 0, 0, 0, 0);
-            if (daysUntilTest > 31 && daysUntilTest < 60) {
-              while (generatedEvents[nextReviewDate] != null) {
-                nextReviewDate = DateTime(nextReviewDate.year,
-                    nextReviewDate.month, nextReviewDate.day + 1, 0, 0, 0, 0);
-              }
-            }
-            if (daysUntilTest > 60) {
-              while (generatedEvents[nextReviewDate] != null) {
-                nextReviewDate = DateTime(nextReviewDate.year,
-                    nextReviewDate.month, nextReviewDate.day + 3, 0, 0, 0, 0);
-              }
-            }
-            if (daysUntilTest < 30) {
-              while (generatedEvents[nextReviewDate] != null) {
-                nextReviewDate = DateTime(nextReviewDate.year,
-                    nextReviewDate.month, nextReviewDate.day + 1, 0, 0, 0, 0);
-              }
-            }
-
-            if (testDay.isAfter(nextReviewDate)) {
-              //Once a free day is used, the corresponding flashcard topic is added
-              generatedEvents[nextReviewDate] = [];
-              generatedEvents[nextReviewDate]!
-                  .add(Event(title: flashcard["topic"] + " Flashcards", color: Color.fromARGB(255, 255, 202, 58)));
-            }
-      }}
-
-      
-
-  
+        if (!unscheduledTopics.contains(flashcard["topic"])) {
+          unscheduledTopics.add(flashcard["topic"]);
+          
+          DateTime nextReviewDate = DateTime(today.year, today.month, today.day + getReviewInterval(daysUntilTest), 0, 0, 0, 0);
+          nextReviewDate = await findNearestFreeDate(nextReviewDate, 7, testDay, today, generatedEvents, userId);
+          
+          if (testDay.isAfter(nextReviewDate)) {
+            generatedEvents[nextReviewDate] = [
+              Event(title: "${flashcard["topic"]} Flashcards", color: kFlashcardColor)
+            ];
+          }
+        }
+      }
     } catch (e) {
       if (kDebugMode) {
         print('Error processing flashcards: $e');
