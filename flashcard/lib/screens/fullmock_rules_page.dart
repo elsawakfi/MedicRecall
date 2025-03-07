@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/drawer_widget.dart';
-import 'package:flashcard_x/screens/minimock_exams.dart';
+import 'package:flashcard_x/screens/fullmock_exams.dart';
 
 
 class FullMockRules extends StatefulWidget {
@@ -144,7 +144,7 @@ class FullMockRulesState extends State<FullMockRules> {
                   onPressed: (){
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => const FullMockExam(),
+                        builder: (context) => const FullMockExam1(),
                       ),
                     );
                   },

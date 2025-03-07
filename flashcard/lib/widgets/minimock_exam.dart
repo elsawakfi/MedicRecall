@@ -454,8 +454,8 @@ class MiniMockExamState extends State<MiniMockExam> {
                           int? newIndex = await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => FullMockReview(
-                                fullMockWidget: this,
+                              builder: (context) => MiniMockReview(
+                                miniMockWidget: this,
                                 rankingLength: rankingAnswers.length,
                                 multiChoiceLength: multiChoiceAnswers.length,
                                 flaggedQuestions: flaggedQuestions,
@@ -510,8 +510,8 @@ class MiniMockExamState extends State<MiniMockExam> {
                           int? newIndex = await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => FullMockReview(
-                                fullMockWidget: this,
+                              builder: (context) => MiniMockReview(
+                                miniMockWidget: this,
                                 rankingLength: rankingAnswers.length,
                                 multiChoiceLength: multiChoiceAnswers.length,
                                 flaggedQuestions: flaggedQuestions,
