@@ -345,14 +345,14 @@ class MiniMockExamState extends State<MiniMockExam> {
                     child: Row(
                       children: [
                         // Fixed Number Column
-                        Column(
+                        Padding(padding: const EdgeInsets.only(top:7.5),
+                        child: Column(
                           children: List.generate(questions[currentQuestion]['options'].length, (index) {
                             return Container(
-                              width: 40,
-                              height: 40,
-                              alignment: Alignment.center,
-                              margin: EdgeInsets.only(bottom: 8),
-                              decoration: BoxDecoration(
+                              width: 45,
+                              height: 45,
+                                alignment: Alignment.center,
+                                margin: const EdgeInsets.only(bottom: 10.5),                              decoration: BoxDecoration(
                                 color: Color.fromARGB(255, 235, 230, 239),
                                 borderRadius: BorderRadius.circular(8),
                                 boxShadow: [
@@ -362,18 +362,23 @@ class MiniMockExamState extends State<MiniMockExam> {
                                     blurRadius: 5,
                                     offset: const Offset(0, 3),
                                   ),
+                                 
                                 ],
+                                
                               ),
                               child: Text(
                                   '${index + 1}',
                                 style: TextStyle(
                                   color: Color.fromARGB(255, 98, 86, 139),
-                                  fontSize: 20,
+                                  fontSize: 21,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
+                              
                             );
+                            
                           }),
+                        ),
                         ),
                         const SizedBox(width: 8),
                         // Reorderable Options Column
