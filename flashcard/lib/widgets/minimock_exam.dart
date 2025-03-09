@@ -261,7 +261,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                         child: SizedBox(
                     child: (
 
-                    Row(
+                    Wrap(
                     children: [
                       Container(
                         margin: const EdgeInsets.only(bottom: 10),
@@ -340,40 +340,71 @@ class MiniMockExamState extends State<MiniMockExam> {
 
                 // If the question is a ranking question, display a reorderable list of options
                 if (questions[currentQuestion]['type'] == "ranking") ...[
-                  
-                //  Row(
-                // Row(crossAxisAlignment: CrossAxisAlignment.start,
-                // children: [
-                    Column( 
-                      
-                    children: List.generate(rankingAnswers[ currentQuestion].length, (index) {
-                      return Container(
-                        width: 40,
-                        height: 40,
-                        alignment: Alignment.center,
-                        margin: EdgeInsets.symmetric(horizontal: 4),
-                        decoration: BoxDecoration(
-                          color: Color.fromARGB(255, 235, 230, 239),
-                          borderRadius: BorderRadius.circular(8),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              spreadRadius: 0,
-                              blurRadius: 5,
-                              offset: const Offset(0, 3), // changes position of shadow
+
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: questions[currentQuestion]['options'].length,
+                  itemBuilder: (context, index) {
+                    String option = questions[currentQuestion]['options'][index];
+                    String optionLetter = rankingAnswers[currentQuestion][index];
+
+                    return Row(
+                      children: [
+                        // Number Box
+                        Container(
+                          width: 40,
+                          height: 40,
+                          alignment: Alignment.center,
+                          margin: EdgeInsets.only(right: 8),
+                          decoration: BoxDecoration(
+                            color: Color.fromARGB(255, 235, 230, 239),
+                            borderRadius: BorderRadius.circular(8),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                spreadRadius: 0,
+                                blurRadius: 5,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            '${index + 1}',
+                            style: TextStyle(
+                              color: Color.fromARGB(255, 98, 86, 139),
+                              fontSize: 20,
+                              fontWeight: FontWeight.w500,
                             ),
-                          ],
-                        ),
-                        child: Text('${index + 1}',
-                          style: TextStyle(
-                            color: Color.fromARGB(255, 98, 86, 139),
-                            fontSize: 20,
-                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                      );
-                    }),
-                    ),
+
+                        // Draggable List Item
+                        Expanded(
+                          child: ReorderableDragStartListener(
+                            key: ValueKey(option),
+                            index: index,
+                            child: Card(
+                              elevation: 3,
+                              color: Color.fromARGB(255, 235, 230, 239),
+                              child: ListTile(
+                                title: Text(
+                                  '   $optionLetter. $option',
+                                  style: TextStyle(
+                                    color: Color.fromARGB(255, 98, 86, 139),
+                                    fontSize: 20,
+                                  ),
+                                ),
+                                trailing: Icon(Icons.drag_handle, color: Color.fromARGB(255, 98, 86, 139), size: 30),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+
                  
                   const SizedBox(width: 16),
                   Expanded(
