@@ -341,112 +341,86 @@ class MiniMockExamState extends State<MiniMockExam> {
                 // If the question is a ranking question, display a reorderable list of options
                 if (questions[currentQuestion]['type'] == "ranking") ...[
 
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: questions[currentQuestion]['options'].length,
-                  itemBuilder: (context, index) {
-                    String option = questions[currentQuestion]['options'][index];
-                    String optionLetter = rankingAnswers[currentQuestion][index];
+              Expanded(
+                            child: ReorderableListView(
+                              buildDefaultDragHandles: false,
+                              proxyDecorator: (Widget child, int index, Animation<double> animation) {
+                                return Material(
+                                  color: Colors.transparent,
+                                  child: child,
+                                );
+                              },
+                              onReorder: (oldIndex, newIndex) {
+                                setState(() {
+                                  if (newIndex > oldIndex) newIndex--; // Adjust the list based on movement of item
+                                  // Update position of option in answer list
+                                  final ranking = rankingAnswers[currentQuestion].removeAt(oldIndex);
+                                  rankingAnswers[currentQuestion].insert(newIndex, ranking);
+                                  // Update position of option text in question list
+                                  final option = questions[currentQuestion]['options'].removeAt(oldIndex);
+                                  questions[currentQuestion]['options'].insert(newIndex, option);
+                                });
+                              },
+                              children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
+                                int optionIndex = entry.key;
+                                String option = entry.value;
+                                String optionLetter = rankingAnswers[currentQuestion][optionIndex];
+                                return ReorderableDragStartListener(
+                                  key: ValueKey(option),
+                                   index: optionIndex,
+                                  child: Row(
+                                    children: [
+                                      // Number Indicator (Left)
+                                      Container(
+                                        width: 40,
+                                        height: 40,
+                                        alignment: Alignment.center,
+                                        margin: EdgeInsets.only(right: 8),
+                                        decoration: BoxDecoration(
+                                          color: Color.fromARGB(255, 235, 230, 239),
+                                          borderRadius: BorderRadius.circular(8),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black.withOpacity(0.2),
+                                              spreadRadius: 0,
+                                              blurRadius: 5,
+                                              offset: const Offset(0, 3),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Text(
+                                          '${optionIndex + 1}',
+                                          style: TextStyle(
+                                            color: Color.fromARGB(255, 98, 86, 139),
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
 
-                    return Row(
-                      children: [
-                        // Number Box
-                        Container(
-                          width: 40,
-                          height: 40,
-                          alignment: Alignment.center,
-                          margin: EdgeInsets.only(right: 8),
-                          decoration: BoxDecoration(
-                            color: Color.fromARGB(255, 235, 230, 239),
-                            borderRadius: BorderRadius.circular(8),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.2),
-                                spreadRadius: 0,
-                                blurRadius: 5,
-                                offset: const Offset(0, 3),
+                              // Draggable List Item (Right)
+                              Expanded(
+                                child: Card(
+                                  elevation: 3,
+                                  color: Color.fromARGB(255, 235, 230, 239),
+                                  child: ListTile(
+                                    title: Text(
+                                      '$optionLetter. $option',
+                                      style: TextStyle(
+                                        color: Color.fromARGB(255, 98, 86, 139),
+                                        fontSize: 20,
+                                      ),
+                                    ),
+                                    trailing: Icon(Icons.drag_handle, color: Color.fromARGB(255, 98, 86, 139), size: 30),
+                                  ),
+                                ),
                               ),
                             ],
                           ),
-                          child: Text(
-                            '${index + 1}',
-                            style: TextStyle(
-                              color: Color.fromARGB(255, 98, 86, 139),
-                              fontSize: 20,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-
-                        // Draggable List Item
-                        Expanded(
-                          child: ReorderableDragStartListener(
-                            key: ValueKey(option),
-                            index: index,
-                            child: Card(
-                              elevation: 3,
-                              color: Color.fromARGB(255, 235, 230, 239),
-                              child: ListTile(
-                                title: Text(
-                                  '   $optionLetter. $option',
-                                  style: TextStyle(
-                                    color: Color.fromARGB(255, 98, 86, 139),
-                                    fontSize: 20,
-                                  ),
-                                ),
-                                trailing: Icon(Icons.drag_handle, color: Color.fromARGB(255, 98, 86, 139), size: 30),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-
-                 
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: ReorderableListView(
-                      buildDefaultDragHandles: false,
-                      proxyDecorator:  (Widget child, int index, Animation<double> animation) {
-                        return Material(
-                          color: Colors.transparent,
-                          child: child,
-                        );
-                      },
-                      onReorder: (oldIndex, newIndex) {
-                        setState(() {
-                          // if(newIndex > oldIndex) newIndex --; // Adjust the list based on movement of item
-                          // Update position of option in answer list
-                          final ranking = rankingAnswers[currentQuestion].removeAt(oldIndex);
-                          rankingAnswers[currentQuestion].insert(newIndex, ranking);
-                          // Update position of option text in question list
-                          final option = questions[currentQuestion]['options'].removeAt(oldIndex);
-                          questions[currentQuestion]['options'].insert(newIndex, option);
-                        });
-                      },
-                      // Create children for the reorderable list using questions
-                      children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
-                        int optionIndex = entry.key;
-                        String option = entry.value;
-                        String optionLetter = rankingAnswers[currentQuestion][optionIndex];
-                        return ReorderableDragStartListener(
-                            key: ValueKey(option),
-                            index: optionIndex,
-                            child: Card(
-                              elevation: 3,
-                              color: Color.fromARGB(255, 235, 230, 239),
-                                child: ListTile(
-                                  title: Text('   $optionLetter. $option', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 20)),
-                                  trailing: Icon(Icons.drag_handle , color: Color.fromARGB(255, 98, 86, 139), size: 30),
-                                )
-                            )
                         );
                       }).toList(),
                     ),
-                  ),
+                  ),    
                 ]
                 
                 
