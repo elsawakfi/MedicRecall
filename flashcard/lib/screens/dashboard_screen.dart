@@ -1,8 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
+import 'package:flashcard_x/screens/study_session_manager.dart';
 import 'package:flashcard_x/widgets/drawer_widget.dart';
+import 'package:flashcard_x/widgets/event.dart';
 import 'package:flutter/material.dart';
+import 'package:flashcard_x/screens/calendar_screen.dart';
 import 'package:flashcard_x/screens/feed_screen.dart';
 import 'package:flashcard_x/screens/button_screen.dart';
 import '../utils/page_transition.dart';
@@ -33,6 +36,14 @@ class HomePageState extends State<HomePage> {
   Map<String, bool> checked = {};
   Map<String, int> seenCards = {};
   Map<String, int> totalCards = {};
+  late DateTime testDay; 
+  late DateTime _firstStudyDate;
+  late Map<DateTime?, List<Event>> selectedEvents;
+  late CollectionReference _eventsCollectionRef;
+  final CollectionReference _userCollectionRef =
+      FirebaseFirestore.instance.collection('users');
+  StudySessionManager studySessionManager = StudySessionManager();
+
 
   double spacing = 16;
 
@@ -85,17 +96,27 @@ class HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+   
     setState(() {
       name = "loading...";
+      selectedEvents = {};
     });
     getData();
+
     setState(() {});
   }
 
   Future<void> getData() async {
-    await getUser();
+    await  getUser();
+    print("User\n");
     await getStats();
+    print("Stats\n");
     await getTopics();
+    print("Topicas\n");
+    //issue with getFirstStudyDay, takes too long but if you put it as the first getter function, the page does not 
+    //build 
+    await  getFirstStudyDay();
+    print("El primer dia de estudiar\n");
   }
 
   @override
@@ -187,7 +208,82 @@ class HomePageState extends State<HomePage> {
       topicCount = querySnapshot.docs.last["topicCount"];
       topicLastSeen = querySnapshot.docs.last["topicLastSeen"];
       loading = false;
-    });
+      testDay = querySnapshot.docs.last['TestDay'].toDate();
+    }); 
+    try{   
+      _eventsCollectionRef =
+          FirebaseFirestore.instance.collection('users/$id/events');
+
+      var snapshots = await _eventsCollectionRef.get();
+       for (var doc in snapshots.docs) {
+        var data = doc.data() as Map<String, dynamic>;
+        if (data.containsKey('date') && data.containsKey('events')) {
+          Timestamp? timestamp = data['date'] as Timestamp?;
+          List<dynamic>? eventsList = data['events'] as List<dynamic>?;
+          
+          if (timestamp != null && eventsList != null) {
+            DateTime date = timestamp.toDate();
+            date = DateTime(date.year, date.month, date.day);
+            
+            List<String> events = eventsList.map((e) => e.toString()).toList();
+            
+            
+            selectedEvents[date] = events.map((title) => Event(
+              title: title,
+              color : Colors.yellow
+            )).toList();
+          }
+        } 
+
+        }
+        } catch(e){
+       print("Error loading events from DB: $e");
+      } 
+    //This is how we sync the calendar screen and the flashcard tutor screen over these events
+    //await getEventsFromDB();
+    
+  }
+
+    Future<void> getEventsFromDB() async {
+    try {
+      QuerySnapshot u = await _userCollectionRef
+          .where("userID", isEqualTo: user.uid)
+          .get();
+      
+      if (u.docs.isEmpty) {
+        print("No user document found!");
+        return;
+      }
+
+
+      String id = u.docs.last.id;      
+      _eventsCollectionRef =
+          FirebaseFirestore.instance.collection('users/$id/events');
+
+      var snapshots = await _eventsCollectionRef.get();
+      for (var doc in snapshots.docs) {
+        var data = doc.data() as Map<String, dynamic>;
+        if (data.containsKey('date') && data.containsKey('events')) {
+          Timestamp? timestamp = data['date'] as Timestamp?;
+          List<dynamic>? eventsList = data['events'] as List<dynamic>?;
+          
+          if (timestamp != null && eventsList != null) {
+            DateTime date = timestamp.toDate();
+            date = DateTime(date.year, date.month, date.day);
+            
+            List<String> events = eventsList.map((e) => e.toString()).toList();
+            
+            
+            selectedEvents[date] = events.map((title) => Event(
+              title: title,
+              color : Colors.yellow
+            )).toList();
+          }
+        }
+      }
+    } catch (e) {
+      print("Error loading events from DB: $e");
+    }
   }
 
   Future<void> getStats() async {
@@ -239,6 +335,24 @@ class HomePageState extends State<HomePage> {
     map[key] = 1;
   }
 
+  Future<void> getFirstStudyDay() async {
+    
+      QuerySnapshot u =
+          await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+
+      var userFromDb = u.docs.first;
+      Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
+      // If the Test Day field isn't null and is in the database we update the UI with it. Otherwise it is displayed as being not set.
+      if (data.containsKey("firstStudyDay") && data["firstStudyDay"] != null) {
+        // firstDayBool = false;
+        _firstStudyDate = DateTime.fromMicrosecondsSinceEpoch(
+            userFromDb["firstStudyDay"].microsecondsSinceEpoch);
+      }
+
+      setState(() {});
+    
+  }
+
   //Formats the checkbox categories according to colour depending on whether the review date is due and how many flashcards have been seen.
   List<ExpansionTile> makeCheckboxList() {
 
@@ -246,9 +360,13 @@ class HomePageState extends State<HomePage> {
     for (var i = 0; i < topics.length; i++) {
 
       var map = topics[i];
+      int numCards = seenCards[map["topic"]] ?? 0;
+      
+      var shade = numCards / (totalCards[map["topic"]]?? 1)*100;
       var text = seenCards[map["topic"]] == null
           ? "0"
           : seenCards[map["topic"].toString()].toString();
+
 
       //Number of days since topic was last revised is converted from seconds to days as an int
       var howLongAgoRevisedDays = (Timestamp.now().seconds - topicLastSeen![i].seconds) / (60 * 60 * 24);
@@ -260,21 +378,76 @@ class HomePageState extends State<HomePage> {
         topicCount![i]=dateToColourMap.length-1;
       }
 
-      int nextReviewDateMilliseconds = (((dateToColourMap[topicCount![i]]! * 24 * 60 * 60) + topicLastSeen![i].seconds) * 1000).toInt();
-      DateTime nextReviewDate = DateTime.fromMillisecondsSinceEpoch(nextReviewDateMilliseconds, isUtc: true).toLocal();
-      String formattedDate = DateFormat('dd/MM/yyy').format(nextReviewDate);
+      
+      DateTime now = DateTime.now();
+      String formattedDate = DateFormat('dd/MM/yyy').format(DateTime.now());
+      //int increment = 0; 
+      List<Event>? eventsForDate;
+     
+      //DateTime targetDate = DateTime(_firstStudyDate.year, _firstStudyDate.month, _firstStudyDate.day, 0, 0, 0, 0);
+      DateTime targetDate = DateTime(now.year, now.month, now.day, 0, 0, 0, 0);
+      while (targetDate.isBefore(testDay) || targetDate.isAtSameMomentAs(testDay)){
+        eventsForDate = selectedEvents[targetDate];
+        
+        //targetDate = DateTime(_firstStudyDate.year, _firstStudyDate.month, _firstStudyDate.day+increment, 0, 0, 0, 0);
+        
+        
+        //int index = 0; 
+      
+        
+        if (eventsForDate != null) {
+          print("Events : $eventsForDate \n");
+          
+          
+          for (Event event in eventsForDate) {
+          if (event.toString().contains(map["topic"])){
+            print("Title is: ${event.toString()} and is on $targetDate\n");
+            if(targetDate.isAtSameMomentAs(DateTime(now.year, now.month, now.day, 0, 0, 0, 0))){
+              formattedDate = "Today";
+              DateTime rescheduledDate = DateTime(targetDate.year, targetDate.month, targetDate.day+7, 0, 0, 0, 0);
+              CalendarStateO().addSingleEvent(rescheduledDate, topics[i].toString(), user);
+              //formattedDate = DateFormat('dd/MM/yyy').format(rescheduledDate);
+            }
+            else if(targetDate.isBefore(now)){
+              //reschedule study session.....
+              DateTime rescheduledDate = DateTime(targetDate.year, targetDate.month, targetDate.day+7, 0, 0, 0, 0);
+              CalendarStateO().addSingleEvent(rescheduledDate, topics[i].toString(), user);
+              formattedDate = DateFormat('dd/MM/yyy').format(rescheduledDate);
+            }
+            
+            else{
+              formattedDate = DateFormat('dd/MM/yyy').format(targetDate);
+            }
 
-      // Section is grey if it hasn't been seen at all, Green if next review date isn't gone past and Red if next review date has none past
-      if (dateToColourMap[topicCount![i]]! > howLongAgoRevisedDays) {
-        topicColour = Colors.green;
-      } else {
+            if ( shade >= 70 ){
+                topicColour = Colors.green;
+                targetDate = testDay;
+            }
+            else{
+              topicColour = Colors.grey;
+              targetDate = testDay;
+            }
+            
+         } 
+          
+      }
+}     else { 
+          if (shade >= 70) {
+            topicColour = Colors.green;}
+          else{
+           topicColour = Colors.grey;
+          }    
+          formattedDate = "N/A";
+}
+      
+ targetDate = targetDate.add(Duration(days: 1)); 
+}
+    int nextReviewDateMilliseconds = (((dateToColourMap[topicCount![i]]! * 24 * 60 * 60) + topicLastSeen![i].seconds) * 1000).toInt();
+    DateTime nextReviewDate = DateTime.fromMillisecondsSinceEpoch(nextReviewDateMilliseconds, isUtc: true).toLocal();
+      if (dateToColourMap[topicCount![i]]! < howLongAgoRevisedDays) {
         topicColour = Colors.red;
+        formattedDate = DateFormat('dd/MM/yyy').format(nextReviewDate);
       }
-      if (topicCount![i] == 0) {
-        topicColour = Colors.grey;
-        formattedDate = "N/A";
-      }
-
       value.add(
           ExpansionTile(
           trailing: Text(
@@ -568,7 +741,3 @@ class HomePageState extends State<HomePage> {
     }
   }
 }
-
-
-
-
