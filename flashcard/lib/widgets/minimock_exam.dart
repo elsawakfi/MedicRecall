@@ -259,11 +259,17 @@ class MiniMockExamState extends State<MiniMockExam> {
                     children: [
                       Center(
                         child: SizedBox(
-                    child: (
+                          //
+                          child: Row(
+                          children: [
+                            Align(alignment: Alignment.centerLeft,
+                            
 
-                    Wrap(
-                    children: [
-                      Container(
+                    // child: (
+
+                    // Wrap(
+                    // children: [
+                      child: Container(
                         margin: const EdgeInsets.only(bottom: 10),
                         width: 160,
                         height: 40.31,
@@ -299,8 +305,9 @@ class MiniMockExamState extends State<MiniMockExam> {
                                   ? Icons.flag
                                   : Icons.flag_outlined,
                               color: Color.fromARGB(255, 98, 86, 139),
-                            )
+                            ),
                         ),
+                      ),
                       ),
                       Spacer(),
                       Container(
@@ -330,7 +337,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                           )
                       ),
                     ])
-                ))),
+                )),
                 // Display the current question text
                   Text(
                   questions[currentQuestion]['question'],
