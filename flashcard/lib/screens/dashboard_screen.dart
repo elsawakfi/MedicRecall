@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
@@ -116,7 +118,7 @@ class HomePageState extends State<HomePage> {
     //issue with getFirstStudyDay, takes too long but if you put it as the first getter function, the page does not 
     //build 
     await  getFirstStudyDay();
-    print("El primer dia de estudiar\n");
+    print("El primer dia de estudiar fue: $_firstStudyDate\n");
   }
 
   @override
@@ -175,6 +177,55 @@ class HomePageState extends State<HomePage> {
       floatingActionButton: const CustomFloatingButton(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
     );
+  }
+
+    Future<void> addSingleEvent(
+      DateTime date, String eventTitle, User user) async {
+    date = DateTime(date.year, date.month, date.day);
+    
+    //The delete single event function updates the UI in real time so I just copied the structure of that function 
+    Event newEvent =  Event(
+                        title: eventTitle,
+                        color: Colors.yellow
+                        );
+    
+   
+    if (selectedEvents[date] == null) {
+      selectedEvents[date] = [];
+      
+    }
+    selectedEvents[date]?.add(newEvent);
+    QuerySnapshot querySnapshot = await _eventsCollectionRef
+        .where("date", isEqualTo: Timestamp.fromDate(date))
+        .get();
+   
+    
+     List<String> updatedEvents =
+        selectedEvents[date]?.map((e) => e.title).toList() ?? [];
+    
+    if (querySnapshot.docs.isNotEmpty) {
+    String docId = querySnapshot.docs.first.id;
+   
+   
+
+    // Update Firestore document
+    await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
+    
+  } else {
+    
+
+    // If no document exists, create a new one
+    DocumentReference newDoc = await _eventsCollectionRef.add({
+      "date": Timestamp.fromDate(date),
+      "events": [eventTitle] // Start with just the new event
+    });
+    
+    String newDocId = newDoc.id;
+    await _eventsCollectionRef.doc(newDocId).update({"events": updatedEvents});
+
+  }
+ 
+    setState(() {});
   }
 
   Future<void> getUser() async {
@@ -239,51 +290,8 @@ class HomePageState extends State<HomePage> {
         } catch(e){
        print("Error loading events from DB: $e");
       } 
-    //This is how we sync the calendar screen and the flashcard tutor screen over these events
-    //await getEventsFromDB();
+ 
     
-  }
-
-    Future<void> getEventsFromDB() async {
-    try {
-      QuerySnapshot u = await _userCollectionRef
-          .where("userID", isEqualTo: user.uid)
-          .get();
-      
-      if (u.docs.isEmpty) {
-        print("No user document found!");
-        return;
-      }
-
-
-      String id = u.docs.last.id;      
-      _eventsCollectionRef =
-          FirebaseFirestore.instance.collection('users/$id/events');
-
-      var snapshots = await _eventsCollectionRef.get();
-      for (var doc in snapshots.docs) {
-        var data = doc.data() as Map<String, dynamic>;
-        if (data.containsKey('date') && data.containsKey('events')) {
-          Timestamp? timestamp = data['date'] as Timestamp?;
-          List<dynamic>? eventsList = data['events'] as List<dynamic>?;
-          
-          if (timestamp != null && eventsList != null) {
-            DateTime date = timestamp.toDate();
-            date = DateTime(date.year, date.month, date.day);
-            
-            List<String> events = eventsList.map((e) => e.toString()).toList();
-            
-            
-            selectedEvents[date] = events.map((title) => Event(
-              title: title,
-              color : Colors.yellow
-            )).toList();
-          }
-        }
-      }
-    } catch (e) {
-      print("Error loading events from DB: $e");
-    }
   }
 
   Future<void> getStats() async {
@@ -384,63 +392,53 @@ class HomePageState extends State<HomePage> {
       //int increment = 0; 
       List<Event>? eventsForDate;
      
-      //DateTime targetDate = DateTime(_firstStudyDate.year, _firstStudyDate.month, _firstStudyDate.day, 0, 0, 0, 0);
-      DateTime targetDate = DateTime(now.year, now.month, now.day, 0, 0, 0, 0);
-      while (targetDate.isBefore(testDay) || targetDate.isAtSameMomentAs(testDay)){
+      DateTime targetDate = DateTime(_firstStudyDate.year, _firstStudyDate.month, _firstStudyDate.day-3, 0, 0, 0, 0);
+      //DateTime targetDate = DateTime(now.year, now.month, now.day, 0, 0, 0, 0);
+      while (targetDate.isBefore(testDay)){
         eventsForDate = selectedEvents[targetDate];
-        
-        //targetDate = DateTime(_firstStudyDate.year, _firstStudyDate.month, _firstStudyDate.day+increment, 0, 0, 0, 0);
-        
-        
-        //int index = 0; 
-      
-        
         if (eventsForDate != null) {
-          print("Events : $eventsForDate \n");
-          
-          
           for (Event event in eventsForDate) {
-          if (event.toString().contains(map["topic"])){
-            print("Title is: ${event.toString()} and is on $targetDate\n");
-            if(targetDate.isAtSameMomentAs(DateTime(now.year, now.month, now.day, 0, 0, 0, 0))){
-              formattedDate = "Today";
-              DateTime rescheduledDate = DateTime(targetDate.year, targetDate.month, targetDate.day+7, 0, 0, 0, 0);
-              CalendarStateO().addSingleEvent(rescheduledDate, topics[i].toString(), user);
-              //formattedDate = DateFormat('dd/MM/yyy').format(rescheduledDate);
-            }
-            else if(targetDate.isBefore(now)){
-              //reschedule study session.....
-              DateTime rescheduledDate = DateTime(targetDate.year, targetDate.month, targetDate.day+7, 0, 0, 0, 0);
-              CalendarStateO().addSingleEvent(rescheduledDate, topics[i].toString(), user);
-              formattedDate = DateFormat('dd/MM/yyy').format(rescheduledDate);
-            }
+            bool rescheduled = false; 
             
-            else{
-              formattedDate = DateFormat('dd/MM/yyy').format(targetDate);
-            }
+            if (event.toString().contains(topics[i]["topic"])){  
+              
+              if(targetDate.isAtSameMomentAs(DateTime(now.year, now.month, now.day, 0, 0, 0, 0))){
+                formattedDate = "Today";
+                //formattedDate = DateFormat('dd/MM/yyy').format(rescheduledDate);
+              }
 
-            if ( shade >= 70 ){
-                topicColour = Colors.green;
-                targetDate = testDay;
-            }
+            else if(targetDate.isBefore(DateTime(now.year, now.month, now.day, 0, 0, 0, 0)) && !rescheduled){
+                //reschedule study session.....
+                print("Rescheduling: ${topics[i]["topic"]}\n");
+                DateTime rescheduledDate = DateTime(targetDate.year, targetDate.month, targetDate.day+3, 0, 0, 0, 0);
+                //Skip a week and look greedily for next available day? 
+                while (selectedEvents[rescheduledDate] != null && rescheduledDate.isBefore(testDay) && !rescheduled){
+                  rescheduledDate = DateTime(rescheduledDate.year, rescheduledDate.month, rescheduledDate.day+1, 0, 0, 0, 0);
+                }
+
+                selectedEvents[rescheduledDate] = [];
+                addSingleEvent(rescheduledDate, "${topics[i]["topic"]} flashcards", user);
+                rescheduled = true; 
+                formattedDate = DateFormat('dd/MM/yyy').format(rescheduledDate);
+                targetDate = now;
+                
+              }
             else{
-              topicColour = Colors.grey;
-              targetDate = testDay;
-            }
-            
-         } 
-          
+                formattedDate = DateFormat('dd/MM/yyy').format(targetDate);
+                
+              }
+              if ( shade >= 70 ){ topicColour = Colors.green;}
+              else{topicColour = Colors.grey;}
+              break;  
+          }      
       }
 }     else { 
-          if (shade >= 70) {
-            topicColour = Colors.green;}
-          else{
-           topicColour = Colors.grey;
+          if (shade >= 70) {topicColour = Colors.green;}
+          else{topicColour = Colors.grey;
           }    
           formattedDate = "N/A";
-}
-      
- targetDate = targetDate.add(Duration(days: 1)); 
+}    
+ targetDate = targetDate.add(Duration(days: 1));
 }
     int nextReviewDateMilliseconds = (((dateToColourMap[topicCount![i]]! * 24 * 60 * 60) + topicLastSeen![i].seconds) * 1000).toInt();
     DateTime nextReviewDate = DateTime.fromMillisecondsSinceEpoch(nextReviewDateMilliseconds, isUtc: true).toLocal();
