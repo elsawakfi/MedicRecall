@@ -259,11 +259,17 @@ class FullMockExamState extends State<FullMockExam> {
                     children: [
                       Center(
                         child: SizedBox(
-                    child: (
+                          //
+                          child: Row(
+                          children: [
+                            Align(alignment: Alignment.centerLeft,
+                            
 
-                    Row(
-                    children: [
-                      Container(
+                    // child: (
+
+                    // Wrap(
+                    // children: [
+                      child: Container(
                         margin: const EdgeInsets.only(bottom: 10),
                         width: 160,
                         height: 40.31,
@@ -299,8 +305,9 @@ class FullMockExamState extends State<FullMockExam> {
                                   ? Icons.flag
                                   : Icons.flag_outlined,
                               color: Color.fromARGB(255, 98, 86, 139),
-                            )
+                            ),
                         ),
+                      ),
                       ),
                       Spacer(),
                       Container(
@@ -330,7 +337,7 @@ class FullMockExamState extends State<FullMockExam> {
                           )
                       ),
                     ])
-                ))),
+                )),
                 // Display the current question text
                   Text(
                   questions[currentQuestion]['question'],
@@ -340,47 +347,95 @@ class FullMockExamState extends State<FullMockExam> {
 
                 // If the question is a ranking question, display a reorderable list of options
                 if (questions[currentQuestion]['type'] == "ranking") ...[
+                  
                   Expanded(
-                    child: ReorderableListView(
-                      buildDefaultDragHandles: false,
-                      proxyDecorator:  (Widget child, int index, Animation<double> animation) {
-                        return Material(
-                          color: Colors.transparent,
-                          child: child,
-                        );
-                      },
-                      onReorder: (oldIndex, newIndex) {
-                        setState(() {
-                          if(newIndex > oldIndex) newIndex --; // Adjust the list based on movement of item
-                          // Update position of option in answer list
-                          final ranking = rankingAnswers[currentQuestion].removeAt(oldIndex);
-                          rankingAnswers[currentQuestion].insert(newIndex, ranking);
-                          // Update position of option text in question list
-                          final option = questions[currentQuestion]['options'].removeAt(oldIndex);
-                          questions[currentQuestion]['options'].insert(newIndex, option);
-                        });
-                      },
-                      // Create children for the reorderable list using questions
-                      children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
-                        int optionIndex = entry.key;
-                        String option = entry.value;
-                        String optionLetter = rankingAnswers[currentQuestion][optionIndex];
-                        return ReorderableDragStartListener(
-                            key: ValueKey(option),
-                            index: optionIndex,
-                            child: Card(
-                              elevation: 3,
-                              color: Color.fromARGB(255, 235, 230, 239),
-                                child: ListTile(
-                                  title: Text('${optionIndex+1}:   $optionLetter. $option', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 20)),
-                                  trailing: Icon(Icons.drag_handle , color: Color.fromARGB(255, 98, 86, 139), size: 30),
-                                )
-                            )
-                        );
-                      }).toList(),
-                    ),
-                  )
-                ]
+                    child: Row(
+                      children: [
+                        // Fixed Number Column
+                        Padding(padding: const EdgeInsets.only(top:7.5),
+                        child: Column(
+                          children: List.generate(questions[currentQuestion]['options'].length, (index) {
+                            return Container(
+                              width: 45,
+                              height: 45,
+                                alignment: Alignment.center,
+                                margin: const EdgeInsets.only(bottom: 10.5),                              decoration: BoxDecoration(
+                                color: Color.fromARGB(255, 235, 230, 239),
+                                borderRadius: BorderRadius.circular(8),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.2),
+                                    spreadRadius: 0,
+                                    blurRadius: 5,
+                                    offset: const Offset(0, 3),
+                                  ),
+                                 
+                                ],
+                                
+                              ),
+                              child: Text(
+                                  '${index + 1}',
+                                style: TextStyle(
+                                  color: Color.fromARGB(255, 98, 86, 139),
+                                  fontSize: 21,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              
+                            );
+                            
+                          }),
+                        ),
+                        ),
+                        const SizedBox(width: 8),
+                        // Reorderable Options Column
+                        Expanded(
+                          child: ReorderableListView(
+                            buildDefaultDragHandles: false,
+                            proxyDecorator: (Widget child, int index, Animation<double> animation) {
+                              return Material(
+                                color: Colors.transparent,
+                                child: child,
+                              );
+                            },
+                            onReorder: (oldIndex, newIndex) {
+                              setState(() {
+                                if (newIndex > oldIndex) newIndex--; // Adjust the list based on movement of item
+                                // Update position of option in answer list
+                                final ranking = rankingAnswers[currentQuestion].removeAt(oldIndex);
+                                rankingAnswers[currentQuestion].insert(newIndex, ranking);
+                                // Update position of option text in question list
+                                final option = questions[currentQuestion]['options'].removeAt(oldIndex);
+                                    questions[currentQuestion]['options'].insert(newIndex, option);
+                              });
+                            },
+                            children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
+                              int optionIndex = entry.key;
+                              String option = entry.value;
+                              String optionLetter = rankingAnswers[currentQuestion][optionIndex];
+                              return ReorderableDragStartListener(
+                                key: ValueKey(option),
+                                index: optionIndex,
+                                child: Card(
+                                  elevation: 3,
+                                  color: Color.fromARGB(255, 235, 230, 239),
+                                  child: ListTile(
+                                    title: Text(
+                                      '$optionLetter. $option',
+                                      style: TextStyle(
+                                        
+                                        color: Color.fromARGB(255, 98, 86, 139),
+                                        fontSize: 20,
+                                      ),
+                                    ),
+                                    trailing: Icon(Icons.drag_handle, color: Color.fromARGB(255, 98, 86, 139), size: 30),
+                                  ),),
+                                );
+                              
+                            }).toList(),
+                          ),
+                        )]       
+    ))]
                 // If the question is a multiple choice question, display checkboxes
                 else if(questions[currentQuestion]['type'] == "multiple choice") ...[
                   //Line below takes the result of the map() and spreads its widgets into the children of Column

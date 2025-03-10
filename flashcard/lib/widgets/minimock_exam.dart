@@ -4,7 +4,6 @@ import 'package:flashcard_x/screens/minimock_scoring.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
 import '../screens/minimock_review.dart';
-import '../screens/fullmock_review.dart';
 import '../utils/timer.dart';
 import 'drawer_widget.dart';
 import 'minimock_help_button.dart';
