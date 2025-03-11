@@ -493,10 +493,15 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                 StudySessionManager().startStudySession(selectedResources);
                 // Close current dialog
                 Navigator.of(context).pop();
-                _scheduleCompleteDialog(context);
-                // If either Official Paper or Full-sized Mock is selected, show Repetition Dialog
-                if (checkbox1.value || checkbox2.value || checkbox5.value) {
-                  _showRepetitionDialog(context);
+                // Check if any of the resources requiring repetitions are selected
+                bool showRepetitionDialog = checkbox1.value || checkbox2.value || checkbox5.value;
+
+                if (showRepetitionDialog) {
+                  // Show repetition dialog for selected resources
+                  _showRepetitionDialog(context, selectedResources);
+                } else {
+                  // If no repetition dialog is needed, show the completion dialog
+                  _scheduleCompleteDialog(context);
                 }
               },
               style: TextButton.styleFrom(
@@ -515,10 +520,19 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     );
   }
 
-  // Show dialog to ask for number of repetitions
-  void _showRepetitionDialog(BuildContext context) {
+  // // Show dialog to ask for number of repetitions
+  void _showRepetitionDialog(BuildContext context, List<String> selectedResources) {
     final List<int> repetitionOptions = [2, 3, 4, 5, 6];
-    int? selectedRepetition;
+    Map<String, int?> selectedRepetitions = {};
+    // Initialize the map with null values for each resource
+    for (var resource in selectedResources) {
+      if (resource == 'Official paper' || 
+          resource == 'Full-sized mock exam' || 
+          resource == 'Official SJT Practice Paper') {
+        selectedRepetitions[resource] = null;
+      }
+    }
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -532,7 +546,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               title: Column(
                 children: [
                   Text(
-                    'How many times would you like to practice the selected resources?',
+                    'How many times would you like to practice each selected resource?',
                     style: const TextStyle(
                       color: Color.fromRGBO(21, 58, 103, 1),
                       fontSize: 21,
@@ -540,89 +554,98 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     ),
                   ),
                   const SizedBox(height: 11),
-                  // Add spacing between lines
                   Text.rich(
                     TextSpan(
                       children: [
                         const TextSpan(
                           text:
-                              'It is recommended to practice at least three times.\nYour chosen number of repetition will apply to both the ',
+                              'It is recommended to practice at least three times.\nYour chosen number of repetitions will apply to each resource individually.',
                           style: TextStyle(
                             color: Color.fromRGBO(21, 58, 103, 1),
                             fontSize: 16,
                             fontWeight: FontWeight.w400, // Regular font weight
                           ),
                         ),
-                        TextSpan(
-                          text: 'Official Paper and Full-sized Mock Exam.',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold, // Make it bold
-                            color: Color.fromRGBO(21, 58, 103, 1),
-                            fontSize: 16,
-                          ),
-                        ),
                       ],
                     ),
                   ),
-                    ...repetitionOptions.map((int value) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical : 5.0),
-                        child: RadioListTile<int>(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15.0),
+                ],
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  children: selectedRepetitions.keys.map((resource) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          resource,
+                          style: const TextStyle(
+                            color: Color.fromRGBO(21, 58, 103, 1),
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
                           ),
-                          tileColor: const Color.fromRGBO(21, 58, 103, 1),
-                          title: Text(
-                            '$value',
-                            style: const TextStyle(
-                              color: Colors.white,
-                            ),
-                          ),
-                          value: value,
-                          groupValue: selectedRepetition,
-                          onChanged: (int? newValue) {
-                            setState(() {
-                              selectedRepetition = newValue;
-                            });
-                          },
                         ),
-                      );
-                    }),
-                  ],
+                        ...repetitionOptions.map((int value) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 5.0),
+                            child: RadioListTile<int>(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15.0),
+                              ),
+                              tileColor: const Color.fromRGBO(21, 58, 103, 1),
+                              title: Text(
+                                '$value',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ),
+                              value: value,
+                              groupValue: selectedRepetitions[resource],
+                              onChanged: (int? newValue) {
+                                setState(() {
+                                  selectedRepetitions[resource] = newValue;
+                                });
+                              },
+                            ),
+                          );
+                        }).toList(),
+                        const SizedBox(height: 20),
+                      ],
+                    );
+                  }).toList(),
                 ),
+              ),
               actions: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                       _showOptionsDialog(context);
-                    },
-                    style: TextButton.styleFrom(
-                      foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
-                      //backgroundColor: const Color.fromRGBO(243, 90, 90, 1),
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      minimumSize: const Size(30, 30), // Sets minimum width and height
-                      maximumSize: const Size (120,45),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        _showOptionsDialog(context);
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        minimumSize: const Size(120, 45),
+                      ),
+                      child: const Text(
+                        'Previous',
+                        style: TextStyle(fontSize: 16),
+                      ),
                     ),
-                    child: const Text(
-                      'Previous',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  ),
-                  const SizedBox(width: 10,),
+                    const SizedBox(width: 10),
                     TextButton(
                       onPressed: () async {
-                        if (selectedRepetition != null) {
-                          // Save selectedRepetition to the database
+                        if (selectedRepetitions.values.every((value) => value != null)) {
+                          // Save selectedRepetitions to the database
                           QuerySnapshot u = await _userCollectionRef
                               .where("userID", isEqualTo: user?.uid)
                               .get();
 
                           var id = u.docs.last.id;
                           await _userCollectionRef.doc(id).update({
-                            'selectedRepetition': selectedRepetition,
+                            'selectedRepetitions': selectedRepetitions,
                           });
 
                           if (context.mounted) {
@@ -633,7 +656,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content:
-                                  Text('Please enter number of repetitions'),
+                                  Text('Please enter number of repetitions for all resources'),
                             ),
                           );
                         }
@@ -641,11 +664,11 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                       style: TextButton.styleFrom(
                         foregroundColor: Colors.white,
                         backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
-                        minimumSize: const Size(120, 45), // Sets minimum width and height
+                        minimumSize: const Size(120, 45),
                       ),
                       child: const Text(
-                      'Submit',
-                      style: TextStyle(fontSize: 16),
+                        'Submit',
+                        style: TextStyle(fontSize: 16),
                       ),
                     ),
                   ],
