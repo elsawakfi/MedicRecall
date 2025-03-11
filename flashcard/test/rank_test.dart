@@ -19,21 +19,12 @@ void main() {
     };
 
     Map<String, dynamic> question2 = {
-      'question': 'Question 1 Text',
-      'explanation': 'Explanation 1',
+      'question': 'Question 2 Text',
+      'explanation': 'Explanation 2',
       'options': ['Option 1', 'Option 2', 'Option 3', 'Option 4', 'Option 5'],
       'correct_answers': ['E','B','A','D','C'],
       'questionNumber': 2,
       'type': "ranking"
-    };
-
-    Map<String, dynamic> question3 = {
-      'question': 'Question 2 Text',
-      'explanation': 'Explanation 2',
-      'options': ['Option 1', 'Option 2', 'Option 3', 'Option 4', 'Option 5', 'Option 6', 'Option 7'],
-      'correctAnswers': ['A', 'B', 'C'],
-      'questionNumber': 3,
-      'type': "multiple choice",
     };
     questions = [question1, question2];
     rankingAnswers = [['A','B','C','D','E'], ['A','B','C','D','E']];

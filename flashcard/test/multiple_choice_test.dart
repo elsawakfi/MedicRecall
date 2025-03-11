@@ -15,7 +15,7 @@ void main() {
       'question': 'Question 1 Text',
       'explanation': 'Explanation 1',
       'options': ['Option 1', 'Option 2', 'Option 3', 'Option 4', 'Option 5', 'Option 6', 'Option 7', 'Option 8'],
-      'correctAnswers': ['A', 'B', 'C'],
+      'correct_answers': ['A', 'B', 'C'],
       'questionNumber': 1,
       'type': "multiple choice",
     };
@@ -23,7 +23,7 @@ void main() {
       'question': 'Question 2 Text',
       'explanation': 'Explanation 2',
       'options': ['Option 1', 'Option 2', 'Option 3', 'Option 4', 'Option 5', 'Option 6', 'Option 7', 'Option 8'],
-      'correctAnswers': ['A', 'C', 'H'],
+      'correct_answers': ['A', 'C', 'H'],
       'questionNumber': 2,
       'type': "multiple choice",
     };
