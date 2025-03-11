@@ -46,9 +46,8 @@ void main() {
   });
 
   void calculateScores() {
-    var userAnswers;
     int tempMaxScore = 0;
-    List<int> answerScores = List.filled(5, 0); // Placeholder to ensure page loads
+    List<int> answerScores = List.filled(4, 0); // Placeholder to ensure page loads
     userAnswers.forEach((questionNumber, userAnswer) {
       int questionIndex = int.parse(questionNumber) - 1;
       switch (questions[questionIndex]['type']) {
@@ -78,5 +77,28 @@ void main() {
     maxScore = tempMaxScore;
   }
 
+  test('All correct', () {
+    userAnswers = {
+      '1': ['A','B','C','D','E'],
+      '2': ['E','D','C','B','A'],
+      '3': ['A','B','C'],
+      '4': ['D','E','F']
+    };
+    calculateScores();
+    expect(64, totalScore);
+    expect(totalScore, maxScore); // User achieves maxScore
+  });
+
+  test('As wrong as possible', () {
+    userAnswers = {
+      '1': ['E','D','C','B','A'],
+      '2': ['A','B','C','D','E'],
+      '3': ['D','E','F'],
+      '4': ['A','B','C']
+    };
+    calculateScores();
+    expect(16, totalScore);
+    expect(64, maxScore);
+  });
 }
 
