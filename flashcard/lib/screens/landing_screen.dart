@@ -7,7 +7,7 @@ import 'package:flashcard_x/screens/study_session_manager.dart';
 import 'package:intl/intl.dart';
 import 'package:flashcard_x/screens/faq.dart';
 import 'package:flashcard_x/screens/flashcard_editor_screen.dart';
-import 'package:flashcard_x/screens/button_screen.dart';
+import 'package:flashcard_x/widgets/countdown_button.dart';
 import 'package:flashcard_x/screens/minimock_landing.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
