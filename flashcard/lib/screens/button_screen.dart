@@ -406,7 +406,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
             children: [
               _buildCheckbox(
                 checkbox1, 
-                'Official Practice Paper', 
+                'Official MSRA Practice Paper', 
                 description: 'The official past paper is available on the Health Education England website. '
                 'It contains 22 Professional Dilemma questions with realistic scenarios and reliable rationales created '
                 'by the same people who write the questions for the MSRA, making it a very valuable resource.\n\n'
@@ -467,8 +467,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               onPressed: () async {
                 // Check which resources were selected
                 List<String> selectedResources = [];
-                if (checkbox1.value) selectedResources.add('Official paper');
-                if (checkbox2.value) selectedResources.add('Full-sized mock exam');
+                if (checkbox1.value) selectedResources.add('Official MSRA Practice Paper');
+                if (checkbox2.value) selectedResources.add('Full-sized Mock Exam');
                 if (checkbox3.value) selectedResources.add('Mini-mocks');
                 if (checkbox4.value) selectedResources.add('Flashcards');
                 if (checkbox5.value) selectedResources.add('Official SJT Practice Paper');
@@ -520,14 +520,14 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     );
   }
 
-  // // Show dialog to ask for number of repetitions
+  // Show dialog to ask for number of repetitions
   void _showRepetitionDialog(BuildContext context, List<String> selectedResources) {
-    final List<int> repetitionOptions = [2, 3, 4, 5, 6];
+    final List<int> repetitionOptions = [1, 2, 3, 4, 5, 6];
     Map<String, int?> selectedRepetitions = {};
     // Initialize the map with null values for each resource
     for (var resource in selectedResources) {
-      if (resource == 'Official paper' || 
-          resource == 'Full-sized mock exam' || 
+      if (resource == 'Official MSRA Practice Paper' ||
+          resource == 'Full-sized Mock Exam' ||
           resource == 'Official SJT Practice Paper') {
         selectedRepetitions[resource] = null;
       }
@@ -544,29 +544,25 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                 borderRadius: BorderRadius.circular(5.0),
               ),
               title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     'How many times would you like to practice each selected resource?',
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Color.fromRGBO(21, 58, 103, 1),
                       fontSize: 21,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                   const SizedBox(height: 11),
-                  Text.rich(
-                    TextSpan(
-                      children: [
-                        const TextSpan(
-                          text:
-                              'It is recommended to practice at least three times.\nYour chosen number of repetitions will apply to each resource individually.',
-                          style: TextStyle(
-                            color: Color.fromRGBO(21, 58, 103, 1),
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400, // Regular font weight
-                          ),
-                        ),
-                      ],
+                  const Text(
+                    'It is recommended to practice at least three times.\n'
+                    'However, for the Official SJT Practice Paper, we suggest only one repetition.\n\n'
+                    'Your chosen number of repetitions will apply to each resource individually.',
+                    style: TextStyle(
+                      color: Color.fromRGBO(21, 58, 103, 1),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400, // Regular font weight
                     ),
                   ),
                 ],
@@ -585,30 +581,29 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        ...repetitionOptions.map((int value) {
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 5.0),
-                            child: RadioListTile<int>(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15.0),
-                              ),
-                              tileColor: const Color.fromRGBO(21, 58, 103, 1),
-                              title: Text(
+                        const SizedBox(height: 10),
+                        Wrap(
+                          spacing: 10, // Horizontal spacing
+                          children: repetitionOptions.map((int value) {
+                            return ChoiceChip(
+                              label: Text(
                                 '$value',
                                 style: const TextStyle(
-                                  color: Colors.white,
+                                  color: Color.fromRGBO(21, 58, 103, 1),
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
-                              value: value,
-                              groupValue: selectedRepetitions[resource],
-                              onChanged: (int? newValue) {
+                              selected: selectedRepetitions[resource] == value,
+                              onSelected: (bool selected) {
                                 setState(() {
-                                  selectedRepetitions[resource] = newValue;
+                                  selectedRepetitions[resource] = selected ? value : null;
                                 });
                               },
-                            ),
-                          );
-                        }).toList(),
+                              selectedColor: const Color.fromRGBO(73, 148, 236, 1),
+                              backgroundColor: Colors.white,
+                            );
+                          }).toList(),
+                        ),
                         const SizedBox(height: 20),
                       ],
                     );
