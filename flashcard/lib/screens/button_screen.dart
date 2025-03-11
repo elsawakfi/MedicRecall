@@ -51,7 +51,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     getTestDay();
     getStopShowing(user!);
     getFirstStudyDay();
-    setState(() {});
+    if(mounted) setState(() {});
     _isHovered['checkbox1'] = false;
     _isHovered['checkbox2'] = false;
     _isHovered['checkbox3'] = false;
@@ -150,7 +150,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       } else {
         testDayBool = true;
       }
-      setState(() {});
+      if(mounted) setState(() {});
     }
   }
 
@@ -175,7 +175,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
 
     // update field testday to what is passed as param
     await getTestDay();
-    setState(() {});
+    if(mounted) setState(() {});
   }
 
   Future<void> getUser() async {
@@ -210,8 +210,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
         _firstStudyDate = DateTime.fromMicrosecondsSinceEpoch(
             userFromDb["firstStudyDay"].microsecondsSinceEpoch);
       }
-
-      setState(() {});
+      if(mounted) setState(() {});
     }
   }
 
@@ -298,8 +297,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
           ],
         );
       },
-    
-    );setState(() {});
+    );
+    if(mounted) setState(() {});
   }
 
     // Show the date picker dialog to select exam date
@@ -323,11 +322,13 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     locale: const Locale('en', 'GB'),
                   );
                   if (picked != null) {
-                    setState(() {
-                      _examDate = picked;
-                      updateTestDay(picked); // Update parent state
-                      testDayBool = false;
-                    });
+                    if(mounted) {
+                      setState(() {
+                        _examDate = picked;
+                        updateTestDay(picked); // Update parent state
+                        testDayBool = false;
+                      });
+                    }
 
                     if (context.mounted) {
                       Navigator.of(context).pop();
@@ -559,9 +560,11 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                           value: value,
                           groupValue: selectedRepetition,
                           onChanged: (int? newValue) {
-                            setState(() {
-                              selectedRepetition = newValue;
-                            });
+                            if(mounted) {
+                              setState(() {
+                                selectedRepetition = newValue;
+                              });
+                            }
                           },
                         ),
                       );
