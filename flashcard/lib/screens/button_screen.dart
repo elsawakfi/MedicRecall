@@ -395,6 +395,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     final checkbox2 = ValueNotifier<bool>(false);
     final checkbox3 = ValueNotifier<bool>(false);
     final checkbox4 = ValueNotifier<bool>(false);
+    final checkbox5 = ValueNotifier<bool>(false);
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -435,6 +436,15 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                 'This resource uses our unique, evidence-based algorithms to help you harness the power of spaced repetition and active recall!',
                 showInfo: true,
               ),
+              _buildCheckbox(
+                checkbox5, 
+                'Official SJT Practice Paper',
+                description: 'This is a practice paper released by the UKFPO as a resource for doctors preparing for the FY2 Situational Judgement Test, '
+                'which is part of the application process for stand-alone FY2 training. Be aware that this paper only includes 18 RATING questions '
+                '(not a format of questions that appears in the MSRA). '
+                'Nevertheless, increasing your exposure to questions and rationales created by the UKFPO is helpful when preparing for the Professional Dilemmas Paper.',
+                showInfo: true,
+              ),
             ],
           ),
           actions: [
@@ -461,6 +471,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                 if (checkbox2.value) selectedResources.add('Full-sized mock exam');
                 if (checkbox3.value) selectedResources.add('Mini-mocks');
                 if (checkbox4.value) selectedResources.add('Flashcards');
+                if (checkbox5.value) selectedResources.add('Official SJT Practice Paper');
 
                 if (selectedResources.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -484,7 +495,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                 Navigator.of(context).pop();
                 _scheduleCompleteDialog(context);
                 // If either Official Paper or Full-sized Mock is selected, show Repetition Dialog
-                if (checkbox1.value || checkbox2.value) {
+                if (checkbox1.value || checkbox2.value || checkbox5.value) {
                   _showRepetitionDialog(context);
                 }
               },
