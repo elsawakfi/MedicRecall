@@ -329,18 +329,27 @@ Widget build(BuildContext context) {
                     ExpansionPanel(
                       canTapOnHeader: true,
                       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-                      headerBuilder: (context, isOpen) {
-                        return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text('Multiple Choice Questions (Question ${widget.rankingLength + 1} - $questionLength)',
-                          style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
+                      headerBuilder: (context, isOpen) => const ListTile(title: Text('Multiple Choice Questions')),
+                  body: Wrap(
+                    children: List.generate(
+                      widget.multiChoiceLength,
+                      (index) => Padding(
+                        padding: const EdgeInsets.all(4.0),
+                        child: ElevatedButton.icon(
+                          onPressed: () => _returnToFullMock(context, widget.rankingLength + index),
+                          icon: Visibility(
+                            visible: widget.flaggedQuestions[widget.rankingLength + index],
+                            child: const Icon(Icons.flag, color: Colors.black),
                           ),
-                          ),
-                        );
-                      },
-                      body: Padding(
+                          label: Text('${widget.rankingLength + index + 1}'),
+                            ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Column(
                           children: [
@@ -440,17 +449,16 @@ Widget build(BuildContext context) {
                           ],
                         ),
                       ),
-                      isExpanded: _isOpen[1],
-                  ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      
+                      // isExpanded: _isOpen[1],
+                  // ),
+                  // ],
+              //   ),
+              // ],
+            // ),
+            ]),
+        )),    
             
-              Spacer(),
+              // Spacer(),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
