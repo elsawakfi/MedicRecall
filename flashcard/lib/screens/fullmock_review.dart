@@ -176,35 +176,39 @@ Widget build(BuildContext context) {
                           child: Text('Ranking Questions (Question 1 - ${widget.rankingLength})',
                           style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
                           fontSize: 16,
-                          fontWeight: FontWeight.w500)),
+                          fontWeight: FontWeight.w500,
+                          ),
+                          ),
                         );
                       },
                       body: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Column(
                           children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(5, (index) => Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                child: SizedBox(
-                                  width: 100, // Set the desired width
-                                  height: 50, // Set the desired height
-                                  child: ElevatedButton.icon(
-                                    onPressed: () {
-                                      _returnToFullMock(context, index);
-                                    },
-                                    icon: Visibility( visible: widget.flaggedQuestions[index],
-                                      child: Icon(Icons.flag, color: Colors.black),),
-                                    label: Text(
-                                      '${index + 1}',
-                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
-                                      fontSize: 20),
-                                    ),
+                           Row(
+                            mainAxisAlignment: MainAxisAlignment.start, // Align the buttons at the start
+                            children: List.generate(5, (index) => Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: SizedBox(
+                                width: 100, // Set the desired width
+                                height: 50, // Set the desired height
+                                child: ElevatedButton.icon(
+                                  onPressed: () {
+                                    _returnToFullMock(context, index);
+                                  },
+                                  icon: Visibility(
+                                    visible: widget.flaggedQuestions[index],
+                                    child: Icon(Icons.flag, color: Colors.black),
+                                  ),
+                                  label: Text(
+                                    '${index + 1}',
+                                    style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 20),
                                   ),
                                 ),
-                              )),
-                            ),
+                              ),
+                            )),
+                          ),
+
                             SizedBox(height: 10),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -222,7 +226,8 @@ Widget build(BuildContext context) {
                                     label: Text(
                                       '${index + 6}',
                                       style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
-                                      fontSize: 20),
+                                      fontSize: 20,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -245,7 +250,8 @@ Widget build(BuildContext context) {
                                     label: Text(
                                       '${index + 11}',
                                       style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
-                                      fontSize: 20),
+                                      fontSize: 20,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -261,14 +267,15 @@ Widget build(BuildContext context) {
                                   height: 50, // Set the desired height
                                   child: ElevatedButton.icon(
                                     onPressed: () {
-                                      _returnToFullMock(context, index+10);
+                                      _returnToFullMock(context, index+15);
                                     },
                                     icon: Visibility( visible: widget.flaggedQuestions[index+15],
                                       child: Icon(Icons.flag, color: Colors.black),),
                                     label: Text(
                                       '${index + 16}',
                                       style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
-                                      fontSize: 20),
+                                      fontSize: 20,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -302,6 +309,23 @@ Widget build(BuildContext context) {
                       ),
                       isExpanded: _isOpen[0],
                     ),
+                ],
+              ),
+            ),
+          ),
+                    
+                   Expanded(child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  ExpansionPanelList(elevation: 1, dividerColor: Colors.transparent,
+                  expandIconColor: Theme.of(context).textTheme.bodyMedium?.color,
+                  expandedHeaderPadding: EdgeInsets.all(4.0),
+                  expansionCallback: (i, isOpen) {
+                    setState(() {
+                      _isOpen[i] = !_isOpen[i];
+                    });
+                  },
+                  children: [
                     ExpansionPanel(
                       canTapOnHeader: true,
                       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
@@ -311,7 +335,9 @@ Widget build(BuildContext context) {
                           child: Text('Multiple Choice Questions (Question ${widget.rankingLength + 1} - $questionLength)',
                           style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
                           fontSize: 16,
-                          fontWeight: FontWeight.w500)),
+                          fontWeight: FontWeight.w500,
+                          ),
+                          ),
                         );
                       },
                       body: Padding(
@@ -415,9 +441,15 @@ Widget build(BuildContext context) {
                         ),
                       ),
                       isExpanded: _isOpen[1],
-                    ),
+                  ),
                   ],
-                ))),
+                ),
+              ],
+            ),
+          ),
+        ),
+      
+            
               Spacer(),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
