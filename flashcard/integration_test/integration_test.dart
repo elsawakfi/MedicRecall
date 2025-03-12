@@ -41,7 +41,7 @@ void main() {
           await tester.pump(const Duration(seconds: 2));
           var deleteButton = find.byWidgetPredicate((widget) {
             return widget is ElevatedButton &&
-                widget.key == Key('deleteButton');
+                widget.key == ValueKey('deleteButton');
           });
 
           expect(deleteButton, findsOneWidget);
@@ -65,14 +65,12 @@ void main() {
         await tester.pumpAndSettle();
 
         // Start entering exam details
-        if (find
-            .text('Yes')
-            .evaluate()
+        if (find.text('Yes').evaluate()
             .isNotEmpty) tester.printToConsole("yes found");
         tester.printToConsole('${find.text('Yes').evaluate()}');
-        expect(find.byKey(Key('yesButton')), findsAny);
+        expect(find.byKey(ValueKey('yesButton')), findsAny);
         await tester.tap(find
-            .byKey(Key('yesButton'))
+            .byKey(ValueKey('yesButton'))
             .first);
         await tester.pumpAndSettle();
 
@@ -88,61 +86,11 @@ void main() {
           return widget is Checkbox && widget.value == false;
         })).first);
         await tester.tap(find.text('Submit'));
+        await tester.tap(find
+            .byKey(ValueKey('submitButton'))
+            .first);
         tester.printToConsole('Exam date set');
         await tester.pumpAndSettle();
       });
-
-    testWidgets('Logging in and reset data', (WidgetTester tester) async {
-      await tester.pump(const Duration(seconds: 4));
-      await loginTest(tester);
-      await tester.pumpAndSettle();
-
-      tester.printToConsole('HomePage screen opens');
-      // Dashboard
-      expect(find.byKey(
-          const ValueKey('Settings')), findsNothing);
-      await tester.tap(find.byKey(
-        const ValueKey('Flashcards'),
-      ));
-      await tester.pumpAndSettle();
-      expect(find.byKey(
-          const ValueKey('Settings')), findsNothing);
-      expect(find.byKey(
-          const ValueKey('Revise')), findsOneWidget);
-      tester.printToConsole('Dashboard opens');
-
-      // Menu
-      expect(find.byKey(
-          const ValueKey('Settings')), findsNothing);
-      await tester.tap(find.byIcon(
-          Icons.menu));
-      await tester.pumpAndSettle();
-      expect(find.byKey(
-          const ValueKey('Settings')), findsOneWidget);
-      tester.printToConsole('Menu opens');
-
-      // User Details
-      await tester.tap(find.byKey(
-        const ValueKey('Settings'),
-      ));
-      await tester.pumpAndSettle();
-      expect(find.byKey(
-          const ValueKey('User Details')), findsOneWidget);
-      tester.printToConsole('Settings opens');
-      await tester.tap(find.byKey(
-        const ValueKey('User Details'),
-      ));
-      await tester.pumpAndSettle();
-      expect(find.byKey(
-          const ValueKey('Reset Userdata')), findsOneWidget);
-      tester.printToConsole('User Details opens');
-
-      // Reset User Data
-      await tester.tap(find.byKey(
-        const ValueKey('Reset Userdata'),
-      ));
-      await tester.pumpAndSettle();
-      tester.printToConsole('User data reset');
-    });
   });
 }

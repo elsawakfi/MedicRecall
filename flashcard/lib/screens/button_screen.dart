@@ -259,7 +259,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
             ),
           ),
           TextButton(
-            key: const Key('yesButton'),
+            key: const ValueKey('yesButton'),
             onPressed: () {
               Navigator.of(context).pop();
               _setFirstStudyDay(); // Ensure this function is defined
@@ -443,6 +443,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
             ),
           ),
             TextButton(
+              key: const ValueKey('submitButton'),
               onPressed: () async {
                 // Check which resources were selected
                 List<String> selectedResources = [];
