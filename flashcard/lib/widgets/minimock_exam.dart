@@ -465,14 +465,14 @@ class MiniMockExamState extends State<MiniMockExam> {
                                 String optionLetter = options[optionIndex];
                                 return CheckboxListTile(
                                   fillColor: WidgetStateProperty.resolveWith<Color?>(
-                                        (states) {
+                                    (states) {
                                       if (states.contains(WidgetState.selected)) {
-                                        return const Color.fromARGB(0, 90, 89, 89); // Color when the checkbox is checked
+                                        return Colors.black; // Black box when selected
                                       }
-                                      return const Color.fromARGB(0, 90, 89, 89); // Transparent when unchecked
+                                      return Colors.transparent; // Default color when unselected
                                     },
                                   ),
-                                  checkColor: Colors.black,
+                                  checkColor: Colors.white, // White tick inside black box
                                   side: const BorderSide(color: Colors.black, width: 1),
                                   
                                   title: Text('$optionLetter. $option', style: TextStyle(fontSize: 20, color: Colors.black)),
