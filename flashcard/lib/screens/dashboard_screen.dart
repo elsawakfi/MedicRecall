@@ -368,6 +368,7 @@ class HomePageState extends State<HomePage> {
     for (var i = 0; i < topics.length; i++) {
 
       var map = topics[i];
+      bool rescheduled = false; 
       int numCards = seenCards[map["topic"]] ?? 0;
       
       var shade = numCards / (totalCards[map["topic"]]?? 1)*100;
@@ -397,19 +398,20 @@ class HomePageState extends State<HomePage> {
       while (targetDate.isBefore(testDay)){
         eventsForDate = selectedEvents[targetDate];
         if (eventsForDate != null) {
+         
           for (Event event in eventsForDate) {
-            bool rescheduled = false; 
             
-            if (event.toString().contains(topics[i]["topic"])){  
+            
+            if (event.toString().contains(map["topic"])){  
               
               if(targetDate.isAtSameMomentAs(DateTime(now.year, now.month, now.day, 0, 0, 0, 0))){
                 formattedDate = "Today";
                 //formattedDate = DateFormat('dd/MM/yyy').format(rescheduledDate);
               }
 
-            else if(targetDate.isBefore(DateTime(now.year, now.month, now.day, 0, 0, 0, 0)) && !rescheduled){
+             else if(targetDate.isBefore(DateTime(now.year, now.month, now.day, 0, 0, 0, 0)) && !rescheduled){
                 //reschedule study session.....
-                print("Rescheduling: ${topics[i]["topic"]}\n");
+                print("Rescheduling: ${map["topic"]}\n");
                 DateTime rescheduledDate = DateTime(targetDate.year, targetDate.month, targetDate.day+3, 0, 0, 0, 0);
                 //Skip a week and look greedily for next available day? 
                 while (selectedEvents[rescheduledDate] != null && rescheduledDate.isBefore(testDay) && !rescheduled){
@@ -421,6 +423,7 @@ class HomePageState extends State<HomePage> {
                 rescheduled = true; 
                 formattedDate = DateFormat('dd/MM/yyy').format(rescheduledDate);
                 targetDate = now;
+                print("Value of rescheduled: $rescheduled");
                 
               }
             else{
