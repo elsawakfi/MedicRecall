@@ -391,18 +391,21 @@ class HomePageState extends State<HomePage> {
       DateTime now = DateTime.now();
       String formattedDate = DateFormat('dd/MM/yyy').format(DateTime.now());
       //int increment = 0; 
-      List<Event>? eventsForDate;
+      Event? eventsForDate;
      
       DateTime targetDate = DateTime(_firstStudyDate.year, _firstStudyDate.month, _firstStudyDate.day-3, 0, 0, 0, 0);
       //DateTime targetDate = DateTime(now.year, now.month, now.day, 0, 0, 0, 0);
       while (targetDate.isBefore(testDay)){
-        eventsForDate = selectedEvents[targetDate];
-        if (eventsForDate != null) {
+        eventsForDate = selectedEvents[targetDate]?.last;
+        if (eventsForDate == null){
+          //print("Nada");
+        }
+        else{        // if (eventsForDate != null) {
          
-          for (Event event in eventsForDate) {
+        //   for (Event event in eventsForDate) {
             
             
-            if (event.toString().contains(map["topic"])){  
+            if (eventsForDate.toString().contains(map["topic"])){  
               
               if(targetDate.isAtSameMomentAs(DateTime(now.year, now.month, now.day, 0, 0, 0, 0))){
                 formattedDate = "Today";
@@ -411,36 +414,45 @@ class HomePageState extends State<HomePage> {
 
              else if(targetDate.isBefore(DateTime(now.year, now.month, now.day, 0, 0, 0, 0)) && !rescheduled){
                 //reschedule study session.....
-                print("Rescheduling: ${map["topic"]}\n");
+                //print("Rescheduling: ${map["topic"]}\n");
                 DateTime rescheduledDate = DateTime(targetDate.year, targetDate.month, targetDate.day+3, 0, 0, 0, 0);
                 //Skip a week and look greedily for next available day? 
-                while (selectedEvents[rescheduledDate] != null && rescheduledDate.isBefore(testDay) && !rescheduled){
+                if (selectedEvents[rescheduledDate] != null && rescheduledDate.isBefore(testDay) && !rescheduled)  {
                   rescheduledDate = DateTime(rescheduledDate.year, rescheduledDate.month, rescheduledDate.day+1, 0, 0, 0, 0);
                 }
 
                 selectedEvents[rescheduledDate] = [];
                 addSingleEvent(rescheduledDate, "${topics[i]["topic"]} flashcards", user);
-                rescheduled = true; 
-                formattedDate = DateFormat('dd/MM/yyy').format(rescheduledDate);
-                targetDate = now;
-                print("Value of rescheduled: $rescheduled");
+                
+                setState((){
+                  rescheduled = true; 
+                  targetDate = DateTime(now.year, now.month, now.day, 0, 0, 0, 0);
+                   formattedDate = DateFormat('dd/MM/yyy').format(rescheduledDate);
+                });
+               
+                //print("Value of rescheduled: $rescheduled");
                 
               }
             else{
                 formattedDate = DateFormat('dd/MM/yyy').format(targetDate);
                 
+                //print("$map is scheduled for $formattedDate\n");
+                
               }
               if ( shade >= 70 ){ topicColour = Colors.green;}
               else{topicColour = Colors.grey;}
-              break;  
+             
+               
           }      
-      }
-}     else { 
+     // }
+     //}    
+     else { 
           if (shade >= 70) {topicColour = Colors.green;}
           else{topicColour = Colors.grey;
           }    
           formattedDate = "N/A";
-}    
+}  }  
+  print("Target date is $targetDate\n");
  targetDate = targetDate.add(Duration(days: 1));
 }
     int nextReviewDateMilliseconds = (((dateToColourMap[topicCount![i]]! * 24 * 60 * 60) + topicLastSeen![i].seconds) * 1000).toInt();

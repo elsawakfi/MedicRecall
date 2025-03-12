@@ -519,14 +519,15 @@ class CalendarStateO extends State<Calendar> {
   Future<void> deleteAllEvents() async {
     selectedEvents
         .clear(); // sets the selectedEvents list to empty - delete all events being stored locally.
-
     QuerySnapshot u =
         await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
     String id = u.docs.last.id;
-    String docID = u.docs.first.id;
+    // String docID = u.docs.first.id;
     _eventsCollectionRef =
         // FirebaseFirestore.instance.collection('users/' + id + "/events");
         FirebaseFirestore.instance.collection('users/$id/events');
+    
+   
     var snapshots = await _eventsCollectionRef.get();
     for (var doc in snapshots.docs) {
       await doc.reference.delete();
@@ -543,11 +544,15 @@ class CalendarStateO extends State<Calendar> {
       }); // update field TestDay to be removed from database
     }
 
+
+   // await  _eventsCollectionRef.doc(docID).update({"events": []});
+
     selectedEvents[testDay]?.remove(Event(
         title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
     getTestDay();
     
-    await  _eventsCollectionRef.doc(docID).update({"events": []});
+    
+    
   }
 
   
@@ -1062,10 +1067,10 @@ class CalendarStateO extends State<Calendar> {
                       // Delete All Events Button
                       ElevatedButton.icon(
                         key: const Key('deleteButton'),
-                        onPressed: () {
+                        onPressed: () async {
                           testDay = null;
                           testDayBool = true;
-                          deleteAllEvents();
+                          await deleteAllEvents();
                           setState(() {});
 
                           // Show confirmation popup
