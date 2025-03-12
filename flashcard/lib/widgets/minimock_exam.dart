@@ -218,7 +218,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                     borderRadius: BorderRadius.circular(16),
                     color:  (remainingSeconds <= 600)
                     ? Colors.red.shade400
-                    : const Color.fromARGB(255, 235, 230, 239),
+                    : const Color.fromARGB(255, 222, 221, 222),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.2),
@@ -233,7 +233,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                         style: TextStyle(
                           color: (remainingSeconds <= 600)
                               ? Colors.white
-                              : Color.fromARGB(255, 98, 86, 139),
+                              : Color.fromARGB(255, 0, 0, 0),
                           fontSize: 18.5,
                           fontWeight: FontWeight.w500,
                         ),
@@ -247,9 +247,13 @@ class MiniMockExamState extends State<MiniMockExam> {
                 double maxScreenWidth = constraints.maxWidth * 0.5;
                 double maxPreferredWidth = 960; // 1920/2
 
+
                 return
                 Center(
                   child: Container(
+                    decoration: const BoxDecoration(
+                      color:   Color.fromARGB(255, 255, 255, 255),
+                    ),
                   constraints: BoxConstraints(
                     maxWidth: maxScreenWidth > maxPreferredWidth ? maxScreenWidth : maxPreferredWidth,
                   ),
@@ -275,7 +279,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                         height: 40.31,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
-                          color: const Color.fromARGB(255, 235, 230, 239),
+                          color: const Color.fromARGB(255, 222, 221, 222),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.2),
@@ -290,7 +294,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                             ? 'Flagged'
                             : 'Flag for review',
                               style: const TextStyle(
-                                color: Color.fromARGB(255, 98, 86, 139),
+                                color: Color.fromARGB(255, 0, 0, 0),
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -304,7 +308,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                               flaggedQuestions[currentQuestion]
                                   ? Icons.flag
                                   : Icons.flag_outlined,
-                              color: Color.fromARGB(255, 98, 86, 139),
+                              color: Color.fromARGB(255, 0, 0, 0),
                             ),
                         ),
                       ),
@@ -316,7 +320,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                           height: 40.31,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(16),
-                            color: const Color.fromARGB(255, 235, 230, 239),
+                            color: const Color.fromARGB(255, 222, 221, 222),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withOpacity(0.2),
@@ -329,7 +333,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                           child: Center(
                             child: Text('Question ${currentQuestion+1}/${questions.length}',
                               style: const TextStyle(
-                                color: Color.fromARGB(255, 98, 86, 139),
+                                color: Color.fromARGB(255, 0, 0, 0),
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -341,7 +345,8 @@ class MiniMockExamState extends State<MiniMockExam> {
                 // Display the current question text
                   Text(
                   questions[currentQuestion]['question'],
-                  style: TextStyle(fontSize: 20),
+                  style: TextStyle(fontSize: 20, color: Colors.black),
+                  
                 ),
                 const SizedBox(height: 20),
 
@@ -360,7 +365,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                               height: 45,
                                 alignment: Alignment.center,
                                 margin: const EdgeInsets.only(bottom: 10.5),                              decoration: BoxDecoration(
-                                color: Color.fromARGB(255, 235, 230, 239),
+                                color: Color.fromARGB(255, 222, 221, 222),
                                 borderRadius: BorderRadius.circular(8),
                                 boxShadow: [
                                   BoxShadow(
@@ -376,7 +381,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                               child: Text(
                                   '${index + 1}',
                                 style: TextStyle(
-                                  color: Color.fromARGB(255, 98, 86, 139),
+                                  color: Color.fromARGB(255, 0, 0, 0),
                                   fontSize: 21,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -400,6 +405,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                             },
                             onReorder: (oldIndex, newIndex) {
                               setState(() {
+                                
                                 if (newIndex > oldIndex) newIndex--; // Adjust the list based on movement of item
                                 // Update position of option in answer list
                                 final ranking = rankingAnswers[currentQuestion].removeAt(oldIndex);
@@ -418,21 +424,22 @@ class MiniMockExamState extends State<MiniMockExam> {
                                 index: optionIndex,
                                 child: Card(
                                   elevation: 3,
-                                  color: Color.fromARGB(255, 235, 230, 239),
+                                  color: Color.fromARGB(255, 222, 221, 222),
                                   child: ListTile(
                                     title: Text(
                                       '$optionLetter. $option',
                                       style: TextStyle(
                                         
-                                        color: Color.fromARGB(255, 98, 86, 139),
+                                        color: Color.fromARGB(255, 0, 0, 0),
                                         fontSize: 20,
                                       ),
                                     ),
-                                    trailing: Icon(Icons.drag_handle, color: Color.fromARGB(255, 98, 86, 139), size: 30),
+                                    trailing: Icon(Icons.drag_handle, color: Color.fromARGB(255, 0, 0, 0), size: 30),
                                   ),),
                                 );
                               
                             }).toList(),
+
                           ),
                         )]       
     ))]
@@ -494,7 +501,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                         height: 45,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
-                          color: const Color.fromARGB(255, 235, 230, 239),
+                          color: const Color.fromARGB(255, 222, 221, 222),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.2),
@@ -526,8 +533,8 @@ class MiniMockExamState extends State<MiniMockExam> {
                             });
                           }
                         },
-                        label: Text('Review Page', style: TextStyle(color:  Color.fromARGB(255, 98, 86, 139), fontSize: 16)),
-                        icon: Icon(Icons.search, color:  Color.fromARGB(255, 98, 86, 139),),
+                        label: Text('Review Page', style: TextStyle(color:  Color.fromARGB(255, 0, 0, 0), fontSize: 16)),
+                        icon: Icon(Icons.search, color:  Color.fromARGB(255, 0, 0, 0),),
                     )),
                     const Spacer(),
                     if (currentQuestion > 0) //Prevents button being shown if no previous questions available
@@ -537,10 +544,10 @@ class MiniMockExamState extends State<MiniMockExam> {
                             currentQuestion--; // Move to previous question
                           });
                         },
-                        icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 98, 86, 139)),
-                        label: Text('Previous', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 16)),
+                        icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0)),
+                        label: Text('Previous', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 16)),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Color.fromARGB(255, 235, 230, 239),
+                          backgroundColor: Color.fromARGB(255, 222, 221, 222),
                         ),
                       ),
                     const SizedBox(width: 16),
@@ -551,10 +558,10 @@ class MiniMockExamState extends State<MiniMockExam> {
                             currentQuestion++; // Move to next question
                           });
                         },
-                        icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139)),
-                        label: Text('Next', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 16)),
+                        icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 0, 0, 0)),
+                        label: Text('Next', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 16)),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Color.fromARGB(255, 235, 230, 239),
+                          backgroundColor: Color.fromARGB(255, 222, 221, 222),
                         ),
                       ),
                     if (currentQuestion == questions.length - 1)
@@ -583,10 +590,10 @@ class MiniMockExamState extends State<MiniMockExam> {
                           }
 
                         },
-                        icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139)),
-                        label: Text('Review', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 16)),
+                        icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 0, 0, 0)),
+                        label: Text('Review', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 16)),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Color.fromARGB(255, 235, 230, 239),
+                          backgroundColor: Color.fromARGB(255, 222, 221, 222),
                         ),
                       ),
                     ],
