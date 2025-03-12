@@ -16,11 +16,11 @@ class MiniMockHelpButtonState extends State<MiniMockHelpButton> {
         _helpPopup(context);
       },
       clipBehavior: Clip.none,
-      backgroundColor: const Color.fromARGB(255, 235, 230, 239),
+      backgroundColor: const Color.fromARGB(255, 222, 221, 222),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
-      child: const Icon(Icons.question_mark, color: Color.fromARGB(255, 98, 86, 139),),
+      child: const Icon(Icons.question_mark, color: Color.fromARGB(255, 0, 0, 0),),
     );
   }
 
