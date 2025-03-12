@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flashcard_x/screens/fullmock_review.dart';
 import 'package:flashcard_x/screens/minimock_scoring.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
@@ -522,26 +523,50 @@ class MiniMockExamState extends State<MiniMockExam> {
                           ],
                         ),
                         child: TextButton.icon(onPressed: () async{
-                          int? newIndex = await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => MiniMockReview(
-                                miniMockWidget: this,
-                                rankingLength: rankingAnswers.length,
-                                multiChoiceLength: multiChoiceAnswers.length,
-                                flaggedQuestions: flaggedQuestions,
-                                displayTime: _displayTime,
-                                remainingSeconds: remainingSeconds,
+                          if (widget.questionDirectory.contains('mini-mock')) {
+                            int? newIndex = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => MiniMockReview(
+                                  miniMockWidget: this,
+                                  rankingLength: rankingAnswers.length,
+                                  multiChoiceLength: multiChoiceAnswers.length,
+                                  flaggedQuestions: flaggedQuestions,
+                                  displayTime: _displayTime,
+                                  remainingSeconds: remainingSeconds,
+                                ),
                               ),
-                            ),
-                          );
-                          // statement bellow allows for faster page update
-                          // Must check for null in case user finishes exam and no value is returned
-                          if (newIndex != null && newIndex != currentQuestion){
-                            setState(() {
-                              currentQuestion = newIndex;
-                            });
-                          }
+                            );
+                            // statement bellow allows for faster page update
+                            // Must check for null in case user finishes exam and no value is returned
+                            if (newIndex != null && newIndex != currentQuestion){
+                              setState(() {
+                                currentQuestion = newIndex;
+                              });
+                            }
+                          } else if (widget.questionDirectory.contains('full-mock')) {
+                            // On pressed load new page and wait for a returned value
+                            int? newIndex = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => FullMockReview(
+                                  fullMockWidget: this,
+                                  rankingLength: rankingAnswers.length,
+                                  multiChoiceLength: multiChoiceAnswers.length,
+                                  flaggedQuestions: flaggedQuestions,
+                                  displayTime: _displayTime,
+                                  remainingSeconds: remainingSeconds,
+                                ),
+                              ),
+                            );
+                            // statement bellow allows for faster page update
+                            // Must check for null in case user finishes exam and no value is returned
+                            if (newIndex != null && newIndex != currentQuestion){
+                              setState(() {
+                                currentQuestion = newIndex;
+                              });
+                            }
+                          };
                         },
                         label: Text('Review Page', style: TextStyle(color:  Color.fromARGB(255, 0, 0, 0), fontSize: 16)),
                         icon: Icon(Icons.search, color:  Color.fromARGB(255, 0, 0, 0),),
@@ -577,28 +602,50 @@ class MiniMockExamState extends State<MiniMockExam> {
                     if (currentQuestion == questions.length - 1)
                       ElevatedButton.icon(
                         onPressed: () async {
-                          // On pressed load new page and wait for a returned value
-                          int? newIndex = await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => MiniMockReview(
-                                miniMockWidget: this,
-                                rankingLength: rankingAnswers.length,
-                                multiChoiceLength: multiChoiceAnswers.length,
-                                flaggedQuestions: flaggedQuestions,
-                                displayTime: _displayTime,
-                                remainingSeconds: remainingSeconds,
+                          if (widget.questionDirectory.contains('mini-mock')) {
+                            int? newIndex = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => MiniMockReview(
+                                  miniMockWidget: this,
+                                  rankingLength: rankingAnswers.length,
+                                  multiChoiceLength: multiChoiceAnswers.length,
+                                  flaggedQuestions: flaggedQuestions,
+                                  displayTime: _displayTime,
+                                  remainingSeconds: remainingSeconds,
+                                ),
                               ),
-                            ),
-                          );
-                          // statement bellow allows for faster page update
-                          // Must check for null in case user finishes exam and no value is returned
-                          if (newIndex != null && newIndex != currentQuestion){
-                            setState(() {
-                              currentQuestion = newIndex;
-                            });
-                          }
-
+                            );
+                            // statement bellow allows for faster page update
+                            // Must check for null in case user finishes exam and no value is returned
+                            if (newIndex != null && newIndex != currentQuestion){
+                              setState(() {
+                                currentQuestion = newIndex;
+                              });
+                            }
+                          } else if (widget.questionDirectory.contains('full-mock')) {
+                            // On pressed load new page and wait for a returned value
+                            int? newIndex = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => FullMockReview(
+                                  fullMockWidget: this,
+                                  rankingLength: rankingAnswers.length,
+                                  multiChoiceLength: multiChoiceAnswers.length,
+                                  flaggedQuestions: flaggedQuestions,
+                                  displayTime: _displayTime,
+                                  remainingSeconds: remainingSeconds,
+                                ),
+                              ),
+                            );
+                            // statement bellow allows for faster page update
+                            // Must check for null in case user finishes exam and no value is returned
+                            if (newIndex != null && newIndex != currentQuestion){
+                              setState(() {
+                                currentQuestion = newIndex;
+                              });
+                            }
+                          };
                         },
                         icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 0, 0, 0)),
                         label: Text('Review', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 16)),
