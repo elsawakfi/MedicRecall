@@ -11,13 +11,6 @@ import 'package:flashcard_x/screens/study_session_manager.dart';
 import 'package:flashcard_x/screens/landing_service.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-/*import 'package:flashcard_x/widgets/drawer_widget.dart';
-import 'package:flashcard_x/widgets/event.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flashcard_x/screens/dashboard_screen.dart';
-import 'package:table_calendar/table_calendar.dart';*/
-
 class CustomFloatingButton extends StatefulWidget {
   const CustomFloatingButton({super.key});
 
@@ -39,7 +32,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
   int buildCount = 0;
   bool testDayBool = true;
   bool buttonPressed = false;
-  bool stopShowing = false; 
+  bool stopShowing = false;
   late String testDayString = "Test day not set";
 
   final Map<String, bool> _isHovered = {};
@@ -59,27 +52,22 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
   }
 
   Future<void> setStopShowing(User user, [bool value = false]) async {
-  await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-    'stopShowing': value,
-    'popUpTime': FieldValue.serverTimestamp(), 
-  }, SetOptions(merge: true));
-   // Merge to avoid overwriting other fields
-}
+    await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+      'stopShowing': value,
+      'popUpTime': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+    // Merge to avoid overwriting other fields
+  }
 
   Future<void> getStopShowing(User user) async {
   DocumentSnapshot doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
 
-  if (doc.exists) {
-    
-    Timestamp? timestamp = doc['popUpTime'];
+    if (doc.exists) {
+      Timestamp? timestamp = doc['popUpTime'];
 
-    if (doc['stopShowing'] != null && timestamp != null) {
-      DateTime savedTime = timestamp.toDate();
-      DateTime currentTime = DateTime.now();
-      // print("Saved time");
-      // print(savedTime);
-      // print("Current time");
-      // print(currentTime);
+      if (doc['stopShowing'] != null && timestamp != null) {
+        DateTime savedTime = timestamp.toDate();
+        DateTime currentTime = DateTime.now();
 
       if (currentTime.difference(savedTime).inMinutes >= 1) {
         await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
@@ -191,10 +179,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       }
     } else {
       user = auth.currentUser!;
-     
     }
     getStopShowing(user!);
-    
   }
 
   Future<void> getFirstStudyDay() async {
@@ -215,18 +201,17 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     }
   }
 
-  Future <void> shouldShowDialog() async{
-      await getTestDay();
-      await getStopShowing(user!);
-      
-     
-      if (mounted && 
-          testDayBool && 
-          _examDate == null && 
-          landingService.onLanding &&
-          !stopShowing){
-       _showRevisionPlanDialog(context);
-       }
+  Future<void> shouldShowDialog() async {
+    await getTestDay();
+    await getStopShowing(user!);
+
+    if (mounted &&
+        testDayBool &&
+        _examDate == null &&
+        landingService.onLanding &&
+        !stopShowing) {
+      _showRevisionPlanDialog(context);
+    }
   }
 
   // Revision dialog
@@ -298,11 +283,11 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
           ],
         );
       },
-    
-    );setState(() {});
+    );
+    setState(() {});
   }
 
-    // Show the date picker dialog to select exam date
+  // Show the date picker dialog to select exam date
   void _showExamDateDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -344,14 +329,14 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                 child: const Text(
                   'Select Exam Date',
                   style: TextStyle(fontSize: 16),
-                  ),
+                ),
               ),
               const SizedBox(),
               Text(
                 _examDate != null
                     ? 'Selected Date: ${DateFormat('dd MMM, yyyy').format(_examDate!)}' // UK Format
-                  : 'No Date Selected',
-              style: TextStyle(
+                    : 'No Date Selected',
+                style: TextStyle(
                   color: _examDate != null
                       ? Colors.black
                       : const Color.fromRGBO(21, 58, 103, 1),
@@ -365,14 +350,13 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     );
   }
 
-   @override
-  void didChangeDependencies(){
+  @override
+  void didChangeDependencies() {
     super.didChangeDependencies();
-    //waits for build function to complete and then calls back to call the condition checking function 
-    WidgetsBinding.instance.addPostFrameCallback((_){
+    //waits for build function to complete and then calls back to call the condition checking function
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       shouldShowDialog();
     });
-  
   }
 
   // Method to save firstStudyDay
@@ -405,44 +389,49 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
             mainAxisSize: MainAxisSize.min,
             children: [
               _buildCheckbox(
-                checkbox1, 
-                'Official MSRA Practice Paper', 
-                description: 'The official past paper is available on the Health Education England website. '
-                'It contains 22 Professional Dilemma questions with realistic scenarios and reliable rationales created '
-                'by the same people who write the questions for the MSRA, making it a very valuable resource.\n\n'
-                'You will be prompted to specify your preferred number of practice attempts upon selection.',
+                checkbox1,
+                'Official MSRA Practice Paper',
+                description:
+                    'The official past paper is available on the Health Education England website. '
+                    'It contains 22 Professional Dilemma questions with realistic scenarios and reliable rationales created '
+                    'by the same people who write the questions for the MSRA, making it a very valuable resource.\n\n'
+                    'You will be prompted to specify your preferred number of practice attempts upon selection.',
                 showInfo: true,
               ),
               _buildCheckbox(
-                checkbox2, 
+                checkbox2,
                 'Full-sized Mock Exam',
-                description: 'Our full-sized mock exam has been designed to mimic the exact conditions you will have on exam day, '
-                'helping you optimize timings while exposing you to different professional scenarios. It includes 50 questions that '
-                'have been carefully created to align with official rationales and GMC guidelines.\n\n'
-                'You will be prompted to specify your preferred number of practice attempts upon selection.',
+                description:
+                    'Our full-sized mock exam has been designed to mimic the exact conditions you will have on exam day, '
+                    'helping you optimize timings while exposing you to different professional scenarios. It includes 50 questions that '
+                    'have been carefully created to align with official rationales and GMC guidelines.\n\n'
+                    'You will be prompted to specify your preferred number of practice attempts upon selection.',
                 showInfo: true,
               ),
               _buildCheckbox(
-                checkbox3, 
+                checkbox3,
                 'Mini-mocks',
-                description: 'We have two mini-mocks available on the platform, which each contain 25 reliable questions. '
-                'They have been created to help track your progress, fine-tune exam timings and increase your exposure to different professional scenarios.', 
+                description:
+                    'We have two mini-mocks available on the platform, which each contain 25 reliable questions. '
+                    'They have been created to help track your progress, fine-tune exam timings and increase your exposure to different professional scenarios.',
                 showInfo: true,
               ),
               _buildCheckbox(
-                checkbox4, 
+                checkbox4,
                 'Flashcard Decks',
-                description: 'Our pre-made flashcard decks contain high-yield principles derived from GMC guidelines and official rationales. '
-                'This resource uses our unique, evidence-based algorithms to help you harness the power of spaced repetition and active recall!',
+                description:
+                    'Our pre-made flashcard decks contain high-yield principles derived from GMC guidelines and official rationales. '
+                    'This resource uses our unique, evidence-based algorithms to help you harness the power of spaced repetition and active recall!',
                 showInfo: true,
               ),
               _buildCheckbox(
-                checkbox5, 
+                checkbox5,
                 'Official SJT Practice Paper',
-                description: 'This is a practice paper released by the UKFPO as a resource for doctors preparing for the FY2 Situational Judgement Test, '
-                'which is part of the application process for stand-alone FY2 training. Be aware that this paper only includes 18 RATING questions '
-                '(not a format of questions that appears in the MSRA). '
-                'Nevertheless, increasing your exposure to questions and rationales created by the UKFPO is helpful when preparing for the Professional Dilemmas Paper.',
+                description:
+                    'This is a practice paper released by the UKFPO as a resource for doctors preparing for the FY2 Situational Judgement Test, '
+                    'which is part of the application process for stand-alone FY2 training. Be aware that this paper only includes 18 RATING questions '
+                    '(not a format of questions that appears in the MSRA). '
+                    'Nevertheless, increasing your exposure to questions and rationales created by the UKFPO is helpful when preparing for the Professional Dilemmas Paper.',
                 showInfo: true,
               ),
             ],
@@ -494,7 +483,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                 // Close current dialog
                 Navigator.of(context).pop();
                 // Check if any of the resources requiring repetitions are selected
-                bool showRepetitionDialog = checkbox1.value || checkbox2.value || checkbox5.value;
+                bool showRepetitionDialog = checkbox1.value || checkbox2.value;
 
                 if (showRepetitionDialog) {
                   // Show repetition dialog for selected resources
@@ -522,245 +511,217 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
 
   // Show dialog to ask for number of repetitions
   void _showRepetitionDialog(BuildContext context, List<String> selectedResources) {
-  final List<int> repetitionOptions = [1, 2, 3, 4, 5, 6];
+  final List<int> repetitionOptions = [2, 3, 4, 5, 6];
 
-  // Define separate variables for each resource's repetition count
-  int? officialMSRARepetitions;
-  int? fullSizedMockRepetitions;
-  int? officialSJTRepetitions;
+    // Define separate variables for each resource's repetition count
+    int? officialMSRARepetitions;
+    int? fullSizedMockRepetitions;
 
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return AlertDialog(
-            backgroundColor: const Color(0xFFE6EDF2),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(5.0),
-            ),
-            title: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'How many times would you like to practice each selected resource?',
-                  style: TextStyle(
-                    color: Color.fromRGBO(21, 58, 103, 1),
-                    fontSize: 21,
-                    fontWeight: FontWeight.w500,
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              backgroundColor: const Color(0xFFE6EDF2),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5.0),
+              ),
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'How many times would you like to practice each selected resource?',
+                    style: TextStyle(
+                      color: Color.fromRGBO(21, 58, 103, 1),
+                      fontSize: 21,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
+                  const SizedBox(height: 11),
+                  const Text(
+                    'It is recommended to practice at least three times.\n'
+                    'Your chosen number of repetitions will apply to each resource individually.',
+                    style: TextStyle(
+                      color: Color.fromRGBO(21, 58, 103, 1),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400, // Regular font weight
+                    ),
+                  ),
+                ],
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    if (selectedResources
+                        .contains('Official MSRA Practice Paper'))
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Official MSRA Practice Paper',
+                            style: TextStyle(
+                              color: Color.fromRGBO(21, 58, 103, 1),
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Wrap(
+                            spacing: 10, // Horizontal spacing
+                            children: repetitionOptions.map((int value) {
+                              return ChoiceChip(
+                                label: Text(
+                                  '$value',
+                                  style: TextStyle(
+                                    color: officialMSRARepetitions == value
+                                        ? Colors.white
+                                        : const Color.fromRGBO(21, 58, 103, 1),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                selected: officialMSRARepetitions == value,
+                                onSelected: (bool selected) {
+                                  setState(() {
+                                    officialMSRARepetitions =
+                                        selected ? value : null;
+                                  });
+                                },
+                                selectedColor:
+                                    const Color.fromRGBO(73, 148, 236, 1),
+                                backgroundColor: Colors.white,
+                              );
+                            }).toList(),
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
+                    if (selectedResources.contains('Full-sized Mock Exam'))
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Full-sized Mock Exam',
+                            style: TextStyle(
+                              color: Color.fromRGBO(21, 58, 103, 1),
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Wrap(
+                            spacing: 10, // Horizontal spacing
+                            children: repetitionOptions.map((int value) {
+                              return ChoiceChip(
+                                label: Text(
+                                  '$value',
+                                  style: TextStyle(
+                                    color: fullSizedMockRepetitions == value
+                                        ? Colors.white
+                                        : const Color.fromRGBO(21, 58, 103, 1),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                selected: fullSizedMockRepetitions == value,
+                                onSelected: (bool selected) {
+                                  setState(() {
+                                    fullSizedMockRepetitions =
+                                        selected ? value : null;
+                                  });
+                                },
+                                selectedColor:
+                                    const Color.fromRGBO(73, 148, 236, 1),
+                                backgroundColor: Colors.white,
+                              );
+                            }).toList(),
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
+                  ],
                 ),
-                const SizedBox(height: 11),
-                const Text(
-                  'It is recommended to practice at least three times.\n'
-                  'However, for the Official SJT Practice Paper, we suggest only one repetition.\n\n'
-                  'Your chosen number of repetitions will apply to each resource individually.',
-                  style: TextStyle(
-                    color: Color.fromRGBO(21, 58, 103, 1),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400, // Regular font weight
-                  ),
+              ),
+              actions: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        _showOptionsDialog(context);
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12),
+                        minimumSize: const Size(120, 45),
+                      ),
+                      child: const Text(
+                        'Previous',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    TextButton(
+                      onPressed: () async {
+                        // Validate that all selected resources have a repetition count
+                        bool isValid = true;
+                        if (selectedResources
+                                .contains('Official MSRA Practice Paper') &&
+                            officialMSRARepetitions == null) {
+                          isValid = false;
+                        }
+                        if (selectedResources
+                                .contains('Full-sized Mock Exam') &&
+                            fullSizedMockRepetitions == null) {
+                          isValid = false;
+                        }
+
+                        if (isValid) {
+                          // Save repetition counts to the database
+                          QuerySnapshot u = await _userCollectionRef
+                              .where("userID", isEqualTo: user?.uid)
+                              .get();
+
+                          var id = u.docs.last.id;
+                          await _userCollectionRef.doc(id).update({
+                            'officialMSRARepetitions': officialMSRARepetitions,
+                            'fullSizedMockRepetitions':
+                                fullSizedMockRepetitions,
+                          });
+
+                          if (context.mounted) {
+                            Navigator.of(context).pop();
+                            _scheduleCompleteDialog(context);
+                          }
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                  'Please select number of repetitions for all resources'),
+                            ),
+                          );
+                        }
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
+                        minimumSize: const Size(120, 45),
+                      ),
+                      child: const Text(
+                        'Submit',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ),
+                  ],
                 ),
               ],
-            ),
-            content: SingleChildScrollView(
-              child: Column(
-                children: [
-                  if (selectedResources.contains('Official MSRA Practice Paper'))
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Official MSRA Practice Paper',
-                          style: TextStyle(
-                            color: Color.fromRGBO(21, 58, 103, 1),
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Wrap(
-                          spacing: 10, // Horizontal spacing
-                          children: repetitionOptions.map((int value) {
-                            return ChoiceChip(
-                              label: Text(
-                                '$value',
-                                style: const TextStyle(
-                                  color: Color.fromRGBO(21, 58, 103, 1),
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              selected: officialMSRARepetitions == value,
-                              onSelected: (bool selected) {
-                                setState(() {
-                                  officialMSRARepetitions = selected ? value : null;
-                                });
-                              },
-                              selectedColor: const Color.fromRGBO(73, 148, 236, 1),
-                              backgroundColor: Colors.white,
-                            );
-                          }).toList(),
-                        ),
-                        const SizedBox(height: 20),
-                      ],
-                    ),
-                  if (selectedResources.contains('Full-sized Mock Exam'))
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Full-sized Mock Exam',
-                          style: TextStyle(
-                            color: Color.fromRGBO(21, 58, 103, 1),
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Wrap(
-                          spacing: 10, // Horizontal spacing
-                          children: repetitionOptions.map((int value) {
-                            return ChoiceChip(
-                              label: Text(
-                                '$value',
-                                style: const TextStyle(
-                                  color: Color.fromRGBO(21, 58, 103, 1),
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              selected: fullSizedMockRepetitions == value,
-                              onSelected: (bool selected) {
-                                setState(() {
-                                  fullSizedMockRepetitions = selected ? value : null;
-                                });
-                              },
-                              selectedColor: const Color.fromRGBO(73, 148, 236, 1),
-                              backgroundColor: Colors.white,
-                            );
-                          }).toList(),
-                        ),
-                        const SizedBox(height: 20),
-                      ],
-                    ),
-                  if (selectedResources.contains('Official SJT Practice Paper'))
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Official SJT Practice Paper',
-                          style: TextStyle(
-                            color: Color.fromRGBO(21, 58, 103, 1),
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Wrap(
-                          spacing: 10, // Horizontal spacing
-                          children: repetitionOptions.map((int value) {
-                            return ChoiceChip(
-                              label: Text(
-                                '$value',
-                                style: const TextStyle(
-                                  color: Color.fromRGBO(21, 58, 103, 1),
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              selected: officialSJTRepetitions == value,
-                              onSelected: (bool selected) {
-                                setState(() {
-                                  officialSJTRepetitions = selected ? value : null;
-                                });
-                              },
-                              selectedColor: const Color.fromRGBO(73, 148, 236, 1),
-                              backgroundColor: Colors.white,
-                            );
-                          }).toList(),
-                        ),
-                        const SizedBox(height: 20),
-                      ],
-                    ),
-                ],
-              ),
-            ),
-            actions: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      _showOptionsDialog(context);
-                    },
-                    style: TextButton.styleFrom(
-                      foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      minimumSize: const Size(120, 45),
-                    ),
-                    child: const Text(
-                      'Previous',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  TextButton(
-                    onPressed: () async {
-                      // Validate that all selected resources have a repetition count
-                      bool isValid = true;
-                      if (selectedResources.contains('Official MSRA Practice Paper') && officialMSRARepetitions == null) {
-                        isValid = false;
-                      }
-                      if (selectedResources.contains('Full-sized Mock Exam') && fullSizedMockRepetitions == null) {
-                        isValid = false;
-                      }
-                      if (selectedResources.contains('Official SJT Practice Paper') && officialSJTRepetitions == null) {
-                        isValid = false;
-                      }
-
-                      if (isValid) {
-                        // Save repetition counts to the database
-                        QuerySnapshot u = await _userCollectionRef
-                            .where("userID", isEqualTo: user?.uid)
-                            .get();
-
-                        var id = u.docs.last.id;
-                        await _userCollectionRef.doc(id).update({
-                          'officialMSRARepetitions': officialMSRARepetitions,
-                          'fullSizedMockRepetitions': fullSizedMockRepetitions,
-                          'officialSJTRepetitions': officialSJTRepetitions,
-                        });
-
-                        if (context.mounted) {
-                          Navigator.of(context).pop();
-                          _scheduleCompleteDialog(context);
-                        }
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Please enter number of repetitions for all resources'),
-                          ),
-                        );
-                      }
-                    },
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
-                      minimumSize: const Size(120, 45),
-                    ),
-                    child: const Text(
-                      'Submit',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          );
-        },
-      );
-    },
-  );
-}
+            );
+          },
+        );
+      },
+    );
+  }
 
   void _showExclusionDialog(BuildContext context) {
     List<String> daysOfTheWeek = [
@@ -787,7 +748,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               actions: [
                 TextButton(
                   onPressed: () {
-                    Navigator.of(context).pop(); // Close dialog
+                    Navigator.of(context).pop();
                     _showExamDateDialog(context);
                   },
                   style: TextButton.styleFrom(
@@ -795,7 +756,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                   ),
                   child: const Text(
                     'Previous',
-                    style: TextStyle(fontSize: 16),),
+                    style: TextStyle(fontSize: 16),
+                  ),
                 ),
                 TextButton(
                   onPressed: () async {
@@ -815,20 +777,20 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     });
 
                     if (context.mounted) {
-                      Navigator.of(context).pop(); // Close dialog after saving
+                      Navigator.of(context).pop();
                       _showOptionsDialog(context);
                     }
                   },
                   style: TextButton.styleFrom(
                     foregroundColor: Colors.white,
-                    backgroundColor: Colors.green,
+                    backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
                     padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                     minimumSize: const Size(120, 45),
                   ),
                   child: const Text(
                     'Next',
                     style: TextStyle(fontSize: 16),
-                    ),
+                  ),
                 ),
               ],
             );

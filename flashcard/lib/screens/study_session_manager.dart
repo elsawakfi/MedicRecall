@@ -235,11 +235,8 @@ class StudySessionManager {
       }
 
       if (selectedResources.contains("Official SJT Practice Paper")) {
-        final repetitions =
-            (userData['officialSJTRepetitions'] as num?)?.toInt() ?? 1;
-
-        await _scheduleSJTPaper(firstStudyDay, normalizedTestDay, daysUntilTest,
-            generatedEvents, repetitions);
+        await _scheduleSJTPaper(
+            firstStudyDay, normalizedTestDay, daysUntilTest, generatedEvents);
       }
 
       return generatedEvents;
@@ -404,25 +401,14 @@ class StudySessionManager {
     }
   }
 
-  Future<void> _scheduleSJTPaper(
-      DateTime firstStudyDay,
-      DateTime testDay,
-      int daysUntilTest,
-      Map<DateTime, List<Event>> generatedEvents,
-      int repetitions) async {
+  Future<void> _scheduleSJTPaper(DateTime firstStudyDay, DateTime testDay,
+      int daysUntilTest, Map<DateTime, List<Event>> generatedEvents) async {
     final userId = auth.currentUser!.uid;
 
-    DateTime SJTDate;
-
-    if (repetitions == 1) {
-      // Schedule 75% into the revision period
-      SJTDate =
-          firstStudyDay.add(Duration(days: (daysUntilTest * 3 / 4).round()));
-    } else {
-      // Default: Schedule on the first study day
-      SJTDate = DateTime(firstStudyDay.year, firstStudyDay.month,
-          firstStudyDay.day, 0, 0, 0, 0);
-    }
+    // Always schedule at 75% through the study period
+    DateTime SJTDate =
+        firstStudyDay.add(Duration(days: (daysUntilTest * 3 / 4).round()));
+    SJTDate = DateTime(SJTDate.year, SJTDate.month, SJTDate.day, 0, 0, 0, 0);
 
     // Check if the calculated date is excluded
     if (await _isExcludedDay(SJTDate, userId) ||
