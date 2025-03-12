@@ -1,11 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flashcard_x/main.dart' as app;
-import 'integration_test.dart' as integration;
+import 'package:integration_test/integration_test.dart';
+import 'calendar_test.dart' as calendar;
 import 'flashcard_test.dart' as flashcard;
+import 'mock_test.dart' as mock;
 
 void main() {
-  integration.main();
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  testWidgets("Log into the app",
+          (WidgetTester tester) async {
+        await tester.pump(const Duration(seconds: 1));
+        tester.printToConsole('Testing login');
+        await loginTest(tester);
+        await tester.pumpAndSettle();
+      });
+
+  calendar.main();
+  mock.main();
   // flashcard.main();
 }
 
