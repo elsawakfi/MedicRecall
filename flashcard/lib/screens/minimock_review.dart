@@ -98,7 +98,7 @@ Widget build(BuildContext context) {
             Container(
               margin: const EdgeInsets.only(left: 32),
               padding: const EdgeInsets.all(8.0),
-              child: const Text('Review'),
+              child: const Text('Review Page'),
             ),
           ],
         ),
@@ -142,8 +142,12 @@ Widget build(BuildContext context) {
     body: LayoutBuilder( builder: (context, constraints) {
       double maxScreenWidth = constraints.maxWidth * 0.5;
       double maxPreferredWidth = 960; // 1920/2
+
       return Center(
         child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+          ),
           constraints: BoxConstraints(
             maxWidth: maxScreenWidth > maxPreferredWidth ? maxScreenWidth : maxPreferredWidth,
           ),
@@ -372,8 +376,8 @@ Widget build(BuildContext context) {
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 98, 86, 139)),
-                      label: Text('Back',  style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 16)),
+                      icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 222, 221, 222)),
+                      label: Text('Back',  style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 16)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color.fromARGB(255, 235, 230, 239),
                       ),
