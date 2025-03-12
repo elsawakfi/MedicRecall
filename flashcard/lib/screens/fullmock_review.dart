@@ -156,6 +156,7 @@ Widget build(BuildContext context) {
             Spacer(),
             Expanded(child: 
             SingleChildScrollView(
+              child: Align(alignment: Alignment.center,
               child:
             ExpansionPanelList(
               elevation: 1,
@@ -167,15 +168,15 @@ Widget build(BuildContext context) {
                   _isOpen[i] = !_isOpen[i];
                 });
               },
-            ),
-          ),),
-
-                ExpansionPanelList(
-  expansionCallback: (index, isExpanded) {
-    setState(() {
-      _isOpen[index] = !isExpanded;
-    });
-  },
+          //   ),
+          // ),),
+  //        
+  //               ExpansionPanelList(
+  // expansionCallback: (index, isExpanded) {
+  //   setState(() {
+  //     _isOpen[index] = !isExpanded;
+  //   });
+  // },
   children: [
     // Ranking Questions Panel
     ExpansionPanel(
@@ -230,6 +231,10 @@ Widget build(BuildContext context) {
     ),
   ],
 ),
+              ),
+            ),
+            ),
+            
 
 Spacer(),
               Row(
