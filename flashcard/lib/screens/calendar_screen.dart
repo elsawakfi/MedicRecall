@@ -585,6 +585,7 @@ class CalendarStateO extends State<Calendar> {
   Future<void> initializeUserAndTestDay() async {
     await getUser();
     await getTestDay();
+    await _loadExcludedDays(); // Load excluded days from Firebase
     if (testDay != null) {
       await getEventsFromDB(); // Then load events from database
       if (selectedEvents.isEmpty){
@@ -879,20 +880,32 @@ class CalendarStateO extends State<Calendar> {
                             ),
                             enabledDayPredicate: (day) {
                               final normalizedDay = DateTime(day.year, day.month, day.day);
+                              final dayName = _getDayName(normalizedDay.weekday);
+                              
+                              // Always show the test day
+                              if (testDay != null && isSameDay(normalizedDay, testDay!)) {
+                                return true;
+                              }
+                              
+                              // Check if day is before today or after test day
                               if (normalizedDay.isBefore(today) || 
                                   (testDay != null && normalizedDay.isAfter(testDay!))) {
                                 return false;
                               }
-                              final dayName = _getDayName(normalizedDay.weekday);
-                              return !(revisionDays.contains(dayName));
+                              
+                              // Check if day is in excluded days
+                              if (revisionDays.contains(dayName)) {
+                                return false;
+                              }
+                              
+                              return true;
                             },
                             onFormatChanged: (CalendarFormat _format) {
                               setState(() {
                                 format = _format;
                               });
                             },
-                            onDaySelected:
-                                (DateTime selectDay, DateTime focusDay) {
+                            onDaySelected: (DateTime selectDay, DateTime focusDay) {
                               setState(() {
                                 selectedDay = selectDay;
                                 focusedDay = focusDay;
@@ -908,21 +921,17 @@ class CalendarStateO extends State<Calendar> {
                                 return Positioned(
                                   bottom: 2,
                                   child: Container(
-                                    width:
-                                        60, // Increased container width significantly
+                                    width: 60,
                                     child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
+                                      mainAxisAlignment: MainAxisAlignment.center,
                                       mainAxisSize: MainAxisSize.min,
                                       children: events.take(3).map((event) {
                                         return Container(
-                                          margin: const EdgeInsets.symmetric(
-                                              horizontal: 1),
-                                          width: 18, // Made lines much longer
+                                          margin: const EdgeInsets.symmetric(horizontal: 1),
+                                          width: 18,
                                           height: 3,
                                           decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(1.5),
+                                            borderRadius: BorderRadius.circular(1.5),
                                             color: (event as Event).color,
                                           ),
                                         );
@@ -931,8 +940,7 @@ class CalendarStateO extends State<Calendar> {
                                   ),
                                 );
                               },
-                            ),
-                            headerStyle: HeaderStyle(
+                            ),headerStyle: HeaderStyle(
                               titleTextStyle: TextStyle(
                                 fontSize: 40,
                                 fontWeight: FontWeight.bold,
@@ -1443,5 +1451,26 @@ class CalendarStateO extends State<Calendar> {
         ],
       ),
     );
+  }
+
+  // Load excluded days from Firebase
+  Future<void> _loadExcludedDays() async {
+    try {
+      QuerySnapshot querySnapshot = await _userCollectionRef
+          .where("userID", isEqualTo: user.uid)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        var userDoc = querySnapshot.docs.first.data() as Map<String, dynamic>;
+        if (userDoc.containsKey("excludedDays")) {
+          var excludedDays = userDoc["excludedDays"] as List<dynamic>;
+          setState(() {
+            revisionDays = excludedDays.map((day) => day.toString()).toList();
+          });
+        }
+      }
+    } catch (e) {
+      print("Error loading excluded days: $e");
+    }
   }
 }
