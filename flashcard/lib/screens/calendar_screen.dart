@@ -854,6 +854,115 @@ class CalendarStateO extends State<Calendar> {
                                     child: Row(
                                       mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
+                                        // Add new chevron
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            border:
+                                                Border.all(color: Colors.white),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                          child: Material(
+                                            color: Colors.transparent,
+                                            child: InkWell(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              onTap: () {
+                                                setState(() {
+                                                  switch (format) {
+                                                    case CalendarFormat.month:
+                                                      focusedDay = DateTime(
+                                                        focusedDay.year,
+                                                        focusedDay.month - 1,
+                                                        focusedDay.day,
+                                                      );
+                                                      break;
+                                                    case CalendarFormat.week:
+                                                      focusedDay = focusedDay
+                                                          .subtract(Duration(
+                                                              days: 7));
+                                                      break;
+                                                    case CalendarFormat
+                                                          .twoWeeks:
+                                                      focusedDay = focusedDay
+                                                          .subtract(Duration(
+                                                              days: 14));
+                                                      break;
+                                                    default:
+                                                      focusedDay = DateTime(
+                                                        focusedDay.year,
+                                                        focusedDay.month - 1,
+                                                        focusedDay.day,
+                                                      );
+                                                  }
+                                                });
+                                              },
+                                              child: Padding(
+                                                padding: EdgeInsets.all(10),
+                                                child: Icon(
+                                                  Icons.chevron_left,
+                                                  color: Colors.white,
+                                                  size: 30,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: 8),
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            border:
+                                                Border.all(color: Colors.white),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                          child: Material(
+                                            color: Colors.transparent,
+                                            child: InkWell(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              onTap: () {
+                                                setState(() {
+                                                  switch (format) {
+                                                    case CalendarFormat.month:
+                                                      focusedDay = DateTime(
+                                                        focusedDay.year,
+                                                        focusedDay.month + 1,
+                                                        focusedDay.day,
+                                                      );
+                                                      break;
+                                                    case CalendarFormat.week:
+                                                      focusedDay = focusedDay
+                                                          .add(Duration(
+                                                              days: 7));
+                                                      break;
+                                                    case CalendarFormat
+                                                          .twoWeeks:
+                                                      focusedDay = focusedDay
+                                                          .add(Duration(
+                                                              days: 14));
+                                                      break;
+                                                    default:
+                                                      focusedDay = DateTime(
+                                                        focusedDay.year,
+                                                        focusedDay.month + 1,
+                                                        focusedDay.day,
+                                                      );
+                                                  }
+                                                });
+                                              },
+                                              child: Padding(
+                                                padding: EdgeInsets.all(10),
+                                                child: Icon(
+                                                  Icons.chevron_right,
+                                                  color: Colors.white,
+                                                  size: 30,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: 8),
                                         // Format Dropdown
                                         Container(
                                           padding: EdgeInsets.symmetric(
@@ -861,7 +970,7 @@ class CalendarStateO extends State<Calendar> {
                                           decoration: BoxDecoration(
                                             color: Colors.blue[600],
                                             borderRadius:
-                                                BorderRadius.circular(50.0),
+                                                BorderRadius.circular(12.0),
                                             border:
                                                 Border.all(color: Colors.white),
                                           ),
@@ -983,14 +1092,10 @@ class CalendarStateO extends State<Calendar> {
                                       formatButtonVisible: false,
                                       headerPadding: EdgeInsets.zero,
                                       headerMargin: EdgeInsets.zero,
-                                      leftChevronVisible: true,
-                                      rightChevronVisible: true,
-                                      leftChevronIcon: Icon(Icons.chevron_left,
-                                          size: 30, color: Colors.blue[300]),
-                                      rightChevronIcon: Icon(
-                                          Icons.chevron_right,
-                                          size: 30,
-                                          color: Colors.blue[300]),
+                                      leftChevronVisible:
+                                          false, // Hide default left chevron
+                                      rightChevronVisible:
+                                          false, // Hide default right chevron
                                     ),
                                     calendarBuilders: CalendarBuilders(
                                       markerBuilder: (context, date, events) {
