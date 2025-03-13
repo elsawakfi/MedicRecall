@@ -74,10 +74,8 @@ void main() {
         await tester.tap((find.byWidgetPredicate((widget) {
           return widget is Checkbox && widget.value == false;
         })).first);
+        await tester.pumpAndSettle();
         await tester.tap(find.text('Submit'));
-        await tester.tap(find
-            .byKey(ValueKey('submitButton'))
-            .first);
         tester.printToConsole('Exam date set');
         await tester.pumpAndSettle();
       });

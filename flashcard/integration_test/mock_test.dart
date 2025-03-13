@@ -19,6 +19,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('Mini-Mock 1'), findsOneWidget);
+        expect(find.byIcon(Icons.lock_open_sharp), findsAny);
         await tester.tap(find.text('Mini-Mock 1'));
         await tester.pumpAndSettle();
 
@@ -72,6 +73,7 @@ void main() {
             await tester.pumpAndSettle();
 
             expect(find.text('Mini-Mock 1'), findsOneWidget);
+            expect(find.byIcon(Icons.lock_open_sharp), findsAny);
             await tester.tap(find.text('Mini-Mock 1'));
             await tester.pumpAndSettle();
 

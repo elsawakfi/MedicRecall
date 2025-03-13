@@ -454,7 +454,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               ),
             ),
             TextButton(
-              key: const ValueKey('submitButton'),
+              key: const ValueKey('submitButton1'),
               onPressed: () async {
                 // Check which resources were selected
                 List<String> selectedResources = [];
@@ -584,10 +584,12 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                                 ),
                                 selected: officialMSRARepetitions == value,
                                 onSelected: (bool selected) {
-                                  setState(() {
-                                    officialMSRARepetitions =
-                                        selected ? value : null;
-                                  });
+                                  if(mounted) {
+                                    setState(() {
+                                      officialMSRARepetitions =
+                                          selected ? value : null;
+                                    });
+                                  }
                                 },
                                 selectedColor:
                                     const Color.fromRGBO(73, 148, 236, 1),
@@ -626,10 +628,12 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                                 ),
                                 selected: fullSizedMockRepetitions == value,
                                 onSelected: (bool selected) {
-                                  setState(() {
-                                    fullSizedMockRepetitions =
-                                        selected ? value : null;
-                                  });
+                                  if(mounted) {
+                                    setState(() {
+                                      fullSizedMockRepetitions =
+                                          selected ? value : null;
+                                    });
+                                  }
                                 },
                                 selectedColor:
                                     const Color.fromRGBO(73, 148, 236, 1),
@@ -665,6 +669,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     ),
                     const SizedBox(width: 10),
                     TextButton(
+                      key: const ValueKey('submitButton2'),
                       onPressed: () async {
                         // Validate that all selected resources have a repetition count
                         bool isValid = true;
