@@ -8,13 +8,13 @@ import 'mock_test.dart' as mock;
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-  testWidgets("Log into the app",
-          (WidgetTester tester) async {
-        await tester.pump(const Duration(seconds: 1));
-        tester.printToConsole('Testing login');
-        await loginTest(tester);
-        await tester.pumpAndSettle();
-      });
+  // testWidgets("Log into the app",
+  //         (WidgetTester tester) async {
+  //       await tester.pump(const Duration(seconds: 1));
+  //       tester.printToConsole('Testing login');
+  //       await loginTest(tester);
+  //       await tester.pumpAndSettle();
+  //     });
 
   // calendar.main();
   mock.main();

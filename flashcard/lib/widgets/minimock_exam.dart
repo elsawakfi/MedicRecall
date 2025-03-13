@@ -366,7 +366,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                         String option = entry.value;
                         String optionLetter = rankingAnswers[currentQuestion][optionIndex];
                         return ReorderableDragStartListener(
-                            key: ValueKey(option),
+                            key: ValueKey(optionLetter),
                             index: optionIndex,
                             child: Card(
                               elevation: 3,
