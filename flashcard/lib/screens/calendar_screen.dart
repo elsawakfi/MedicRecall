@@ -858,17 +858,14 @@ class CalendarStateO extends State<Calendar> {
                                             constraints.maxWidth < 600;
 
                                         return Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                           children: [
                                             // Month Title
                                             Flexible(
                                               child: Text(
-                                                DateFormat('MMMM y')
-                                                    .format(focusedDay),
+                                                DateFormat('MMMM y').format(focusedDay),
                                                 style: TextStyle(
-                                                  fontSize:
-                                                      isSmallScreen ? 24 : 40,
+                                                  fontSize: isSmallScreen ? 24 : 40,
                                                   fontWeight: FontWeight.bold,
                                                   color: Colors.white,
                                                 ),
@@ -881,19 +878,14 @@ class CalendarStateO extends State<Calendar> {
                                               children: [
                                                 // Today button
                                                 Container(
-                                                  decoration: BoxDecoration(
-                                                    border: Border.all(
-                                                        color: Colors.white),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8),
-                                                  ),
                                                   child: Material(
-                                                    color: Colors.transparent,
+                                                    color: Colors.lightBlue,
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(30),
+                                                    ),
                                                     child: InkWell(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              8),
+                                                      borderRadius: BorderRadius.circular(30),
                                                       onTap: () {
                                                         setState(() {
                                                           focusedDay =
@@ -901,85 +893,54 @@ class CalendarStateO extends State<Calendar> {
                                                         });
                                                       },
                                                       child: Padding(
-                                                        padding: EdgeInsets
-                                                            .symmetric(
-                                                                horizontal:
-                                                                    isSmallScreen
-                                                                        ? 16
-                                                                        : 30,
-                                                                vertical:
-                                                                    isSmallScreen
-                                                                        ? 8
-                                                                        : 13),
+                                                        padding: EdgeInsets.symmetric(
+                                                                horizontal: isSmallScreen ? 16 : 30,
+                                                                vertical: isSmallScreen ? 8 : 13),
                                                         child: Text(
                                                           'TODAY',
                                                           style: TextStyle(
                                                             color: Colors.white,
-                                                            fontSize:
-                                                                isSmallScreen
-                                                                    ? 14
-                                                                    : 16,
+                                                            fontWeight: FontWeight.w600,
+                                                            fontSize: isSmallScreen ? 14 : 16,
                                                           ),
                                                         ),
                                                       ),
                                                     ),
                                                   ),
                                                 ),
-                                                SizedBox(
-                                                    width:
-                                                        isSmallScreen ? 8 : 12),
+                                                SizedBox(width: isSmallScreen ? 8 : 12),
                                                 // Add new chevron
                                                 Container(
-                                                  decoration: BoxDecoration(
-                                                    border: Border.all(
-                                                        color: Colors.white),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8),
-                                                  ),
                                                   child: Material(
-                                                    color: Colors.transparent,
+                                                    color: Colors.lightBlue,
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(20),
+                                                    ),
                                                     child: InkWell(
                                                       borderRadius:
-                                                          BorderRadius.circular(
-                                                              8),
+                                                          BorderRadius.circular(20),
                                                       onTap: () {
                                                         setState(() {
                                                           switch (format) {
-                                                            case CalendarFormat
-                                                                  .month:
-                                                              focusedDay =
-                                                                  DateTime(
+                                                            case CalendarFormat.month:
+                                                              focusedDay = DateTime(
                                                                 focusedDay.year,
-                                                                focusedDay
-                                                                        .month -
-                                                                    1,
+                                                                focusedDay.month - 1,
                                                                 focusedDay.day,
                                                               );
                                                               break;
-                                                            case CalendarFormat
-                                                                  .week:
-                                                              focusedDay = focusedDay
-                                                                  .subtract(
-                                                                      Duration(
-                                                                          days:
-                                                                              7));
+                                                            case CalendarFormat.week:
+                                                              focusedDay = focusedDay.subtract(Duration(days: 7));
                                                               break;
-                                                            case CalendarFormat
-                                                                  .twoWeeks:
-                                                              focusedDay = focusedDay
-                                                                  .subtract(
-                                                                      Duration(
-                                                                          days:
-                                                                              14));
+                                                            case CalendarFormat.twoWeeks:
+                                                              focusedDay = focusedDay.subtract(Duration(days: 14));
                                                               break;
                                                             default:
-                                                              focusedDay =
-                                                                  DateTime(
+                                                              focusedDay = DateTime(
                                                                 focusedDay.year,
-                                                                focusedDay
-                                                                        .month -
-                                                                    1,
+                                                                focusedDay.month - 1,
                                                                 focusedDay.day,
                                                               );
                                                           }
@@ -987,71 +948,48 @@ class CalendarStateO extends State<Calendar> {
                                                       },
                                                       child: Padding(
                                                         padding: EdgeInsets.all(
-                                                            isSmallScreen
-                                                                ? 8
-                                                                : 10),
+                                                            isSmallScreen ? 8 : 10),
                                                         child: Icon(
                                                           Icons.chevron_left,
                                                           color: Colors.white,
-                                                          size: isSmallScreen
-                                                              ? 24
-                                                              : 30,
+                                                          size: isSmallScreen ? 24 : 30,
                                                         ),
                                                       ),
                                                     ),
                                                   ),
                                                 ),
-                                                SizedBox(
-                                                    width:
-                                                        isSmallScreen ? 4 : 8),
+                                                SizedBox(width: isSmallScreen ? 4 : 8),
                                                 Container(
-                                                  decoration: BoxDecoration(
-                                                    border: Border.all(
-                                                        color: Colors.white),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8),
-                                                  ),
                                                   child: Material(
-                                                    color: Colors.transparent,
+                                                    color: Colors.lightBlue,
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(20),
+                                                    ),
                                                     child: InkWell(
                                                       borderRadius:
-                                                          BorderRadius.circular(
-                                                              8),
+                                                          BorderRadius.circular(20),
                                                       onTap: () {
                                                         setState(() {
                                                           switch (format) {
-                                                            case CalendarFormat
-                                                                  .month:
-                                                              focusedDay =
-                                                                  DateTime(
+                                                            case CalendarFormat.month:
+                                                              focusedDay = DateTime(
                                                                 focusedDay.year,
-                                                                focusedDay
-                                                                        .month +
-                                                                    1,
+                                                                focusedDay.month + 1,
                                                                 focusedDay.day,
                                                               );
                                                               break;
-                                                            case CalendarFormat
-                                                                  .week:
-                                                              focusedDay = focusedDay
-                                                                  .add(Duration(
-                                                                      days: 7));
+                                                            case CalendarFormat.week:
+                                                              focusedDay = focusedDay.add(Duration(days: 7));
                                                               break;
-                                                            case CalendarFormat
-                                                                  .twoWeeks:
-                                                              focusedDay = focusedDay
-                                                                  .add(Duration(
-                                                                      days:
-                                                                          14));
+                                                            case CalendarFormat.twoWeeks:
+                                                              focusedDay = focusedDay.add(Duration(days: 14));
                                                               break;
                                                             default:
-                                                              focusedDay =
-                                                                  DateTime(
+                                                              focusedDay = DateTime(
                                                                 focusedDay.year,
-                                                                focusedDay
-                                                                        .month +
-                                                                    1,
+                                                                focusedDay.month + 1,
                                                                 focusedDay.day,
                                                               );
                                                           }
@@ -1059,39 +997,26 @@ class CalendarStateO extends State<Calendar> {
                                                       },
                                                       child: Padding(
                                                         padding: EdgeInsets.all(
-                                                            isSmallScreen
-                                                                ? 8
-                                                                : 10),
+                                                            isSmallScreen ? 8 : 10),
                                                         child: Icon(
                                                           Icons.chevron_right,
                                                           color: Colors.white,
-                                                          size: isSmallScreen
-                                                              ? 24
-                                                              : 30,
+                                                          size: isSmallScreen ? 24 : 30,
                                                         ),
                                                       ),
                                                     ),
                                                   ),
                                                 ),
-                                                SizedBox(
-                                                    width:
-                                                        isSmallScreen ? 8 : 12),
+                                                SizedBox(width: isSmallScreen ? 8 : 12),
                                                 // Format Dropdown
                                                 Container(
                                                   padding: EdgeInsets.symmetric(
-                                                      horizontal: isSmallScreen
-                                                          ? 8
-                                                          : 12,
-                                                      vertical: isSmallScreen
-                                                          ? 2
-                                                          : 3),
+                                                      horizontal: isSmallScreen ? 8 : 20,
+                                                      vertical: isSmallScreen ? 2 : 3),
                                                   decoration: BoxDecoration(
                                                     color: Colors.blue[600],
                                                     borderRadius:
-                                                        BorderRadius.circular(
-                                                            12.0),
-                                                    border: Border.all(
-                                                        color: Colors.white),
+                                                        BorderRadius.circular(30.0),
                                                   ),
                                                   child: DropdownButton<
                                                       CalendarFormat>(
@@ -1102,14 +1027,11 @@ class CalendarStateO extends State<Calendar> {
                                                     icon: Icon(
                                                         Icons.arrow_drop_down,
                                                         color: Colors.white,
-                                                        size: isSmallScreen
-                                                            ? 20
-                                                            : 24),
+                                                        size: isSmallScreen ? 20 : 24),
                                                     style: TextStyle(
                                                         color: Colors.white,
-                                                        fontSize: isSmallScreen
-                                                            ? 12
-                                                            : 14),
+                                                        fontWeight: FontWeight.bold,
+                                                        fontSize: isSmallScreen ? 12: 14),
                                                     items: CalendarFormat.values
                                                         .map((CalendarFormat
                                                             format) {
