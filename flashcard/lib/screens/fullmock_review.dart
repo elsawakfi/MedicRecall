@@ -46,8 +46,15 @@ class FullMockReviewState extends State<FullMockReview> {
     label: Text('${questionNumber + 1}',
     style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
     fontSize: 20,),
-  ));
+  ),
+  
+   style: ElevatedButton.styleFrom(
+      padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24), // Increase the padding for a larger button
+      minimumSize: Size(100, 30), // Make the button larger with a minimum size (width, height)
+    alignment: Alignment.center,
+   ) );
 }
+  
 
 
 
@@ -210,6 +217,8 @@ Widget build(BuildContext context) {
                       body: Center(
                       child: Wrap(
                          alignment: WrapAlignment.center,
+                           spacing: 6.0,
+                         runSpacing: 10.0,
                         children: List.generate(
                           widget.rankingLength,
                           (index) => Padding(
@@ -232,6 +241,8 @@ Widget build(BuildContext context) {
                     body: Center(
                       child: Wrap(
                          alignment: WrapAlignment.center,
+                         spacing: 6.0,
+                         runSpacing: 10.0,
                       children: List.generate(
                         widget.multiChoiceLength,
                         (index) => Padding(
@@ -250,7 +261,14 @@ Widget build(BuildContext context) {
                             style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
                             fontSize: 20,),
                           ),
+                           style: ElevatedButton.styleFrom(
+                              padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24), // Increase the padding for a larger button
+                              minimumSize: Size(100, 30), // Make the button larger with a minimum size (width, height)
+                            alignment: Alignment.center,
+                            ),
+  
                           ),
+                          
                         ),
                       ),
                     ),
