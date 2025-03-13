@@ -57,9 +57,9 @@ void main() {
         await tester.pumpAndSettle();
 
         // Start entering exam details
-        expect(find.byKey(ValueKey('yesButton')), findsAny);
+        expect(find.text('Yes'), findsAny);
         await tester.tap(find
-            .byKey(ValueKey('yesButton'))
+            .text('Yes')
             .first);
         await tester.pumpAndSettle();
 
