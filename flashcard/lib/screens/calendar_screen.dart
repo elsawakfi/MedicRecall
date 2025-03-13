@@ -851,245 +851,317 @@ class CalendarStateO extends State<Calendar> {
                                   Container(
                                     padding: EdgeInsets.symmetric(
                                         vertical: 16.0, horizontal: 24.0),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        // Month Title
-                                        Text(
-                                          DateFormat('MMMM y')
-                                              .format(focusedDay),
-                                          style: TextStyle(
-                                            fontSize: 40,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                        // Navigation and Format Controls
-                                        Row(
+                                    child: LayoutBuilder(
+                                      builder: (context, constraints) {
+                                        // Check if we're on a small screen
+                                        bool isSmallScreen =
+                                            constraints.maxWidth < 600;
+
+                                        return Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
                                           children: [
-                                            // Today button
-                                            Container(
-                                              decoration: BoxDecoration(
-                                                border: Border.all(
-                                                    color: Colors.white),
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
+                                            // Month Title
+                                            Flexible(
+                                              child: Text(
+                                                DateFormat('MMMM y')
+                                                    .format(focusedDay),
+                                                style: TextStyle(
+                                                  fontSize:
+                                                      isSmallScreen ? 24 : 40,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.white,
+                                                ),
+                                                overflow: TextOverflow.ellipsis,
                                               ),
-                                              child: Material(
-                                                color: Colors.transparent,
-                                                child: InkWell(
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                  onTap: () {
-                                                    setState(() {
-                                                      focusedDay =
-                                                          DateTime.now();
-                                                    });
-                                                  },
-                                                  child: Padding(
-                                                    padding:
-                                                        EdgeInsets.symmetric(
-                                                            horizontal: 30,
-                                                            vertical: 13),
-                                                    child: Text(
-                                                      'TODAY',
-                                                      style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 16,
+                                            ),
+                                            // Navigation and Format Controls
+                                            Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                // Today button
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                    border: Border.all(
+                                                        color: Colors.white),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8),
+                                                  ),
+                                                  child: Material(
+                                                    color: Colors.transparent,
+                                                    child: InkWell(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              8),
+                                                      onTap: () {
+                                                        setState(() {
+                                                          focusedDay =
+                                                              DateTime.now();
+                                                        });
+                                                      },
+                                                      child: Padding(
+                                                        padding: EdgeInsets
+                                                            .symmetric(
+                                                                horizontal:
+                                                                    isSmallScreen
+                                                                        ? 16
+                                                                        : 30,
+                                                                vertical:
+                                                                    isSmallScreen
+                                                                        ? 8
+                                                                        : 13),
+                                                        child: Text(
+                                                          'TODAY',
+                                                          style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize:
+                                                                isSmallScreen
+                                                                    ? 14
+                                                                    : 16,
+                                                          ),
+                                                        ),
                                                       ),
                                                     ),
                                                   ),
                                                 ),
-                                              ),
-                                            ),
-                                            SizedBox(width: 8),
-                                            // Add new chevron
-                                            Container(
-                                              decoration: BoxDecoration(
-                                                border: Border.all(
-                                                    color: Colors.white),
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                              ),
-                                              child: Material(
-                                                color: Colors.transparent,
-                                                child: InkWell(
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                  onTap: () {
-                                                    setState(() {
-                                                      switch (format) {
-                                                        case CalendarFormat
-                                                              .month:
-                                                          focusedDay = DateTime(
-                                                            focusedDay.year,
-                                                            focusedDay.month -
-                                                                1,
-                                                            focusedDay.day,
-                                                          );
-                                                          break;
-                                                        case CalendarFormat
-                                                              .week:
-                                                          focusedDay = focusedDay
-                                                              .subtract(
-                                                                  Duration(
-                                                                      days: 7));
-                                                          break;
-                                                        case CalendarFormat
-                                                              .twoWeeks:
-                                                          focusedDay = focusedDay
-                                                              .subtract(
-                                                                  Duration(
-                                                                      days:
-                                                                          14));
-                                                          break;
-                                                        default:
-                                                          focusedDay = DateTime(
-                                                            focusedDay.year,
-                                                            focusedDay.month -
-                                                                1,
-                                                            focusedDay.day,
-                                                          );
-                                                      }
-                                                    });
-                                                  },
-                                                  child: Padding(
-                                                    padding: EdgeInsets.all(10),
-                                                    child: Icon(
-                                                      Icons.chevron_left,
-                                                      color: Colors.white,
-                                                      size: 30,
+                                                SizedBox(
+                                                    width:
+                                                        isSmallScreen ? 8 : 12),
+                                                // Add new chevron
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                    border: Border.all(
+                                                        color: Colors.white),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8),
+                                                  ),
+                                                  child: Material(
+                                                    color: Colors.transparent,
+                                                    child: InkWell(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              8),
+                                                      onTap: () {
+                                                        setState(() {
+                                                          switch (format) {
+                                                            case CalendarFormat
+                                                                  .month:
+                                                              focusedDay =
+                                                                  DateTime(
+                                                                focusedDay.year,
+                                                                focusedDay
+                                                                        .month -
+                                                                    1,
+                                                                focusedDay.day,
+                                                              );
+                                                              break;
+                                                            case CalendarFormat
+                                                                  .week:
+                                                              focusedDay = focusedDay
+                                                                  .subtract(
+                                                                      Duration(
+                                                                          days:
+                                                                              7));
+                                                              break;
+                                                            case CalendarFormat
+                                                                  .twoWeeks:
+                                                              focusedDay = focusedDay
+                                                                  .subtract(
+                                                                      Duration(
+                                                                          days:
+                                                                              14));
+                                                              break;
+                                                            default:
+                                                              focusedDay =
+                                                                  DateTime(
+                                                                focusedDay.year,
+                                                                focusedDay
+                                                                        .month -
+                                                                    1,
+                                                                focusedDay.day,
+                                                              );
+                                                          }
+                                                        });
+                                                      },
+                                                      child: Padding(
+                                                        padding: EdgeInsets.all(
+                                                            isSmallScreen
+                                                                ? 8
+                                                                : 10),
+                                                        child: Icon(
+                                                          Icons.chevron_left,
+                                                          color: Colors.white,
+                                                          size: isSmallScreen
+                                                              ? 24
+                                                              : 30,
+                                                        ),
+                                                      ),
                                                     ),
                                                   ),
                                                 ),
-                                              ),
-                                            ),
-                                            SizedBox(width: 8),
-                                            Container(
-                                              decoration: BoxDecoration(
-                                                border: Border.all(
-                                                    color: Colors.white),
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
-                                              ),
-                                              child: Material(
-                                                color: Colors.transparent,
-                                                child: InkWell(
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                  onTap: () {
-                                                    setState(() {
-                                                      switch (format) {
-                                                        case CalendarFormat
-                                                              .month:
-                                                          focusedDay = DateTime(
-                                                            focusedDay.year,
-                                                            focusedDay.month +
-                                                                1,
-                                                            focusedDay.day,
-                                                          );
-                                                          break;
-                                                        case CalendarFormat
-                                                              .week:
-                                                          focusedDay =
-                                                              focusedDay.add(
-                                                                  Duration(
+                                                SizedBox(
+                                                    width:
+                                                        isSmallScreen ? 4 : 8),
+                                                Container(
+                                                  decoration: BoxDecoration(
+                                                    border: Border.all(
+                                                        color: Colors.white),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8),
+                                                  ),
+                                                  child: Material(
+                                                    color: Colors.transparent,
+                                                    child: InkWell(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              8),
+                                                      onTap: () {
+                                                        setState(() {
+                                                          switch (format) {
+                                                            case CalendarFormat
+                                                                  .month:
+                                                              focusedDay =
+                                                                  DateTime(
+                                                                focusedDay.year,
+                                                                focusedDay
+                                                                        .month +
+                                                                    1,
+                                                                focusedDay.day,
+                                                              );
+                                                              break;
+                                                            case CalendarFormat
+                                                                  .week:
+                                                              focusedDay = focusedDay
+                                                                  .add(Duration(
                                                                       days: 7));
-                                                          break;
-                                                        case CalendarFormat
-                                                              .twoWeeks:
-                                                          focusedDay =
-                                                              focusedDay
+                                                              break;
+                                                            case CalendarFormat
+                                                                  .twoWeeks:
+                                                              focusedDay = focusedDay
                                                                   .add(Duration(
                                                                       days:
                                                                           14));
-                                                          break;
-                                                        default:
-                                                          focusedDay = DateTime(
-                                                            focusedDay.year,
-                                                            focusedDay.month +
-                                                                1,
-                                                            focusedDay.day,
-                                                          );
-                                                      }
-                                                    });
-                                                  },
-                                                  child: Padding(
-                                                    padding: EdgeInsets.all(10),
-                                                    child: Icon(
-                                                      Icons.chevron_right,
-                                                      color: Colors.white,
-                                                      size: 30,
+                                                              break;
+                                                            default:
+                                                              focusedDay =
+                                                                  DateTime(
+                                                                focusedDay.year,
+                                                                focusedDay
+                                                                        .month +
+                                                                    1,
+                                                                focusedDay.day,
+                                                              );
+                                                          }
+                                                        });
+                                                      },
+                                                      child: Padding(
+                                                        padding: EdgeInsets.all(
+                                                            isSmallScreen
+                                                                ? 8
+                                                                : 10),
+                                                        child: Icon(
+                                                          Icons.chevron_right,
+                                                          color: Colors.white,
+                                                          size: isSmallScreen
+                                                              ? 24
+                                                              : 30,
+                                                        ),
+                                                      ),
                                                     ),
                                                   ),
                                                 ),
-                                              ),
-                                            ),
-                                            SizedBox(width: 8),
-                                            // Format Dropdown
-                                            Container(
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: 12, vertical: 3),
-                                              decoration: BoxDecoration(
-                                                color: Colors.blue[600],
-                                                borderRadius:
-                                                    BorderRadius.circular(12.0),
-                                                border: Border.all(
-                                                    color: Colors.white),
-                                              ),
-                                              child: DropdownButton<
-                                                  CalendarFormat>(
-                                                value: format,
-                                                dropdownColor: Colors.blue[600],
-                                                underline: SizedBox(),
-                                                icon: Icon(
-                                                    Icons.arrow_drop_down,
-                                                    color: Colors.white),
-                                                style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 14),
-                                                items: CalendarFormat.values
-                                                    .map((CalendarFormat
-                                                        format) {
-                                                  String formatName;
-                                                  switch (format) {
-                                                    case CalendarFormat.month:
-                                                      formatName =
-                                                          'MONTHLY VIEW';
-                                                      break;
-                                                    case CalendarFormat.week:
-                                                      formatName =
-                                                          'WEEKLY VIEW';
-                                                      break;
-                                                    case CalendarFormat
-                                                          .twoWeeks:
-                                                      formatName =
-                                                          '2-WEEK VIEW';
-                                                      break;
-                                                    default:
-                                                      formatName = format.name
-                                                          .toUpperCase();
-                                                  }
-                                                  return DropdownMenuItem<
+                                                SizedBox(
+                                                    width:
+                                                        isSmallScreen ? 8 : 12),
+                                                // Format Dropdown
+                                                Container(
+                                                  padding: EdgeInsets.symmetric(
+                                                      horizontal: isSmallScreen
+                                                          ? 8
+                                                          : 12,
+                                                      vertical: isSmallScreen
+                                                          ? 2
+                                                          : 3),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.blue[600],
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            12.0),
+                                                    border: Border.all(
+                                                        color: Colors.white),
+                                                  ),
+                                                  child: DropdownButton<
                                                       CalendarFormat>(
                                                     value: format,
-                                                    child: Text(formatName),
-                                                  );
-                                                }).toList(),
-                                                onChanged: (CalendarFormat?
-                                                    newFormat) {
-                                                  if (newFormat != null) {
-                                                    setState(() {
-                                                      format = newFormat;
-                                                    });
-                                                  }
-                                                },
-                                              ),
+                                                    dropdownColor:
+                                                        Colors.blue[600],
+                                                    underline: SizedBox(),
+                                                    icon: Icon(
+                                                        Icons.arrow_drop_down,
+                                                        color: Colors.white,
+                                                        size: isSmallScreen
+                                                            ? 20
+                                                            : 24),
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: isSmallScreen
+                                                            ? 12
+                                                            : 14),
+                                                    items: CalendarFormat.values
+                                                        .map((CalendarFormat
+                                                            format) {
+                                                      String formatName;
+                                                      switch (format) {
+                                                        case CalendarFormat
+                                                              .month:
+                                                          formatName =
+                                                              isSmallScreen
+                                                                  ? 'MONTH'
+                                                                  : 'MONTHLY VIEW';
+                                                          break;
+                                                        case CalendarFormat
+                                                              .week:
+                                                          formatName =
+                                                              isSmallScreen
+                                                                  ? 'WEEK'
+                                                                  : 'WEEKLY VIEW';
+                                                          break;
+                                                        case CalendarFormat
+                                                              .twoWeeks:
+                                                          formatName =
+                                                              isSmallScreen
+                                                                  ? '2-WEEK'
+                                                                  : '2-WEEK VIEW';
+                                                          break;
+                                                        default:
+                                                          formatName = format
+                                                              .name
+                                                              .toUpperCase();
+                                                      }
+                                                      return DropdownMenuItem<
+                                                          CalendarFormat>(
+                                                        value: format,
+                                                        child: Text(formatName),
+                                                      );
+                                                    }).toList(),
+                                                    onChanged: (CalendarFormat?
+                                                        newFormat) {
+                                                      if (newFormat != null) {
+                                                        setState(() {
+                                                          format = newFormat;
+                                                        });
+                                                      }
+                                                    },
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                           ],
-                                        ),
-                                      ],
+                                        );
+                                      },
                                     ),
                                   ),
                                   // Calendar
@@ -1219,7 +1291,6 @@ class CalendarStateO extends State<Calendar> {
                               ),
                             ),
                             const SizedBox(height: 20),
-                            const SizedBox(height: 20),
                             ..._getEventsfromDay(selectedDay).map(
                               //This block of code will need to be re run if we are to have live updates,
                               //This is necessary for both the add and edit event functions
@@ -1294,136 +1365,173 @@ class CalendarStateO extends State<Calendar> {
                     // Buttons at the bottom of the right section
                     Padding(
                       padding: const EdgeInsets.all(20),
-                      child: Row(
-                        mainAxisAlignment:
-                            MainAxisAlignment.end, // Align buttons to the right
-                        children: [
-                          // Add New Event Button
-                          ElevatedButton.icon(
-                            onPressed: () => _showAddEventDialog(context),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.lightBlue,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20)),
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 24, vertical: 12),
-                            ),
-                            icon: const Icon(Icons.add, size: 25),
-                            label: const Text(
-                              "Add New Event",
-                              style: TextStyle(fontSize: 22),
-                            ),
-                          ),
-                          const SizedBox(width: 20),
-                          // Homepage Button
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => const Landing()),
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.lightBlue,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20)),
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 24, vertical: 12),
-                            ),
-                            child: const Text(
-                              "Homepage",
-                              style: TextStyle(fontSize: 22),
-                            ),
-                          ),
-                          const SizedBox(width: 20),
-                          // Delete All Events Button
-                          ElevatedButton.icon(
-                            key: const Key('deleteButton'),
-                            onPressed: () {
-                              testDay = null;
-                              testDayBool = true;
-                              deleteAllEvents();
-                              setState(() {});
-
-                              // Show confirmation popup
-                              showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  backgroundColor: const Color(0xFFE6EDF2),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(0),
-                                  ),
-                                  title: const Text(
-                                    "All Events Deleted",
-                                    style: const TextStyle(
-                                      color: Color.fromRGBO(21, 58, 103, 1),
-                                      fontSize: 21,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  content: const Text(
-                                    "Go to the homepage to schedule your study schedule.",
-                                    style: const TextStyle(
-                                      color: Color.fromRGBO(21, 58, 103, 1),
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      style: TextButton.styleFrom(
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 24, vertical: 12),
-                                        minimumSize: Size(120, 45),
-                                      ),
-                                      child: Text(
-                                        'OK',
-                                        style: TextStyle(fontSize: 16),
-                                      ),
-                                    ),
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) => Landing()),
-                                        );
-                                      },
-                                      style: TextButton.styleFrom(
-                                        foregroundColor: Colors.white,
-                                        backgroundColor: Colors.blue,
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 24, vertical: 12),
-                                        minimumSize: Size(120, 45),
-                                      ),
-                                      child: Text(
-                                        'Go to Homepage',
-                                        style: TextStyle(fontSize: 16),
-                                      ),
-                                    ),
-                                  ],
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          bool isSmallScreen = constraints.maxWidth < 600;
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              // Add New Event Button
+                              ElevatedButton.icon(
+                                onPressed: () => _showAddEventDialog(context),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.lightBlue,
+                                  foregroundColor: Colors.white,
+                                  shape: isSmallScreen
+                                      ? RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12))
+                                      : RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(20)),
+                                  padding: isSmallScreen
+                                      ? EdgeInsets.all(20)
+                                      : EdgeInsets.symmetric(
+                                          horizontal: 24, vertical: 12),
                                 ),
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.redAccent,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20)),
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 24, vertical: 12),
-                            ),
-                            icon: const Icon(Icons.delete, size: 25),
-                            label: const Text(
-                              "Delete All Events",
-                              style: TextStyle(fontSize: 22),
-                            ),
-                          ),
-                        ],
+                                icon: Icon(Icons.add,
+                                    size: isSmallScreen ? 32 : 25),
+                                label: isSmallScreen
+                                    ? SizedBox.shrink()
+                                    : const Text(
+                                        "Add New Event",
+                                        style: TextStyle(fontSize: 22),
+                                      ),
+                              ),
+                              SizedBox(width: isSmallScreen ? 8 : 12),
+                              // Homepage Button
+                              ElevatedButton.icon(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => const Landing()),
+                                  );
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.lightBlue,
+                                  foregroundColor: Colors.white,
+                                  shape: isSmallScreen
+                                      ? RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12))
+                                      : RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(20)),
+                                  padding: isSmallScreen
+                                      ? EdgeInsets.all(20)
+                                      : EdgeInsets.symmetric(
+                                          horizontal: 24, vertical: 12),
+                                ),
+                                icon: Icon(Icons.home,
+                                    size: isSmallScreen ? 32 : 25),
+                                label: isSmallScreen
+                                    ? SizedBox.shrink()
+                                    : const Text(
+                                        "Homepage",
+                                        style: TextStyle(fontSize: 22),
+                                      ),
+                              ),
+                              SizedBox(width: isSmallScreen ? 8 : 12),
+                              // Delete All Events Button
+                              ElevatedButton.icon(
+                                key: const Key('deleteButton'),
+                                onPressed: () {
+                                  testDay = null;
+                                  testDayBool = true;
+                                  deleteAllEvents();
+                                  setState(() {});
+
+                                  // Show confirmation popup
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      backgroundColor: const Color(0xFFE6EDF2),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(0),
+                                      ),
+                                      title: const Text(
+                                        "All Events Deleted",
+                                        style: TextStyle(
+                                          color: Color.fromRGBO(21, 58, 103, 1),
+                                          fontSize: 21,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                      content: const Text(
+                                        "Go to the homepage to schedule your study schedule.",
+                                        style: TextStyle(
+                                          color: Color.fromRGBO(21, 58, 103, 1),
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context),
+                                          style: TextButton.styleFrom(
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 24, vertical: 12),
+                                            minimumSize: Size(120, 45),
+                                          ),
+                                          child: Text(
+                                            'OK',
+                                            style: TextStyle(fontSize: 16),
+                                          ),
+                                        ),
+                                        TextButton(
+                                          onPressed: () {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      Landing()),
+                                            );
+                                          },
+                                          style: TextButton.styleFrom(
+                                            foregroundColor: Colors.white,
+                                            backgroundColor: Colors.blue,
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 24, vertical: 12),
+                                            minimumSize: Size(120, 45),
+                                          ),
+                                          child: Text(
+                                            'Go to Homepage',
+                                            style: TextStyle(fontSize: 16),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.redAccent,
+                                  foregroundColor: Colors.white,
+                                  shape: isSmallScreen
+                                      ? RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12))
+                                      : RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(20)),
+                                  padding: isSmallScreen
+                                      ? EdgeInsets.all(20)
+                                      : EdgeInsets.symmetric(
+                                          horizontal: 24, vertical: 12),
+                                ),
+                                icon: Icon(Icons.delete,
+                                    size: isSmallScreen ? 32 : 25),
+                                label: isSmallScreen
+                                    ? SizedBox.shrink()
+                                    : const Text(
+                                        "Delete All Events",
+                                        style: TextStyle(fontSize: 22),
+                                      ),
+                              ),
+                            ],
+                          );
+                        },
                       ),
                     ),
                   ],
