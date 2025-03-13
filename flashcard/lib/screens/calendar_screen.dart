@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart' as launcher;
-import 'button_screen.dart';
+import '../widgets/countdown_button.dart';
+import 'dashboard_screen.dart';
 
 // Internal imports
 import 'landing_screen.dart';
@@ -69,7 +70,6 @@ class CalendarStateO extends State<Calendar> {
   final CollectionReference _userCollectionRef =
       FirebaseFirestore.instance.collection('users');
   final FirebaseAuth auth = FirebaseAuth.instance;
-
   late User user;
   late Map<DateTime?, List<Event>> selectedEvents;
   CalendarFormat format = CalendarFormat.month;
@@ -80,6 +80,7 @@ class CalendarStateO extends State<Calendar> {
       DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
   final TextEditingController _eventController = TextEditingController();
   bool testDayBool = false;
+  
   //The CalendarFormat variable format allows the user to change their view of the calendar, into weekly, biweekly and monthly.
   // for some reason, events need to have their time as being midnight to be shown on the calendar. So need to set the today constant to be midnight today.
   // therefore today isn't just datetime.now it is calibrated to midnight.
@@ -253,15 +254,12 @@ class CalendarStateO extends State<Calendar> {
         return;
       }
 
-      String id = u.docs.last.id;
-      print("Found user document with ID: $id");
-      
+
+      String id = u.docs.last.id;      
       _eventsCollectionRef =
           FirebaseFirestore.instance.collection('users/$id/events');
 
       var snapshots = await _eventsCollectionRef.get();
-      print("Found ${snapshots.docs.length} events in database");
-
       for (var doc in snapshots.docs) {
         var data = doc.data() as Map<String, dynamic>;
         if (data.containsKey('date') && data.containsKey('events')) {
@@ -273,7 +271,7 @@ class CalendarStateO extends State<Calendar> {
             date = DateTime(date.year, date.month, date.day);
             
             List<String> events = eventsList.map((e) => e.toString()).toList();
-            print("Loading ${events.length} events for date $date");
+            
             
             selectedEvents[date] = events.map((title) => Event(
               title: title,
@@ -287,12 +285,27 @@ class CalendarStateO extends State<Calendar> {
     }
   }
 
-  Color _getEventColor(String title) {
+  Color _getEventColor(String title)  {
+    List <String> flashcards = [
+      "Team working",
+      "Effective communication",
+      "Acting within your remit",
+      "Patient focus",
+      "Commitment to professionalism",
+      "Coping with pressure",
+      "Confidentiality"
+    ];
     if (title == "Test Day") return const Color.fromARGB(255, 255, 89, 94);
     if (title.contains("Mini Mock")) return StudySessionManager.kMiniMockColor;
     if (title.contains("Full-sized Mock")) return StudySessionManager.kFullMockColor;
     if (title.contains("Official Paper")) return StudySessionManager.kOfficialPaperColor;
-    return StudySessionManager.kFlashcardColor;
+    if (title.contains("Official SJT Practice Paper")) return StudySessionManager.kSJTPaperColor;
+    
+    for (String flashcard in flashcards){
+        if(title.contains(flashcard)) return StudySessionManager.kFlashcardColor;
+      }
+    
+    return Color.fromARGB(200, 0, 0, 100);
   }
 
   //When creating a new revision plan we update the database with the revision topics and dates in the calendar
@@ -343,10 +356,12 @@ class CalendarStateO extends State<Calendar> {
     if (title.contains('official paper')) {
       return "official_paper";
     }
+    if (title.contains('official sjt practice paper')) {
+      return "official_sjt_paper";
+    }
     if (title.contains('test day')) {
       return "test_day";
     }
-    
     // If it's not one of the 5 main events, show "feature not available"
     return "unknown";
   }
@@ -434,6 +449,27 @@ class CalendarStateO extends State<Calendar> {
           );
         }
       }
+    } else if (eventType == 'official_sjt_paper'){
+      final String url = 'https://foundationprogramme.nhs.uk/programmes/f2-stand-alone/f2sa2025-sjt/preparation-materials/';
+      try {
+        if (!await launcher.launch(url)) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Could not open the Official SJT Paper website'),
+              ),
+            );
+          }
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Could not open the Official SJT Paper website'),
+            ),
+          );
+        }
+      }
     } else if (eventType == 'mini_mock') {
       Navigator.push(
         context,
@@ -510,6 +546,7 @@ class CalendarStateO extends State<Calendar> {
     QuerySnapshot u =
         await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
     String id = u.docs.last.id;
+    String docID = u.docs.first.id;
     _eventsCollectionRef =
         // FirebaseFirestore.instance.collection('users/' + id + "/events");
         FirebaseFirestore.instance.collection('users/$id/events');
@@ -532,74 +569,11 @@ class CalendarStateO extends State<Calendar> {
     selectedEvents[testDay]?.remove(Event(
         title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
     getTestDay();
+    
+    await  _eventsCollectionRef.doc(docID).update({"events": []});
   }
 
-  Future<void> updateOneEvent(
-      Event oldEvent, String newTitle, DateTime newDate) async {
-    DateTime normalizedOldDate =
-        DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
-    DateTime normalizedNewDate =
-        DateTime(newDate.year, newDate.month, newDate.day);
-
-    // 1️⃣ Remove the old event from the local `selectedEvents` map
-    selectedEvents[normalizedOldDate]
-        ?.removeWhere((event) => event.title == oldEvent.title);
-    if (selectedEvents[normalizedOldDate]?.isEmpty ?? false) {
-      selectedEvents.remove(
-          normalizedOldDate); // If no more events on that day, remove it
-    }
-
-    // 2️⃣ Add the updated event to the new date
-    if (selectedEvents[normalizedNewDate] != null) {
-      selectedEvents[normalizedNewDate]
-          ?.add(Event(title: newTitle, color: oldEvent.color));
-    } else {
-      selectedEvents[normalizedNewDate] = [
-        Event(title: newTitle, color: oldEvent.color)
-      ];
-    }
-
-    // 3️⃣ Remove old event from Firestore
-    await deleteSingleEvent(normalizedOldDate, oldEvent.title, user);
-
-    // 4️⃣ Ensure Firestore is updated correctly
-    QuerySnapshot u =
-        await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
-    String id = u.docs.last.id;
-    _eventsCollectionRef =
-        FirebaseFirestore.instance.collection('users/$id/events');
-
-    QuerySnapshot querySnapshot = await _eventsCollectionRef
-        .where("date", isEqualTo: Timestamp.fromDate(normalizedNewDate))
-        .get();
-
-    List<String> updatedEvents =
-        selectedEvents[normalizedNewDate]?.map((e) => e.title).toList() ?? [];
-
-    if (querySnapshot.docs.isEmpty) {
-      // If no document exists for the new date, create it
-      if (updatedEvents.isNotEmpty) {
-        await _eventsCollectionRef.add({
-          "date":
-              Timestamp.fromDate(normalizedNewDate), // Ensure correct format
-          "events": updatedEvents,
-        });
-      }
-    } else {
-      // If a document exists, update it
-      String docId = querySnapshot.docs.first.id;
-      if (updatedEvents.isEmpty) {
-        await _eventsCollectionRef.doc(docId).delete();
-      } else {
-        await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
-      }
-    }
-
-    // 5️⃣ Refresh UI
-    setState(() {
-      selectedDay = normalizedNewDate;
-    });
-  }
+  
 
   @override
   void initState() {
@@ -612,21 +586,18 @@ class CalendarStateO extends State<Calendar> {
     await getUser();
     await getTestDay();
     if (testDay != null) {
-      print("Test day is set to: $testDay");
+      await getEventsFromDB(); // Then load events from database
+      if (selectedEvents.isEmpty){
+          await generateStudySessions(user); // Generate study sessions
+      }
       
       // First add Test Day event
       selectedEvents[testDay] = [
         Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94))
       ];
-      print("Added Test Day event");
 
-      // Then load events from database
-      await getEventsFromDB();
-      print("Loaded events from DB: ${selectedEvents.length} days have events");
-
-      // Generate study sessions
-      await generateStudySessions(user);
-      print("Generated study sessions");
+      //If the user already selected their resources, generate study session should not be called 
+      //it should only be called the first time they choose their test day and resources 
 
       setState(() {});
     } else {
@@ -677,7 +648,7 @@ class CalendarStateO extends State<Calendar> {
   // so get object from databse, then .toString or as String
 
   // helper function for adding new events
-  void _showAddEventDialog(BuildContext context) {
+  void _showAddEventDialog(BuildContext context)  {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -697,27 +668,17 @@ class CalendarStateO extends State<Calendar> {
             ),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               if (_eventController.text.isNotEmpty) {
-                if (selectedEvents[selectedDay] != null) {
-                  selectedEvents[selectedDay]?.add(
-                    Event(
-                        title: _eventController.text,
-                        color: const Color.fromARGB(255, 253, 252, 220)),
-                  );
-                } else {
-                  selectedEvents[selectedDay] = [
-                    Event(
-                        title: _eventController.text,
-                        color: const Color.fromARGB(255, 253, 252, 220)),
-                  ];
-                }
+
+                
+                await addSingleEvent(selectedDay, _eventController.text, user);
                 updateEventsToDB(user);
                 Navigator.pop(context);
                 _eventController.clear();
                 setState(() {});
-              }
-            },
+              
+            }},
             style: TextButton.styleFrom(
               foregroundColor: Colors.white,
               backgroundColor: Colors.blue,
@@ -729,9 +690,21 @@ class CalendarStateO extends State<Calendar> {
               style: TextStyle(fontSize: 16),
             ),
           ),
+
         ],
       ),
     );
+  }
+
+  @override
+  void didChangeDependencies(){
+    super.didChangeDependencies();
+    //waits for build function to complete and then calls back to call the condition checking function 
+    WidgetsBinding.instance.addPostFrameCallback((_){
+     getEventsFromDB();
+     setState((){});
+    });
+  
   }
 
   @override
@@ -797,6 +770,9 @@ class CalendarStateO extends State<Calendar> {
                   ),
                   SizedBox(height: 30),
                   _buildLabelItem(
+                      'Custom Events', Color.fromARGB(200, 0, 0, 100)),
+                  SizedBox(height: 30),
+                  _buildLabelItem(
                       'Mini Mock', StudySessionManager.kMiniMockColor),
                   SizedBox(height: 30),
                   _buildLabelItem(
@@ -809,7 +785,11 @@ class CalendarStateO extends State<Calendar> {
                       'Flashcards', StudySessionManager.kFlashcardColor),
                   SizedBox(height: 30),
                   _buildLabelItem(
+                      'Official SJT Paper', StudySessionManager.kSJTPaperColor),
+                  SizedBox(height: 30),
+                  _buildLabelItem(
                       'Test Day', const Color.fromARGB(255, 255, 89, 94)),
+                  
                 ],
               ),
             ),
@@ -888,7 +868,7 @@ class CalendarStateO extends State<Calendar> {
                               ),
                               // Custom marker settings
                               markersMaxCount:
-                                  5, // Show up to 5 markers per day
+                                  6, // Show up to 5 markers per day
                               markersAnchor: 1.0,
                               cellPadding: EdgeInsets.all(8.0),
                               cellMargin: EdgeInsets.all(4.0),
@@ -977,6 +957,8 @@ class CalendarStateO extends State<Calendar> {
                         const SizedBox(height: 20),
                         const SizedBox(height: 20),
                         ..._getEventsfromDay(selectedDay).map(
+                          //This block of code will need to be re run if we are to have live updates, 
+                          //This is necessary for both the add and edit event functions 
                           (Event event) => Padding(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 16.0, vertical: 8.0),
@@ -1211,6 +1193,56 @@ class CalendarStateO extends State<Calendar> {
     );
   }
 
+  Future<void> addSingleEvent(
+      DateTime date, String eventTitle, User user) async {
+    date = DateTime(date.year, date.month, date.day);
+    
+    //The delete single event function updates the UI in real time so I just copied the structure of that function 
+    Event newEvent =  Event(
+                        title: eventTitle,
+                        color: _getEventColor(eventTitle));
+    
+   
+    if (selectedEvents[date] == null) {
+      selectedEvents[date] = [];
+      
+    }
+    selectedEvents[date]?.add(newEvent);
+    QuerySnapshot querySnapshot = await _eventsCollectionRef
+        .where("date", isEqualTo: Timestamp.fromDate(date))
+        .get();
+   
+    
+     List<String> updatedEvents =
+        selectedEvents[date]?.map((e) => e.title).toList() ?? [];
+    
+    if (querySnapshot.docs.isNotEmpty) {
+    String docId = querySnapshot.docs.first.id;
+   
+   
+
+    // Update Firestore document
+    await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
+    
+  } else {
+    
+
+    // If no document exists, create a new one
+    DocumentReference newDoc = await _eventsCollectionRef.add({
+      "date": Timestamp.fromDate(date),
+      "events": [eventTitle] // Start with just the new event
+    });
+    
+    String newDocId = newDoc.id;
+    await _eventsCollectionRef.doc(newDocId).update({"events": updatedEvents});
+
+  }
+ 
+    setState(() {});
+  }
+
+
+
   Future<void> deleteSingleEvent(
       DateTime date, String eventTitle, User user) async {
     date = DateTime(date.year, date.month, date.day);
@@ -1242,6 +1274,23 @@ class CalendarStateO extends State<Calendar> {
     }
 
     setState(() {});
+  }
+
+  Future<void> updateOneEvent(
+      Event oldEvent, String newTitle, DateTime newDate) async {
+    DateTime normalizedOldDate =
+        DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
+    DateTime normalizedNewDate =
+        DateTime(newDate.year, newDate.month, newDate.day);
+
+    // Remove old event from Firestore
+    await deleteSingleEvent(normalizedOldDate, oldEvent.title, user);
+    await addSingleEvent(normalizedNewDate, newTitle, user);
+    
+    // Refresh UI
+    setState(() {
+      selectedDay = normalizedNewDate;
+    });
   }
 
   void _editEventDate(BuildContext context, Event event) {
@@ -1349,7 +1398,7 @@ class CalendarStateO extends State<Calendar> {
             onPressed: () {
               if (_editEventController.text.isNotEmpty &&
                   _selectedDate != null) {
-                updateOneEvent(
+                 updateOneEvent(
                     event, _editEventController.text, _selectedDate!);
                 Navigator.pop(context);
               }

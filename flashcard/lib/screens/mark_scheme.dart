@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'dashboard_screen.dart';
 import 'ms_questions.dart';
-import 'package:flashcard_x/screens/button_screen.dart';
+import 'package:flashcard_x/widgets/countdown_button.dart';
 
 
 // first we define our mark scheme info class - DONE

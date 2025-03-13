@@ -11,13 +11,6 @@ import 'package:flashcard_x/screens/study_session_manager.dart';
 import 'package:flashcard_x/screens/landing_service.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-/*import 'package:flashcard_x/widgets/drawer_widget.dart';
-import 'package:flashcard_x/widgets/event.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flashcard_x/screens/dashboard_screen.dart';
-import 'package:table_calendar/table_calendar.dart';*/
-
 class CustomFloatingButton extends StatefulWidget {
   const CustomFloatingButton({super.key});
 
@@ -39,7 +32,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
   int buildCount = 0;
   bool testDayBool = true;
   bool buttonPressed = false;
-  bool stopShowing = false; 
+  bool stopShowing = false;
   late String testDayString = "Test day not set";
 
   final Map<String, bool> _isHovered = {};
@@ -59,27 +52,22 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
   }
 
   Future<void> setStopShowing(User user, [bool value = false]) async {
-  await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-    'stopShowing': value,
-    'popUpTime': FieldValue.serverTimestamp(), 
-  }, SetOptions(merge: true));
-   // Merge to avoid overwriting other fields
-}
+    await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+      'stopShowing': value,
+      'popUpTime': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
+    // Merge to avoid overwriting other fields
+  }
 
   Future<void> getStopShowing(User user) async {
   DocumentSnapshot doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
 
-  if (doc.exists) {
-    
-    Timestamp? timestamp = doc['popUpTime'];
+    if (doc.exists) {
+      Timestamp? timestamp = doc['popUpTime'];
 
-    if (doc['stopShowing'] != null && timestamp != null) {
-      DateTime savedTime = timestamp.toDate();
-      DateTime currentTime = DateTime.now();
-      // print("Saved time");
-      // print(savedTime);
-      // print("Current time");
-      // print(currentTime);
+      if (doc['stopShowing'] != null && timestamp != null) {
+        DateTime savedTime = timestamp.toDate();
+        DateTime currentTime = DateTime.now();
 
       if (currentTime.difference(savedTime).inMinutes >= 1) {
         await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
@@ -191,10 +179,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       }
     } else {
       user = auth.currentUser!;
-     
     }
     getStopShowing(user!);
-    
   }
 
   Future<void> getFirstStudyDay() async {
@@ -214,18 +200,17 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     }
   }
 
-  Future <void> shouldShowDialog() async{
-      await getTestDay();
-      await getStopShowing(user!);
-      
-     
-      if (mounted && 
-          testDayBool && 
-          _examDate == null && 
-          landingService.onLanding &&
-          !stopShowing){
-       _showRevisionPlanDialog(context);
-       }
+  Future<void> shouldShowDialog() async {
+    await getTestDay();
+    await getStopShowing(user!);
+
+    if (mounted &&
+        testDayBool &&
+        _examDate == null &&
+        landingService.onLanding &&
+        !stopShowing) {
+      _showRevisionPlanDialog(context);
+    }
   }
 
   // Revision dialog
@@ -301,7 +286,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     if(mounted) setState(() {});
   }
 
-    // Show the date picker dialog to select exam date
+  // Show the date picker dialog to select exam date
   void _showExamDateDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -332,7 +317,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
 
                     if (context.mounted) {
                       Navigator.of(context).pop();
-                      _showOptionsDialog(context); // Proceed to next dialog
+                      _showExclusionDialog(context); // Proceed to next dialog
                     }
                   }
                 },
@@ -345,14 +330,14 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                 child: const Text(
                   'Select Exam Date',
                   style: TextStyle(fontSize: 16),
-                  ),
+                ),
               ),
               const SizedBox(),
               Text(
                 _examDate != null
                     ? 'Selected Date: ${DateFormat('dd MMM, yyyy').format(_examDate!)}' // UK Format
-                  : 'No Date Selected',
-              style: TextStyle(
+                    : 'No Date Selected',
+                style: TextStyle(
                   color: _examDate != null
                       ? Colors.black
                       : const Color.fromRGBO(21, 58, 103, 1),
@@ -366,14 +351,13 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     );
   }
 
-   @override
-  void didChangeDependencies(){
+  @override
+  void didChangeDependencies() {
     super.didChangeDependencies();
-    //waits for build function to complete and then calls back to call the condition checking function 
-    WidgetsBinding.instance.addPostFrameCallback((_){
+    //waits for build function to complete and then calls back to call the condition checking function
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       shouldShowDialog();
     });
-  
   }
 
   // Method to save firstStudyDay
@@ -396,6 +380,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     final checkbox2 = ValueNotifier<bool>(false);
     final checkbox3 = ValueNotifier<bool>(false);
     final checkbox4 = ValueNotifier<bool>(false);
+    final checkbox5 = ValueNotifier<bool>(false);
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -405,52 +390,79 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
             mainAxisSize: MainAxisSize.min,
             children: [
               _buildCheckbox(
-                checkbox1, 
-                'Official Practice Paper',
-                'The official past paper is available on the Health Education England website. It contains 22 Professional Dilemma questions with realistic scenarios and reliable rationales created by the same people who write the questions for the MSRA, making it a very valuable resource. \n\nYou will be prompted to specify your preferred number of practice attempts upon selection.'
+                checkbox1,
+                'Official MSRA Practice Paper',
+                description:
+                    'The official past paper is available on the Health Education England website. '
+                    'It contains 22 Professional Dilemma questions with realistic scenarios and reliable rationales created '
+                    'by the same people who write the questions for the MSRA, making it a very valuable resource.\n\n'
+                    'You will be prompted to specify your preferred number of practice attempts upon selection.',
+                showInfo: true,
               ),
               _buildCheckbox(
-                checkbox2, 
+                checkbox2,
                 'Full-sized Mock Exam',
-                'Our full-sized mock exam has been designed to mimic the exact conditions you will have on exam day, helping you optimise timings while exposing you to different professional scenarios. It includes 50 questions that have been carefully created to align with official rationales and GMC guidelines. \n\nYou will be prompted to specify your preferred number of practice attempts upon selection.'
+                description:
+                    'Our full-sized mock exam has been designed to mimic the exact conditions you will have on exam day, '
+                    'helping you optimize timings while exposing you to different professional scenarios. It includes 50 questions that '
+                    'have been carefully created to align with official rationales and GMC guidelines.\n\n'
+                    'You will be prompted to specify your preferred number of practice attempts upon selection.',
+                showInfo: true,
               ),
               _buildCheckbox(
-                checkbox3, 
+                checkbox3,
                 'Mini-mocks',
-                'We have two mini-mocks available on the platform, which each contain 25 reliable questions. They have been created to help track your progress, fine-tune exam timings and increase your exposure to different professional scenarios.'
+                description:
+                    'We have two mini-mocks available on the platform, which each contain 25 reliable questions. '
+                    'They have been created to help track your progress, fine-tune exam timings and increase your exposure to different professional scenarios.',
+                showInfo: true,
               ),
               _buildCheckbox(
-                checkbox4, 
+                checkbox4,
                 'Flashcard Decks',
-                'Our pre-made flashcard decks contain high-yield principles derived from GMC guidelines and official rationales. This resource uses our unique, evidence-based algorithms to help you harness the power of spaced repetition and active recall!'
+                description:
+                    'Our pre-made flashcard decks contain high-yield principles derived from GMC guidelines and official rationales. '
+                    'This resource uses our unique, evidence-based algorithms to help you harness the power of spaced repetition and active recall!',
+                showInfo: true,
+              ),
+              _buildCheckbox(
+                checkbox5,
+                'Official SJT Practice Paper',
+                description:
+                    'This is a practice paper released by the UKFPO as a resource for doctors preparing for the FY2 Situational Judgement Test, '
+                    'which is part of the application process for stand-alone FY2 training. Be aware that this paper only includes 18 RATING questions '
+                    '(not a format of questions that appears in the MSRA). '
+                    'Nevertheless, increasing your exposure to questions and rationales created by the UKFPO is helpful when preparing for the Professional Dilemmas Paper.',
+                showInfo: true,
               ),
             ],
           ),
           actions: [
             TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _showExamDateDialog(context);
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              minimumSize: const Size(120, 45), // Sets minimum width and height
+              onPressed: () {
+                Navigator.of(context).pop();
+                _showExclusionDialog(context);
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                minimumSize: const Size(120, 45),
+              ),
+              child: const Text(
+                'Previous',
+                style: TextStyle(fontSize: 16),
+              ),
             ),
-            child: const Text(
-              'Previous',
-              style: TextStyle(fontSize: 16),
-            ),
-          ),
             TextButton(
               key: const ValueKey('submitButton'),
               onPressed: () async {
                 // Check which resources were selected
                 List<String> selectedResources = [];
-                if (checkbox1.value) selectedResources.add('Official paper');
-                if (checkbox2.value) selectedResources.add('Full-sized mock exam');
+                if (checkbox1.value) selectedResources.add('Official MSRA Practice Paper');
+                if (checkbox2.value) selectedResources.add('Full-sized Mock Exam');
                 if (checkbox3.value) selectedResources.add('Mini-mocks');
                 if (checkbox4.value) selectedResources.add('Flashcards');
+                if (checkbox5.value) selectedResources.add('Official SJT Practice Paper');
 
                 if (selectedResources.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -465,28 +477,32 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     .get();
                 // Update Firestore with selected resources
                 var id = u.docs.last.id;
-                _userCollectionRef.doc(id).update({
+                await _userCollectionRef.doc(id).update({
                   'selectedResources': selectedResources,
                 });
                 // Start study session
                 StudySessionManager().startStudySession(selectedResources);
                 // Close current dialog
                 Navigator.of(context).pop();
-                _scheduleCompleteDialog(context);
-                // If either Official Paper or Full-sized Mock is selected, show Repetition Dialog
-                if (checkbox1.value || checkbox2.value) {
-                  _showRepetitionDialog(context);
+                // Check if any of the resources requiring repetitions are selected
+                bool showRepetitionDialog = checkbox1.value || checkbox2.value;
+
+                if (showRepetitionDialog) {
+                  // Show repetition dialog for selected resources
+                  _showRepetitionDialog(context, selectedResources);
+                } else {
+                  // If no repetition dialog is needed, show the completion dialog
+                  _scheduleCompleteDialog(context);
                 }
               },
               style: TextButton.styleFrom(
                 foregroundColor: Colors.white,
                 backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                // minimumSize: const Size(120, 45), // Sets minimum width and height
               ),
               child: const Text(
-              'Submit',
-              style: TextStyle(fontSize: 16),
+                'Submit',
+                style: TextStyle(fontSize: 16),
               ),
             ),
           ],
@@ -496,9 +512,13 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
   }
 
   // Show dialog to ask for number of repetitions
-  void _showRepetitionDialog(BuildContext context) {
-    final List<int> repetitionOptions = [2, 3, 4, 5, 6];
-    int? selectedRepetition;
+  void _showRepetitionDialog(BuildContext context, List<String> selectedResources) {
+  final List<int> repetitionOptions = [2, 3, 4, 5, 6];
+
+    // Define separate variables for each resource's repetition count
+    int? officialMSRARepetitions;
+    int? fullSizedMockRepetitions;
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -510,101 +530,166 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                 borderRadius: BorderRadius.circular(5.0),
               ),
               title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'How many times would you like to practice the selected resources?',
-                    style: const TextStyle(
+                  const Text(
+                    'How many times would you like to practice each selected resource?',
+                    style: TextStyle(
                       color: Color.fromRGBO(21, 58, 103, 1),
                       fontSize: 21,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                   const SizedBox(height: 11),
-                  // Add spacing between lines
-                  Text.rich(
-                    TextSpan(
-                      children: [
-                        const TextSpan(
-                          text:
-                              'It is recommended to practice at least three times.\nYour chosen number of repetition will apply to both the ',
-                          style: TextStyle(
-                            color: Color.fromRGBO(21, 58, 103, 1),
-                            fontSize: 16,
-                            fontWeight: FontWeight.w400, // Regular font weight
-                          ),
-                        ),
-                        TextSpan(
-                          text: 'Official Paper and Full-sized Mock Exam.',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold, // Make it bold
-                            color: Color.fromRGBO(21, 58, 103, 1),
-                            fontSize: 16,
-                          ),
-                        ),
-                      ],
+                  const Text(
+                    'It is recommended to practice at least three times.\n'
+                    'Your chosen number of repetitions will apply to each resource individually.',
+                    style: TextStyle(
+                      color: Color.fromRGBO(21, 58, 103, 1),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400, // Regular font weight
                     ),
                   ),
-                    ...repetitionOptions.map((int value) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical : 5.0),
-                        child: RadioListTile<int>(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15.0),
-                          ),
-                          tileColor: const Color.fromRGBO(21, 58, 103, 1),
-                          title: Text(
-                            '$value',
-                            style: const TextStyle(
-                              color: Colors.white,
+                ],
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    if (selectedResources
+                        .contains('Official MSRA Practice Paper'))
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Official MSRA Practice Paper',
+                            style: TextStyle(
+                              color: Color.fromRGBO(21, 58, 103, 1),
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                          value: value,
-                          groupValue: selectedRepetition,
-                          onChanged: (int? newValue) {
-                            if(mounted) {
-                              setState(() {
-                                selectedRepetition = newValue;
-                              });
-                            }
-                          },
-                        ),
-                      );
-                    }),
+                          const SizedBox(height: 10),
+                          Wrap(
+                            spacing: 10, // Horizontal spacing
+                            children: repetitionOptions.map((int value) {
+                              return ChoiceChip(
+                                label: Text(
+                                  '$value',
+                                  style: TextStyle(
+                                    color: officialMSRARepetitions == value
+                                        ? Colors.white
+                                        : const Color.fromRGBO(21, 58, 103, 1),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                selected: officialMSRARepetitions == value,
+                                onSelected: (bool selected) {
+                                  setState(() {
+                                    officialMSRARepetitions =
+                                        selected ? value : null;
+                                  });
+                                },
+                                selectedColor:
+                                    const Color.fromRGBO(73, 148, 236, 1),
+                                backgroundColor: Colors.white,
+                              );
+                            }).toList(),
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
+                    if (selectedResources.contains('Full-sized Mock Exam'))
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Full-sized Mock Exam',
+                            style: TextStyle(
+                              color: Color.fromRGBO(21, 58, 103, 1),
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Wrap(
+                            spacing: 10, // Horizontal spacing
+                            children: repetitionOptions.map((int value) {
+                              return ChoiceChip(
+                                label: Text(
+                                  '$value',
+                                  style: TextStyle(
+                                    color: fullSizedMockRepetitions == value
+                                        ? Colors.white
+                                        : const Color.fromRGBO(21, 58, 103, 1),
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                selected: fullSizedMockRepetitions == value,
+                                onSelected: (bool selected) {
+                                  setState(() {
+                                    fullSizedMockRepetitions =
+                                        selected ? value : null;
+                                  });
+                                },
+                                selectedColor:
+                                    const Color.fromRGBO(73, 148, 236, 1),
+                                backgroundColor: Colors.white,
+                              );
+                            }).toList(),
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
                   ],
                 ),
+              ),
               actions: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                       _showOptionsDialog(context);
-                    },
-                    style: TextButton.styleFrom(
-                      foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
-                      //backgroundColor: const Color.fromRGBO(243, 90, 90, 1),
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      minimumSize: const Size(30, 30), // Sets minimum width and height
-                      maximumSize: const Size (120,45),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        _showOptionsDialog(context);
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12),
+                        minimumSize: const Size(120, 45),
+                      ),
+                      child: const Text(
+                        'Previous',
+                        style: TextStyle(fontSize: 16),
+                      ),
                     ),
-                    child: const Text(
-                      'Previous',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  ),
-                  const SizedBox(width: 10,),
+                    const SizedBox(width: 10),
                     TextButton(
                       onPressed: () async {
-                        if (selectedRepetition != null) {
-                          // Save selectedRepetition to the database
+                        // Validate that all selected resources have a repetition count
+                        bool isValid = true;
+                        if (selectedResources
+                                .contains('Official MSRA Practice Paper') &&
+                            officialMSRARepetitions == null) {
+                          isValid = false;
+                        }
+                        if (selectedResources
+                                .contains('Full-sized Mock Exam') &&
+                            fullSizedMockRepetitions == null) {
+                          isValid = false;
+                        }
+
+                        if (isValid) {
+                          // Save repetition counts to the database
                           QuerySnapshot u = await _userCollectionRef
                               .where("userID", isEqualTo: user?.uid)
                               .get();
 
                           var id = u.docs.last.id;
                           await _userCollectionRef.doc(id).update({
-                            'selectedRepetition': selectedRepetition,
+                            'officialMSRARepetitions': officialMSRARepetitions,
+                            'fullSizedMockRepetitions':
+                                fullSizedMockRepetitions,
                           });
 
                           if (context.mounted) {
@@ -614,8 +699,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                              content:
-                                  Text('Please enter number of repetitions'),
+                              content: Text(
+                                  'Please select number of repetitions for all resources'),
                             ),
                           );
                         }
@@ -623,14 +708,91 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                       style: TextButton.styleFrom(
                         foregroundColor: Colors.white,
                         backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
-                        minimumSize: const Size(120, 45), // Sets minimum width and height
+                        minimumSize: const Size(120, 45),
                       ),
                       child: const Text(
-                      'Submit',
-                      style: TextStyle(fontSize: 16),
+                        'Submit',
+                        style: TextStyle(fontSize: 16),
                       ),
                     ),
                   ],
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showExclusionDialog(BuildContext context) {
+    List<String> daysOfTheWeek = [
+      "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
+    ];
+
+    Map<String, ValueNotifier<bool>> selectedDays = {
+      for (var day in daysOfTheWeek) day: ValueNotifier<bool>(false),
+    };
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return _buildAlertDialog(
+              title: 'Select Days to Exclude from Study',
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: selectedDays.keys.map((day) {
+                  return _buildCheckbox(selectedDays[day]!, day, showInfo: false); // ✅ Hide info icon
+                }).toList(),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _showExamDateDialog(context);
+                  },
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  ),
+                  child: const Text(
+                    'Previous',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    List<String> excludedDays = selectedDays.entries
+                        .where((entry) => entry.value.value)
+                        .map((entry) => entry.key)
+                        .toList();
+
+                    // Save excluded days to Firestore or local storage
+                    QuerySnapshot u = await _userCollectionRef
+                        .where("userID", isEqualTo: user?.uid)
+                        .get();
+
+                    var id = u.docs.last.id;
+                    await _userCollectionRef.doc(id).update({
+                      'excludedDays': excludedDays,
+                    });
+
+                    if (context.mounted) {
+                      Navigator.of(context).pop();
+                      _showOptionsDialog(context);
+                    }
+                  },
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    minimumSize: const Size(120, 45),
+                  ),
+                  child: const Text(
+                    'Next',
+                    style: TextStyle(fontSize: 16),
+                  ),
                 ),
               ],
             );
@@ -828,8 +990,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     );
   }
 
-  Widget _buildCheckbox(ValueNotifier<bool> notifier, String text, String description) {
-    String id = text.toLowerCase().replaceAll(' ', '_');
+  Widget _buildCheckbox(ValueNotifier<bool> notifier, String text, {String? description, bool showInfo = true}) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       padding: const EdgeInsets.all(12.0),
@@ -884,7 +1045,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                         ),
                       ),
                     ),
-                    _buildInfoIcon(id, description),
+                    if (showInfo && description != null) _buildInfoIcon(text, description), // Show only if required
                   ],
                 ),
               ),
