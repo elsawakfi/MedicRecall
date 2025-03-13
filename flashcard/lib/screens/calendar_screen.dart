@@ -837,8 +837,8 @@ class CalendarStateO extends State<Calendar> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 16.0, vertical: 8.0),
                           child: TableCalendar(
-                            firstDay: today,
-                            lastDay: testDay ?? DateTime.now().add(const Duration(days: 365)),
+                            firstDay: DateTime(2023),
+                            lastDay: DateTime(2026),
                             focusedDay: focusedDay,
                             calendarFormat: format,
                             startingDayOfWeek: StartingDayOfWeek.monday,
@@ -879,26 +879,8 @@ class CalendarStateO extends State<Calendar> {
                               cellMargin: const EdgeInsets.all(4.0),
                             ),
                             enabledDayPredicate: (day) {
-                              final normalizedDay = DateTime(day.year, day.month, day.day);
-                              final dayName = _getDayName(normalizedDay.weekday);
-                              
-                              // Always show the test day
-                              if (testDay != null && isSameDay(normalizedDay, testDay!)) {
-                                return true;
-                              }
-                              
-                              // Check if day is before today or after test day
-                              if (normalizedDay.isBefore(today) || 
-                                  (testDay != null && normalizedDay.isAfter(testDay!))) {
-                                return false;
-                              }
-                              
-                              // Check if day is in excluded days
-                              if (revisionDays.contains(dayName)) {
-                                return false;
-                              }
-                              
-                              return true;
+                              final dayName = _getDayName(day.weekday);
+                              return !revisionDays.contains(dayName);
                             },
                             onFormatChanged: (CalendarFormat _format) {
                               setState(() {
