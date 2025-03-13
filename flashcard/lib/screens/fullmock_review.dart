@@ -35,18 +35,18 @@ class FullMockReviewState extends State<FullMockReview> {
   String _displayTime = '';
   late int remainingSeconds;
 
-  Widget _buildQuestionButton(int questionNumber) {
+ Widget _buildQuestionButton(int questionNumber) {
+  bool isFlagged = widget.flaggedQuestions.length > questionNumber 
+                   && widget.flaggedQuestions[questionNumber] == true;
   return ElevatedButton.icon(
     onPressed: () => _returnToFullMock(context, questionNumber),
-    icon: Visibility(
-      visible: (widget.flaggedQuestions.length > questionNumber) 
-               ? widget.flaggedQuestions[questionNumber] 
-               : false,
-      child: const Icon(Icons.flag, color: Colors.black),
-    ),
+    icon: isFlagged 
+      ? const Icon(Icons.flag, color: Colors.black) 
+      : const SizedBox.shrink(),
     label: Text('${questionNumber + 1}'),
   );
 }
+
 
   @override
   void initState(){
@@ -175,27 +175,23 @@ Widget build(BuildContext context) {
             maxWidth: maxScreenWidth > maxPreferredWidth ? maxScreenWidth : maxPreferredWidth,
           ),
           padding: EdgeInsets.all(16),
-             
-            child: Column(
-            // mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-            // Spacer(),
-            Expanded(
-              child: SingleChildScrollView(
-              child: Align(alignment: Alignment.center,
-              child: 
-              Column(
-              children: [
-                ExpansionPanelList(
-              elevation: 1,
-              // dividerColor: Colors.transparent,
-              expandIconColor: Theme.of(context).textTheme.bodyMedium?.color,
-              expandedHeaderPadding: EdgeInsets.all(4.0),
-              expansionCallback: (i, isOpen) {
-                setState(() {
-                  _isOpen[i] = !_isOpen[i];
-                });
-              },
+             child: SizedBox(
+              height: MediaQuery.of(context).size.height*0.8,
+              child: Column(children: [
+                Expanded(child: 
+                SingleChildScrollView(
+                  child: Align(alignment: Alignment.center,
+                  child: Column(children: [
+                  ExpansionPanelList(
+                    elevation: 1,
+                    expandIconColor: Theme.of(context).textTheme.bodyMedium?.color,
+                    expandedHeaderPadding: EdgeInsets.all(4.0),
+                    expansionCallback: (i, isOpen) {
+                      setState(() {
+                        _isOpen[i] = !_isOpen[i];
+                      });
+                    },
+        
   children: [
     // Ranking Questions Panel
     ExpansionPanel(
@@ -211,39 +207,19 @@ Widget build(BuildContext context) {
           (index) => Padding(
             padding: const EdgeInsets.all(4.0),
             child: _buildQuestionButton(index),
-              // onPressed: () => _returnToFullMock(context, index),
-              // icon: Visibility(
-              //   visible: (widget.flaggedQuestions.length > index) 
-              //            ? widget.flaggedQuestions[index] 
-              //            : false,
-                // child: const Icon(Icons.flag, color: Colors.black),
-              
-              // label: Text('${index + 1}'),
             ),
           ),
         ),
       ),
-    // ),
-    // Multiple Choice Questions Panel
-    // ExpansionPanelList(
-    //   elevation: 1,
-    //   expandIconColor: Theme.of(context).appBarTheme.backgroundColor,
-    //   expandedHeaderPadding: EdgeInsets.all(4.0),
-    //   expansionCallback: (i, isOpen) {
-    //     setState(() {
-    //       _isOpen[i] = !_isOpen[i];
-    //     });
-    //   },
-      // children: [
+
         ExpansionPanel(
           isExpanded: _isOpen[1],
           canTapOnHeader: true,
           backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-          headerBuilder: (context, isOpen) => ListTile(title: Text('Multiple Choice Questions (Question ${widget.rankingLength + 1} - $questionLength)')),
-          // return const ListTile(
-          //   title: Text('Multiple Choice Questions (Question ${widget.rankingLength + 1} - $questionLength)')), body: null,
-        
-      
+          headerBuilder: (context, isOpen) => ListTile(
+            title: Text(
+              'Multiple Choice Questions (Question ${widget.rankingLength + 1} - $questionLength)'),
+              ),
     body: Wrap(
       children: List.generate(
         widget.multiChoiceLength,
@@ -262,21 +238,19 @@ Widget build(BuildContext context) {
           ),
         ),
       ),
-                )],
+                ),],
   ),
 ],
 ),
 ),
-),
-
-),
+),),
+           
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   // Align(
                   //   alignment: Alignment.centerLeft,
                     const MiniMockHelpButton(),
-            ]),
                   const SizedBox(width: 16),
                   Container(
                     width: 160,
@@ -302,7 +276,7 @@ Widget build(BuildContext context) {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color.fromARGB(255, 222, 221, 222),
                       ),
-                    )
+                    ),
                   ),
                   const Spacer(),
                   SizedBox(
@@ -317,22 +291,10 @@ Widget build(BuildContext context) {
                         label: Text('Complete Exam',  style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 16)),
                       )
                   ),
-            ])));
+            ],
+            ),
+            ],
+            ),
+            ),
+      ),);
 })));}}
-              // )));
-            
-        
-  
-  
-
-//             Spacer(),
-//             MiniMockHelpButton(),
-//             Spacer(),
-//           ],
-//         ),
-//       ),
-//     );
-//   }),
-//   ));
-// }
-// } 
