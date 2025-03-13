@@ -43,9 +43,12 @@ class FullMockReviewState extends State<FullMockReview> {
     icon: isFlagged 
       ? const Icon(Icons.flag, color: Colors.black) 
       : const SizedBox.shrink(),
-    label: Text('${questionNumber + 1}'),
-  );
+    label: Text('${questionNumber + 1}',
+    style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
+    fontSize: 20,),
+  ));
 }
+
 
 
   @override
@@ -232,6 +235,7 @@ Widget build(BuildContext context) {
                         widget.multiChoiceLength,
                         (index) => Padding(
                           padding: const EdgeInsets.all(4.0),
+                          //  child: _buildQuestionButton(index),
                           child: ElevatedButton.icon(
                             onPressed: () => _returnToFullMock(context, widget.rankingLength + index),
                             icon: Visibility(
@@ -239,14 +243,17 @@ Widget build(BuildContext context) {
                                       ? widget.flaggedQuestions[widget.rankingLength + index] 
                                       : false,
                               child: const Icon(Icons.flag, color: Colors.black),
+                              
                             ),
-                            label: Text('${widget.rankingLength + index + 1}'),
+                            label: Text('${widget.rankingLength + index + 1}',
+                            style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
+                            fontSize: 20,),
                           ),
                           ),
                         ),
                       ),
                     ),
-                  )],
+                  ))],
                 ),
               ],
             ),
