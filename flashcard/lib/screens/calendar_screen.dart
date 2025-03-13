@@ -849,174 +849,245 @@ class CalendarStateO extends State<Calendar> {
                                 children: [
                                   // Custom Header with Dropdown
                                   Container(
-                                    padding:
-                                        EdgeInsets.symmetric(vertical: 16.0),
+                                    padding: EdgeInsets.symmetric(
+                                        vertical: 16.0, horizontal: 24.0),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
-                                        // Add new chevron
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            border:
-                                                Border.all(color: Colors.white),
-                                            borderRadius:
-                                                BorderRadius.circular(8),
+                                        // Month Title
+                                        Text(
+                                          DateFormat('MMMM y')
+                                              .format(focusedDay),
+                                          style: TextStyle(
+                                            fontSize: 40,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
                                           ),
-                                          child: Material(
-                                            color: Colors.transparent,
-                                            child: InkWell(
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                              onTap: () {
-                                                setState(() {
-                                                  switch (format) {
-                                                    case CalendarFormat.month:
-                                                      focusedDay = DateTime(
-                                                        focusedDay.year,
-                                                        focusedDay.month - 1,
-                                                        focusedDay.day,
-                                                      );
-                                                      break;
-                                                    case CalendarFormat.week:
-                                                      focusedDay = focusedDay
-                                                          .subtract(Duration(
-                                                              days: 7));
-                                                      break;
-                                                    case CalendarFormat
-                                                          .twoWeeks:
-                                                      focusedDay = focusedDay
-                                                          .subtract(Duration(
-                                                              days: 14));
-                                                      break;
-                                                    default:
-                                                      focusedDay = DateTime(
-                                                        focusedDay.year,
-                                                        focusedDay.month - 1,
-                                                        focusedDay.day,
-                                                      );
-                                                  }
-                                                });
-                                              },
-                                              child: Padding(
-                                                padding: EdgeInsets.all(10),
-                                                child: Icon(
-                                                  Icons.chevron_left,
-                                                  color: Colors.white,
-                                                  size: 30,
+                                        ),
+                                        // Navigation and Format Controls
+                                        Row(
+                                          children: [
+                                            // Today button
+                                            Container(
+                                              decoration: BoxDecoration(
+                                                border: Border.all(
+                                                    color: Colors.white),
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                              ),
+                                              child: Material(
+                                                color: Colors.transparent,
+                                                child: InkWell(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                  onTap: () {
+                                                    setState(() {
+                                                      focusedDay =
+                                                          DateTime.now();
+                                                    });
+                                                  },
+                                                  child: Padding(
+                                                    padding:
+                                                        EdgeInsets.symmetric(
+                                                            horizontal: 30,
+                                                            vertical: 13),
+                                                    child: Text(
+                                                      'TODAY',
+                                                      style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 16,
+                                                      ),
+                                                    ),
+                                                  ),
                                                 ),
                                               ),
                                             ),
-                                          ),
-                                        ),
-                                        SizedBox(width: 8),
-                                        Container(
-                                          decoration: BoxDecoration(
-                                            border:
-                                                Border.all(color: Colors.white),
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                          ),
-                                          child: Material(
-                                            color: Colors.transparent,
-                                            child: InkWell(
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                              onTap: () {
-                                                setState(() {
-                                                  switch (format) {
-                                                    case CalendarFormat.month:
-                                                      focusedDay = DateTime(
-                                                        focusedDay.year,
-                                                        focusedDay.month + 1,
-                                                        focusedDay.day,
-                                                      );
-                                                      break;
-                                                    case CalendarFormat.week:
-                                                      focusedDay = focusedDay
-                                                          .add(Duration(
-                                                              days: 7));
-                                                      break;
-                                                    case CalendarFormat
-                                                          .twoWeeks:
-                                                      focusedDay = focusedDay
-                                                          .add(Duration(
-                                                              days: 14));
-                                                      break;
-                                                    default:
-                                                      focusedDay = DateTime(
-                                                        focusedDay.year,
-                                                        focusedDay.month + 1,
-                                                        focusedDay.day,
-                                                      );
-                                                  }
-                                                });
-                                              },
-                                              child: Padding(
-                                                padding: EdgeInsets.all(10),
-                                                child: Icon(
-                                                  Icons.chevron_right,
-                                                  color: Colors.white,
-                                                  size: 30,
+                                            SizedBox(width: 8),
+                                            // Add new chevron
+                                            Container(
+                                              decoration: BoxDecoration(
+                                                border: Border.all(
+                                                    color: Colors.white),
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                              ),
+                                              child: Material(
+                                                color: Colors.transparent,
+                                                child: InkWell(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                  onTap: () {
+                                                    setState(() {
+                                                      switch (format) {
+                                                        case CalendarFormat
+                                                              .month:
+                                                          focusedDay = DateTime(
+                                                            focusedDay.year,
+                                                            focusedDay.month -
+                                                                1,
+                                                            focusedDay.day,
+                                                          );
+                                                          break;
+                                                        case CalendarFormat
+                                                              .week:
+                                                          focusedDay = focusedDay
+                                                              .subtract(
+                                                                  Duration(
+                                                                      days: 7));
+                                                          break;
+                                                        case CalendarFormat
+                                                              .twoWeeks:
+                                                          focusedDay = focusedDay
+                                                              .subtract(
+                                                                  Duration(
+                                                                      days:
+                                                                          14));
+                                                          break;
+                                                        default:
+                                                          focusedDay = DateTime(
+                                                            focusedDay.year,
+                                                            focusedDay.month -
+                                                                1,
+                                                            focusedDay.day,
+                                                          );
+                                                      }
+                                                    });
+                                                  },
+                                                  child: Padding(
+                                                    padding: EdgeInsets.all(10),
+                                                    child: Icon(
+                                                      Icons.chevron_left,
+                                                      color: Colors.white,
+                                                      size: 30,
+                                                    ),
+                                                  ),
                                                 ),
                                               ),
                                             ),
-                                          ),
-                                        ),
-                                        SizedBox(width: 8),
-                                        // Format Dropdown
-                                        Container(
-                                          padding: EdgeInsets.symmetric(
-                                              horizontal: 12, vertical: 4),
-                                          decoration: BoxDecoration(
-                                            color: Colors.blue[600],
-                                            borderRadius:
-                                                BorderRadius.circular(12.0),
-                                            border:
-                                                Border.all(color: Colors.white),
-                                          ),
-                                          child: DropdownButton<CalendarFormat>(
-                                            value: format,
-                                            dropdownColor: Colors.blue[600],
-                                            underline:
-                                                SizedBox(), // Remove the default underline
-                                            icon: Icon(Icons.arrow_drop_down,
-                                                color: Colors.white),
-                                            style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 14),
-                                            items: CalendarFormat.values
-                                                .map((CalendarFormat format) {
-                                              // Custom format names mapping
-                                              String formatName;
-                                              switch (format) {
-                                                case CalendarFormat.month:
-                                                  formatName = 'MONTHLY VIEW';
-                                                  break;
-                                                case CalendarFormat.week:
-                                                  formatName = 'WEEKLY VIEW';
-                                                  break;
-                                                case CalendarFormat.twoWeeks:
-                                                  formatName = '2-WEEK VIEW';
-                                                  break;
-                                                default:
-                                                  formatName =
-                                                      format.name.toUpperCase();
-                                              }
-                                              return DropdownMenuItem<
+                                            SizedBox(width: 8),
+                                            Container(
+                                              decoration: BoxDecoration(
+                                                border: Border.all(
+                                                    color: Colors.white),
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                              ),
+                                              child: Material(
+                                                color: Colors.transparent,
+                                                child: InkWell(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                  onTap: () {
+                                                    setState(() {
+                                                      switch (format) {
+                                                        case CalendarFormat
+                                                              .month:
+                                                          focusedDay = DateTime(
+                                                            focusedDay.year,
+                                                            focusedDay.month +
+                                                                1,
+                                                            focusedDay.day,
+                                                          );
+                                                          break;
+                                                        case CalendarFormat
+                                                              .week:
+                                                          focusedDay =
+                                                              focusedDay.add(
+                                                                  Duration(
+                                                                      days: 7));
+                                                          break;
+                                                        case CalendarFormat
+                                                              .twoWeeks:
+                                                          focusedDay =
+                                                              focusedDay
+                                                                  .add(Duration(
+                                                                      days:
+                                                                          14));
+                                                          break;
+                                                        default:
+                                                          focusedDay = DateTime(
+                                                            focusedDay.year,
+                                                            focusedDay.month +
+                                                                1,
+                                                            focusedDay.day,
+                                                          );
+                                                      }
+                                                    });
+                                                  },
+                                                  child: Padding(
+                                                    padding: EdgeInsets.all(10),
+                                                    child: Icon(
+                                                      Icons.chevron_right,
+                                                      color: Colors.white,
+                                                      size: 30,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(width: 8),
+                                            // Format Dropdown
+                                            Container(
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: 12, vertical: 3),
+                                              decoration: BoxDecoration(
+                                                color: Colors.blue[600],
+                                                borderRadius:
+                                                    BorderRadius.circular(12.0),
+                                                border: Border.all(
+                                                    color: Colors.white),
+                                              ),
+                                              child: DropdownButton<
                                                   CalendarFormat>(
                                                 value: format,
-                                                child: Text(formatName),
-                                              );
-                                            }).toList(),
-                                            onChanged:
-                                                (CalendarFormat? newFormat) {
-                                              if (newFormat != null) {
-                                                setState(() {
-                                                  format = newFormat;
-                                                });
-                                              }
-                                            },
-                                          ),
+                                                dropdownColor: Colors.blue[600],
+                                                underline: SizedBox(),
+                                                icon: Icon(
+                                                    Icons.arrow_drop_down,
+                                                    color: Colors.white),
+                                                style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 14),
+                                                items: CalendarFormat.values
+                                                    .map((CalendarFormat
+                                                        format) {
+                                                  String formatName;
+                                                  switch (format) {
+                                                    case CalendarFormat.month:
+                                                      formatName =
+                                                          'MONTHLY VIEW';
+                                                      break;
+                                                    case CalendarFormat.week:
+                                                      formatName =
+                                                          'WEEKLY VIEW';
+                                                      break;
+                                                    case CalendarFormat
+                                                          .twoWeeks:
+                                                      formatName =
+                                                          '2-WEEK VIEW';
+                                                      break;
+                                                    default:
+                                                      formatName = format.name
+                                                          .toUpperCase();
+                                                  }
+                                                  return DropdownMenuItem<
+                                                      CalendarFormat>(
+                                                    value: format,
+                                                    child: Text(formatName),
+                                                  );
+                                                }).toList(),
+                                                onChanged: (CalendarFormat?
+                                                    newFormat) {
+                                                  if (newFormat != null) {
+                                                    setState(() {
+                                                      format = newFormat;
+                                                    });
+                                                  }
+                                                },
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ],
                                     ),
@@ -1034,6 +1105,22 @@ class CalendarStateO extends State<Calendar> {
                                     },
                                     startingDayOfWeek: StartingDayOfWeek.monday,
                                     daysOfWeekVisible: true,
+                                    daysOfWeekHeight: 40.0,
+                                    daysOfWeekStyle: DaysOfWeekStyle(
+                                      // Style for weekday names
+                                      weekdayStyle: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16.0,
+                                        color: Colors
+                                            .white, // Changed to white for dark mode
+                                      ),
+                                      // Style for weekend names
+                                      weekendStyle: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16.0,
+                                        color: Colors.grey[400],
+                                      ),
+                                    ),
                                     onDaySelected: (DateTime selectDay,
                                         DateTime focusDay) {
                                       setState(() {
@@ -1083,21 +1170,17 @@ class CalendarStateO extends State<Calendar> {
                                       cellMargin: EdgeInsets.all(4.0),
                                     ),
                                     headerStyle: HeaderStyle(
-                                      titleTextStyle: TextStyle(
-                                        fontSize: 40,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                      // Hide the default format button
                                       formatButtonVisible: false,
                                       headerPadding: EdgeInsets.zero,
                                       headerMargin: EdgeInsets.zero,
-                                      leftChevronVisible:
-                                          false, // Hide default left chevron
-                                      rightChevronVisible:
-                                          false, // Hide default right chevron
+                                      leftChevronVisible: false,
+                                      rightChevronVisible: false,
                                     ),
                                     calendarBuilders: CalendarBuilders(
+                                      headerTitleBuilder: (context, day) {
+                                        return SizedBox
+                                            .shrink(); // Return empty widget
+                                      },
                                       markerBuilder: (context, date, events) {
                                         if (events.isEmpty) return null;
                                         return Positioned(
