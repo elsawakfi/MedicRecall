@@ -647,6 +647,28 @@ class CalendarStateO extends State<Calendar> {
   //maybe make testDay string be default string, then set state to be a string returned from firebase
   // so get object from databse, then .toString or as String
 
+  // Helper function to get day name
+  String _getDayName(int weekday) {
+    switch (weekday) {
+      case 1:
+        return "Monday";
+      case 2:
+        return "Tuesday";
+      case 3:
+        return "Wednesday";
+      case 4:
+        return "Thursday";
+      case 5:
+        return "Friday";
+      case 6:
+        return "Saturday";
+      case 7:
+        return "Sunday";
+      default:
+        return "";
+    }
+  }
+
   // helper function for adding new events
   void _showAddEventDialog(BuildContext context)  {
     showDialog(
@@ -814,17 +836,61 @@ class CalendarStateO extends State<Calendar> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 16.0, vertical: 8.0),
                           child: TableCalendar(
-                            firstDay: DateTime.utc(2020, 1, 1),
-                            lastDay: DateTime.utc(2030, 12, 31),
+                            firstDay: today,
+                            lastDay: testDay ?? DateTime.now().add(const Duration(days: 365)),
                             focusedDay: focusedDay,
                             calendarFormat: format,
+                            startingDayOfWeek: StartingDayOfWeek.monday,
+                            daysOfWeekVisible: true,
+                            calendarStyle: CalendarStyle(
+                              selectedDecoration: BoxDecoration(
+                                color: Colors.blue[600],
+                                shape: BoxShape.circle,
+                              ),
+                              todayDecoration: const BoxDecoration(
+                                color: Color.fromARGB(255, 13, 71, 161),
+                                shape: BoxShape.circle,
+                              ),
+                              selectedTextStyle: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              defaultTextStyle: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              weekendTextStyle: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              outsideTextStyle: TextStyle(
+                                color: Colors.grey[500],
+                              ),
+                              disabledTextStyle: TextStyle(
+                                color: Colors.grey[600],
+                                decoration: TextDecoration.lineThrough,
+                                decorationColor: Colors.grey[400],
+                                decorationThickness: 2,
+                              ),
+                              markersMaxCount: 6,
+                              markersAnchor: 1.0,
+                              cellPadding: const EdgeInsets.all(8.0),
+                              cellMargin: const EdgeInsets.all(4.0),
+                            ),
+                            enabledDayPredicate: (day) {
+                              final normalizedDay = DateTime(day.year, day.month, day.day);
+                              if (normalizedDay.isBefore(today) || 
+                                  (testDay != null && normalizedDay.isAfter(testDay!))) {
+                                return false;
+                              }
+                              final dayName = _getDayName(normalizedDay.weekday);
+                              return !(revisionDays.contains(dayName));
+                            },
                             onFormatChanged: (CalendarFormat _format) {
                               setState(() {
                                 format = _format;
                               });
                             },
-                            startingDayOfWeek: StartingDayOfWeek.monday,
-                            daysOfWeekVisible: true,
                             onDaySelected:
                                 (DateTime selectDay, DateTime focusDay) {
                               setState(() {
@@ -836,43 +902,6 @@ class CalendarStateO extends State<Calendar> {
                               return isSameDay(selectedDay, date);
                             },
                             eventLoader: _getEventsfromDay,
-                            calendarStyle: CalendarStyle(
-                              // Make selected day more visible with a darker blue
-                              selectedDecoration: BoxDecoration(
-                                color: Colors.blue[600],
-                                shape: BoxShape.circle,
-                              ),
-                              // Make today's date stand out with a distinct color
-                              todayDecoration: BoxDecoration(
-                                color: Color.fromARGB(255, 13, 71, 161),
-                                shape: BoxShape.circle,
-                              ),
-                              // Improve visibility of selected text
-                              selectedTextStyle: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              // Make default days more visible on dark background
-                              defaultTextStyle: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              // Make weekend days match default days
-                              weekendTextStyle: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              // Improve visibility of outside days
-                              outsideTextStyle: TextStyle(
-                                color: Colors.grey[500],
-                              ),
-                              // Custom marker settings
-                              markersMaxCount:
-                                  6, // Show up to 5 markers per day
-                              markersAnchor: 1.0,
-                              cellPadding: EdgeInsets.all(8.0),
-                              cellMargin: EdgeInsets.all(4.0),
-                            ),
                             calendarBuilders: CalendarBuilders(
                               markerBuilder: (context, date, events) {
                                 if (events.isEmpty) return null;
