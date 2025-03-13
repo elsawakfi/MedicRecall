@@ -134,7 +134,7 @@ Widget build(BuildContext context) {
         height: 40.31,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          color: const Color.fromARGB(255, 235, 230, 239),
+          color: Color.fromARGB(255, 222, 221, 222),
           boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.2),
@@ -148,9 +148,10 @@ Widget build(BuildContext context) {
           child: Text(
             'Time Remaining: $_displayTime',
             style: TextStyle(
-              color: Color.fromARGB(255, 98, 86, 139),
+              color: Color.fromARGB(255, 0, 0, 0),
               fontSize: 18.5,
               fontWeight: FontWeight.w500,
+             
             ),
           ),
         )),
