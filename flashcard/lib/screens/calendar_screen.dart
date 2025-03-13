@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart' as launcher;
-import 'button_screen.dart';
+import '../widgets/countdown_button.dart';
 import 'dashboard_screen.dart';
 
 // Internal imports
@@ -299,13 +299,12 @@ class CalendarStateO extends State<Calendar> {
     if (title.contains("Mini Mock")) return StudySessionManager.kMiniMockColor;
     if (title.contains("Full-sized Mock")) return StudySessionManager.kFullMockColor;
     if (title.contains("Official Paper")) return StudySessionManager.kOfficialPaperColor;
-    
+    if (title.contains("Official SJT Practice Paper")) return StudySessionManager.kSJTPaperColor;
     
     for (String flashcard in flashcards){
         if(title.contains(flashcard)) return StudySessionManager.kFlashcardColor;
       }
     
-  
     return Color.fromARGB(200, 0, 0, 100);
   }
 
@@ -356,6 +355,9 @@ class CalendarStateO extends State<Calendar> {
     }
     if (title.contains('official paper')) {
       return "official_paper";
+    }
+    if (title.contains('official sjt practice paper')) {
+      return "official_sjt_paper";
     }
     if (title.contains('test day')) {
       return "test_day";
@@ -443,6 +445,27 @@ class CalendarStateO extends State<Calendar> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Could not open the official paper website'),
+            ),
+          );
+        }
+      }
+    } else if (eventType == 'official_sjt_paper'){
+      final String url = 'https://foundationprogramme.nhs.uk/programmes/f2-stand-alone/f2sa2025-sjt/preparation-materials/';
+      try {
+        if (!await launcher.launch(url)) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Could not open the Official SJT Paper website'),
+              ),
+            );
+          }
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Could not open the Official SJT Paper website'),
             ),
           );
         }
@@ -573,14 +596,8 @@ class CalendarStateO extends State<Calendar> {
         Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94))
       ];
 
-      
-
       //If the user already selected their resources, generate study session should not be called 
       //it should only be called the first time they choose their test day and resources 
-
-      
-      
-
 
       setState(() {});
     } else {
@@ -656,13 +673,6 @@ class CalendarStateO extends State<Calendar> {
 
                 
                 await addSingleEvent(selectedDay, _eventController.text, user);
-                // if (selectedEvents[selectedDay] != null) {
-                //   selectedEvents[selectedDay]?.add(newEvent);
-                // } else {
-                //   selectedEvents[selectedDay] = [];
-                //   selectedEvents[selectedDay]?.add(newEvent);
-
-                // }
                 updateEventsToDB(user);
                 Navigator.pop(context);
                 _eventController.clear();
@@ -773,6 +783,9 @@ class CalendarStateO extends State<Calendar> {
                   SizedBox(height: 30),
                   _buildLabelItem(
                       'Flashcards', StudySessionManager.kFlashcardColor),
+                  SizedBox(height: 30),
+                  _buildLabelItem(
+                      'Official SJT Paper', StudySessionManager.kSJTPaperColor),
                   SizedBox(height: 30),
                   _buildLabelItem(
                       'Test Day', const Color.fromARGB(255, 255, 89, 94)),
@@ -1270,72 +1283,11 @@ class CalendarStateO extends State<Calendar> {
     DateTime normalizedNewDate =
         DateTime(newDate.year, newDate.month, newDate.day);
 
-    // 1️⃣ Remove the old event from the local `selectedEvents` map
-    // selectedEvents[normalizedOldDate]
-    //     ?.removeWhere((event) => event.title == oldEvent.title);
-    // if (selectedEvents[normalizedOldDate]?.isEmpty ?? false) {
-    //   selectedEvents.remove(
-    //       normalizedOldDate); // If no more events on that day, remove it
-    // }
-
-    // 2️⃣ Add the updated event to the new date
-    // if (selectedEvents[normalizedNewDate] != null) {
-    //   selectedEvents[normalizedNewDate]
-    //       ?.add(Event(title: newTitle, color: oldEvent.color));
-    // } else {
-    //   selectedEvents[normalizedNewDate] = [
-    //     Event(title: newTitle, color: oldEvent.color)
-    //   ];
-    // }
-
-    // 3️⃣ Remove old event from Firestore
+    // Remove old event from Firestore
     await deleteSingleEvent(normalizedOldDate, oldEvent.title, user);
     await addSingleEvent(normalizedNewDate, newTitle, user);
-
-    // // 4️⃣ Ensure Firestore is updated correctly
-    // QuerySnapshot u =
-    //     await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
-    // String id = u.docs.last.id;
-    // _eventsCollectionRef =
-    //     FirebaseFirestore.instance.collection('users/$id/events');
-
-    // QuerySnapshot querySnapshot = await _eventsCollectionRef
-    //     .where("date", isEqualTo: Timestamp.fromDate(normalizedNewDate))
-    //     .get();
-
-    // List<String> updatedEvents =
-    //     selectedEvents[normalizedNewDate]?.map((e) => e.title).toList() ?? [];
     
-
-    // //Turns out, you need to ensure that the code on line 592 is run if you want the UI
-    // //to update correctly, I think that was the only thing that was wrong. I do not understand the 
-    // //rest of your code if you want to remove the bits that are unnecessary now. 
-    // if (querySnapshot.docs.isEmpty) {
-    //   // If no document exists for the new date, create it
-      
-    //    String docId = querySnapshot.docs.first.id;
-    //   await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
-    //   if (updatedEvents.isNotEmpty) {
-    //     await _eventsCollectionRef.add({
-    //       "date":
-    //           Timestamp.fromDate(normalizedNewDate), // Ensure correct format
-    //       "events": updatedEvents,
-    //     });
-    //   await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
-    //   }
-    // } else {
-    //   // If a document exists, update it
-    //   String docId = querySnapshot.docs.first.id;
-    //   if (updatedEvents.isEmpty) {
-    //     await _eventsCollectionRef.doc(docId).delete();
-    //   } else {
-    //     await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
-    //   }
-    //   await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
-    // }
-    
-
-    // 5️⃣ Refresh UI
+    // Refresh UI
     setState(() {
       selectedDay = normalizedNewDate;
     });
