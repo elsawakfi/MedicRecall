@@ -701,7 +701,7 @@ class CalendarStateO extends State<Calendar> {
     });
   }
 
-  // Add this new method before the build method
+  // Function to show the labels dialog (pop-up) 
   void _showLabelsDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -725,7 +725,7 @@ class CalendarStateO extends State<Calendar> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildLabelItem(
-                    'Custom Events', Color.fromARGB(200, 0, 0, 100)),
+                    'Test Day', const Color.fromARGB(255, 255, 89, 94)),
                 const SizedBox(height: 20),
                 _buildLabelItem(
                     'Mini Mock', StudySessionManager.kMiniMockColor),
@@ -743,7 +743,7 @@ class CalendarStateO extends State<Calendar> {
                     'Official SJT Paper', StudySessionManager.kSJTPaperColor),
                 const SizedBox(height: 20),
                 _buildLabelItem(
-                    'Test Day', const Color.fromARGB(255, 255, 89, 94)),
+                    'Custom Events', Color.fromARGB(200, 0, 0, 100)),
               ],
             ),
           ),
@@ -1200,7 +1200,7 @@ class CalendarStateO extends State<Calendar> {
     );
   }
 
-  // VoidCallback -> Signature of callbacks that have no arguments and return no data.
+  // Helper function to build a label item
   Widget _buildLabelItem(String label, Color color) {
     return Row(
       children: [
@@ -1216,7 +1216,7 @@ class CalendarStateO extends State<Calendar> {
         Text(
           label,
           style: TextStyle(
-            color: Colors.white,
+            color: Color.fromRGBO(21, 58, 103, 1),
             fontSize: 16,
           ),
         ),
