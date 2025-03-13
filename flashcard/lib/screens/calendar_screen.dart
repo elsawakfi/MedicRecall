@@ -219,27 +219,60 @@ class CalendarStateO extends State<Calendar> {
 
   //with UTD we want to update the date on the calendar, and change in firebase
   Future<void> updateTestDay(DateTime date) async {
-    QuerySnapshot u =
-        await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
+    // Normalize both dates to avoid time-based mismatches
+    date = DateTime(date.year, date.month, date.day);
+    if (testDay != null) {
+      testDay = DateTime(testDay!.year, testDay!.month, testDay!.day);
+    }
 
-    /*  FIRST update on database */
-    var id = u.docs.last.id; // id being where the user's id details
-
-    var userFromDb = u.docs.first;
-    Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
-
-    _userCollectionRef.doc(id).update({
-      "TestDay": date,
-      // "firstStudyDay": data.containsKey("firstStudyDay") && data["firstStudyDay"] != null
-      //   ? data["firstStudyDay"] // Keep existing firstStudyDay if it exists
-      //   : DateTime.now(), // Otherwise, set it to now
+    // Remove test day event from all dates to prevent duplicates
+    selectedEvents.forEach((key, events) {
+      events.removeWhere((event) => event.title == "Test Day");
+      if (events.isEmpty) {
+        selectedEvents.remove(key);
+      }
     });
 
-    selectedEvents[testDay]?.remove(Event(
-        title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
-    // update field testday to what is passed as param
-    await getTestDay();
-    setState(() {});
+    // Update Firebase
+    QuerySnapshot u = await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
+    var id = u.docs.last.id;
+    await _userCollectionRef.doc(id).update({
+      "TestDay": date,
+    });
+
+    // Update local test day
+    testDay = date;
+
+    // Add test day event to the new date
+    if (!selectedEvents.containsKey(date)) {
+      selectedEvents[date] = [];
+    }
+    selectedEvents[date]?.add(
+      Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94))
+    );
+
+    // Update events in Firebase
+    await updateEventsToDB(user);
+
+    // Update the focused day to show the new test day
+    setState(() {
+      focusedDay = date;
+      selectedDay = date;
+    });
+
+    // Rebuild the entire screen to refresh countdown button
+    if (context.mounted) {
+      // Use a microtask to ensure state updates are complete
+      Future.microtask(() {
+        Navigator.of(context).pushReplacement(
+          PageRouteBuilder(
+            pageBuilder: (context, animation1, animation2) => const Calendar(),
+            transitionDuration: Duration.zero,
+            reverseTransitionDuration: Duration.zero,
+          ),
+        );
+      });
+    }
   }
 
   //updates the UI with the events collected from firebase
@@ -253,7 +286,6 @@ class CalendarStateO extends State<Calendar> {
         print("No user document found!");
         return;
       }
-
 
       String id = u.docs.last.id;      
       _eventsCollectionRef =
@@ -270,14 +302,28 @@ class CalendarStateO extends State<Calendar> {
             DateTime date = timestamp.toDate();
             date = DateTime(date.year, date.month, date.day);
             
+            // Filter out any existing Test Day events from the database
+            eventsList.removeWhere((title) => title.toString() == "Test Day");
+            
             List<String> events = eventsList.map((e) => e.toString()).toList();
-            
-            
             selectedEvents[date] = events.map((title) => Event(
               title: title,
               color: _getEventColor(title),
             )).toList();
           }
+        }
+      }
+
+      // Add Test Day event if testDay is set
+      if (testDay != null) {
+        DateTime normalizedTestDay = DateTime(testDay!.year, testDay!.month, testDay!.day);
+        if (!selectedEvents.containsKey(normalizedTestDay)) {
+          selectedEvents[normalizedTestDay] = [];
+        }
+        if (!selectedEvents[normalizedTestDay]!.any((e) => e.title == "Test Day")) {
+          selectedEvents[normalizedTestDay]!.add(
+            Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94))
+          );
         }
       }
     } catch (e) {
@@ -616,6 +662,8 @@ class CalendarStateO extends State<Calendar> {
     setState(() {
       selectedEvents.addAll(events);
     });
+    // add to database
+    await studySessionManager.saveStudySessionsToDB(user, events);
   }
 
   Future<void> _loadTopicsList() async {
@@ -1308,7 +1356,15 @@ class CalendarStateO extends State<Calendar> {
     
     // Refresh UI
     setState(() {
-      selectedDay = normalizedNewDate;
+      // Force rebuild of the CustomFloatingButton by updating a key
+      if (context.mounted) {
+        final nav = Navigator.of(context);
+        nav.pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => const Calendar(),
+          ),
+        );
+      }
     });
   }
 
@@ -1339,6 +1395,7 @@ class CalendarStateO extends State<Calendar> {
             // Editable Event Title
             TextFormField(
               controller: _editEventController,
+              enabled: event.title != "Test Day", // Disable title editing for Test Day
               style: const TextStyle(
                 color: Color.fromRGBO(21, 58, 103, 1),
                 fontSize: 16,
@@ -1411,24 +1468,35 @@ class CalendarStateO extends State<Calendar> {
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               minimumSize: const Size(120, 45),
             ),
-            child: const Text("Cancel", style: TextStyle(fontSize: 16)),
+            child: const Text(
+              "Cancel",
+              style: TextStyle(fontSize: 16),
+            ),
           ),
           TextButton(
-            onPressed: () {
-              if (_editEventController.text.isNotEmpty &&
-                  _selectedDate != null) {
-                 updateOneEvent(
-                    event, _editEventController.text, _selectedDate!);
+            onPressed: () async {
+              if (_editEventController.text.isNotEmpty && _selectedDate != null) {
+                if (event.title == "Test Day") {
+                  // For Test Day events, use updateTestDay
+                  await updateTestDay(_selectedDate!);
+                } else {
+                  // For other events, use updateOneEvent
+                  await updateOneEvent(event, _editEventController.text, _selectedDate!);
+                }
                 Navigator.pop(context);
+                setState(() {});
               }
             },
             style: TextButton.styleFrom(
               foregroundColor: Colors.white,
-              backgroundColor: const Color.fromRGBO(21, 58, 103, 1),
+              backgroundColor: Colors.blue,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               minimumSize: const Size(120, 45),
             ),
-            child: const Text("Save", style: TextStyle(fontSize: 16)),
+            child: const Text(
+              "Save Changes",
+              style: TextStyle(fontSize: 16),
+            ),
           ),
         ],
       ),

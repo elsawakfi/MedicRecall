@@ -119,24 +119,21 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
 
       var userFromDb = querySnapshot.docs.first;
       Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
-      // If the Test Day field isn't null and is in the database we update the UI with it. Otherwise it is displayed as being not set.
-      if ((data.containsKey("TestDay") || data["TestDay"] != null) &&
-          (buildCount <= 2 || (_examDate != null && buildCount > 2))) {
+      
+      if (data.containsKey("TestDay") && data["TestDay"] != null) {
         testDayBool = false;
-        _examDate = DateTime.fromMicrosecondsSinceEpoch(userFromDb["TestDay"]
-            .microsecondsSinceEpoch); // Firebase is weird. Conversion from TimeStamp to DateTime object
+        _examDate = DateTime.fromMicrosecondsSinceEpoch(
+            data["TestDay"].microsecondsSinceEpoch);
+        
         String? day = _examDate?.day.toString();
-        // String? month = _examDate?.month.toString();
-
-        // Convert month number to month name
         String? month = _examDate?.month != null 
             ? DateFormat('MMMM').format(DateTime(_examDate!.year, _examDate!.month))
             : null;
         String? year = _examDate?.year.toString();
-        // testDayString = '$day-$month-$year';
         testDayString = '$day ${month} $year';
       } else {
         testDayBool = true;
+        testDayString = "Test day not set";
       }
       setState(() {});
     }
@@ -742,7 +739,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: selectedDays.keys.map((day) {
-                  return _buildCheckbox(selectedDays[day]!, day, showInfo: false); // ✅ Hide info icon
+                  return _buildCheckbox(selectedDays[day]!, day, showInfo: false); // Hide info icon
                 }).toList(),
               ),
               actions: [
