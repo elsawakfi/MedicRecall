@@ -145,6 +145,16 @@ Widget build(BuildContext context) {
       double maxPreferredWidth = 960; // 1920/2
       return Center(
         child: Container(
+          decoration: BoxDecoration(
+                        boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              spreadRadius: 5,
+                              blurRadius: 5,
+                              offset: const Offset(0, 3),
+                              )],
+            color:   Color.fromARGB(255, 255, 255, 255),),
+          
           constraints: BoxConstraints(
             maxWidth: maxScreenWidth > maxPreferredWidth ? maxScreenWidth : maxPreferredWidth,
           ),
@@ -264,10 +274,10 @@ Spacer(),
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 98, 86, 139)),
-                      label: Text('Back',  style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 16)),
+                      icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0)),
+                      label: Text('Back',  style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 16)),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color.fromARGB(255, 235, 230, 239),
+                        backgroundColor: const Color.fromARGB(255, 222, 221, 222),
                       ),
                     )
                   ),
