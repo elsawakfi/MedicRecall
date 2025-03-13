@@ -156,6 +156,8 @@ Widget build(BuildContext context) {
     body: LayoutBuilder( builder: (context, constraints) {
       double maxScreenWidth = constraints.maxWidth * 0.5;
       double maxPreferredWidth = 960; // 1920/2
+
+
       return Center(
         child: Container(
           decoration: 
@@ -176,7 +178,7 @@ Widget build(BuildContext context) {
           ),
           padding: EdgeInsets.all(16),
              child: SizedBox(
-              height: MediaQuery.of(context).size.height*0.8,
+              height: constraints.maxHeight,
               child: Column(children: [
                 Expanded(child: 
                 SingleChildScrollView(
@@ -192,59 +194,66 @@ Widget build(BuildContext context) {
                       });
                     },
         
-  children: [
-    // Ranking Questions Panel
-    ExpansionPanel(
-      isExpanded: _isOpen[0],
-      canTapOnHeader: true,
-      backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-      headerBuilder: (context, isOpen) => ListTile(
-        title: Text('Ranking Questions (Question 1 - ${widget.rankingLength})'),
-      ),
-      body: Wrap(
-        children: List.generate(
-          widget.rankingLength,
-          (index) => Padding(
-            padding: const EdgeInsets.all(4.0),
-            child: _buildQuestionButton(index),
-            ),
-          ),
-        ),
-      ),
+                  children: [
+                    // Ranking Questions Panel
+                    ExpansionPanel(
+                      isExpanded: _isOpen[0],
+                      canTapOnHeader: true,
+                      backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+                      headerBuilder: (context, isOpen) => ListTile(
+                        title: Text('Ranking Questions (Question 1 - ${widget.rankingLength})'),
+                      ),
+                      body: Center(
+                      child: Wrap(
+                         alignment: WrapAlignment.center,
+                        children: List.generate(
+                          widget.rankingLength,
+                          (index) => Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: _buildQuestionButton(index),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
 
-        ExpansionPanel(
-          isExpanded: _isOpen[1],
-          canTapOnHeader: true,
-          backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-          headerBuilder: (context, isOpen) => ListTile(
-            title: Text(
-              'Multiple Choice Questions (Question ${widget.rankingLength + 1} - $questionLength)'),
-              ),
-    body: Wrap(
-      children: List.generate(
-        widget.multiChoiceLength,
-        (index) => Padding(
-          padding: const EdgeInsets.all(4.0),
-          child: ElevatedButton.icon(
-            onPressed: () => _returnToFullMock(context, widget.rankingLength + index),
-            icon: Visibility(
-              visible: (widget.flaggedQuestions.length > widget.rankingLength + index) 
-                       ? widget.flaggedQuestions[widget.rankingLength + index] 
-                       : false,
-              child: const Icon(Icons.flag, color: Colors.black),
+                        ExpansionPanel(
+                          isExpanded: _isOpen[1],
+                          canTapOnHeader: true,
+                          backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+                          headerBuilder: (context, isOpen) => ListTile(
+                            title: Text(
+                              'Multiple Choice Questions (Question ${widget.rankingLength + 1} - $questionLength)'),
+                              ),
+                    body: Center(
+                      child: Wrap(
+                         alignment: WrapAlignment.center,
+                      children: List.generate(
+                        widget.multiChoiceLength,
+                        (index) => Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: ElevatedButton.icon(
+                            onPressed: () => _returnToFullMock(context, widget.rankingLength + index),
+                            icon: Visibility(
+                              visible: (widget.flaggedQuestions.length > widget.rankingLength + index) 
+                                      ? widget.flaggedQuestions[widget.rankingLength + index] 
+                                      : false,
+                              child: const Icon(Icons.flag, color: Colors.black),
+                            ),
+                            label: Text('${widget.rankingLength + index + 1}'),
+                          ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  )],
+                ),
+              ],
             ),
-            label: Text('${widget.rankingLength + index + 1}'),
-          ),
           ),
         ),
       ),
-                ),],
-  ),
-],
-),
-),
-),),
-           
+                      
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
