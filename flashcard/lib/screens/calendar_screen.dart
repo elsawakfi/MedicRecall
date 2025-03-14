@@ -418,7 +418,7 @@ class CalendarStateO extends State<Calendar> {
     if (title == "Test Day") return const Color.fromARGB(255, 255, 89, 94);
     if (title.contains("Mini Mock")) return StudySessionManager.kMiniMockColor;
     if (title.contains("Full-sized Mock")) return StudySessionManager.kFullMockColor;
-    if (title.contains("Official Paper")) return StudySessionManager.kOfficialPaperColor;
+    if (title.contains("Official MRSA Paper")) return StudySessionManager.kOfficialPaperColor;
     if (title.contains("Official SJT Practice Paper")) return StudySessionManager.kSJTPaperColor;
     
     for (String flashcard in flashcards){
@@ -473,7 +473,7 @@ class CalendarStateO extends State<Calendar> {
     if (title.contains('flashcard')) {
       return "flashcard";
     }
-    if (title.contains('official paper')) {
+    if (title.contains('official mrsa paper')) {
       return "official_paper";
     }
     if (title.contains('official sjt practice paper')) {
@@ -555,7 +555,7 @@ class CalendarStateO extends State<Calendar> {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Could not open the official paper website'),
+                content: Text('Could not open the official MRSA paper website'),
               ),
             );
           }
@@ -564,7 +564,7 @@ class CalendarStateO extends State<Calendar> {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Could not open the official paper website'),
+              content: Text('Could not open the official MRSA paper website'),
             ),
           );
         }
@@ -761,7 +761,7 @@ class CalendarStateO extends State<Calendar> {
         for (var event in events) {
           if (event.title.contains("Mini Mock") || 
               event.title.contains("Full-sized Mock") || 
-              event.title.contains("Official Paper") ||
+              event.title.contains("Official MRSA Paper") ||
               event.title.contains("Flashcard")) {
             hasStudySessions = true;
             break;
