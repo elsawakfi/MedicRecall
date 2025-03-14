@@ -252,21 +252,41 @@ class CalendarStateO extends State<Calendar> {
 
   // We pull the testDay if its in the database to be updated in the calendar UI
   Future<void> getTestDay() async {
-    QuerySnapshot querySnapshot =
-        await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+    try {
+      QuerySnapshot querySnapshot =
+          await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
 
-    var userFromDb = querySnapshot.docs.first;
-    Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
-    //if the Test Day field isn't null and is in the database we update the UI with it. Otherwise it is displayed as being not set.
-    if ((data.containsKey("TestDay") || data["TestDay"] != null) &&
-        (testDay != null)) {
-      testDayBool = false;
-      testDay = DateTime.fromMicrosecondsSinceEpoch(userFromDb["TestDay"]
-          .microsecondsSinceEpoch); //firebase is weird. conversion from TimeStamp to DateTime object
-    } else {
-      testDayBool = true;
+      if (querySnapshot.docs.isEmpty) {
+        setState(() {
+          testDayBool = true;
+          testDay = null;
+        });
+        return;
+      }
+
+      var userFromDb = querySnapshot.docs.first;
+      Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
+      
+      // Check if TestDay exists in Firestore document
+      if (data.containsKey("TestDay") && data["TestDay"] != null) {
+        setState(() {
+          testDayBool = false;
+          testDay = DateTime.fromMicrosecondsSinceEpoch(data["TestDay"].microsecondsSinceEpoch);
+        });
+      } else {
+        // No test day in database
+        setState(() {
+          testDayBool = true;
+          testDay = null;
+        });
+      }
+    } catch (e) {
+      print("Error retrieving test day: $e");
+      setState(() {
+        testDayBool = true;
+        testDay = null;
+      });
     }
-    setState(() {});
   }
 
   //with UTD we want to update the date on the calendar, and change in firebase
@@ -638,53 +658,81 @@ class CalendarStateO extends State<Calendar> {
 
   //deletes all events and testDay in UI calendar and firebase
   Future<void> deleteAllEvents() async {
-    selectedEvents
-        .clear(); // sets the selectedEvents list to empty - delete all events being stored locally.
+    // Clear all events from local state
+    selectedEvents.clear();
 
+    // Get user document
     QuerySnapshot u =
         await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+    
+    if (u.docs.isEmpty) {
+      print("No user document found!");
+      return;
+    }
+    
     String id = u.docs.last.id;
-    String docID = u.docs.first.id;
-    _eventsCollectionRef =
-        // FirebaseFirestore.instance.collection('users/' + id + "/events");
-        FirebaseFirestore.instance.collection('users/$id/events');
+    
+    // Setup events collection reference
+    _eventsCollectionRef = FirebaseFirestore.instance.collection('users/$id/events');
+    
+    // Delete all event documents
     var snapshots = await _eventsCollectionRef.get();
     for (var doc in snapshots.docs) {
       await doc.reference.delete();
     }
 
+    // Get user data for updates
     var userFromDb = u.docs.first;
     Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
     CollectionReference users = FirebaseFirestore.instance.collection('users');
 
+    // Update operations for Firestore
+    Map<String, dynamic> updates = {};
+    
+    // Remove TestDay
     if (data.containsKey("TestDay") || data["TestDay"] != null) {
-      data.remove("TestDay");
-      users.doc(id).update({
-        "TestDay": FieldValue.delete()
-      }); // update field TestDay to be removed from database
+      updates["TestDay"] = FieldValue.delete();
+    }
+    
+    // Clear excluded days
+    if (data.containsKey("excludedDays") || data["excludedDays"] != null) {
+      updates["excludedDays"] = [];
+      // Also clear local state
+      setState(() {
+        revisionDays = [];
+      });
+    }
+    
+    // Apply all updates at once
+    if (updates.isNotEmpty) {
+      await users.doc(id).update(updates);
     }
 
-    selectedEvents[testDay]?.remove(Event(
-        title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
-    getTestDay();
+    // Reset test day locally
+    testDay = null;
+    testDayBool = true;
     
-    await  _eventsCollectionRef.doc(docID).update({"events": []});
-  }
-
-  
-
-  @override
-  void initState() {
-    super.initState();
-    selectedEvents = {};
-    initializeUserAndTestDay();
+    // Clear any lingering events
+    if (u.docs.isNotEmpty) {
+      String docID = u.docs.first.id;
+      try {
+        await _eventsCollectionRef.doc(docID).update({"events": []});
+      } catch (e) {
+        print("Error clearing events: $e");
+      }
+    }
+    
+    // Update UI
+    setState(() {});
   }
 
   Future<void> initializeUserAndTestDay() async {
     await getUser();
     await getTestDay();
     await _loadExcludedDays(); // Load excluded days from Firebase
-    if (testDay != null) {
+    
+    // Only proceed with test day handling if a test day exists
+    if (testDay != null && !testDayBool) {
       await getEventsFromDB(); // Then load events from database
       
       // First add Test Day event if not already present
@@ -731,7 +779,9 @@ class CalendarStateO extends State<Calendar> {
 
       setState(() {});
     } else {
-      print("Test day is null!");
+      // No test day is set or test day was deleted
+      await getEventsFromDB(); // Still load other events if any
+      setState(() {});
     }
   }
 
@@ -764,6 +814,13 @@ class CalendarStateO extends State<Calendar> {
     setState(() {
       topicsList = topics.map((topic) => topic["topic"].toString()).toList();
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    selectedEvents = {};
+    initializeUserAndTestDay();
   }
 
   @override
@@ -930,7 +987,7 @@ class CalendarStateO extends State<Calendar> {
                       'Mini Mock', StudySessionManager.kMiniMockColor),
                   SizedBox(height: 30),
                   _buildLabelItem(
-                      'Full-Sized Mock', StudySessionManager.kFullMockColor),
+                      'Full-sized Mock', StudySessionManager.kFullMockColor),
                   SizedBox(height: 30),
                   _buildLabelItem('Official MRSA Paper',
                       StudySessionManager.kOfficialPaperColor),
