@@ -366,6 +366,10 @@ class CalendarStateO extends State<Calendar> {
           FirebaseFirestore.instance.collection('users/$id/events');
 
       var snapshots = await _eventsCollectionRef.get();
+      
+      // Clear existing events first to prevent duplicates
+      selectedEvents.clear();
+      
       for (var doc in snapshots.docs) {
         var data = doc.data() as Map<String, dynamic>;
         if (data.containsKey('date') && data.containsKey('events')) {
@@ -389,7 +393,7 @@ class CalendarStateO extends State<Calendar> {
       }
 
       // Add Test Day event if testDay is set
-      if (testDay != null) {
+      if (testDay != null && !testDayBool) {
         DateTime normalizedTestDay = DateTime(testDay!.year, testDay!.month, testDay!.day);
         if (!selectedEvents.containsKey(normalizedTestDay)) {
           selectedEvents[normalizedTestDay] = [];
@@ -400,8 +404,13 @@ class CalendarStateO extends State<Calendar> {
           );
         }
       }
+      
+      // Force update UI
+      setState(() {});
+      
+      print("Events loaded from database: ${selectedEvents.length} dates");
     } catch (e) {
-      print("Error loading events from DB: $e");
+      print("Error getting events from database: $e");
     }
   }
 
@@ -1416,51 +1425,48 @@ class CalendarStateO extends State<Calendar> {
       DateTime date, String eventTitle, User user) async {
     date = DateTime(date.year, date.month, date.day);
     
-    //The delete single event function updates the UI in real time so I just copied the structure of that function 
-    Event newEvent =  Event(
-                        title: eventTitle,
-                        color: _getEventColor(eventTitle));
+    // Create the new event with proper color
+    Event newEvent = Event(
+      title: eventTitle,
+      color: _getEventColor(eventTitle)
+    );
     
-   
+    // Add to local state first
     if (selectedEvents[date] == null) {
       selectedEvents[date] = [];
-      
     }
     selectedEvents[date]?.add(newEvent);
+    
+    // Get existing events for this date from Firebase
     QuerySnapshot querySnapshot = await _eventsCollectionRef
         .where("date", isEqualTo: Timestamp.fromDate(date))
         .get();
    
-    
-     List<String> updatedEvents =
+    // Get all event titles as a list
+    List<String> updatedEvents =
         selectedEvents[date]?.map((e) => e.title).toList() ?? [];
     
-    if (querySnapshot.docs.isNotEmpty) {
-    String docId = querySnapshot.docs.first.id;
-   
-   
-
-    // Update Firestore document
-    await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
+    try {
+      if (querySnapshot.docs.isNotEmpty) {
+        // Update existing document
+        String docId = querySnapshot.docs.first.id;
+        await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
+      } else {
+        // Create a new document for this date
+        await _eventsCollectionRef.add({
+          "date": Timestamp.fromDate(date),
+          "events": updatedEvents
+        });
+      }
+      
+      print("Successfully saved event: $eventTitle on ${date.toString().split(' ')[0]}");
+    } catch (e) {
+      print("Error saving event to Firebase: $e");
+    }
     
-  } else {
-    
-
-    // If no document exists, create a new one
-    DocumentReference newDoc = await _eventsCollectionRef.add({
-      "date": Timestamp.fromDate(date),
-      "events": [eventTitle] // Start with just the new event
-    });
-    
-    String newDocId = newDoc.id;
-    await _eventsCollectionRef.doc(newDocId).update({"events": updatedEvents});
-
-  }
- 
+    // Important: Update calendar UI
     setState(() {});
   }
-
-
 
   Future<void> deleteSingleEvent(
       DateTime date, String eventTitle, User user) async {
@@ -1502,22 +1508,26 @@ class CalendarStateO extends State<Calendar> {
     DateTime normalizedNewDate =
         DateTime(newDate.year, newDate.month, newDate.day);
 
-    // Remove old event from Firestore
-    await deleteSingleEvent(normalizedOldDate, oldEvent.title, user);
-    await addSingleEvent(normalizedNewDate, newTitle, user);
-    
-    // Refresh UI
-    setState(() {
-      // Force rebuild of the CustomFloatingButton by updating a key
-      if (context.mounted) {
-        final nav = Navigator.of(context);
-        nav.pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => const Calendar(),
-          ),
-        );
-      }
-    });
+    try {
+      // First, delete the old event
+      await deleteSingleEvent(normalizedOldDate, oldEvent.title, user);
+      
+      // Then add the new event
+      await addSingleEvent(normalizedNewDate, newTitle, user);
+      
+      // Make sure to update the selected day to the new date
+      setState(() {
+        selectedDay = normalizedNewDate;
+        focusedDay = normalizedNewDate;
+      });
+      
+      // Reload all events to ensure consistency
+      await getEventsFromDB();
+      
+      print("Successfully updated event from '${oldEvent.title}' to '$newTitle'");
+    } catch (e) {
+      print("Error updating event: $e");
+    }
   }
 
   void _editEventDate(BuildContext context, Event event) {
