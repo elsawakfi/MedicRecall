@@ -1010,6 +1010,16 @@ class CalendarStateO extends State<Calendar> {
                               cellMargin: const EdgeInsets.all(4.0),
                             ),
                             enabledDayPredicate: (day) {
+                              // Always enable the test day, regardless of exclusion settings
+                              if (testDay != null) {
+                                DateTime normalizedTestDay = DateTime(testDay!.year, testDay!.month, testDay!.day);
+                                DateTime normalizedDay = DateTime(day.year, day.month, day.day);
+                                if (isSameDay(normalizedTestDay, normalizedDay)) {
+                                  return true;  // Always enable the test day
+                                }
+                              }
+                              
+                              // For other days, apply normal exclusion rules
                               final dayName = _getDayName(day.weekday);
                               return !revisionDays.contains(dayName);
                             },
