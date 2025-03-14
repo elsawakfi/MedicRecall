@@ -369,7 +369,7 @@ class CalendarStateO extends State<Calendar> {
     if (title.contains("Mini Mock")) return StudySessionManager.kMiniMockColor;
     if (title.contains("Full-sized Mock"))
       return StudySessionManager.kFullMockColor;
-    if (title.contains("Official Paper"))
+    if (title.contains("Official MSRA Paper"))
       return StudySessionManager.kOfficialPaperColor;
     if (title.contains("Official SJT Practice Paper"))
       return StudySessionManager.kSJTPaperColor;
@@ -426,8 +426,8 @@ class CalendarStateO extends State<Calendar> {
     if (title.contains('flashcard')) {
       return "flashcard";
     }
-    if (title.contains('official paper')) {
-      return "official_paper";
+    if (title.contains('official msra practice paper')) {
+      return "official_msra_paper";
     }
     if (title.contains('official sjt practice paper')) {
       return "official_sjt_paper";
@@ -502,7 +502,7 @@ class CalendarStateO extends State<Calendar> {
   Future<void> _navigateToEventDetails(Event event) async {
     String eventType = _getEventType(event.title);
 
-    if (eventType == 'official_paper') {
+    if (eventType == 'official_msra_paper') {
       final String url =
           'https://medical.hee.nhs.uk/medical-training-recruitment/medical-specialty-training/publications/multi-specialty-recruitment-assessment-%28msra%29-practice-paper/section-1--professional-dilemma-pd';
       try {
@@ -510,7 +510,7 @@ class CalendarStateO extends State<Calendar> {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Could not open the official paper website'),
+                content: Text('Could not open the official MSRA paper website'),
               ),
             );
           }
@@ -519,7 +519,7 @@ class CalendarStateO extends State<Calendar> {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Could not open the official paper website'),
+              content: Text('Could not open the official MSRA paper website'),
             ),
           );
         }
@@ -687,6 +687,7 @@ class CalendarStateO extends State<Calendar> {
           if (event.title.contains("Mini Mock") ||
               event.title.contains("Full-sized Mock") ||
               event.title.contains("Official MSRA Paper") ||
+              event.title.contains("Official SJT Paper") ||
               event.title.contains("Flashcard")) {
             hasStudySessions = true;
             break;

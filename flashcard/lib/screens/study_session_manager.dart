@@ -394,7 +394,9 @@ class StudySessionManager {
           generatedEvents[officialPaperDate] == null &&
           !await _isExcludedDay(officialPaperDate, userId)) {
         generatedEvents[officialPaperDate] = [
-          Event(title: "Official Paper ${i + 1}", color: kOfficialPaperColor)
+          Event(
+              title: "Official MSRA Practice Paper ${i + 1}",
+              color: kOfficialPaperColor)
         ];
         lastPaperDate = officialPaperDate;
       }
