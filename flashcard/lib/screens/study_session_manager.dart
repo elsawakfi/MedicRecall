@@ -212,7 +212,7 @@ class StudySessionManager {
             firstStudyDay, normalizedTestDay, daysUntilTest, generatedEvents);
       }
 
-      // Schedule Official MRSA papers
+      // Schedule Official MSRA papers
       if (selectedResources.contains('Official MSRA Practice Paper')) {
         final repetitions =
             (userData['officialMSRARepetitions'] as num?)?.toInt() ?? 1;
@@ -394,7 +394,7 @@ class StudySessionManager {
           generatedEvents[officialPaperDate] == null &&
           !await _isExcludedDay(officialPaperDate, userId)) {
         generatedEvents[officialPaperDate] = [
-          Event(title: "Official MRSA Paper ${i + 1}", color: kOfficialPaperColor)
+          Event(title: "Official MSRA Paper ${i + 1}", color: kOfficialPaperColor)
         ];
         lastPaperDate = officialPaperDate;
       }
