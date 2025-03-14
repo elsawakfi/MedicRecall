@@ -27,8 +27,10 @@ It is used for both UI display and database storage
 
 bool loading = true;
 
+// List of topics for study sessions and MSRA exam preparation
+// Format: "Main category - Specific topic" 
+// Used for generating and categorizing study sessions
 List<String> topicsList = [
-  // topics with a subtopic (if it has one)
   "Patient focus - Maintaining patient focus",
   "Patient focus - Driving",
   "Patient focus - Intimate examination",
