@@ -28,7 +28,7 @@ class MiniMockReview extends StatefulWidget {
 }
 
 class MiniMockReviewState extends State<MiniMockReview> {
-  List<bool> _isOpen = [false, false];
+  List<bool> _isOpen = [true, true];
   late int questionLength;
 
   late TimerController _timerController;

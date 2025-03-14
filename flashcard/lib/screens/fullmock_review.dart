@@ -28,7 +28,7 @@ class FullMockReview extends StatefulWidget {
 }
 
 class FullMockReviewState extends State<FullMockReview> {
-  List<bool> _isOpen = [false, false];
+  List<bool> _isOpen = [true, true];
   late int questionLength;
 
   late TimerController _timerController;
@@ -62,7 +62,7 @@ class FullMockReviewState extends State<FullMockReview> {
   void initState(){
     super.initState();
     questionLength = widget.rankingLength + widget.multiChoiceLength;
-    _isOpen = List.generate(2, (index) => false);
+    // _isOpen = List.generate(2, (index) => true);
     _displayTime = widget.displayTime;
     remainingSeconds = widget.remainingSeconds;
     _timerController = TimerController(
