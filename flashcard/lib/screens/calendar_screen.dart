@@ -1472,32 +1472,54 @@ class CalendarStateO extends State<Calendar> {
       DateTime date, String eventTitle, User user) async {
     date = DateTime(date.year, date.month, date.day);
 
-    if (!selectedEvents.containsKey(date)) return;
+    if (!selectedEvents.containsKey(date)) {
+      print("No events found for date: ${date.toString().split(' ')[0]}");
+      return;
+    }
 
+    // Check if the event exists before attempting to remove
+    bool eventExists = selectedEvents[date]?.any((event) => event.title == eventTitle) ?? false;
+    if (!eventExists) {
+      print("Event '$eventTitle' not found on ${date.toString().split(' ')[0]}");
+      return;
+    }
+
+    // Remove the event from local state
     selectedEvents[date]?.removeWhere((event) => event.title == eventTitle);
-
+    
+    // If this was the last event for this date, remove the date entry
     if (selectedEvents[date]?.isEmpty ?? false) {
       selectedEvents.remove(date);
     }
 
-    QuerySnapshot querySnapshot = await _eventsCollectionRef
-        .where("date", isEqualTo: Timestamp.fromDate(date))
-        .get();
+    // Update Firebase
+    try {
+      QuerySnapshot querySnapshot = await _eventsCollectionRef
+          .where("date", isEqualTo: Timestamp.fromDate(date))
+          .get();
 
-    if (querySnapshot.docs.isNotEmpty) {
-      String docId = querySnapshot.docs.first.id;
-      List<String> updatedEvents =
-          selectedEvents[date]?.map((e) => e.title).toList() ?? [];
+      if (querySnapshot.docs.isNotEmpty) {
+        String docId = querySnapshot.docs.first.id;
+        List<String> updatedEvents =
+            selectedEvents[date]?.map((e) => e.title).toList() ?? [];
 
-      if (updatedEvents.isEmpty) {
-        await _eventsCollectionRef
-            .doc(docId)
-            .delete(); // ❗ Ensure deletion happens
+        if (updatedEvents.isEmpty) {
+          // If no events left for this date, delete the document
+          await _eventsCollectionRef.doc(docId).delete();
+          print("Deleted document for date: ${date.toString().split(' ')[0]}");
+        } else {
+          // Otherwise update with remaining events
+          await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
+          print("Updated document with remaining events for date: ${date.toString().split(' ')[0]}");
+        }
       } else {
-        await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
+        print("No document found for date: ${date.toString().split(' ')[0]}");
       }
+    } catch (e) {
+      print("Error deleting event from Firebase: $e");
     }
 
+    // Update UI
     setState(() {});
   }
 
@@ -1509,13 +1531,78 @@ class CalendarStateO extends State<Calendar> {
         DateTime(newDate.year, newDate.month, newDate.day);
 
     try {
-      // First, delete the old event
-      await deleteSingleEvent(normalizedOldDate, oldEvent.title, user);
+      print("Updating event: '${oldEvent.title}' -> '$newTitle', date: ${normalizedOldDate.toString().split(' ')[0]} -> ${normalizedNewDate.toString().split(' ')[0]}");
       
-      // Then add the new event
-      await addSingleEvent(normalizedNewDate, newTitle, user);
+      // Special handling for Test Day events which need different treatment
+      bool isTestDay = oldEvent.title == "Test Day";
       
-      // Make sure to update the selected day to the new date
+      // First, remove the event from local state
+      if (selectedEvents.containsKey(normalizedOldDate)) {
+        selectedEvents[normalizedOldDate]?.removeWhere((event) => 
+            event.title == oldEvent.title);
+            
+        // If no events left for this date, remove the date entry
+        if (selectedEvents[normalizedOldDate]?.isEmpty ?? false) {
+          selectedEvents.remove(normalizedOldDate);
+        }
+      }
+      
+      // Then, remove from Firebase
+      QuerySnapshot oldDaySnapshot = await _eventsCollectionRef
+          .where("date", isEqualTo: Timestamp.fromDate(normalizedOldDate))
+          .get();
+          
+      if (oldDaySnapshot.docs.isNotEmpty) {
+        String docId = oldDaySnapshot.docs.first.id;
+        List<String> updatedEvents = selectedEvents[normalizedOldDate]?.map((e) => e.title).toList() ?? [];
+        
+        if (updatedEvents.isEmpty) {
+          // Delete document if no events remain
+          await _eventsCollectionRef.doc(docId).delete();
+          print("Deleted document for old date: ${normalizedOldDate.toString().split(' ')[0]}");
+        } else {
+          // Update with remaining events
+          await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
+          print("Updated document with remaining events for old date");
+        }
+      }
+      
+      // Now add the event to the new date
+      // Create the new event with proper color
+      Event newEvent = Event(
+        title: newTitle,
+        color: _getEventColor(newTitle)
+      );
+      
+      // Add to local state
+      if (selectedEvents[normalizedNewDate] == null) {
+        selectedEvents[normalizedNewDate] = [];
+      }
+      selectedEvents[normalizedNewDate]?.add(newEvent);
+      
+      // Update Firebase for the new date
+      QuerySnapshot newDaySnapshot = await _eventsCollectionRef
+          .where("date", isEqualTo: Timestamp.fromDate(normalizedNewDate))
+          .get();
+          
+      List<String> newDateEvents = 
+          selectedEvents[normalizedNewDate]?.map((e) => e.title).toList() ?? [];
+          
+      if (newDaySnapshot.docs.isNotEmpty) {
+        // Update existing document
+        String docId = newDaySnapshot.docs.first.id;
+        await _eventsCollectionRef.doc(docId).update({"events": newDateEvents});
+        print("Updated document for new date: ${normalizedNewDate.toString().split(' ')[0]}");
+      } else {
+        // Create a new document for this date
+        await _eventsCollectionRef.add({
+          "date": Timestamp.fromDate(normalizedNewDate),
+          "events": newDateEvents
+        });
+        print("Created new document for date: ${normalizedNewDate.toString().split(' ')[0]}");
+      }
+      
+      // Update the selected day to the new date
       setState(() {
         selectedDay = normalizedNewDate;
         focusedDay = normalizedNewDate;
