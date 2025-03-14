@@ -71,11 +71,35 @@ void main() {
         await tester.tap(find.text('OK'));
         await tester.pumpAndSettle();
 
+        FocusManager.instance.primaryFocus?.unfocus();
+        await tester.pump();
         await tester.tap((find.byWidgetPredicate((widget) {
           return widget is Checkbox && widget.value == false;
         })).first);
         await tester.pumpAndSettle();
+        FocusManager.instance.primaryFocus?.unfocus();
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Next'));
+        await tester.pumpAndSettle();
+
+        await tester.tap((find.byWidgetPredicate((widget) {
+          return widget is Checkbox && widget.value == false;
+        })).first);
+        await tester.pumpAndSettle();
+        // Possible Focus Manager errors occur if the line below isn't used
+        FocusManager.instance.primaryFocus?.unfocus();
+        await tester.pump();
         await tester.tap(find.text('Submit'));
+        await tester.pumpAndSettle();
+
+        await tester.tap((find.byWidgetPredicate((widget) {
+          return widget is ChoiceChip;})).first);
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Submit'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Ok'));
+        await tester.pumpAndSettle();
+
         tester.printToConsole('Exam date set');
         await tester.pumpAndSettle();
       });

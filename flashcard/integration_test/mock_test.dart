@@ -61,7 +61,7 @@ void main() {
         await tester.pumpAndSettle();
       });
 
-    testWidgets("Test Ranking and Multiple Choice UI",
+    testWidgets("Test Ranking UI",
             (WidgetTester tester) async {
             await tester.pump(const Duration(seconds: 1));
             tester.printToConsole('Testing exam date feature');

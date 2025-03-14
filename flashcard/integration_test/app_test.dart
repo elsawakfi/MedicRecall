@@ -30,6 +30,8 @@ Future<void> loginTest(WidgetTester tester) async{
   tester.printToConsole('App started');
   await tester.pump(const Duration(seconds: 5));
   await tester.pumpAndSettle();
+  FocusManager.instance.primaryFocus?.unfocus();
+  await tester.pump();
 
   // Finding the email is really on and off for some reason
   var emailFinder = find.byKey(const ValueKey('emailSignUpField'));
@@ -42,7 +44,10 @@ Future<void> loginTest(WidgetTester tester) async{
   await tester.enterText(emailFinder,
       'xecovop602@deligy.com');
   tester.printToConsole('Entered email text');
+  FocusManager.instance.primaryFocus?.unfocus();
+  await tester.pump();
 
+  // Flutter focuses on text fields resulting in possible errors in testing if not disposed of
   await tester.enterText(
       find.byKey(
           const ValueKey('passwordSignUpField')), 'password');
@@ -51,6 +56,8 @@ Future<void> loginTest(WidgetTester tester) async{
     const ValueKey('Log In Button'),
   ));
   await tester.pumpAndSettle();
+  FocusManager.instance.primaryFocus?.unfocus();
+  await tester.pump();
 
   //CLOSE POP UP
   bool isPopUp = find.text('No').evaluate().isNotEmpty;
