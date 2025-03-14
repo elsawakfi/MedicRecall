@@ -191,12 +191,65 @@ class CalendarStateO extends State<Calendar> {
   }
 
   Future<void> generateStudySessions(User user) async {
-    var studySessions = await studySessionManager.generateStudySessions(user);
-    setState(() {
-      selectedEvents.addAll(studySessions);
-    });
-    // add to database
-    await studySessionManager.saveStudySessionsToDB(user, studySessions);
+    try {
+      // Get user document to check for selected resources
+      QuerySnapshot userSnapshot =
+          await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+
+      if (userSnapshot.docs.isEmpty) {
+        print("No user document found for generating study sessions");
+        return;
+      }
+
+      var userDoc = userSnapshot.docs.last.data() as Map<String, dynamic>;
+
+      // Check if user has selected resources
+      if (!userDoc.containsKey("selectedResources") ||
+          !(userDoc["selectedResources"] is List) ||
+          (userDoc["selectedResources"] as List).isEmpty) {
+        print("No resources selected for study sessions");
+        return;
+      }
+
+      // Generate study sessions using StudySessionManager
+      var studySessions = await studySessionManager.generateStudySessions(user);
+
+      if (studySessions.isNotEmpty) {
+        // Merge new study sessions with existing events
+        setState(() {
+          for (var entry in studySessions.entries) {
+            // Normalize date to avoid time comparison issues
+            DateTime normalizedDate =
+                DateTime(entry.key.year, entry.key.month, entry.key.day);
+
+            if (selectedEvents.containsKey(normalizedDate)) {
+              // Filter out any duplicate events
+              List<Event> newEvents = entry.value
+                  .where((newEvent) => !selectedEvents[normalizedDate]!.any(
+                      (existingEvent) => existingEvent.title == newEvent.title))
+                  .toList();
+
+              selectedEvents[normalizedDate]!.addAll(newEvents);
+            } else {
+              selectedEvents[normalizedDate] = entry.value;
+            }
+          }
+        });
+
+        // Save to database
+        await studySessionManager.saveStudySessionsToDB(user, studySessions);
+
+        // Also update events in our Firebase events collection
+        await updateEventsToDB(user);
+
+        print(
+            "Successfully generated and saved ${studySessions.length} study session days");
+      } else {
+        print("No study sessions were generated");
+      }
+    } catch (e) {
+      print("Error in generateStudySessions: $e");
+    }
   }
 
   // DATABASE FUNCTIONS:
@@ -606,53 +659,74 @@ class CalendarStateO extends State<Calendar> {
   Future<void> initializeUserAndTestDay() async {
     await getUser();
     await getTestDay();
-    if (testDay != null) {
-      await getEventsFromDB(); // Then load events from database
-      if (selectedEvents.isEmpty) {
-        await generateStudySessions(user); // Generate study sessions
+    await _loadExcludedDays(); // Load excluded days from Firebase
+
+    if (testDay != null && !testDayBool) {
+      await getEventsFromDB();
+
+      DateTime normalizedTestDay =
+          DateTime(testDay!.year, testDay!.month, testDay!.day);
+      if (!selectedEvents.containsKey(normalizedTestDay)) {
+        selectedEvents[normalizedTestDay] = [];
       }
 
-      // First add Test Day event
-      selectedEvents[testDay] = [
-        Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94))
-      ];
+      bool testDayEventExists = false;
+      if (selectedEvents[normalizedTestDay] != null) {
+        testDayEventExists = selectedEvents[normalizedTestDay]!
+            .any((event) => event.title == "Test Day");
+      }
 
-      //If the user already selected their resources, generate study session should not be called
-      //it should only be called the first time they choose their test day and resources
+      if (!testDayEventExists) {
+        selectedEvents[normalizedTestDay]!.add(Event(
+            title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
+      }
+
+      bool hasStudySessions = false;
+      for (var events in selectedEvents.values) {
+        for (var event in events) {
+          if (event.title.contains("Mini Mock") ||
+              event.title.contains("Full-sized Mock") ||
+              event.title.contains("Official MSRA Paper") ||
+              event.title.contains("Flashcard")) {
+            hasStudySessions = true;
+            break;
+          }
+        }
+        if (hasStudySessions) break;
+      }
+
+      if (!hasStudySessions) {
+        try {
+          await generateStudySessions(user);
+        } catch (e) {
+          print("Error generating study sessions: $e");
+        }
+      }
 
       setState(() {});
     } else {
-      print("Test day is null!");
+      await getEventsFromDB();
+      setState(() {});
     }
   }
 
-  Future<void> _loadStudySessions() async {
-    StudySessionManager studySessionManager = StudySessionManager();
-    User user = FirebaseAuth.instance.currentUser!;
-    // DateTime testDay = DateTime.now().add(Duration(days: 30)); // Example test day
+  Future<void> _loadExcludedDays() async {
+    try {
+      QuerySnapshot querySnapshot =
+          await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
 
-    Map<DateTime, List<Event>> events =
-        await studySessionManager.generateStudySessions(user);
-    setState(() {
-      selectedEvents.addAll(events);
-    });
-  }
-
-  Future<void> _loadTopicsList() async {
-    if (auth.currentUser == null) return;
-
-    var querySnapshot = await _userCollectionRef
-        .where("userID", isEqualTo: auth.currentUser!.uid)
-        .get();
-
-    if (querySnapshot.docs.isEmpty) return;
-
-    var userDoc = querySnapshot.docs.last.data() as Map<String, dynamic>;
-    var topics = userDoc["topics"] as List<dynamic>;
-
-    setState(() {
-      topicsList = topics.map((topic) => topic["topic"].toString()).toList();
-    });
+      if (querySnapshot.docs.isNotEmpty) {
+        var userDoc = querySnapshot.docs.first.data() as Map<String, dynamic>;
+        if (userDoc.containsKey("excludedDays")) {
+          var excludedDays = userDoc["excludedDays"] as List<dynamic>;
+          setState(() {
+            revisionDays = excludedDays.map((day) => day.toString()).toList();
+          });
+        }
+      }
+    } catch (e) {
+      print("Error loading excluded days: $e");
+    }
   }
 
   @override
@@ -1183,7 +1257,8 @@ class CalendarStateO extends State<Calendar> {
                                         color: Colors.black.withOpacity(0.4),
                                         border: Border(
                                           bottom: BorderSide(
-                                            color: Colors.white.withOpacity(0.4),
+                                            color:
+                                                Colors.white.withOpacity(0.4),
                                             width: 1.5,
                                           ),
                                         ),
@@ -1250,9 +1325,13 @@ class CalendarStateO extends State<Calendar> {
                                         fontSize: 16,
                                         color: Colors.grey[500],
                                       ),
-                                      // Custom marker settings
-                                      markersMaxCount:
-                                          6, // Show up to 5 markers per day
+                                      disabledTextStyle: TextStyle(
+                                        color: Colors.grey[600],
+                                        decoration: TextDecoration.lineThrough,
+                                        decorationColor: Colors.grey[400],
+                                        decorationThickness: 2,
+                                      ),
+                                      markersMaxCount: 6,
                                       markersAnchor: 1.0,
                                       cellPadding: EdgeInsets.symmetric(
                                           vertical: 12.0, horizontal: 8.0),
@@ -1286,7 +1365,8 @@ class CalendarStateO extends State<Calendar> {
                                                 return Container(
                                                   margin: const EdgeInsets
                                                       .symmetric(horizontal: 1),
-                                                  width: 30 - (events.length * 4),
+                                                  width:
+                                                      30 - (events.length * 4),
                                                   height: 8,
                                                   decoration: BoxDecoration(
                                                     borderRadius:
@@ -1302,6 +1382,25 @@ class CalendarStateO extends State<Calendar> {
                                         );
                                       },
                                     ),
+                                    enabledDayPredicate: (day) {
+                                      // Always enable the test day, regardless of exclusion settings
+                                      if (testDay != null) {
+                                        DateTime normalizedTestDay = DateTime(
+                                            testDay!.year,
+                                            testDay!.month,
+                                            testDay!.day);
+                                        DateTime normalizedDay = DateTime(
+                                            day.year, day.month, day.day);
+                                        if (isSameDay(
+                                            normalizedTestDay, normalizedDay)) {
+                                          return true; // Always enable the test day
+                                        }
+                                      }
+
+                                      // For other days, apply normal exclusion rules
+                                      final dayName = _getDayName(day.weekday);
+                                      return !revisionDays.contains(dayName);
+                                    },
                                   ),
                                 ],
                               ),
@@ -1812,5 +1911,27 @@ class CalendarStateO extends State<Calendar> {
         ],
       ),
     );
+  }
+
+  // Add the helper function for day names
+  String _getDayName(int weekday) {
+    switch (weekday) {
+      case 1:
+        return "Monday";
+      case 2:
+        return "Tuesday";
+      case 3:
+        return "Wednesday";
+      case 4:
+        return "Thursday";
+      case 5:
+        return "Friday";
+      case 6:
+        return "Saturday";
+      case 7:
+        return "Sunday";
+      default:
+        return "";
+    }
   }
 }
