@@ -8,8 +8,6 @@ import 'package:flashcard_x/widgets/drawer_widget.dart';
 import 'package:flashcard_x/screens/minimock1_rules_page.dart';
 import 'package:flashcard_x/widgets/countdown_button.dart';
 
-import 'minimock_exams.dart';
-
 
 class MiniMockLanding extends StatefulWidget {
   const MiniMockLanding({super.key});

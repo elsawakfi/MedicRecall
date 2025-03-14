@@ -107,7 +107,7 @@ class MiniMockScoringState extends State<MiniMockScoring> {
     var id = snapshot.docs.last.id;
     DocumentSnapshot<
         Map<String, dynamic>> userAnswers = await FirebaseFirestore.instance
-        .collection('users').doc(id).collection('Exam answers').doc(
+        .collection('users').doc(id).collection('examAnswers').doc(
         widget.answerDirectory).get();
     Map<String, dynamic> userAnswerMap = userAnswers.get('answers');
     return userAnswerMap;
@@ -132,14 +132,16 @@ Future<void> fetchAverageScore() async {
         .collection('mini-mock-stats')
         .doc(widget.questionDirectory)
         .get();
-        int median = snapshot.get('median');
+    int median;
+    // Ensure the median exists else set it to 0
+    (snapshot.exists) ? median = snapshot.get('median') : median = 0;
     averageScore = median.toDouble();
   }
 
 
   void calculateScores(){
     int tempMaxScore = 0;
-    answerScores = List.filled(25, 0); // Placeholder to ensure page loads
+    answerScores = List.filled(questions.length, 0); // Placeholder to ensure page loads
 
     userAnswers.forEach((questionNumber, userAnswer){
       int questionIndex = int.parse(questionNumber) - 1; // String question number to integer index
@@ -175,8 +177,6 @@ Future<void> fetchAverageScore() async {
     setState(() {
       maxScore = tempMaxScore;
       totalScore = totalScore;
-      // userPercentageScore = userPercentageScore;
-      // averagePercentageScore = averagePercentageScore;
     });
     _updateScore(totalScore);
   }
@@ -192,24 +192,12 @@ Future<void> fetchAverageScore() async {
     DocumentReference userDocRef = FirebaseFirestore.instance.collection(
         'users').doc(id);
     DocumentReference scoreDocRef = userDocRef.collection(
-        'Exam answers').doc(widget.answerDirectory);
+        'examAnswers').doc(widget.answerDirectory);
 
     // Add user's score to user score field
     await scoreDocRef.update({
       'score': score,
     });
-
-    // final url = Uri.parse('http://localhost:5001/flashcard-6edc2/us-central1/update_exam_score');
-    // final response = await http.post(
-    //   url,
-    //   headers: {'Content-Type': 'application/json'},
-    //   body: jsonEncode({
-    //     "userId": id,
-    //     "score": score,
-    //     "directory": widget.questionDirectory
-    //   })
-    // );
-    // print(response);
   }
 
   @override
