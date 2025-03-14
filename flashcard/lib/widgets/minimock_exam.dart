@@ -128,7 +128,7 @@ class MiniMockExamState extends State<MiniMockExam> {
     DocumentReference userDocRef = FirebaseFirestore.instance.collection(
         'users').doc(id);
     DocumentReference examAnswersDocRef = userDocRef.collection(
-        'Exam answers').doc(widget.answerDirectory);
+        'examAnswers').doc(widget.answerDirectory);
 
     // Add user's answers to user answer document
     await examAnswersDocRef.set({

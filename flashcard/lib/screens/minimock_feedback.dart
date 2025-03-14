@@ -138,7 +138,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
        var id = snapshot.docs.last.id;
        DocumentSnapshot<
            Map<String, dynamic>> userAnswers = await FirebaseFirestore.instance
-           .collection('users').doc(id).collection('Exam answers').doc(
+           .collection('users').doc(id).collection('examAnswers').doc(
            widget.answerDirectory).get();
        Map<String, dynamic> userAnswerMap = userAnswers.get('answers');
        return userAnswerMap;
