@@ -393,8 +393,17 @@ Widget build(BuildContext context) {
                           widget.miniMockWidget.examEnd();
                         },
                         icon: Icon(Icons.check_outlined, color: Theme.of(context).textTheme.bodyMedium?.color),
-                        label: Text('Complete Exam',  style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 16)),
+                        label: Text('Complete Exam',  style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 16)
+                        ),
+                         style: ElevatedButton.styleFrom(
+      backgroundColor: Colors.green, // Green button color
+      foregroundColor: Colors.white, // Text/Icon color
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(50), // Rounded corners
                       )
+                         )
+                      )
+                      
                   ),
                 ],
               )
