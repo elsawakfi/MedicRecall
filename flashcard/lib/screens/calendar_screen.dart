@@ -173,12 +173,64 @@ class CalendarStateO extends State<Calendar> {
   }
 
   Future<void> generateStudySessions(User user) async {
-    var studySessions = await studySessionManager.generateStudySessions(user);
-    setState(() {
-      selectedEvents.addAll(studySessions);
-    });
-    // add to database
-    await studySessionManager.saveStudySessionsToDB(user, studySessions);
+    try {
+      // Get user document to check for selected resources
+      QuerySnapshot userSnapshot = await _userCollectionRef
+          .where("userID", isEqualTo: user.uid)
+          .get();
+          
+      if (userSnapshot.docs.isEmpty) {
+        print("No user document found for generating study sessions");
+        return;
+      }
+      
+      var userDoc = userSnapshot.docs.last.data() as Map<String, dynamic>;
+      
+      // Check if user has selected resources
+      if (!userDoc.containsKey("selectedResources") || 
+          !(userDoc["selectedResources"] is List) ||
+          (userDoc["selectedResources"] as List).isEmpty) {
+        print("No resources selected for study sessions");
+        return;
+      }
+      
+      // Generate study sessions using StudySessionManager
+      var studySessions = await studySessionManager.generateStudySessions(user);
+      
+      if (studySessions.isNotEmpty) {
+        // Merge new study sessions with existing events
+        setState(() {
+          for (var entry in studySessions.entries) {
+            // Normalize date to avoid time comparison issues
+            DateTime normalizedDate = DateTime(
+              entry.key.year, entry.key.month, entry.key.day);
+              
+            if (selectedEvents.containsKey(normalizedDate)) {
+              // Filter out any duplicate events
+              List<Event> newEvents = entry.value.where((newEvent) => 
+                !selectedEvents[normalizedDate]!.any((existingEvent) => 
+                  existingEvent.title == newEvent.title)).toList();
+                  
+              selectedEvents[normalizedDate]!.addAll(newEvents);
+            } else {
+              selectedEvents[normalizedDate] = entry.value;
+            }
+          }
+        });
+        
+        // Save to database
+        await studySessionManager.saveStudySessionsToDB(user, studySessions);
+        
+        // Also update events in our Firebase events collection
+        await updateEventsToDB(user);
+        
+        print("Successfully generated and saved ${studySessions.length} study session days");
+      } else {
+        print("No study sessions were generated");
+      }
+    } catch (e) {
+      print("Error in generateStudySessions: $e");
+    }
   }
 
   // DATABASE FUNCTIONS:
@@ -634,17 +686,48 @@ class CalendarStateO extends State<Calendar> {
     await _loadExcludedDays(); // Load excluded days from Firebase
     if (testDay != null) {
       await getEventsFromDB(); // Then load events from database
-      if (selectedEvents.isEmpty){
-          await generateStudySessions(user); // Generate study sessions
+      
+      // First add Test Day event if not already present
+      DateTime normalizedTestDay = DateTime(testDay!.year, testDay!.month, testDay!.day);
+      if (!selectedEvents.containsKey(normalizedTestDay)) {
+        selectedEvents[normalizedTestDay] = [];
       }
       
-      // First add Test Day event
-      selectedEvents[testDay] = [
-        Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94))
-      ];
-
-      //If the user already selected their resources, generate study session should not be called 
-      //it should only be called the first time they choose their test day and resources 
+      // Check if the Test Day event already exists
+      bool testDayEventExists = false;
+      if (selectedEvents[normalizedTestDay] != null) {
+        testDayEventExists = selectedEvents[normalizedTestDay]!.any((event) => event.title == "Test Day");
+      }
+      
+      if (!testDayEventExists) {
+        selectedEvents[normalizedTestDay]!.add(
+          Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94))
+        );
+      }
+      
+      // Check for study sessions by examining event titles
+      bool hasStudySessions = false;
+      for (var events in selectedEvents.values) {
+        for (var event in events) {
+          if (event.title.contains("Mini Mock") || 
+              event.title.contains("Full-sized Mock") || 
+              event.title.contains("Official Paper") ||
+              event.title.contains("Flashcard")) {
+            hasStudySessions = true;
+            break;
+          }
+        }
+        if (hasStudySessions) break;
+      }
+      
+      // If no study sessions found, try to generate them
+      if (!hasStudySessions) {
+        try {
+          await generateStudySessions(user);
+        } catch (e) {
+          print("Error generating study sessions: $e");
+        }
+      }
 
       setState(() {});
     } else {

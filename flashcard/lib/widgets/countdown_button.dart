@@ -826,7 +826,13 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               ),
             ),
             TextButton(
-              onPressed: () {
+              onPressed: () async {
+                // Generate and save study sessions before navigating to calendar
+                final studySessionManager = StudySessionManager();
+                final events = await studySessionManager.generateStudySessions(user!);
+                await studySessionManager.saveStudySessionsToDB(user!, events);
+                
+                // Navigate to Calendar screen to see the new schedule
                 Navigator.push(
                   context,
                   MaterialPageRoute(
