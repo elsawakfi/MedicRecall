@@ -177,29 +177,40 @@ class MiniMockExamState extends State<MiniMockExam> {
           appBar: AppBar(
               automaticallyImplyLeading: false,
               elevation: 0,
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Stack(
-                        children: [
-                          Positioned(
-                            top: 2.3,
-                            child: Image.asset(
-                              'assets/newlogo.png',
-                              fit: BoxFit.cover,
-                              height: 34,
-                            ),
-                          ),
-                          Container(
-                              margin: const EdgeInsets.only(left: 32),
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text(widget.title)
-                          ),
-                        ],
-                      )
-                  ]
+              title: LayoutBuilder(
+  builder: (context, constraints) {
+    if (MediaQuery.of(context).size.width >= 600) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Stack(
+            children: [
+              Positioned(
+                top: 2.3,
+                child: Image.asset(
+                  'assets/newlogo.png',
+                  fit: BoxFit.cover,
+                  height: 34,
+                ),
               ),
+              Container(
+                margin: const EdgeInsets.only(left: 32),
+                padding: const EdgeInsets.all(8.0),
+                child: Text(widget.title),
+              ),
+            ],
+          )
+        ],
+      );
+    } else {
+      return Align(
+        alignment: Alignment.centerLeft,
+        child: Text("Exam 1")); // Add a fallback widget here
+    }
+  },
+),
+
               centerTitle: true,
               leading: Builder(
                 builder: (context) => GestureDetector(
@@ -210,9 +221,10 @@ class MiniMockExamState extends State<MiniMockExam> {
                 ),
               ),
               actions: [
-                Container(
+                LayoutBuilder(builder: (context, constraints) {
+                return Container(
                   margin: const EdgeInsets.only(right: 16),
-                  width: 210,
+                  width:  210, 
                   height: 40.31,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
@@ -238,8 +250,8 @@ class MiniMockExamState extends State<MiniMockExam> {
                           fontWeight: FontWeight.w500,
                         ),
                       )),
-                )
-              ],
+              );
+  })],
           ),
           body: questions.isEmpty
               ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
