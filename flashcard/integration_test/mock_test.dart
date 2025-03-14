@@ -46,8 +46,8 @@ void main() {
         // Check review page works
         await tester.tap(find.text('Review Page'));
         await tester.pumpAndSettle();
-        await tester.tap(find.text('Ranking Questions (Question 1 - 13)'));
-        await tester.pumpAndSettle();
+        // await tester.tap(find.text('Ranking Questions (Question 1 - 13)'));
+        // await tester.pumpAndSettle();
         expect(find.byIcon(Icons.flag), findsOneWidget);
 
         await tester.tap(find.text('1'));

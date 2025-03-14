@@ -1019,6 +1019,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                   return Transform.scale(
                     scale: 1.2,
                     child: Checkbox(
+                      key: ValueKey(text),
                       value: value,
                       onChanged: (bool? newValue) {
                         notifier.value = newValue ?? false;

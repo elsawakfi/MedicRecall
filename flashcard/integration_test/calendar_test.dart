@@ -73,6 +73,7 @@ void main() {
 
         FocusManager.instance.primaryFocus?.unfocus();
         await tester.pump();
+        expect(find.byType(Checkbox), findsAny);
         await tester.tap((find.byWidgetPredicate((widget) {
           return widget is Checkbox && widget.value == false;
         })).first);
@@ -82,20 +83,24 @@ void main() {
         await tester.tap(find.text('Next'));
         await tester.pumpAndSettle();
 
-        await tester.tap((find.byWidgetPredicate((widget) {
-          return widget is Checkbox && widget.value == false;
-        })).first);
+        expect(find.byType(Checkbox), findsAny);
+        await tester.tap(find.byKey(ValueKey('Official MSRA Practice Paper')));
+        // await tester.tap((find.byWidgetPredicate((widget) {
+        //   return widget is Checkbox && widget.value == false;
+        // })).first);
         await tester.pumpAndSettle();
         // Possible Focus Manager errors occur if the line below isn't used
         FocusManager.instance.primaryFocus?.unfocus();
         await tester.pump();
-        await tester.tap(find.text('Submit'));
+        // await tester.tap(find.text('Submit'));
+        await tester.tap(find.byKey(ValueKey('submitButton1')));
         await tester.pumpAndSettle();
 
-        await tester.tap((find.byWidgetPredicate((widget) {
-          return widget is ChoiceChip;})).first);
+        expect(find.byType(ChoiceChip), findsAny);
+        await tester.tap((find.byType(ChoiceChip)).first);
         await tester.pumpAndSettle();
-        await tester.tap(find.text('Submit'));
+        // await tester.tap(find.text('Submit'));
+        await tester.tap(find.byKey(ValueKey('submitButton2')));
         await tester.pumpAndSettle();
         await tester.tap(find.text('Ok'));
         await tester.pumpAndSettle();

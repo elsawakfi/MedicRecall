@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flashcard_x/screens/button_screen.dart';
+import '../widgets/countdown_button.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flutter/material.dart';
