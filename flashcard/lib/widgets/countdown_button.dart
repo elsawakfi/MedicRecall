@@ -44,7 +44,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     getTestDay();
     getStopShowing(user!);
     getFirstStudyDay();
-    setState(() {});
+    if(mounted) setState(() {});
     _isHovered['checkbox1'] = false;
     _isHovered['checkbox2'] = false;
     _isHovered['checkbox3'] = false;
@@ -138,7 +138,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       } else {
         testDayBool = true;
       }
-      setState(() {});
+      if(mounted) setState(() {});
     }
   }
 
@@ -163,7 +163,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
 
     // update field testday to what is passed as param
     await getTestDay();
-    setState(() {});
+    if(mounted) setState(() {});
   }
 
   Future<void> getUser() async {
@@ -196,8 +196,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
         _firstStudyDate = DateTime.fromMicrosecondsSinceEpoch(
             userFromDb["firstStudyDay"].microsecondsSinceEpoch);
       }
-
-      setState(() {});
+      if(mounted) setState(() {});
     }
   }
 
@@ -245,7 +244,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
             ),
           ),
           TextButton(
-            key: const Key('yesButton'),
+            key: const ValueKey('yesButton'),
             onPressed: () {
               Navigator.of(context).pop();
               _setFirstStudyDay(); // Ensure this function is defined
@@ -284,7 +283,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
         );
       },
     );
-    setState(() {});
+    if(mounted) setState(() {});
   }
 
   // Show the date picker dialog to select exam date
@@ -308,11 +307,13 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     locale: const Locale('en', 'GB'),
                   );
                   if (picked != null) {
-                    setState(() {
-                      _examDate = picked;
-                      updateTestDay(picked); // Update parent state
-                      testDayBool = false;
-                    });
+                    if(mounted) {
+                      setState(() {
+                        _examDate = picked;
+                        updateTestDay(picked); // Update parent state
+                        testDayBool = false;
+                      });
+                    }
 
                     if (context.mounted) {
                       Navigator.of(context).pop();
@@ -453,6 +454,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               ),
             ),
             TextButton(
+              key: const ValueKey('submitButton1'),
               onPressed: () async {
                 // Check which resources were selected
                 List<String> selectedResources = [];
@@ -582,10 +584,12 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                                 ),
                                 selected: officialMSRARepetitions == value,
                                 onSelected: (bool selected) {
-                                  setState(() {
-                                    officialMSRARepetitions =
-                                        selected ? value : null;
-                                  });
+                                  if(mounted) {
+                                    setState(() {
+                                      officialMSRARepetitions =
+                                          selected ? value : null;
+                                    });
+                                  }
                                 },
                                 selectedColor:
                                     const Color.fromRGBO(73, 148, 236, 1),
@@ -624,10 +628,12 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                                 ),
                                 selected: fullSizedMockRepetitions == value,
                                 onSelected: (bool selected) {
-                                  setState(() {
-                                    fullSizedMockRepetitions =
-                                        selected ? value : null;
-                                  });
+                                  if(mounted) {
+                                    setState(() {
+                                      fullSizedMockRepetitions =
+                                          selected ? value : null;
+                                    });
+                                  }
                                 },
                                 selectedColor:
                                     const Color.fromRGBO(73, 148, 236, 1),
@@ -663,6 +669,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     ),
                     const SizedBox(width: 10),
                     TextButton(
+                      key: const ValueKey('submitButton2'),
                       onPressed: () async {
                         // Validate that all selected resources have a repetition count
                         bool isValid = true;
@@ -1012,6 +1019,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                   return Transform.scale(
                     scale: 1.2,
                     child: Checkbox(
+                      key: ValueKey(text),
                       value: value,
                       onChanged: (bool? newValue) {
                         notifier.value = newValue ?? false;

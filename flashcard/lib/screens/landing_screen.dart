@@ -55,7 +55,7 @@ class LandingState extends State<Landing> {
     getUser();
     getFirstStudyDay();
     landingService.onLanding = true;
-    setState(() {});
+    if(mounted) setState(() {});
   }
 
   Future<void> _setFirstStudyDay() async {
@@ -104,7 +104,7 @@ class LandingState extends State<Landing> {
       testDayBool_ = true;
 
     }
-    setState(() {});
+    if(mounted) setState(() {});
   }
   Future<void> getTestDay() async {
     if(user != null){
@@ -128,7 +128,7 @@ class LandingState extends State<Landing> {
         } else {
           testDayBool_ = true;
         }
-        setState(() {});
+        if(mounted) setState(() {});
       }
     }
   }
@@ -145,7 +145,7 @@ class LandingState extends State<Landing> {
         _firstStudyDate = (data["firstStudyDay"] as Timestamp).toDate();
       }
 
-      setState(() {});
+      if(mounted) setState(() {});
     } 
   }
 
@@ -766,7 +766,7 @@ class LandingState extends State<Landing> {
       });
       // update field testday to what is passed as param
     await getTestDay();
-    setState(() {});
+    if(mounted) setState(() {});
   
   }
  }
