@@ -217,5 +217,51 @@ This will execute all tests inside the `test/` directory.
 > - Use `flutter logs` to view real-time logs and errors.
 > - Add `print()` statements inside tests or your code for debugging purposes.
 > - Check Firebase logs in the Firebase Console for backend-related issues.
-> - If tests fail inconsistently, try running with `flutter test --`coverage` to track untested code paths.
+> - If tests fail inconsistently, try running with `flutter test --coverage` to track untested code paths.
 <p align="right">(<a href="#contents">back to top</a>)</p>
+
+## 📑 Database Structure
+This section provides an overview of the firestore structure and the root collections:
+- [Flashcards](#flashcards)
+- [Markscheme / Mocks](#️markscheme-mock)
+- [Reminders](#️-reminders)
+- [Topics](#️-topics)
+- [Users](#-users)
+
+### Flashcards
+The flashcard collection contains documents that detail each of the default flashcards available to the user. Each flashcard document contains: 
+| Field                 | Data Type | Explanation |
+|-----------------------|-----------|-------------|
+| ```back```            | String    | Contains the flashcard's answer |
+| ```front```           | String    | Contains the flashcard's question |
+| ```owner```           | String    |  |
+| ```subtopic```        | String    | For fine tuning the specific segment of the flashcard's topic |
+| ```topic```           | String    | The related flashcard topic |
+
+### <a id="️markscheme-mock"></a> Markscheme / Mocks
+The marksheme and mock collections contain a vast array of question documents which are queried from the app when the user is interacting with their related test. Whilst the markscheme and mock documents are similar, they do contain different fields.
+
+Each document within the markcheme collection contains: 
+| Field                 | Data Type       | Explanation |
+|-----------------------|-----------------|-------------|
+| ```action``` | String    | Contains the action performed in the context of the situation |
+| ```answer``` | String    | Contains the correct answer to the question |
+| ```bool``` | String    | States whether the question is official or not |
+| ```explanation```     | String    | Provides a rationale for the correct answer |
+| ```indicator```         | String    | Contains the question number |
+| ```question```        | String    | Contains the question number |
+| ```Situation```  | String    | The text that provides context to the scenario |
+| ```type```            | String    | Details whether the question is of type `rating`, `ranking` or `multiple choice` for easier filtering |
+
+Each document within the mock collections contains:
+| Field                 | Data Type | Explanation |
+|-----------------------|-----------|-------------|
+| ```correct_answers``` | Array&lt;String&gt;    | Contains the correct answers to the question |
+| ```explanation```     | String    | Provides a rationale for the correct answers |
+| ```options```         | Array&lt;String&gt;    | Contains the options from which the user will select their answer from |
+| ```question```        | String    | The question text |
+| ```questionNumber```  | Number    | Allows for correct question ordering |
+| ```type```            | String    | Details whether the question is of type `ranking` or `multiple choice` for easier filtering |
+
+> [!NOTE]
+>The markscheme collection was created by our ancestors whilst the mock collections were created by the MedicRecall2 2024 team hence the difference in document structure.
