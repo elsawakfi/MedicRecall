@@ -34,12 +34,12 @@ class HomePageState extends State<HomePage> {
   CollectionReference users = FirebaseFirestore.instance.collection('users');
   final FirebaseAuth auth = FirebaseAuth.instance;
   bool loading = true;
+  List<(String,String)> topicNames = [];
   List<Map<String, dynamic>> topics = [];
   Map<String, bool> checked = {};
   Map<String, int> seenCards = {};
   Map<String, int> totalCards = {};
   late DateTime testDay; 
-  late DateTime _firstStudyDate;
   late Map<DateTime?, List<Event>> selectedEvents;
   late CollectionReference _eventsCollectionRef;
   final CollectionReference _userCollectionRef =
@@ -93,6 +93,8 @@ class HomePageState extends State<HomePage> {
       checked = holderList[1];
       loading = false;
     });
+   
+
   }
 
   @override
@@ -102,30 +104,37 @@ class HomePageState extends State<HomePage> {
     setState(() {
       name = "loading...";
       selectedEvents = {};
+      loading = true;
     });
     getData();
+     
 
-    setState(() {});
+    setState(() {
+      loading = false;
+    });
   }
 
   Future<void> getData() async {
     await  getUser();
-    print("User\n");
+    
     await getStats();
-    print("Stats\n");
+
+
+    //await  getFirstStudyDay();
+   
     await getTopics();
-    print("Topicas\n");
-    //issue with getFirstStudyDay, takes too long but if you put it as the first getter function, the page does not 
-    //build 
-    await  getFirstStudyDay();
-    print("El primer dia de estudiar fue: $_firstStudyDate\n");
+
+    //issue with getFirstStudyDay, takes too long but if you put it as the first getter function
+    //the page does not build 
+   
+   
+    
   }
 
   @override
   Widget build(BuildContext context) {
     // double width = MediaQuery.of(context).size.width;
     // double height = MediaQuery.of(context).size.height;
-
     return Scaffold(
       key: _key,
       drawer: const DrawMain(),
@@ -164,13 +173,13 @@ class HomePageState extends State<HomePage> {
         ),
       ),
 
-      body: Center(
+      body: Center (
         child: loading
             ? const CircularProgressIndicator()
             : SingleChildScrollView(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
-                  children: makeColumn(),
+                  children: await makeColumn(),
                 ),
               ),
       ),
@@ -252,14 +261,14 @@ class HomePageState extends State<HomePage> {
     }
     QuerySnapshot querySnapshot =
         await users.where("userID", isEqualTo: user.uid).get();
-
     setState(() {
       name = querySnapshot.docs.last["name"];
       id = querySnapshot.docs.last.id;
       topicCount = querySnapshot.docs.last["topicCount"];
       topicLastSeen = querySnapshot.docs.last["topicLastSeen"];
-      loading = false;
       testDay = querySnapshot.docs.last['TestDay'].toDate();
+      loading = false;
+      
     }); 
     try{   
       _eventsCollectionRef =
@@ -295,9 +304,9 @@ class HomePageState extends State<HomePage> {
   }
 
   Future<void> getStats() async {
-    setState(() {
-      loading = true;
-    });
+    // setState(() {
+    //   loading = true;
+    // });
     CollectionReference flashcardRef =
         FirebaseFirestore.instance.collection('flashcards');
     CollectionReference seenRef = FirebaseFirestore.instance
@@ -330,9 +339,9 @@ class HomePageState extends State<HomePage> {
       }
     }
 
-    setState(() {
-      loading = false;
-    });
+    // setState(() {
+    //   loading = false;
+    // });
   }
 
   void incrementMap(Map<String, int> map, String key) {
@@ -343,27 +352,26 @@ class HomePageState extends State<HomePage> {
     map[key] = 1;
   }
 
-  Future<void> getFirstStudyDay() async {
-    
-      QuerySnapshot u =
-          await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
-
-      var userFromDb = u.docs.first;
-      Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
-      // If the Test Day field isn't null and is in the database we update the UI with it. Otherwise it is displayed as being not set.
-      if (data.containsKey("firstStudyDay") && data["firstStudyDay"] != null) {
-        // firstDayBool = false;
-        _firstStudyDate = DateTime.fromMicrosecondsSinceEpoch(
-            userFromDb["firstStudyDay"].microsecondsSinceEpoch);
-      }
-
-      setState(() {});
-    
-  }
+ 
 
   //Formats the checkbox categories according to colour depending on whether the review date is due and how many flashcards have been seen.
-  List<ExpansionTile> makeCheckboxList() {
+  Future<List<ExpansionTile>> makeCheckboxList() async  {
+      //getFirstStudyDay();
+      QuerySnapshot querySnapshot =
+        await users.where("userID", isEqualTo: user.uid).get();
+      DateTime _firstStudyDate = querySnapshot.docs.last['firstStudyDay'].toDate();
+      Event? eventsForDate;
+      DateTime targetDate = DateTime(_firstStudyDate.year, _firstStudyDate.month, _firstStudyDate.day, 0, 0, 0, 0);
 
+      while (targetDate.isBefore(testDay)){
+        eventsForDate = selectedEvents[targetDate]?.last;
+        if (eventsForDate != null && eventsForDate.title.contains("Flashcards")){
+           String formattedDate = DateFormat('dd/MM/yyy').format(targetDate);
+          topicNames.add((eventsForDate.title,formattedDate));
+        }
+      }
+    
+  
     List<ExpansionTile> value = [];
     for (var i = 0; i < topics.length; i++) {
 
@@ -387,22 +395,38 @@ class HomePageState extends State<HomePage> {
         topicCount![i]=dateToColourMap.length-1;
       }
 
-      
       DateTime now = DateTime.now();
       String formattedDate = DateFormat('dd/MM/yyy').format(DateTime.now());
       //int increment = 0; 
       Event? eventsForDate;
      
+      //it takes way too long to iterate over every single day for every flashcard deck, would be better to do the other
+      //way around. Iterate through all the dates, if we see a flashcard, do the necessary functions. It'll be a runtime 
+      //of number of days between exam and first study day as opposed to number of flashcards*number of days between exam 
       DateTime targetDate = DateTime(_firstStudyDate.year, _firstStudyDate.month, _firstStudyDate.day-3, 0, 0, 0, 0);
       //DateTime targetDate = DateTime(now.year, now.month, now.day, 0, 0, 0, 0);
+      
+      
+      var format = topicNames.firstWhere(
+      (tuple) => tuple.$1.contains(map["topic"]),
+      orElse: () => ("", "N/A"), 
+      );
+
+      print("Found Topic\n");
+      print(topicNames);
+
+      topicNames.remove(format);
+
+
+      //Way of extracting the corresponding date in a faster way than iterating over the whole calendar 
+      
+      
       while (targetDate.isBefore(testDay)){
         eventsForDate = selectedEvents[targetDate]?.last;
         if (eventsForDate == null){
-          //print("Nada");
+          
         }
-        else{        // if (eventsForDate != null) {
-         
-        //   for (Event event in eventsForDate) {
+        else{        
             
             
             if (eventsForDate.toString().contains(map["topic"])){  
@@ -452,7 +476,6 @@ class HomePageState extends State<HomePage> {
           }    
           formattedDate = "N/A";
 }  }  
-  print("Target date is $targetDate\n");
  targetDate = targetDate.add(Duration(days: 1));
 }
     int nextReviewDateMilliseconds = (((dateToColourMap[topicCount![i]]! * 24 * 60 * 60) + topicLastSeen![i].seconds) * 1000).toInt();
@@ -592,7 +615,7 @@ class HomePageState extends State<HomePage> {
     );
   }
 
-  List<Widget> makeColumn() {
+  Future<List<Widget>> makeColumn() async {
     List<Widget> widgets = [
       const SizedBox(height: 40),
       Container(
@@ -657,7 +680,7 @@ class HomePageState extends State<HomePage> {
       Container(
         margin: const EdgeInsets.only(left: 30.0, right: 30.0),
         child: Column(
-          children: makeCheckboxList(),
+          children: await makeCheckboxList(),
         ),
       ),
 

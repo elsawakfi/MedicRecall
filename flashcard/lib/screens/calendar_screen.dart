@@ -550,12 +550,8 @@ class CalendarStateO extends State<Calendar> {
     selectedEvents[testDay]?.remove(Event(
         title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
     getTestDay();
-    
-    
-    
+      
   }
-
-  
 
   @override
   void initState() {
@@ -1071,6 +1067,7 @@ class CalendarStateO extends State<Calendar> {
                           testDay = null;
                           testDayBool = true;
                           await deleteAllEvents();
+                          //Should add a pop up that tells the user to wait while their events are being deleted
                           setState(() {});
 
                           // Show confirmation popup
@@ -1232,8 +1229,6 @@ class CalendarStateO extends State<Calendar> {
  
     setState(() {});
   }
-
-
 
   Future<void> deleteSingleEvent(
       DateTime date, String eventTitle, User user) async {
