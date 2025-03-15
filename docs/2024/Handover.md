@@ -193,7 +193,7 @@ This will execute all tests inside the `test/` directory.
 
       In the first terminal, start the ChromeDriver by running the following command:
 
-      ```sh
+      ```console
       chromedriver --port=4444
       ```
 
@@ -222,17 +222,18 @@ This will execute all tests inside the `test/` directory.
 > - Check Firebase logs in the Firebase Console for backend-related issues.
 <p align="right">(<a href="#contents">back to top</a>)</p>
 
-## 📑 Database Structure
+## 💾 Database Structure
 This section provides an overview of the [firestore](https://firebase.google.com/docs/firestore) and the main root collections:
 - [Flashcards](#flashcards)
-- [Markscheme / Mocks](#️markscheme-mock)
+- [Markscheme](#️markscheme)
+- [Mocks](#️mocks)
 - [Topics](#️topics)
 - [Users](#users)
 
-### Flashcards
+### <a id="️flashcards"></a> 📇 Flashcards
 The flashcard collection contains documents that detail each of the default flashcards available to the user.
 
-Each flashcard document contains: 
+Each document within the **flashcard** collection contains: 
 | Field                 | Data Type | Explanation |
 |-----------------------|-----------|-------------|
 | ```back```            | String    | Contains the flashcard's answer |
@@ -241,10 +242,10 @@ Each flashcard document contains:
 | ```subtopic```        | String    | For fine tuning the specific segment of the flashcard's topic |
 | ```topic```           | String    | The related flashcard topic |
 
-### <a id="️markscheme-mock"></a> Markscheme / Mocks
-The marksheme and mock collections contain a vast array of question documents which are queried from the app when the user is interacting with their related test. Whilst the markscheme and mock documents are similar, they do contain different fields.
+### <a id="️markscheme"></a> 📑 Markscheme
+The marksheme collection contain a vast array of question documents which are queried from the app when the user is interacting with the markscheme system.
 
-Each document within the markcheme collection contains: 
+Each document within the **markscheme** collection contains: 
 | Field                 | Data Type       | Explanation |
 |-----------------------|-----------------|-------------|
 | ```action``` | String    | Contains the action performed in the context of the situation |
@@ -256,7 +257,10 @@ Each document within the markcheme collection contains:
 | ```Situation```  | String    | The text that provides context to the scenario |
 | ```type```            | String    | Details whether the question is of type `rating`, `ranking` or `multiple choice` for easier filtering |
 
-Each document within the mock collections contains:
+### <a id="mocks"></a> 📝 Mocks
+The mock collections follow the same principle as the markscheme collection, however whilst the markscheme and mock documents are similar, they do contain different fields. The mock documents are quereied whenever the user is interacting with their related mock exam.
+
+Each document within the **mock** collections contains:
 | Field                 | Data Type | Explanation |
 |-----------------------|-----------|-------------|
 | ```correct_answers``` | Array&lt;String&gt;    | Contains the correct answers to the question |
@@ -269,10 +273,10 @@ Each document within the mock collections contains:
 > [!NOTE]
 >The markscheme collection was created by our ancestors whilst the mock collections were created by the MedicRecall2 2024 team hence the difference in document structure.
 
-### <a id="️topics"></a> Topics
-The topics collection is referenced in flashacrds as each document of topics contains a topic used to group flashcards.
+### <a id="️topics"></a> 📖 Topics
+The topics collection is referenced in flashcards as each document of topics contains a topic used to group flashcards.
 
-Each document within the topics collection contains: 
+Each document within the **topics** collection contains: 
 | Field                 | Data Type | Explanation |
 |-----------------------|-----------|-------------|
 | ```color``` | String    | For design purposes |
@@ -282,11 +286,10 @@ Each document within the topics collection contains:
 | ```subtopics```  | Array&lt;String&gt;    | The subtopics of the topic |
 | ```topic```            | String    | The name of the topic itself |
 
-### Users
+### <a id="️users"></a> 🗿 Users
 The users collection contains documents associated to each user on the platform.
 
-Each document within the users collection contains:
-Each document within the topics collection contains: 
+Each document within the **users** collection contains:
 | Field                 | Data Type | Explanation |
 |-----------------------|-----------|-------------|
 | ```events``` | Collection    | Contains all major events scheduled for the user |
@@ -314,7 +317,7 @@ The current functions consist of:
 - `sendEmail` - A HTTP triggered function used to notify users of their revision schedule, and
 - `update_exam_score` - An event triggered function that updated the global average score of a mock exam whenever a user's associated exam's score field is updated.
 
-### Deploying Cloud Functions with Firebase
+### 📨 Deploying Cloud Functions with Firebase
 #### Prerequisites
 1. **Firebase Account:** Ensure you have an account connected to the firebase with the role 'Cloud Functions Admin'.
 
@@ -332,7 +335,7 @@ The current functions consist of:
     firebase login
     ```
 
-2. Navigate to the functions directory created by Firebase:
+2. Navigate to the functions directory:
 
     ```bash
     cd functions
@@ -362,3 +365,27 @@ The current functions consist of:
     ```bash
     pip install -r requirements.txt
     ```
+> [!NOTE]
+> Cloud Functions can also be written using Node.js however this project uses Python.
+
+#### Step 2: Write / Edit the Function
+1. Open the ```main.py``` file in the functions directory.
+2. Write your Python function [(Guide)](https://firebase.google.com/docs/functions/get-started?gen=2nd)
+
+#### Step 3: Test the Function
+1. Run the Firebase Emulator Suite:
+    ```bash
+    firebase emulators:start
+    ```
+2. The emulator will display a URL like: 
+    ```bash
+    http://localhost:5001
+    ```
+3. Trigger your emulated function, whether that be by sending it a HTTP request or updating a field in an emulated firestore database.
+#### Step 4: Deploy to Production
+1. Once you've tested your function locally and confirmed it works as expected, deploy it to Firebase:
+    ```bash
+    firebase deploy --only functions
+    ```
+
+<p align="right">(<a href="#contents">back to top</a>)</p>
