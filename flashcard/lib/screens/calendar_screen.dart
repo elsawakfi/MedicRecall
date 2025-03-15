@@ -76,6 +76,7 @@ class CalendarStateO extends State<Calendar> {
   DateTime? testDay = DateTime.now();
   DateTime selectedDay = DateTime(2020, 1, 1);
   DateTime focusedDay = DateTime.now();
+  bool loading = false; 
   final DateTime today =
       DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
   final TextEditingController _eventController = TextEditingController();
@@ -517,6 +518,9 @@ class CalendarStateO extends State<Calendar> {
 
   //deletes all events and testDay in UI calendar and firebase
   Future<void> deleteAllEvents() async {
+    setState((){
+      loading = true;
+    });
     selectedEvents
         .clear(); // sets the selectedEvents list to empty - delete all events being stored locally.
     QuerySnapshot u =
@@ -543,6 +547,7 @@ class CalendarStateO extends State<Calendar> {
         "TestDay": FieldValue.delete()
       }); // update field TestDay to be removed from database
     }
+    
 
 
    // await  _eventsCollectionRef.doc(docID).update({"events": []});
@@ -550,6 +555,9 @@ class CalendarStateO extends State<Calendar> {
     selectedEvents[testDay]?.remove(Event(
         title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
     getTestDay();
+    setState((){
+      loading = false;
+    });
       
   }
 
@@ -700,6 +708,7 @@ class CalendarStateO extends State<Calendar> {
 
   @override
   Widget build(BuildContext context) {
+   
     return Scaffold(
       drawer: const DrawMain(),
       appBar: AppBar(
@@ -736,7 +745,9 @@ class CalendarStateO extends State<Calendar> {
         ),
         centerTitle: true,
       ),
-      body: Row(
+      body: loading 
+      ? CircularProgressIndicator()
+      : Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Labels section (Left side of the page)
