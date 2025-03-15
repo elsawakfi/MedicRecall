@@ -40,6 +40,7 @@ class HomePageState extends State<HomePage> {
   Map<String, int> seenCards = {};
   Map<String, int> totalCards = {};
   late DateTime testDay; 
+  late DateTime _firstStudyDate;
   late Map<DateTime?, List<Event>> selectedEvents;
   late CollectionReference _eventsCollectionRef;
   final CollectionReference _userCollectionRef =
@@ -81,52 +82,63 @@ class HomePageState extends State<HomePage> {
     return holderList;
   }
 
+    
+
+  
   Future<void> getTopics() async {
-    setState(() {
-      loading = true;
-    });
+    // setState(() {
+    //   loading = true;
+    // });
 
     var holderList = await getTopicsDatabase();
 
     setState(() {
       topics = holderList[0];
       checked = holderList[1];
-      loading = false;
+      // loading = false;
+      
     });
    
 
   }
+
+  //  @override
+  // void didChangeDependencies(){
+  //   super.didChangeDependencies();
+  //   //waits for build function to complete and then calls back to call the condition checking function 
+  //   WidgetsBinding.instance.addPostFrameCallback((_){
+  //    setState((){});
+  //   });
+  // }
 
   @override
   void initState() {
     super.initState();
+    getData();
    
-    setState(() {
+  
+  }
+
+  Future<void> getData() async {
+    setState((){
       name = "loading...";
       selectedEvents = {};
       loading = true;
     });
-    getData();
-     
-
-    setState(() {
-      loading = false;
-    });
-  }
-
-  Future<void> getData() async {
     await  getUser();
     
     await getStats();
-
-
-    //await  getFirstStudyDay();
    
     await getTopics();
+      
+      setState(() {
+      loading = false;
+    });
+
+    print("First study date $_firstStudyDate\n");
 
     //issue with getFirstStudyDay, takes too long but if you put it as the first getter function
     //the page does not build 
-   
    
     
   }
@@ -135,6 +147,8 @@ class HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     // double width = MediaQuery.of(context).size.width;
     // double height = MediaQuery.of(context).size.height;
+    
+    print("Value of loading: $loading\n");
     return Scaffold(
       key: _key,
       drawer: const DrawMain(),
@@ -174,12 +188,12 @@ class HomePageState extends State<HomePage> {
       ),
 
       body: Center (
-        child: loading
-            ? const CircularProgressIndicator()
-            : SingleChildScrollView(
+        child: loading 
+        ? CircularProgressIndicator()
+        : SingleChildScrollView(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
-                  children: await makeColumn(),
+                  children: makeColumn(),
                 ),
               ),
       ),
@@ -238,11 +252,10 @@ class HomePageState extends State<HomePage> {
   }
 
   Future<void> getUser() async {
-
+    // setState(() {
+    //   loading = true;
+    // });
     NavigatorState nav = Navigator.of(context);
-    setState(() {
-      loading = true;
-    });
     if (auth.currentUser == null) {
       var tmp = await auth
           .authStateChanges()
@@ -267,8 +280,9 @@ class HomePageState extends State<HomePage> {
       topicCount = querySnapshot.docs.last["topicCount"];
       topicLastSeen = querySnapshot.docs.last["topicLastSeen"];
       testDay = querySnapshot.docs.last['TestDay'].toDate();
-      loading = false;
-      
+      _firstStudyDate = DateTime.fromMicrosecondsSinceEpoch(
+            querySnapshot.docs.last["firstStudyDay"].microsecondsSinceEpoch); 
+      // loading = false;
     }); 
     try{   
       _eventsCollectionRef =
@@ -304,9 +318,9 @@ class HomePageState extends State<HomePage> {
   }
 
   Future<void> getStats() async {
-    // setState(() {
-    //   loading = true;
-    // });
+  //  setState(() {
+  //     loading = true;
+  //   });
     CollectionReference flashcardRef =
         FirebaseFirestore.instance.collection('flashcards');
     CollectionReference seenRef = FirebaseFirestore.instance
@@ -338,7 +352,6 @@ class HomePageState extends State<HomePage> {
         }
       }
     }
-
     // setState(() {
     //   loading = false;
     // });
@@ -355,22 +368,17 @@ class HomePageState extends State<HomePage> {
  
 
   //Formats the checkbox categories according to colour depending on whether the review date is due and how many flashcards have been seen.
-  Future<List<ExpansionTile>> makeCheckboxList() async  {
-      //getFirstStudyDay();
-      QuerySnapshot querySnapshot =
-        await users.where("userID", isEqualTo: user.uid).get();
-      DateTime _firstStudyDate = querySnapshot.docs.last['firstStudyDay'].toDate();
+  List<ExpansionTile> makeCheckboxList()   {
       Event? eventsForDate;
       DateTime targetDate = DateTime(_firstStudyDate.year, _firstStudyDate.month, _firstStudyDate.day, 0, 0, 0, 0);
-
       while (targetDate.isBefore(testDay)){
         eventsForDate = selectedEvents[targetDate]?.last;
         if (eventsForDate != null && eventsForDate.title.contains("Flashcards")){
            String formattedDate = DateFormat('dd/MM/yyy').format(targetDate);
           topicNames.add((eventsForDate.title,formattedDate));
         }
+        targetDate = targetDate.add(Duration(days: 1));
       }
-    
   
     List<ExpansionTile> value = [];
     for (var i = 0; i < topics.length; i++) {
@@ -615,7 +623,7 @@ class HomePageState extends State<HomePage> {
     );
   }
 
-  Future<List<Widget>> makeColumn() async {
+  List<Widget> makeColumn()  {
     List<Widget> widgets = [
       const SizedBox(height: 40),
       Container(
@@ -680,7 +688,7 @@ class HomePageState extends State<HomePage> {
       Container(
         margin: const EdgeInsets.only(left: 30.0, right: 30.0),
         child: Column(
-          children: await makeCheckboxList(),
+          children: makeCheckboxList(),
         ),
       ),
 
