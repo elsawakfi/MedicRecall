@@ -16,7 +16,7 @@ void main() {
         await tester.pumpAndSettle();
       });
 
-  calendar.main();
+  // calendar.main();
   mock.main();
   // flashcard.main();
 }
@@ -42,7 +42,7 @@ Future<void> loginTest(WidgetTester tester) async{
   }
   expect(emailFinder, findsOneWidget);
   await tester.enterText(emailFinder,
-      'xecovop602@deligy.com');
+      'ooz05506@jioso.com');
   tester.printToConsole('Entered email text');
   FocusManager.instance.primaryFocus?.unfocus();
   await tester.pump();

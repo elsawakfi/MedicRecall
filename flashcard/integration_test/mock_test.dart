@@ -115,5 +115,57 @@ void main() {
                 expect(listTile.key, expectedOrder[i]);
             }
         });
+
+    testWidgets("Test Multiple Choice UI",
+            (WidgetTester tester) async {
+          await tester.pump(const Duration(seconds: 1));
+          tester.printToConsole('Testing exam date feature');
+          await loginTest(tester);
+          await tester.pumpAndSettle();
+
+          expect(find.text('Mini-Mocks'), findsOneWidget);
+          await tester.tap(find.text('Mini-Mocks'));
+          await tester.pumpAndSettle();
+
+          expect(find.text('Mini-Mock 1'), findsOneWidget);
+          expect(find.byIcon(Icons.lock_open_sharp), findsAny);
+          await tester.tap(find.text('Mini-Mock 1'));
+          await tester.pumpAndSettle();
+
+          expect(find.text('Begin Exam'), findsOneWidget);
+          await tester.tap(find.text('Begin Exam'));
+          await tester.pumpAndSettle();
+          expect(find.text('Question 1/25'), findsOneWidget);
+
+          await tester.tap(find.text('Review Page'));
+          await tester.pumpAndSettle();
+          await tester.tap(find.text('14'));
+          await tester.pumpAndSettle();
+          expect(find.text('Question 14/25'), findsOneWidget);
+
+          // No options have been selected
+          expect(find.byWidgetPredicate((widget) {
+            return widget is Checkbox && widget.value == true;
+          }), findsNothing);
+
+          // Tap 4 choices and ensure only 3 are selected
+          await tester.tap(find.byKey(ValueKey('A')));
+          await tester.tap(find.byKey(ValueKey('B')));
+          await tester.tap(find.byKey(ValueKey('C')));
+          await tester.tap(find.byKey(ValueKey('D')));
+          await tester.pumpAndSettle();
+          expect(find.byWidgetPredicate((widget) {
+            return widget is Checkbox && widget.value == true;
+          }), findsExactly(3));
+
+          // Unselect the options
+          await tester.tap(find.byKey(ValueKey('A')));
+          await tester.tap(find.byKey(ValueKey('B')));
+          await tester.tap(find.byKey(ValueKey('C')));
+          await tester.pumpAndSettle();
+          expect(find.byWidgetPredicate((widget) {
+            return widget is Checkbox && widget.value == true;
+          }), findsNothing);
+        });
   });
 }

@@ -417,6 +417,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                                 int questionIndex = currentQuestion - rankingAnswers.length;
                                 String optionLetter = options[optionIndex];
                                 return CheckboxListTile(
+                                  key: ValueKey(optionLetter),
                                   fillColor: WidgetStateProperty.resolveWith<Color?>(
                                     (states) {
                                       if (states.contains(WidgetState.selected)) {
