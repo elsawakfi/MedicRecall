@@ -276,7 +276,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                           child: Row(
                           children: [
                             Align(alignment: Alignment.centerLeft,
-                            
+
 
                     // child: (
 
@@ -355,7 +355,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                   Text(
                   questions[currentQuestion]['question'],
                   style: TextStyle(fontSize: 20, color: Colors.black),
-                  
+
                 ),
                 const SizedBox(height: 20),
 
@@ -373,7 +373,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                             },
                             onReorder: (oldIndex, newIndex) {
                               setState(() {
-                                
+
                                 if (newIndex > oldIndex) newIndex--; // Adjust the list based on movement of item
                                 // Update position of option in answer list
                                 final ranking = rankingAnswers[currentQuestion].removeAt(oldIndex);
@@ -388,29 +388,23 @@ class MiniMockExamState extends State<MiniMockExam> {
                               String option = entry.value;
                               String optionLetter = rankingAnswers[currentQuestion][optionIndex];
                               return ReorderableDragStartListener(
-                                key: ValueKey(option),
+                                key: ValueKey(optionLetter),
                                 index: optionIndex,
                                 child: Card(
                                   elevation: 3,
                                   color:Color.fromARGB(255, 222, 221, 222),
                                   child: ListTile(
-                                    title: Text(
-                                      '${optionIndex+1}:  $optionLetter. $option',
-                                      style: TextStyle(
-                                        
-                                        color: Color.fromARGB(255, 0, 0, 0),
-                                        fontSize: 20,
-                                      ),
+                                    title: Text('${optionIndex+1}:  $optionLetter. $option',
+                                      style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
                                     ),
                                     trailing: Icon(Icons.drag_handle, color: Color.fromARGB(255, 0, 0, 0), size: 30),
-                                  ),),
-                                );
-                              
+                                  )
+                                ),
+                              );
                             }).toList(),
-
                           ),
                         )
-                        ]      
+                ]
                 // If the question is a multiple choice question, display checkboxes
                 else if(questions[currentQuestion]['type'] == "multiple choice") ...[
                   //Line below takes the result of the map() and spreads its widgets into the children of Column
@@ -423,6 +417,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                                 int questionIndex = currentQuestion - rankingAnswers.length;
                                 String optionLetter = options[optionIndex];
                                 return CheckboxListTile(
+                                  key: ValueKey(optionLetter),
                                   fillColor: WidgetStateProperty.resolveWith<Color?>(
                                     (states) {
                                       if (states.contains(WidgetState.selected)) {
@@ -433,7 +428,6 @@ class MiniMockExamState extends State<MiniMockExam> {
                                   ),
                                   checkColor: Colors.white, // White tick inside black box
                                   side: const BorderSide(color: Colors.black, width: 1),
-                                  
                                   title: Text('$optionLetter. $option', style: TextStyle(fontSize: 20, color: Colors.black)),
                                   value: multiChoiceAnswers[questionIndex][optionIndex],
                                   onChanged: (value) {
