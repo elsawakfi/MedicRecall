@@ -205,8 +205,8 @@ class MiniMockExamState extends State<MiniMockExam> {
       );
     } else {
       return Align(
-        alignment: Alignment.centerLeft,
-        child: Text("Exam 1")); // Add a fallback widget here
+        alignment: Alignment.center,
+        child: Text("Mock 1")); // Add a fallback widget here
     }
   },
 ),
@@ -224,7 +224,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                 LayoutBuilder(builder: (context, constraints) {
                 return Container(
                   margin: const EdgeInsets.only(right: 16),
-                  width:  210, 
+                  width: MediaQuery.of(context).size.width < 600 ? 120 : 210, 
                   height: 40.31,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
@@ -240,7 +240,9 @@ class MiniMockExamState extends State<MiniMockExam> {
                       ),
                     ],
                   ),
-                  child: Center(
+                  child: LayoutBuilder(builder: (context, constraints) {
+                    if (MediaQuery.of(context).size.width >= 600){
+                    return Center(
                       child: Text('Time Remaining: $_displayTime',
                         style: TextStyle(
                           color: (remainingSeconds <= 600)
@@ -249,8 +251,16 @@ class MiniMockExamState extends State<MiniMockExam> {
                           fontSize: 18.5,
                           fontWeight: FontWeight.w500,
                         ),
-                      )),
-              );
+                      ));} else {return Center(
+                      child: Text('$_displayTime',
+                        style: TextStyle(
+                          color: (remainingSeconds <= 600)
+                              ? Colors.white
+                              : Color.fromARGB(255, 98, 86, 139),
+                          fontSize: 18.5,
+                          fontWeight: FontWeight.w500,
+                  )));}
+                }));
   })],
           ),
           body: questions.isEmpty
