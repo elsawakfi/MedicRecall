@@ -7,7 +7,7 @@
 - [Architecture Overview](#️-architecture-overview)
 - [Project Structure](#-project-structure)
 - [Testing & Debugging](#️-testing--debugging)
-- [Database Structure](#️-database-structure)
+- [Database Structure](#-database-structure)
 - [Cloud Functions](#️-cloud-functions)
 
 ## 📌 Project Overview
@@ -104,13 +104,13 @@ Before you begin, make sure you have the following installed:
 The following diagram illustrates the MedicRecall system architecture, highlighting the interaction between the frontend Flutter application and Firebase backend services.
 
 <p align="left">
-  <img width="470" alt="architecture image" src="./Architecture/Architecture.png" style="box-shadow: 5px 5px 10px rgba(0,0,0,0.5)";>
+  <img width="714" alt="architecture image" src="./Architecture/Architecture.png" style="box-shadow: 5px 5px 10px rgba(0,0,0,0.5)";>
 </p>
 <p align="right">(<a href="#contents">back to top</a>)</p>
 
 ## 📂 Project Structure
 This section provides an overview of the important files contained within the project structure:
-- [Root](#-root-directory)
+- [Root Directory](#-root-directory)
 - [./.github](#️-github)
 - [./flashcard](#-flashcard)
 
@@ -135,6 +135,8 @@ The `.github` directory houses our GitHub configurations, such as **Continuous I
 │   └── OTHER.md                     # Template for creating issues
 └── pull_request_template.md         # Standard PR guidelines
 ```
+**🔧 ./.github/workflows**
+This directory contains the workflows required for **GitHub Actions** to run tests and deploy our project. The diagram outlining this can be found [here](#️-cicd-diagram).
 
 **📝 ./.github/ISSUE_TEMPLATE**
 This directory contains pre-defined issue templates that help **streamline issue reporting** and ensure consistency in bug reports and feature requests.
@@ -177,6 +179,7 @@ flashcard/
 <p align="right">(<a href="#contents">back to top</a>)</p>
 
 ## 🛠️ Testing & Debugging
+
 **Running Unit & Widget Tests**
 Run unit and widget tests to verify core functionalities:
   ```sh
@@ -220,17 +223,25 @@ This will execute all tests inside the `test/` directory.
 > - Ensure that you have properly used tester pumps where necessary for proper widget loading.
 > - Add `tester.printToConsole()` statements inside tests or your code for debugging purposes.
 > - Check Firebase logs in the Firebase Console for backend-related issues.
+
+### ⚙️ CI/CD Diagram
+The following diagram illustrates the MedicRecall CI/CD system, highlighting the key paths for running both testing and deployment.
+<p align="left">
+  <img width="621" alt="ci/cd image" src="./CI-CD-diagram/CI-CD-Diagram.png" style="box-shadow: 5px 5px 10px rgba(0,0,0,0.5)";>
+</p>
+
 <p align="right">(<a href="#contents">back to top</a>)</p>
+
 
 ## 💾 Database Structure
 This section provides an overview of the [firestore](https://firebase.google.com/docs/firestore) and the main root collections:
-- [Flashcards](#flashcards)
-- [Markscheme](#️markscheme)
-- [Mocks](#️mocks)
-- [Topics](#️topics)
-- [Users](#users)
+- [Flashcards](#-flashcards)
+- [Markscheme](#-markscheme)
+- [Mocks](#-mocks)
+- [Topics](#-topics)
+- [Users](#-users)
 
-### <a id="️flashcards"></a> 📇 Flashcards
+### 📇 Flashcards
 The flashcard collection contains documents that detail each of the default flashcards available to the user.
 
 Each document within the **flashcard** collection contains: 
@@ -242,7 +253,7 @@ Each document within the **flashcard** collection contains:
 | ```subtopic```        | String    | For fine tuning the specific segment of the flashcard's topic |
 | ```topic```           | String    | The related flashcard topic |
 
-### <a id="️markscheme"></a> 📑 Markscheme
+### 📑 Markscheme
 The marksheme collection contain a vast array of question documents which are queried from the app when the user is interacting with the markscheme system.
 
 Each document within the **markscheme** collection contains: 
@@ -257,8 +268,8 @@ Each document within the **markscheme** collection contains:
 | ```Situation```  | String    | The text that provides context to the scenario |
 | ```type```            | String    | Details whether the question is of type `rating`, `ranking` or `multiple choice` for easier filtering |
 
-### <a id="mocks"></a> 📝 Mocks
-The mock collections follow the same principle as the markscheme collection, however whilst the markscheme and mock documents are similar, they do contain different fields. The mock documents are quereied whenever the user is interacting with their related mock exam.
+### 📝 Mocks
+The mock collections follow the same principle as the markscheme collection, however whilst the markscheme and mock documents are similar, they do contain different fields. The mock documents are queried whenever the user is interacting with their related mock exam.
 
 Each document within the **mock** collections contains:
 | Field                 | Data Type | Explanation |
@@ -273,7 +284,7 @@ Each document within the **mock** collections contains:
 > [!NOTE]
 >The markscheme collection was created by our ancestors whilst the mock collections were created by the MedicRecall2 2024 team hence the difference in document structure.
 
-### <a id="️topics"></a> 📖 Topics
+### 📖 Topics
 The topics collection is referenced in flashcards as each document of topics contains a topic used to group flashcards.
 
 Each document within the **topics** collection contains: 
@@ -286,7 +297,7 @@ Each document within the **topics** collection contains:
 | ```subtopics```  | Array&lt;String&gt;    | The subtopics of the topic |
 | ```topic```            | String    | The name of the topic itself |
 
-### <a id="️users"></a> 🗿 Users
+### 🗿 Users
 The users collection contains documents associated to each user on the platform.
 
 Each document within the **users** collection contains:
