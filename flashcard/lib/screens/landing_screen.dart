@@ -3,8 +3,6 @@ import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/calendar_screen.dart';
 import 'package:flashcard_x/screens/dashboard_screen.dart';
-import 'package:flashcard_x/screens/study_session_manager.dart';
-import 'package:intl/intl.dart';
 import 'package:flashcard_x/screens/faq.dart';
 import 'package:flashcard_x/screens/flashcard_editor_screen.dart';
 import 'package:flashcard_x/widgets/countdown_button.dart';
@@ -12,6 +10,7 @@ import 'package:flashcard_x/screens/minimock_landing.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'feedback_screen.dart';
+import 'fullmock_landing.dart';
 import 'landing_service.dart';
 import 'mark_scheme.dart';
 import 'package:flashcard_x/screens/settings_screen.dart' as setting;
@@ -24,11 +23,9 @@ import 'package:flashcard_x/screens/settings_screen.dart' as setting;
 
 /* TO DO
 Build the new landing page that comes after logging in and before the main dashboard.
-
 Do i need to pass the user's name over?
-
-
 */
+
 class Landing extends StatefulWidget {
   static String id = 'landing';
 
@@ -451,7 +448,55 @@ class LandingState extends State<Landing> {
                                 
                             ),
                           ),
-                        
+                           const SizedBox(height: 40),
+                          Center(
+                            child: Container(
+                              constraints: const BoxConstraints(maxWidth: 400),
+                              child: TextButton(
+                                style: TextButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+                                  foregroundColor: Colors.blueGrey,
+                                  backgroundColor: Colors.blueGrey,
+                                  side: const BorderSide(color: Colors.blueGrey, width: 2),
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.all(Radius.circular(100)),
+                                  ),
+                                ),
+                                onPressed: () {
+                                  landingService.onLanding = false;
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const FullMockLanding(),
+                                  ),
+                                );
+                                },
+                                
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: const [
+                                    Icon(
+                                      Icons.assignment_outlined,
+                                      color: Colors.white,
+                                    ),
+                                    SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(
+                                        'Full Mock',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 34,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ), 
+                                
+                            ),
+                          ),
                           const SizedBox(height: 40),
                           Center(
                             child: Container(
