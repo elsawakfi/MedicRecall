@@ -7,6 +7,8 @@
 - [Architecture Overview](#️-architecture-overview)
 - [Project Structure](#-project-structure)
 - [Testing & Debugging](#️-testing--debugging)
+- [Database Structure](#️-database-structure)
+- [Cloud Functions](#️-cloud-functions)
 
 ## 📌 Project Overview
 - **Project Name:** MedicRecall
@@ -215,21 +217,22 @@ This will execute all tests inside the `test/` directory.
 
 > 💡 Debugging Tips
 > - Use `flutter logs` to view real-time logs and errors.
-> - Add `print()` statements inside tests or your code for debugging purposes.
+> - Ensure that you have properly used tester pumps where necessary for proper widget loading.
+> - Add `tester.printToConsole()` statements inside tests or your code for debugging purposes.
 > - Check Firebase logs in the Firebase Console for backend-related issues.
-> - If tests fail inconsistently, try running with `flutter test --coverage` to track untested code paths.
 <p align="right">(<a href="#contents">back to top</a>)</p>
 
 ## 📑 Database Structure
-This section provides an overview of the firestore structure and the root collections:
+This section provides an overview of the [firestore](https://firebase.google.com/docs/firestore) and the main root collections:
 - [Flashcards](#flashcards)
 - [Markscheme / Mocks](#️markscheme-mock)
-- [Reminders](#️-reminders)
-- [Topics](#️-topics)
-- [Users](#-users)
+- [Topics](#️topics)
+- [Users](#users)
 
 ### Flashcards
-The flashcard collection contains documents that detail each of the default flashcards available to the user. Each flashcard document contains: 
+The flashcard collection contains documents that detail each of the default flashcards available to the user.
+
+Each flashcard document contains: 
 | Field                 | Data Type | Explanation |
 |-----------------------|-----------|-------------|
 | ```back```            | String    | Contains the flashcard's answer |
@@ -265,3 +268,44 @@ Each document within the mock collections contains:
 
 > [!NOTE]
 >The markscheme collection was created by our ancestors whilst the mock collections were created by the MedicRecall2 2024 team hence the difference in document structure.
+
+### <a id="️topics"></a> Topics
+The topics collection is referenced in flashacrds as each document of topics contains a topic used to group flashcards.
+
+Each document within the topics collection contains: 
+| Field                 | Data Type | Explanation |
+|-----------------------|-----------|-------------|
+| ```color``` | String    | For design purposes |
+| ```emoji```     | String    | For design purposes |
+| ```numberOfCards```         | Number    | Total number of flashcards associated with that topic |
+| ```subtopicLength```        | Array&lt;Number&gt;    | How many flashcards are associated to each subtopic |
+| ```subtopics```  | Array&lt;String&gt;    | The subtopics of the topic |
+| ```topic```            | String    | The name of the topic itself |
+
+### Users
+The users collection contains documents associated to each user on the platform.
+
+Each document within the users collection contains:
+Each document within the topics collection contains: 
+| Field                 | Data Type | Explanation |
+|-----------------------|-----------|-------------|
+| ```events``` | Collection    | Contains all major events scheduled for the user |
+| ```examAnswers``` | Collection    | Contains all answers the user has entered in the mock exams |
+| ```flashcardsSeen``` | Collection    | Contains all individual flashcards the user has revised and their choices |
+| ```TestDay``` | Timestamp    | The timestamp for the user's test day, used for exam scheduling |
+| ```email```     | String    | The user's email |
+| ```excludedDays```         | Array&lt;String&gt;    | The days that the user doesn't want to revise on |
+| ```fullSizedMockRepetitions```        | Number    | Number of times the user wants to schedule the full mock exam |
+| ```name```  | String    | The user's username |
+| ```notify```            | Boolean    | Whether the user wants to be notified or not |
+| ```officialMSRARepetitions```            | Number    | Number of times the user wants to schedule the MSRA |
+| ```selectedResources```            | Array&lt;String&gt;    | The chosen revision resources |
+| ```topicCount```            | Array&lt;Number&gt;    | Number of times the user has seen a topic |
+| ```topicLastSeen```            | Array&lt;Timestamp&gt;    | Last time the user revised a topic |
+| ```topicScore```            | Array&lt;Number&gt;    | The score for each revised topic |
+| ```topicsSeen```            | Array&lt;String&gt;    | The revised topics |
+| ```userID```            | String    | The user's auth ID (different to their document ID) |
+
+<p align="right">(<a href="#contents">back to top</a>)</p>
+
+## ☁️ Cloud Functions
