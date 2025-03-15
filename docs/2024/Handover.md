@@ -309,3 +309,56 @@ Each document within the topics collection contains:
 <p align="right">(<a href="#contents">back to top</a>)</p>
 
 ## ☁️ Cloud Functions
+[Cloud Functions](https://firebase.google.com/docs/functions) are serverless functions that allow you to run code in response to [events](https://cloud.google.com/functions/docs/calling) without managing the underlying infrastructure.
+The current functions consist of:
+- `sendEmail` - A HTTP triggered function used to notify users of their revision schedule, and
+- `update_exam_score` - An event triggered function that updated the global average score of a mock exam whenever a user's associated exam's score field is updated.
+
+### Deploying Cloud Functions with Firebase
+#### Prerequisites
+1. **Firebase Account:** Ensure you have an account connected to the firebase with the role 'Cloud Functions Admin'.
+
+2. **Node.js and npm:** Install Node.js (npm comes bundled with it).
+
+3. **Firebase CLI:** Install the Firebase CLI globally:
+    ```bash
+    npm install -g firebase-tools
+    ```
+4. Python: Ensure Python 3.7+ is installed on your system.
+
+#### Step 1: Set Up the Environment
+1. Log into firebase from the CLI:
+    ```bash
+    firebase login
+    ```
+
+2. Navigate to the functions directory created by Firebase:
+
+    ```bash
+    cd functions
+    ```
+  
+3. Create a virtual environment for Python:
+
+    ```bash
+    python3 -m venv venv
+    ```
+
+4. Activate the virtual environment:
+
+    - On macOS/Linux:
+      ```bash
+      source venv/bin/activate
+      ```
+
+    - On Windows
+
+      ```bash
+      venv\Scripts\activate
+      ```
+
+5. Install required Python packages:
+
+    ```bash
+    pip install -r requirements.txt
+    ```
