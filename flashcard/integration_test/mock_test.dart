@@ -29,11 +29,12 @@ void main() {
 
         // Check if navigation works
         expect(find.text('Question 1/25'), findsOneWidget);
-        expect(find.text('Next'), findsOneWidget);
-        await tester.tap(find.text('Next'));
+        expect(find.byIcon(Icons.arrow_forward), findsOneWidget);
+        await tester.tap(find.byIcon(Icons.arrow_forward));
         await tester.pumpAndSettle();
         expect(find.text('Question 2/25'), findsOneWidget);
-        await tester.tap(find.text('Previous'));
+        expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+        await tester.tap(find.byIcon(Icons.arrow_back));
         await tester.pumpAndSettle();
         expect(find.text('Question 1/25'), findsOneWidget);
 
