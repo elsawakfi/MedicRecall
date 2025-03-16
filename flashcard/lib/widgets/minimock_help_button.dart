@@ -11,18 +11,23 @@ class MiniMockHelpButton extends StatefulWidget {
 class MiniMockHelpButtonState extends State<MiniMockHelpButton> {
   @override
   Widget build(BuildContext context) {
-    return FloatingActionButton(
+    return Container(
+      width: 40,
+      height: 40,
+      child: FloatingActionButton(
       onPressed: (){
         _helpPopup(context);
       },
       clipBehavior: Clip.none,
-      backgroundColor: const Color.fromARGB(255, 222, 221, 222),
+      backgroundColor: const Color.fromARGB(255, 222, 221, 222), 
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(13),
       ),
       child: const Icon(Icons.question_mark, color: Color.fromARGB(255, 0, 0, 0),),
+      ),
     );
   }
+  
 
   void _helpPopup(BuildContext context){
     showDialog(
