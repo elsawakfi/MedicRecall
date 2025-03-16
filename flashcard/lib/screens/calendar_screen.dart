@@ -27,8 +27,10 @@ It is used for both UI display and database storage
 
 bool loading = true;
 
+// List of topics for study sessions and MSRA exam preparation
+// Format: "Main category - Specific topic" 
+// Used for generating and categorizing study sessions
 List<String> topicsList = [
-  // topics with a subtopic (if it has one)
   "Patient focus - Maintaining patient focus",
   "Patient focus - Driving",
   "Patient focus - Intimate examination",
@@ -173,12 +175,64 @@ class CalendarStateO extends State<Calendar> {
   }
 
   Future<void> generateStudySessions(User user) async {
-    var studySessions = await studySessionManager.generateStudySessions(user);
-    setState(() {
-      selectedEvents.addAll(studySessions);
-    });
-    // add to database
-    await studySessionManager.saveStudySessionsToDB(user, studySessions);
+    try {
+      // Get user document to check for selected resources
+      QuerySnapshot userSnapshot = await _userCollectionRef
+          .where("userID", isEqualTo: user.uid)
+          .get();
+          
+      if (userSnapshot.docs.isEmpty) {
+        print("No user document found for generating study sessions");
+        return;
+      }
+      
+      var userDoc = userSnapshot.docs.last.data() as Map<String, dynamic>;
+      
+      // Check if user has selected resources
+      if (!userDoc.containsKey("selectedResources") || 
+          !(userDoc["selectedResources"] is List) ||
+          (userDoc["selectedResources"] as List).isEmpty) {
+        print("No resources selected for study sessions");
+        return;
+      }
+      
+      // Generate study sessions using StudySessionManager
+      var studySessions = await studySessionManager.generateStudySessions(user);
+      
+      if (studySessions.isNotEmpty) {
+        // Merge new study sessions with existing events
+        setState(() {
+          for (var entry in studySessions.entries) {
+            // Normalize date to avoid time comparison issues
+            DateTime normalizedDate = DateTime(
+              entry.key.year, entry.key.month, entry.key.day);
+              
+            if (selectedEvents.containsKey(normalizedDate)) {
+              // Filter out any duplicate events
+              List<Event> newEvents = entry.value.where((newEvent) => 
+                !selectedEvents[normalizedDate]!.any((existingEvent) => 
+                  existingEvent.title == newEvent.title)).toList();
+                  
+              selectedEvents[normalizedDate]!.addAll(newEvents);
+            } else {
+              selectedEvents[normalizedDate] = entry.value;
+            }
+          }
+        });
+        
+        // Save to database
+        await studySessionManager.saveStudySessionsToDB(user, studySessions);
+        
+        // Also update events in our Firebase events collection
+        await updateEventsToDB(user);
+        
+        print("Successfully generated and saved ${studySessions.length} study session days");
+      } else {
+        print("No study sessions were generated");
+      }
+    } catch (e) {
+      print("Error in generateStudySessions: $e");
+    }
   }
 
   // DATABASE FUNCTIONS:
@@ -200,46 +254,132 @@ class CalendarStateO extends State<Calendar> {
 
   // We pull the testDay if its in the database to be updated in the calendar UI
   Future<void> getTestDay() async {
-    QuerySnapshot querySnapshot =
-        await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+    try {
+      QuerySnapshot querySnapshot =
+          await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
 
-    var userFromDb = querySnapshot.docs.first;
-    Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
-    //if the Test Day field isn't null and is in the database we update the UI with it. Otherwise it is displayed as being not set.
-    if ((data.containsKey("TestDay") || data["TestDay"] != null) &&
-        (testDay != null)) {
-      testDayBool = false;
-      testDay = DateTime.fromMicrosecondsSinceEpoch(userFromDb["TestDay"]
-          .microsecondsSinceEpoch); //firebase is weird. conversion from TimeStamp to DateTime object
-    } else {
-      testDayBool = true;
+      if (querySnapshot.docs.isEmpty) {
+        setState(() {
+          testDayBool = true;
+          testDay = null;
+        });
+        return;
+      }
+
+      var userFromDb = querySnapshot.docs.first;
+      Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
+      
+      // Check if TestDay exists in Firestore document
+      if (data.containsKey("TestDay") && data["TestDay"] != null) {
+        setState(() {
+          testDayBool = false;
+          testDay = DateTime.fromMicrosecondsSinceEpoch(data["TestDay"].microsecondsSinceEpoch);
+        });
+      } else {
+        // No test day in database
+        setState(() {
+          testDayBool = true;
+          testDay = null;
+        });
+      }
+    } catch (e) {
+      print("Error retrieving test day: $e");
+      setState(() {
+        testDayBool = true;
+        testDay = null;
+      });
     }
-    setState(() {});
   }
 
   //with UTD we want to update the date on the calendar, and change in firebase
   Future<void> updateTestDay(DateTime date) async {
-    QuerySnapshot u =
-        await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
+    try {
+      // Normalize both dates to avoid time-based mismatches
+      date = DateTime(date.year, date.month, date.day);
+      DateTime? oldTestDay = testDay != null 
+          ? DateTime(testDay!.year, testDay!.month, testDay!.day)
+          : null;
 
-    /*  FIRST update on database */
-    var id = u.docs.last.id; // id being where the user's id details
+      // Create a copy of the keys to avoid concurrent modification
+      final dateKeys = List<DateTime?>.from(selectedEvents.keys);
+      
+      // Remove test day event from all dates to prevent duplicates
+      for (var key in dateKeys) {
+        if (key != null && selectedEvents.containsKey(key)) {
+          final events = selectedEvents[key]!;
+          final newEvents = events.where((event) => event.title != "Test Day").toList();
+          
+          if (newEvents.isEmpty) {
+            selectedEvents.remove(key);
+          } else {
+            selectedEvents[key] = newEvents;
+          }
+        }
+      }
 
-    var userFromDb = u.docs.first;
-    Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
+      // Update Firebase
+      QuerySnapshot u = await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
+      if (u.docs.isNotEmpty) {
+        var id = u.docs.last.id;
+        await _userCollectionRef.doc(id).update({
+          "TestDay": date,
+        });
+      }
 
-    _userCollectionRef.doc(id).update({
-      "TestDay": date,
-      // "firstStudyDay": data.containsKey("firstStudyDay") && data["firstStudyDay"] != null
-      //   ? data["firstStudyDay"] // Keep existing firstStudyDay if it exists
-      //   : DateTime.now(), // Otherwise, set it to now
-    });
+      // Update local test day
+      testDay = date;
 
-    selectedEvents[testDay]?.remove(Event(
-        title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
-    // update field testday to what is passed as param
-    await getTestDay();
-    setState(() {});
+      // Add test day event to the new date
+      if (!selectedEvents.containsKey(date)) {
+        selectedEvents[date] = [];
+      }
+      selectedEvents[date]?.add(
+        Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94))
+      );
+
+      // Update events in Firebase - create a safe copy of the events map for updating
+      await updateEventsToDB(user);
+
+      // Update the focused day to show the new test day
+      setState(() {
+        focusedDay = date;
+        selectedDay = date;
+      });
+
+      // Rebuild the entire screen to refresh countdown button
+      if (context.mounted) {
+        // Use a microtask to ensure state updates are complete
+        Future.microtask(() {
+          Navigator.of(context).pushReplacement(
+            PageRouteBuilder(
+              pageBuilder: (context, animation1, animation2) => const Calendar(),
+              transitionDuration: Duration.zero,
+              reverseTransitionDuration: Duration.zero,
+            ),
+          );
+        });
+      }
+    } catch (e) {
+      print("Error updating test day: $e");
+      // Show error dialog to the user
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Error'),
+              content: Text('Failed to update Test Day: ${e.toString()}'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      }
+    }
   }
 
   //updates the UI with the events collected from firebase
@@ -254,12 +394,15 @@ class CalendarStateO extends State<Calendar> {
         return;
       }
 
-
       String id = u.docs.last.id;      
       _eventsCollectionRef =
           FirebaseFirestore.instance.collection('users/$id/events');
 
       var snapshots = await _eventsCollectionRef.get();
+      
+      // Clear existing events first to prevent duplicates
+      selectedEvents.clear();
+      
       for (var doc in snapshots.docs) {
         var data = doc.data() as Map<String, dynamic>;
         if (data.containsKey('date') && data.containsKey('events')) {
@@ -270,9 +413,10 @@ class CalendarStateO extends State<Calendar> {
             DateTime date = timestamp.toDate();
             date = DateTime(date.year, date.month, date.day);
             
+            // Filter out any existing Test Day events from the database
+            eventsList.removeWhere((title) => title.toString() == "Test Day");
+            
             List<String> events = eventsList.map((e) => e.toString()).toList();
-            
-            
             selectedEvents[date] = events.map((title) => Event(
               title: title,
               color: _getEventColor(title),
@@ -280,8 +424,26 @@ class CalendarStateO extends State<Calendar> {
           }
         }
       }
+
+      // Add Test Day event if testDay is set
+      if (testDay != null && !testDayBool) {
+        DateTime normalizedTestDay = DateTime(testDay!.year, testDay!.month, testDay!.day);
+        if (!selectedEvents.containsKey(normalizedTestDay)) {
+          selectedEvents[normalizedTestDay] = [];
+        }
+        if (!selectedEvents[normalizedTestDay]!.any((e) => e.title == "Test Day")) {
+          selectedEvents[normalizedTestDay]!.add(
+            Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94))
+          );
+        }
+      }
+      
+      // Force update UI
+      setState(() {});
+      
+      print("Events loaded from database: ${selectedEvents.length} dates");
     } catch (e) {
-      print("Error loading events from DB: $e");
+      print("Error getting events from database: $e");
     }
   }
 
@@ -298,7 +460,7 @@ class CalendarStateO extends State<Calendar> {
     if (title == "Test Day") return const Color.fromARGB(255, 255, 89, 94);
     if (title.contains("Mini Mock")) return StudySessionManager.kMiniMockColor;
     if (title.contains("Full-sized Mock")) return StudySessionManager.kFullMockColor;
-    if (title.contains("Official Paper")) return StudySessionManager.kOfficialPaperColor;
+    if (title.contains("Official MSRA Paper")) return StudySessionManager.kOfficialPaperColor;
     if (title.contains("Official SJT Practice Paper")) return StudySessionManager.kSJTPaperColor;
     
     for (String flashcard in flashcards){
@@ -347,14 +509,15 @@ class CalendarStateO extends State<Calendar> {
     if (title.contains('mini mock')) {
       return "mini_mock";
     }
-    if (title.contains('full-sized mock') || title.contains('full mock')) {
+    if (title.contains('full-sized mock') || 
+        title.contains('full mock')) {
       return "full_mock";
     }
     if (title.contains('flashcard')) {
       return "flashcard";
     }
-    if (title.contains('official paper')) {
-      return "official_paper";
+    if (title.contains('official MSRA paper')) {
+      return "official_MSRA_paper";
     }
     if (title.contains('official sjt practice paper')) {
       return "official_sjt_paper";
@@ -428,14 +591,14 @@ class CalendarStateO extends State<Calendar> {
   Future<void> _navigateToEventDetails(Event event) async {
     String eventType = _getEventType(event.title);
 
-    if (eventType == 'official_paper') {
+    if (eventType == 'official_MSRA_paper') {
       final String url = 'https://medical.hee.nhs.uk/medical-training-recruitment/medical-specialty-training/publications/multi-specialty-recruitment-assessment-%28msra%29-practice-paper/section-1--professional-dilemma-pd';
       try {
         if (!await launcher.launch(url)) {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Could not open the official paper website'),
+                content: Text('Could not open the official MSRA paper website'),
               ),
             );
           }
@@ -444,7 +607,7 @@ class CalendarStateO extends State<Calendar> {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Could not open the official paper website'),
+              content: Text('Could not open the official MSRA paper website'),
             ),
           );
         }
@@ -540,68 +703,130 @@ class CalendarStateO extends State<Calendar> {
 
   //deletes all events and testDay in UI calendar and firebase
   Future<void> deleteAllEvents() async {
-    selectedEvents
-        .clear(); // sets the selectedEvents list to empty - delete all events being stored locally.
+    // Clear all events from local state
+    selectedEvents.clear();
 
+    // Get user document
     QuerySnapshot u =
         await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+    
+    if (u.docs.isEmpty) {
+      print("No user document found!");
+      return;
+    }
+    
     String id = u.docs.last.id;
-    String docID = u.docs.first.id;
-    _eventsCollectionRef =
-        // FirebaseFirestore.instance.collection('users/' + id + "/events");
-        FirebaseFirestore.instance.collection('users/$id/events');
+    
+    // Setup events collection reference
+    _eventsCollectionRef = FirebaseFirestore.instance.collection('users/$id/events');
+    
+    // Delete all event documents
     var snapshots = await _eventsCollectionRef.get();
     for (var doc in snapshots.docs) {
       await doc.reference.delete();
     }
 
+    // Get user data for updates
     var userFromDb = u.docs.first;
     Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
     CollectionReference users = FirebaseFirestore.instance.collection('users');
 
+    // Update operations for Firestore
+    Map<String, dynamic> updates = {};
+    
+    // Remove TestDay
     if (data.containsKey("TestDay") || data["TestDay"] != null) {
-      data.remove("TestDay");
-      users.doc(id).update({
-        "TestDay": FieldValue.delete()
-      }); // update field TestDay to be removed from database
+      updates["TestDay"] = FieldValue.delete();
+    }
+    
+    // Clear excluded days
+    if (data.containsKey("excludedDays") || data["excludedDays"] != null) {
+      updates["excludedDays"] = [];
+      // Also clear local state
+      setState(() {
+        revisionDays = [];
+      });
+    }
+    
+    // Apply all updates at once
+    if (updates.isNotEmpty) {
+      await users.doc(id).update(updates);
     }
 
-    selectedEvents[testDay]?.remove(Event(
-        title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
-    getTestDay();
+    // Reset test day locally
+    testDay = null;
+    testDayBool = true;
     
-    await  _eventsCollectionRef.doc(docID).update({"events": []});
-  }
-
-  
-
-  @override
-  void initState() {
-    super.initState();
-    selectedEvents = {};
-    initializeUserAndTestDay();
+    // Clear any lingering events
+    if (u.docs.isNotEmpty) {
+      String docID = u.docs.first.id;
+      try {
+        await _eventsCollectionRef.doc(docID).update({"events": []});
+      } catch (e) {
+        print("Error clearing events: $e");
+      }
+    }
+    
+    // Update UI
+    setState(() {});
   }
 
   Future<void> initializeUserAndTestDay() async {
     await getUser();
     await getTestDay();
-    if (testDay != null) {
+    await _loadExcludedDays(); // Load excluded days from Firebase
+    
+    // Only proceed with test day handling if a test day exists
+    if (testDay != null && !testDayBool) {
       await getEventsFromDB(); // Then load events from database
-      if (selectedEvents.isEmpty){
-          await generateStudySessions(user); // Generate study sessions
+      
+      // First add Test Day event if not already present
+      DateTime normalizedTestDay = DateTime(testDay!.year, testDay!.month, testDay!.day);
+      if (!selectedEvents.containsKey(normalizedTestDay)) {
+        selectedEvents[normalizedTestDay] = [];
       }
       
-      // First add Test Day event
-      selectedEvents[testDay] = [
-        Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94))
-      ];
-
-      //If the user already selected their resources, generate study session should not be called 
-      //it should only be called the first time they choose their test day and resources 
+      // Check if the Test Day event already exists
+      bool testDayEventExists = false;
+      if (selectedEvents[normalizedTestDay] != null) {
+        testDayEventExists = selectedEvents[normalizedTestDay]!.any((event) => event.title == "Test Day");
+      }
+      
+      if (!testDayEventExists) {
+        selectedEvents[normalizedTestDay]!.add(
+          Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94))
+        );
+      }
+      
+      // Check for study sessions by examining event titles
+      bool hasStudySessions = false;
+      for (var events in selectedEvents.values) {
+        for (var event in events) {
+          if (event.title.contains("Mini Mock") || 
+              event.title.contains("Full-sized Mock") || 
+              event.title.contains("Official MSRA Paper") ||
+              event.title.contains("Flashcard")) {
+            hasStudySessions = true;
+            break;
+          }
+        }
+        if (hasStudySessions) break;
+      }
+      
+      // If no study sessions found, try to generate them
+      if (!hasStudySessions) {
+        try {
+          await generateStudySessions(user);
+        } catch (e) {
+          print("Error generating study sessions: $e");
+        }
+      }
 
       setState(() {});
     } else {
-      print("Test day is null!");
+      // No test day is set or test day was deleted
+      await getEventsFromDB(); // Still load other events if any
+      setState(() {});
     }
   }
 
@@ -615,6 +840,8 @@ class CalendarStateO extends State<Calendar> {
     setState(() {
       selectedEvents.addAll(events);
     });
+    // add to database
+    await studySessionManager.saveStudySessionsToDB(user, events);
   }
 
   Future<void> _loadTopicsList() async {
@@ -635,6 +862,13 @@ class CalendarStateO extends State<Calendar> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    selectedEvents = {};
+    initializeUserAndTestDay();
+  }
+
+  @override
   void dispose() {
     _eventController
         .dispose(); // when page is closed, event controller disposes of the unadded events.
@@ -646,6 +880,28 @@ class CalendarStateO extends State<Calendar> {
 
   //maybe make testDay string be default string, then set state to be a string returned from firebase
   // so get object from databse, then .toString or as String
+
+  // Helper function to get day name
+  String _getDayName(int weekday) {
+    switch (weekday) {
+      case 1:
+        return "Monday";
+      case 2:
+        return "Tuesday";
+      case 3:
+        return "Wednesday";
+      case 4:
+        return "Thursday";
+      case 5:
+        return "Friday";
+      case 6:
+        return "Saturday";
+      case 7:
+        return "Sunday";
+      default:
+        return "";
+    }
+  }
 
   // helper function for adding new events
   void _showAddEventDialog(BuildContext context)  {
@@ -670,15 +926,69 @@ class CalendarStateO extends State<Calendar> {
           TextButton(
             onPressed: () async {
               if (_eventController.text.isNotEmpty) {
+                // Show loading indicator while adding event
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      backgroundColor: Colors.white,
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              const Color.fromRGBO(51, 178, 73, 1),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'Adding event...',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Color.fromRGBO(21, 58, 103, 1),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
 
-                
-                await addSingleEvent(selectedDay, _eventController.text, user);
-                updateEventsToDB(user);
-                Navigator.pop(context);
-                _eventController.clear();
-                setState(() {});
-              
-            }},
+                try {
+                  await addSingleEvent(selectedDay, _eventController.text, user);
+                  await updateEventsToDB(user);
+                  
+                  // Close the loading dialog
+                  Navigator.of(context).pop();
+                  // Close the add event dialog
+                  Navigator.of(context).pop();
+                  
+                  _eventController.clear();
+                  setState(() {});
+                } catch (e) {
+                  // Close the loading dialog
+                  Navigator.of(context).pop();
+                  
+                  // Show error dialog
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Error'),
+                        content: Text('Failed to add event: ${e.toString()}'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                }
+              }
+            },
             style: TextButton.styleFrom(
               foregroundColor: Colors.white,
               backgroundColor: Colors.blue,
@@ -776,9 +1086,9 @@ class CalendarStateO extends State<Calendar> {
                       'Mini Mock', StudySessionManager.kMiniMockColor),
                   SizedBox(height: 30),
                   _buildLabelItem(
-                      'Full-Sized Mock', StudySessionManager.kFullMockColor),
+                      'Full-sized Mock', StudySessionManager.kFullMockColor),
                   SizedBox(height: 30),
-                  _buildLabelItem('Official MRSA Paper',
+                  _buildLabelItem('Official MSRA Paper',
                       StudySessionManager.kOfficialPaperColor),
                   SizedBox(height: 30),
                   _buildLabelItem(
@@ -814,19 +1124,67 @@ class CalendarStateO extends State<Calendar> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 16.0, vertical: 8.0),
                           child: TableCalendar(
-                            firstDay: DateTime.utc(2020, 1, 1),
-                            lastDay: DateTime.utc(2030, 12, 31),
+                            firstDay: DateTime(2023),
+                            lastDay: DateTime(2026),
                             focusedDay: focusedDay,
                             calendarFormat: format,
+                            startingDayOfWeek: StartingDayOfWeek.monday,
+                            daysOfWeekVisible: true,
+                            calendarStyle: CalendarStyle(
+                              selectedDecoration: BoxDecoration(
+                                color: Colors.blue[600],
+                                shape: BoxShape.circle,
+                              ),
+                              todayDecoration: const BoxDecoration(
+                                color: Color.fromARGB(255, 13, 71, 161),
+                                shape: BoxShape.circle,
+                              ),
+                              selectedTextStyle: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              defaultTextStyle: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              weekendTextStyle: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              outsideTextStyle: TextStyle(
+                                color: Colors.grey[500],
+                              ),
+                              disabledTextStyle: TextStyle(
+                                color: Colors.grey[600],
+                                decoration: TextDecoration.lineThrough,
+                                decorationColor: Colors.grey[400],
+                                decorationThickness: 2,
+                              ),
+                              markersMaxCount: 6,
+                              markersAnchor: 1.0,
+                              cellPadding: const EdgeInsets.all(8.0),
+                              cellMargin: const EdgeInsets.all(4.0),
+                            ),
+                            enabledDayPredicate: (day) {
+                              // Always enable the test day, regardless of exclusion settings
+                              if (testDay != null) {
+                                DateTime normalizedTestDay = DateTime(testDay!.year, testDay!.month, testDay!.day);
+                                DateTime normalizedDay = DateTime(day.year, day.month, day.day);
+                                if (isSameDay(normalizedTestDay, normalizedDay)) {
+                                  return true;  // Always enable the test day
+                                }
+                              }
+                              
+                              // For other days, apply normal exclusion rules
+                              final dayName = _getDayName(day.weekday);
+                              return !revisionDays.contains(dayName);
+                            },
                             onFormatChanged: (CalendarFormat _format) {
                               setState(() {
                                 format = _format;
                               });
                             },
-                            startingDayOfWeek: StartingDayOfWeek.monday,
-                            daysOfWeekVisible: true,
-                            onDaySelected:
-                                (DateTime selectDay, DateTime focusDay) {
+                            onDaySelected: (DateTime selectDay, DateTime focusDay) {
                               setState(() {
                                 selectedDay = selectDay;
                                 focusedDay = focusDay;
@@ -836,64 +1194,23 @@ class CalendarStateO extends State<Calendar> {
                               return isSameDay(selectedDay, date);
                             },
                             eventLoader: _getEventsfromDay,
-                            calendarStyle: CalendarStyle(
-                              // Make selected day more visible with a darker blue
-                              selectedDecoration: BoxDecoration(
-                                color: Colors.blue[600],
-                                shape: BoxShape.circle,
-                              ),
-                              // Make today's date stand out with a distinct color
-                              todayDecoration: BoxDecoration(
-                                color: Color.fromARGB(255, 13, 71, 161),
-                                shape: BoxShape.circle,
-                              ),
-                              // Improve visibility of selected text
-                              selectedTextStyle: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              // Make default days more visible on dark background
-                              defaultTextStyle: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              // Make weekend days match default days
-                              weekendTextStyle: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              // Improve visibility of outside days
-                              outsideTextStyle: TextStyle(
-                                color: Colors.grey[500],
-                              ),
-                              // Custom marker settings
-                              markersMaxCount:
-                                  6, // Show up to 5 markers per day
-                              markersAnchor: 1.0,
-                              cellPadding: EdgeInsets.all(8.0),
-                              cellMargin: EdgeInsets.all(4.0),
-                            ),
                             calendarBuilders: CalendarBuilders(
                               markerBuilder: (context, date, events) {
                                 if (events.isEmpty) return null;
                                 return Positioned(
                                   bottom: 2,
                                   child: Container(
-                                    width:
-                                        60, // Increased container width significantly
+                                    width: 60,
                                     child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
+                                      mainAxisAlignment: MainAxisAlignment.center,
                                       mainAxisSize: MainAxisSize.min,
                                       children: events.take(3).map((event) {
                                         return Container(
-                                          margin: const EdgeInsets.symmetric(
-                                              horizontal: 1),
-                                          width: 18, // Made lines much longer
+                                          margin: const EdgeInsets.symmetric(horizontal: 1),
+                                          width: 18,
                                           height: 3,
                                           decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(1.5),
+                                            borderRadius: BorderRadius.circular(1.5),
                                             color: (event as Event).color,
                                           ),
                                         );
@@ -902,8 +1219,7 @@ class CalendarStateO extends State<Calendar> {
                                   ),
                                 );
                               },
-                            ),
-                            headerStyle: HeaderStyle(
+                            ),headerStyle: HeaderStyle(
                               titleTextStyle: TextStyle(
                                 fontSize: 40,
                                 fontWeight: FontWeight.bold,
@@ -1197,82 +1513,101 @@ class CalendarStateO extends State<Calendar> {
       DateTime date, String eventTitle, User user) async {
     date = DateTime(date.year, date.month, date.day);
     
-    //The delete single event function updates the UI in real time so I just copied the structure of that function 
-    Event newEvent =  Event(
-                        title: eventTitle,
-                        color: _getEventColor(eventTitle));
+    // Create the new event with proper color
+    Event newEvent = Event(
+      title: eventTitle,
+      color: _getEventColor(eventTitle)
+    );
     
-   
+    // Add to local state first
     if (selectedEvents[date] == null) {
       selectedEvents[date] = [];
-      
     }
     selectedEvents[date]?.add(newEvent);
+    
+    // Get existing events for this date from Firebase
     QuerySnapshot querySnapshot = await _eventsCollectionRef
         .where("date", isEqualTo: Timestamp.fromDate(date))
         .get();
    
-    
-     List<String> updatedEvents =
+    // Get all event titles as a list
+    List<String> updatedEvents =
         selectedEvents[date]?.map((e) => e.title).toList() ?? [];
     
-    if (querySnapshot.docs.isNotEmpty) {
-    String docId = querySnapshot.docs.first.id;
-   
-   
-
-    // Update Firestore document
-    await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
+    try {
+      if (querySnapshot.docs.isNotEmpty) {
+        // Update existing document
+        String docId = querySnapshot.docs.first.id;
+        await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
+      } else {
+        // Create a new document for this date
+        await _eventsCollectionRef.add({
+          "date": Timestamp.fromDate(date),
+          "events": updatedEvents
+        });
+      }
+      
+      print("Successfully saved event: $eventTitle on ${date.toString().split(' ')[0]}");
+    } catch (e) {
+      print("Error saving event to Firebase: $e");
+    }
     
-  } else {
-    
-
-    // If no document exists, create a new one
-    DocumentReference newDoc = await _eventsCollectionRef.add({
-      "date": Timestamp.fromDate(date),
-      "events": [eventTitle] // Start with just the new event
-    });
-    
-    String newDocId = newDoc.id;
-    await _eventsCollectionRef.doc(newDocId).update({"events": updatedEvents});
-
-  }
- 
+    // Important: Update calendar UI
     setState(() {});
   }
-
-
 
   Future<void> deleteSingleEvent(
       DateTime date, String eventTitle, User user) async {
     date = DateTime(date.year, date.month, date.day);
 
-    if (!selectedEvents.containsKey(date)) return;
+    if (!selectedEvents.containsKey(date)) {
+      print("No events found for date: ${date.toString().split(' ')[0]}");
+      return;
+    }
 
+    // Check if the event exists before attempting to remove
+    bool eventExists = selectedEvents[date]?.any((event) => event.title == eventTitle) ?? false;
+    if (!eventExists) {
+      print("Event '$eventTitle' not found on ${date.toString().split(' ')[0]}");
+      return;
+    }
+
+    // Remove the event from local state
     selectedEvents[date]?.removeWhere((event) => event.title == eventTitle);
-
+    
+    // If this was the last event for this date, remove the date entry
     if (selectedEvents[date]?.isEmpty ?? false) {
       selectedEvents.remove(date);
     }
 
-    QuerySnapshot querySnapshot = await _eventsCollectionRef
-        .where("date", isEqualTo: Timestamp.fromDate(date))
-        .get();
+    // Update Firebase
+    try {
+      QuerySnapshot querySnapshot = await _eventsCollectionRef
+          .where("date", isEqualTo: Timestamp.fromDate(date))
+          .get();
 
-    if (querySnapshot.docs.isNotEmpty) {
-      String docId = querySnapshot.docs.first.id;
-      List<String> updatedEvents =
-          selectedEvents[date]?.map((e) => e.title).toList() ?? [];
+      if (querySnapshot.docs.isNotEmpty) {
+        String docId = querySnapshot.docs.first.id;
+        List<String> updatedEvents =
+            selectedEvents[date]?.map((e) => e.title).toList() ?? [];
 
-      if (updatedEvents.isEmpty) {
-        await _eventsCollectionRef
-            .doc(docId)
-            .delete(); // ❗ Ensure deletion happens
+        if (updatedEvents.isEmpty) {
+          // If no events left for this date, delete the document
+          await _eventsCollectionRef.doc(docId).delete();
+          print("Deleted document for date: ${date.toString().split(' ')[0]}");
+        } else {
+          // Otherwise update with remaining events
+          await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
+          print("Updated document with remaining events for date: ${date.toString().split(' ')[0]}");
+        }
       } else {
-        await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
+        print("No document found for date: ${date.toString().split(' ')[0]}");
       }
+    } catch (e) {
+      print("Error deleting event from Firebase: $e");
     }
 
+    // Update UI
     setState(() {});
   }
 
@@ -1283,14 +1618,91 @@ class CalendarStateO extends State<Calendar> {
     DateTime normalizedNewDate =
         DateTime(newDate.year, newDate.month, newDate.day);
 
-    // Remove old event from Firestore
-    await deleteSingleEvent(normalizedOldDate, oldEvent.title, user);
-    await addSingleEvent(normalizedNewDate, newTitle, user);
-    
-    // Refresh UI
-    setState(() {
-      selectedDay = normalizedNewDate;
-    });
+    try {
+      print("Updating event: '${oldEvent.title}' -> '$newTitle', date: ${normalizedOldDate.toString().split(' ')[0]} -> ${normalizedNewDate.toString().split(' ')[0]}");
+      
+      // Special handling for Test Day events which need different treatment
+      bool isTestDay = oldEvent.title == "Test Day";
+      
+      // First, remove the event from local state
+      if (selectedEvents.containsKey(normalizedOldDate)) {
+        selectedEvents[normalizedOldDate]?.removeWhere((event) => 
+            event.title == oldEvent.title);
+            
+        // If no events left for this date, remove the date entry
+        if (selectedEvents[normalizedOldDate]?.isEmpty ?? false) {
+          selectedEvents.remove(normalizedOldDate);
+        }
+      }
+      
+      // Then, remove from Firebase
+      QuerySnapshot oldDaySnapshot = await _eventsCollectionRef
+          .where("date", isEqualTo: Timestamp.fromDate(normalizedOldDate))
+          .get();
+          
+      if (oldDaySnapshot.docs.isNotEmpty) {
+        String docId = oldDaySnapshot.docs.first.id;
+        List<String> updatedEvents = selectedEvents[normalizedOldDate]?.map((e) => e.title).toList() ?? [];
+        
+        if (updatedEvents.isEmpty) {
+          // Delete document if no events remain
+          await _eventsCollectionRef.doc(docId).delete();
+          print("Deleted document for old date: ${normalizedOldDate.toString().split(' ')[0]}");
+        } else {
+          // Update with remaining events
+          await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
+          print("Updated document with remaining events for old date");
+        }
+      }
+      
+      // Now add the event to the new date
+      // Create the new event with proper color
+      Event newEvent = Event(
+        title: newTitle,
+        color: _getEventColor(newTitle)
+      );
+      
+      // Add to local state
+      if (selectedEvents[normalizedNewDate] == null) {
+        selectedEvents[normalizedNewDate] = [];
+      }
+      selectedEvents[normalizedNewDate]?.add(newEvent);
+      
+      // Update Firebase for the new date
+      QuerySnapshot newDaySnapshot = await _eventsCollectionRef
+          .where("date", isEqualTo: Timestamp.fromDate(normalizedNewDate))
+          .get();
+          
+      List<String> newDateEvents = 
+          selectedEvents[normalizedNewDate]?.map((e) => e.title).toList() ?? [];
+          
+      if (newDaySnapshot.docs.isNotEmpty) {
+        // Update existing document
+        String docId = newDaySnapshot.docs.first.id;
+        await _eventsCollectionRef.doc(docId).update({"events": newDateEvents});
+        print("Updated document for new date: ${normalizedNewDate.toString().split(' ')[0]}");
+      } else {
+        // Create a new document for this date
+        await _eventsCollectionRef.add({
+          "date": Timestamp.fromDate(normalizedNewDate),
+          "events": newDateEvents
+        });
+        print("Created new document for date: ${normalizedNewDate.toString().split(' ')[0]}");
+      }
+      
+      // Update the selected day to the new date
+      setState(() {
+        selectedDay = normalizedNewDate;
+        focusedDay = normalizedNewDate;
+      });
+      
+      // Reload all events to ensure consistency
+      await getEventsFromDB();
+      
+      print("Successfully updated event from '${oldEvent.title}' to '$newTitle'");
+    } catch (e) {
+      print("Error updating event: $e");
+    }
   }
 
   void _editEventDate(BuildContext context, Event event) {
@@ -1320,6 +1732,7 @@ class CalendarStateO extends State<Calendar> {
             // Editable Event Title
             TextFormField(
               controller: _editEventController,
+              enabled: event.title != "Test Day", // Disable title editing for Test Day
               style: const TextStyle(
                 color: Color.fromRGBO(21, 58, 103, 1),
                 fontSize: 16,
@@ -1392,27 +1805,116 @@ class CalendarStateO extends State<Calendar> {
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               minimumSize: const Size(120, 45),
             ),
-            child: const Text("Cancel", style: TextStyle(fontSize: 16)),
+            child: const Text(
+              "Cancel",
+              style: TextStyle(fontSize: 16),
+            ),
           ),
           TextButton(
-            onPressed: () {
-              if (_editEventController.text.isNotEmpty &&
-                  _selectedDate != null) {
-                 updateOneEvent(
-                    event, _editEventController.text, _selectedDate!);
-                Navigator.pop(context);
+            onPressed: () async {
+              if (_editEventController.text.isNotEmpty && _selectedDate != null) {
+                // Show loading indicator while saving
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      backgroundColor: Colors.white,
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              const Color.fromRGBO(51, 178, 73, 1),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'Updating event...',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Color.fromRGBO(21, 58, 103, 1),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+
+                try {
+                  if (event.title == "Test Day") {
+                    // For Test Day events, use updateTestDay
+                    await updateTestDay(_selectedDate!);
+                  } else {
+                    // For other events, use updateOneEvent
+                    await updateOneEvent(event, _editEventController.text, _selectedDate!);
+                  }
+                  
+                  // Close the loading dialog
+                  Navigator.of(context).pop();
+                  // Close the event edit dialog
+                  Navigator.of(context).pop();
+                  
+                  // Update the state
+                  setState(() {});
+                } catch (e) {
+                  // Close the loading dialog
+                  Navigator.of(context).pop();
+                  
+                  // Show error dialog
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Error'),
+                        content: Text('Failed to update event: ${e.toString()}'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                }
               }
             },
             style: TextButton.styleFrom(
               foregroundColor: Colors.white,
-              backgroundColor: const Color.fromRGBO(21, 58, 103, 1),
+              backgroundColor: Colors.blue,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               minimumSize: const Size(120, 45),
             ),
-            child: const Text("Save", style: TextStyle(fontSize: 16)),
+            child: const Text(
+              "Save Changes",
+              style: TextStyle(fontSize: 16),
+            ),
           ),
         ],
       ),
     );
+  }
+
+  // Load excluded days from Firebase
+  Future<void> _loadExcludedDays() async {
+    try {
+      QuerySnapshot querySnapshot = await _userCollectionRef
+          .where("userID", isEqualTo: user.uid)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        var userDoc = querySnapshot.docs.first.data() as Map<String, dynamic>;
+        if (userDoc.containsKey("excludedDays")) {
+          var excludedDays = userDoc["excludedDays"] as List<dynamic>;
+          setState(() {
+            revisionDays = excludedDays.map((day) => day.toString()).toList();
+          });
+        }
+      }
+    } catch (e) {
+      print("Error loading excluded days: $e");
+    }
   }
 }

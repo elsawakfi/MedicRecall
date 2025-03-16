@@ -119,24 +119,21 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
 
       var userFromDb = querySnapshot.docs.first;
       Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
-      // If the Test Day field isn't null and is in the database we update the UI with it. Otherwise it is displayed as being not set.
-      if ((data.containsKey("TestDay") || data["TestDay"] != null) &&
-          (buildCount <= 2 || (_examDate != null && buildCount > 2))) {
+      
+      if (data.containsKey("TestDay") && data["TestDay"] != null) {
         testDayBool = false;
-        _examDate = DateTime.fromMicrosecondsSinceEpoch(userFromDb["TestDay"]
-            .microsecondsSinceEpoch); // Firebase is weird. Conversion from TimeStamp to DateTime object
+        _examDate = DateTime.fromMicrosecondsSinceEpoch(
+            data["TestDay"].microsecondsSinceEpoch);
+        
         String? day = _examDate?.day.toString();
-        // String? month = _examDate?.month.toString();
-
-        // Convert month number to month name
         String? month = _examDate?.month != null 
             ? DateFormat('MMMM').format(DateTime(_examDate!.year, _examDate!.month))
             : null;
         String? year = _examDate?.year.toString();
-        // testDayString = '$day-$month-$year';
         testDayString = '$day ${month} $year';
       } else {
         testDayBool = true;
+        testDayString = "Test day not set";
       }
       if(mounted) setState(() {});
     }
@@ -749,7 +746,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: selectedDays.keys.map((day) {
-                  return _buildCheckbox(selectedDays[day]!, day, showInfo: false); // ✅ Hide info icon
+                  return _buildCheckbox(selectedDays[day]!, day, showInfo: false); // Hide info icon
                 }).toList(),
               ),
               actions: [
@@ -836,13 +833,74 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               ),
             ),
             TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => Calendar(),
-                  ),
+              onPressed: () async {
+                // Show loading indicator while processing
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      backgroundColor: Colors.white,
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              const Color.fromRGBO(51, 178, 73, 1),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'Generating your schedule...', 
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Color.fromRGBO(21, 58, 103, 1),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 );
+                
+                try {
+                  // Generate and save study sessions before navigating to calendar
+                  final studySessionManager = StudySessionManager();
+                  final events = await studySessionManager.generateStudySessions(user!);
+                  await studySessionManager.saveStudySessionsToDB(user!, events);
+                  
+                  // Close the loading dialog
+                  Navigator.of(context).pop();
+                  // Close the current dialog
+                  Navigator.of(context).pop();
+                  
+                  // Navigate to Calendar screen to see the new schedule
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Calendar(),
+                    ),
+                  );
+                } catch (e) {
+                  // Close the loading dialog
+                  Navigator.of(context).pop();
+                  // Show error dialog
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Error'),
+                        content: Text('Failed to generate schedule: ${e.toString()}'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                }
               },
               style: TextButton.styleFrom(
                 foregroundColor: Colors.white,
