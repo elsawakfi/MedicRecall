@@ -307,7 +307,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                     // children: [
                       child: Container(
                         margin: const EdgeInsets.only(bottom: 10),
-                        width: 160,
+                        width: MediaQuery.of(context).size.width < 600 ? 75 : 160,
                         height: 40.31,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
@@ -321,7 +321,8 @@ class MiniMockExamState extends State<MiniMockExam> {
                             ),
                           ],
                         ),
-                        child:TextButton.icon(
+                        child:LayoutBuilder(builder: (context,constraints){
+                          if (MediaQuery.of(context).size.width >= 600)  {return TextButton.icon(
                             label: Text(flaggedQuestions[currentQuestion]
                             ? 'Flagged'
                             : 'Flag for review',
@@ -342,13 +343,25 @@ class MiniMockExamState extends State<MiniMockExam> {
                                   : Icons.flag_outlined,
                               color: Color.fromARGB(255, 0, 0, 0),
                             ),
-                        ),
+                        );}else{return IconButton(
+                            onPressed: () {
+                              setState((){
+                                flaggedQuestions[currentQuestion] = !flaggedQuestions[currentQuestion];
+                              });
+                            },
+                            icon: Icon(
+                              flaggedQuestions[currentQuestion]
+                                  ? Icons.flag
+                                  : Icons.flag_outlined,
+                              color: Color.fromARGB(255, 0, 0, 0),
+                            ),
+                        );}}),
                       ),
                       ),
                       Spacer(),
                       Container(
                           margin: const EdgeInsets.only(bottom: 10),
-                          width: 160,
+                          width: MediaQuery.of(context).size.width < 600 ? 75 : 160,
                           height: 40.31,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(16),
@@ -362,7 +375,8 @@ class MiniMockExamState extends State<MiniMockExam> {
                               ),
                             ],
                           ),
-                          child: Center(
+                          child:LayoutBuilder(builder: (context,constraints) {
+                            if (MediaQuery.of(context).size.width >= 600){return Center(
                             child: Text('Question ${currentQuestion+1}/${questions.length}',
                               style: const TextStyle(
                                 color: Color.fromARGB(255, 0, 0, 0),
@@ -370,7 +384,16 @@ class MiniMockExamState extends State<MiniMockExam> {
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                          )
+                          );}else{
+                            return Center(
+                            child: Text('${currentQuestion+1}/${questions.length}',
+                              style: const TextStyle(
+                                color: Color.fromARGB(255, 0, 0, 0),
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ));
+                          }})
                       ),
                     ])
                 )),
