@@ -219,14 +219,15 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
         double maxScreenWidth = constraints.maxWidth * 0.5;
         double maxPreferredWidth = 960; // 1920/2
 
-        return Center(
-        child: Container(
+        return Align(
+          alignment: Alignment.center,
+            child: Container(
         constraints: BoxConstraints(
           maxWidth: maxScreenWidth > maxPreferredWidth ? maxScreenWidth : maxPreferredWidth,
         ),
         padding: EdgeInsets.all(16),
-        child:  SingleChildScrollView(child:
-        Column(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Row(
               children: [
@@ -285,13 +286,16 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                 )
               ]
             ),
-            Column(children: [
+            Expanded(
+             child: SingleChildScrollView(
+              child: Column(
+                children: [
               // Display the current question text
               Text(
                 questions[currentQuestion]['question'],
                 style: TextStyle(fontSize: 18),
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 10),
             // If the question is a ranking question, display a reorderable list of options
             if (questions[currentQuestion]['type'] == "ranking") ...[
               Column( children: [
@@ -359,6 +363,8 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                   return ListTile(
                     title: Text('$optionLetter. $option', style: TextStyle(fontSize: 18, color: Theme.of(context).textTheme.bodyMedium?.color)),
                     enabled: false,
+                    dense: true,
+                    visualDensity: VisualDensity(vertical: -4),
                   );
                 }).toList()
               ),
@@ -389,7 +395,8 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
               questions[currentQuestion]['explanation'],
               style: TextStyle(fontSize: 18),
             )
-            ]),
+            ])
+            )),
             //compare the answers keys and the user's answers and provided
             //format tbd
 
@@ -464,9 +471,8 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
               ],
             )),
           ],
-        )),
-      ),
-        );
+        ),
+      ));
       })
       )
     );
