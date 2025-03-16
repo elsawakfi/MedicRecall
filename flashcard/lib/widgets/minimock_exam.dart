@@ -544,9 +544,9 @@ class MiniMockExamState extends State<MiniMockExam> {
                             }
                           };
                         },
-                        label: Text('Review Page', style: TextStyle(color:  Color.fromARGB(255, 0, 0, 0), fontSize: 12)
+                        label: Text('Review Page', style: TextStyle(color:  Color.fromARGB(255, 0, 0, 0), fontSize: 13)
                         ),
-                        icon: Icon(Icons.search, color:  Color.fromARGB(255, 0, 0, 0), size:13
+                        icon: Icon(Icons.search, color:  Color.fromARGB(255, 0, 0, 0), size:14
                         ),
                       
                         
@@ -560,12 +560,12 @@ class MiniMockExamState extends State<MiniMockExam> {
                             currentQuestion--; // Move to previous question
                           });
                         },
-                        icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0), size:9),
-                        label: Text('Previous', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 11)),
+                        icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0), size:20),
+                        label: SizedBox(),
                         style: ElevatedButton.styleFrom(
                           backgroundColor:Color.fromARGB(255, 222, 221, 222),
-                          padding: EdgeInsets.symmetric(horizontal: 5, vertical: 3),
-                          minimumSize: Size(60,25),
+                          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          minimumSize: Size(55,30),
                         ),
                       ),
                     const SizedBox(width: 8),
@@ -576,16 +576,17 @@ class MiniMockExamState extends State<MiniMockExam> {
                             currentQuestion++; // Move to next question
                           });
                         },
-                        icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 0, 0, 0), size:9),
-                        label: Text('Next', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 11)
-                        ),
+                        icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 0, 0, 0), size: 20),
+                        label: SizedBox(), //Empty SizedBox to ensure no text is displayed
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Color.fromARGB(255, 217, 216, 217),
-                          padding: EdgeInsets.symmetric(horizontal: 5, vertical: 3),
-                          minimumSize: Size(60,25),
-                        ),
-                      ),
-                    //  const SizedBox(width: 8),
+                          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          minimumSize: Size(55,30),
+                       
+                      
+                     ),
+                     iconAlignment: IconAlignment.end,),
+                
 
                     if (currentQuestion == questions.length - 1)
                     SizedBox(
