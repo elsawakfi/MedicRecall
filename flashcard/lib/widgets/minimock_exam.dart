@@ -475,7 +475,8 @@ class MiniMockExamState extends State<MiniMockExam> {
                     SizedBox(
                         child:
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Align(
                         alignment: Alignment.centerLeft,
@@ -483,8 +484,8 @@ class MiniMockExamState extends State<MiniMockExam> {
                     ),
                     const SizedBox(width: 16),
                     Container(
-                        width: 160,
-                        height: 45,
+                        width: 120,
+                        height: 35,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
                           color: const Color.fromARGB(255, 222, 221, 222),
@@ -543,13 +544,13 @@ class MiniMockExamState extends State<MiniMockExam> {
                             }
                           };
                         },
-                        label: Text('Review Page', style: TextStyle(color:  Color.fromARGB(255, 0, 0, 0), fontSize: 9)),
-                        icon: Icon(Icons.search, color:  Color.fromARGB(255, 0, 0, 0), size:12),
-                        style: ElevatedButton.styleFrom(
-                             backgroundColor:Color.fromARGB(255, 222, 221, 222),
-                          padding: EdgeInsets.symmetric(horizontal: 3, vertical: 2),
-                          minimumSize: Size(50,18),
-                        )
+                        label: Text('Review Page', style: TextStyle(color:  Color.fromARGB(255, 0, 0, 0), fontSize: 12)
+                        ),
+                        icon: Icon(Icons.search, color:  Color.fromARGB(255, 0, 0, 0), size:13
+                        ),
+                      
+                        
+                        
                     )),
                     const Spacer(),
                     if (currentQuestion > 0) //Prevents button being shown if no previous questions available
@@ -587,7 +588,10 @@ class MiniMockExamState extends State<MiniMockExam> {
                     //  const SizedBox(width: 8),
 
                     if (currentQuestion == questions.length - 1)
-                      ElevatedButton.icon(
+                    SizedBox(
+                    width: 40, // Force the button width
+                    height: 16, // Force the button height
+                      child: ElevatedButton.icon(
                         onPressed: () async {
                           if (widget.questionDirectory.contains('mini-mock')) {
                             int? newIndex = await Navigator.push(
@@ -634,14 +638,14 @@ class MiniMockExamState extends State<MiniMockExam> {
                             }
                           };
                         },
-                        icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 0, 0, 0), size:12),
+                        icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 0, 0, 0), size:9),
                         label: Text('Review', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 11)),
                         style: ElevatedButton.styleFrom(
                           backgroundColor:Color.fromARGB(255, 222, 221, 222),
-                            padding: EdgeInsets.symmetric(horizontal: 3, vertical: 2),
-                          minimumSize: Size(50,18),
+                         
                         ),
                       ),
+                    ),
                     ],
                   ))),
                 ]
