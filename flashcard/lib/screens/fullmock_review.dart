@@ -306,10 +306,12 @@ Widget build(BuildContext context) {
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0)),
-                      label: Text('Back',  style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 16)),
+                      icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0), size:9),
+                      label: Text('Back',  style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 11)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color.fromARGB(255, 222, 221, 222),
+                          padding: EdgeInsets.symmetric(horizontal: 5, vertical: 3),
+                          minimumSize: Size(60,25),
                       ),
                     ),
                   ),

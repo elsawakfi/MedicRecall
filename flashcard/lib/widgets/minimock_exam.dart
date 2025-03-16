@@ -543,8 +543,13 @@ class MiniMockExamState extends State<MiniMockExam> {
                             }
                           };
                         },
-                        label: Text('Review Page', style: TextStyle(color:  Color.fromARGB(255, 0, 0, 0), fontSize: 16)),
-                        icon: Icon(Icons.search, color:  Color.fromARGB(255, 0, 0, 0),),
+                        label: Text('Review Page', style: TextStyle(color:  Color.fromARGB(255, 0, 0, 0), fontSize: 9)),
+                        icon: Icon(Icons.search, color:  Color.fromARGB(255, 0, 0, 0), size:12),
+                        style: ElevatedButton.styleFrom(
+                             backgroundColor:Color.fromARGB(255, 222, 221, 222),
+                          padding: EdgeInsets.symmetric(horizontal: 3, vertical: 2),
+                          minimumSize: Size(50,18),
+                        )
                     )),
                     const Spacer(),
                     if (currentQuestion > 0) //Prevents button being shown if no previous questions available
@@ -555,14 +560,14 @@ class MiniMockExamState extends State<MiniMockExam> {
                           });
                         },
                         icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0), size:9),
-                        label: Text('Previous', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 9)),
+                        label: Text('Previous', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 11)),
                         style: ElevatedButton.styleFrom(
                           backgroundColor:Color.fromARGB(255, 222, 221, 222),
                           padding: EdgeInsets.symmetric(horizontal: 5, vertical: 3),
-                          minimumSize: Size(60,32),
+                          minimumSize: Size(60,25),
                         ),
                       ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 8),
                     if (currentQuestion < questions.length - 1)
                       ElevatedButton.icon(
                         onPressed: () {
@@ -571,12 +576,12 @@ class MiniMockExamState extends State<MiniMockExam> {
                           });
                         },
                         icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 0, 0, 0), size:9),
-                        label: Text('Next', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 9)
+                        label: Text('Next', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 11)
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Color.fromARGB(255, 217, 216, 217),
                           padding: EdgeInsets.symmetric(horizontal: 5, vertical: 3),
-                          minimumSize: Size(60,32),
+                          minimumSize: Size(60,25),
                         ),
                       ),
                     //  const SizedBox(width: 8),
@@ -629,10 +634,12 @@ class MiniMockExamState extends State<MiniMockExam> {
                             }
                           };
                         },
-                        icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 0, 0, 0)),
-                        label: Text('Review', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 16)),
+                        icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 0, 0, 0), size:12),
+                        label: Text('Review', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 11)),
                         style: ElevatedButton.styleFrom(
                           backgroundColor:Color.fromARGB(255, 222, 221, 222),
+                            padding: EdgeInsets.symmetric(horizontal: 3, vertical: 2),
+                          minimumSize: Size(50,18),
                         ),
                       ),
                     ],
