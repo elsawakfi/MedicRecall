@@ -191,65 +191,12 @@ class CalendarStateO extends State<Calendar> {
   }
 
   Future<void> generateStudySessions(User user) async {
-    try {
-      // Get user document to check for selected resources
-      QuerySnapshot userSnapshot =
-          await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
-
-      if (userSnapshot.docs.isEmpty) {
-        print("No user document found for generating study sessions");
-        return;
-      }
-
-      var userDoc = userSnapshot.docs.last.data() as Map<String, dynamic>;
-
-      // Check if user has selected resources
-      if (!userDoc.containsKey("selectedResources") ||
-          !(userDoc["selectedResources"] is List) ||
-          (userDoc["selectedResources"] as List).isEmpty) {
-        print("No resources selected for study sessions");
-        return;
-      }
-
-      // Generate study sessions using StudySessionManager
-      var studySessions = await studySessionManager.generateStudySessions(user);
-
-      if (studySessions.isNotEmpty) {
-        // Merge new study sessions with existing events
-        setState(() {
-          for (var entry in studySessions.entries) {
-            // Normalize date to avoid time comparison issues
-            DateTime normalizedDate =
-                DateTime(entry.key.year, entry.key.month, entry.key.day);
-
-            if (selectedEvents.containsKey(normalizedDate)) {
-              // Filter out any duplicate events
-              List<Event> newEvents = entry.value
-                  .where((newEvent) => !selectedEvents[normalizedDate]!.any(
-                      (existingEvent) => existingEvent.title == newEvent.title))
-                  .toList();
-
-              selectedEvents[normalizedDate]!.addAll(newEvents);
-            } else {
-              selectedEvents[normalizedDate] = entry.value;
-            }
-          }
-        });
-
-        // Save to database
-        await studySessionManager.saveStudySessionsToDB(user, studySessions);
-
-        // Also update events in our Firebase events collection
-        await updateEventsToDB(user);
-
-        print(
-            "Successfully generated and saved ${studySessions.length} study session days");
-      } else {
-        print("No study sessions were generated");
-      }
-    } catch (e) {
-      print("Error in generateStudySessions: $e");
-    }
+    var studySessions = await studySessionManager.generateStudySessions(user);
+    setState(() {
+      selectedEvents.addAll(studySessions);
+    });
+    // add to database
+    await studySessionManager.saveStudySessionsToDB(user, studySessions);
   }
 
   // DATABASE FUNCTIONS:
@@ -367,12 +314,9 @@ class CalendarStateO extends State<Calendar> {
     ];
     if (title == "Test Day") return const Color.fromARGB(255, 255, 89, 94);
     if (title.contains("Mini Mock")) return StudySessionManager.kMiniMockColor;
-    if (title.contains("Full-sized Mock"))
-      return StudySessionManager.kFullMockColor;
-    if (title.contains("Official MSRA Paper"))
-      return StudySessionManager.kOfficialPaperColor;
-    if (title.contains("Official SJT Practice Paper"))
-      return StudySessionManager.kSJTPaperColor;
+    if (title.contains("Full-sized Mock")) return StudySessionManager.kFullMockColor;
+    if (title.contains("Official MSRA Practice Paper")) return StudySessionManager.kOfficialPaperColor;
+    if (title.contains("Official SJT Practice Paper")) return StudySessionManager.kSJTPaperColor;
 
     for (String flashcard in flashcards) {
       if (title.contains(flashcard)) return StudySessionManager.kFlashcardColor;
@@ -510,7 +454,7 @@ class CalendarStateO extends State<Calendar> {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Could not open the official MSRA paper website'),
+                content: Text('Could not open the official MSRA practice paper website'),
               ),
             );
           }
@@ -519,7 +463,7 @@ class CalendarStateO extends State<Calendar> {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Could not open the official MSRA paper website'),
+              content: Text('Could not open the official MSRA practice paper website'),
             ),
           );
         }
@@ -659,75 +603,53 @@ class CalendarStateO extends State<Calendar> {
   Future<void> initializeUserAndTestDay() async {
     await getUser();
     await getTestDay();
-    await _loadExcludedDays(); // Load excluded days from Firebase
-
-    if (testDay != null && !testDayBool) {
-      await getEventsFromDB();
-
-      DateTime normalizedTestDay =
-          DateTime(testDay!.year, testDay!.month, testDay!.day);
-      if (!selectedEvents.containsKey(normalizedTestDay)) {
-        selectedEvents[normalizedTestDay] = [];
+    if (testDay != null) {
+      await getEventsFromDB(); // Then load events from database
+      if (selectedEvents.isEmpty) {
+        await generateStudySessions(user); // Generate study sessions
       }
 
-      bool testDayEventExists = false;
-      if (selectedEvents[normalizedTestDay] != null) {
-        testDayEventExists = selectedEvents[normalizedTestDay]!
-            .any((event) => event.title == "Test Day");
-      }
+      // First add Test Day event
+      selectedEvents[testDay] = [
+        Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94))
+      ];
 
-      if (!testDayEventExists) {
-        selectedEvents[normalizedTestDay]!.add(Event(
-            title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
-      }
-
-      bool hasStudySessions = false;
-      for (var events in selectedEvents.values) {
-        for (var event in events) {
-          if (event.title.contains("Mini Mock") ||
-              event.title.contains("Full-sized Mock") ||
-              event.title.contains("Official MSRA Paper") ||
-              event.title.contains("Official SJT Paper") ||
-              event.title.contains("Flashcard")) {
-            hasStudySessions = true;
-            break;
-          }
-        }
-        if (hasStudySessions) break;
-      }
-
-      if (!hasStudySessions) {
-        try {
-          await generateStudySessions(user);
-        } catch (e) {
-          print("Error generating study sessions: $e");
-        }
-      }
+      //If the user already selected their resources, generate study session should not be called
+      //it should only be called the first time they choose their test day and resources
 
       setState(() {});
     } else {
-      await getEventsFromDB();
-      setState(() {});
+      print("Test day is null!");
     }
   }
 
-  Future<void> _loadExcludedDays() async {
-    try {
-      QuerySnapshot querySnapshot =
-          await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+  Future<void> _loadStudySessions() async {
+    StudySessionManager studySessionManager = StudySessionManager();
+    User user = FirebaseAuth.instance.currentUser!;
+    // DateTime testDay = DateTime.now().add(Duration(days: 30)); // Example test day
 
-      if (querySnapshot.docs.isNotEmpty) {
-        var userDoc = querySnapshot.docs.first.data() as Map<String, dynamic>;
-        if (userDoc.containsKey("excludedDays")) {
-          var excludedDays = userDoc["excludedDays"] as List<dynamic>;
-          setState(() {
-            revisionDays = excludedDays.map((day) => day.toString()).toList();
-          });
-        }
-      }
-    } catch (e) {
-      print("Error loading excluded days: $e");
-    }
+    Map<DateTime, List<Event>> events =
+        await studySessionManager.generateStudySessions(user);
+    setState(() {
+      selectedEvents.addAll(events);
+    });
+  }
+
+  Future<void> _loadTopicsList() async {
+    if (auth.currentUser == null) return;
+
+    var querySnapshot = await _userCollectionRef
+        .where("userID", isEqualTo: auth.currentUser!.uid)
+        .get();
+
+    if (querySnapshot.docs.isEmpty) return;
+
+    var userDoc = querySnapshot.docs.last.data() as Map<String, dynamic>;
+    var topics = userDoc["topics"] as List<dynamic>;
+
+    setState(() {
+      topicsList = topics.map((topic) => topic["topic"].toString()).toList();
+    });
   }
 
   @override
@@ -1258,8 +1180,7 @@ class CalendarStateO extends State<Calendar> {
                                         color: Colors.black.withOpacity(0.4),
                                         border: Border(
                                           bottom: BorderSide(
-                                            color:
-                                                Colors.white.withOpacity(0.4),
+                                            color: Colors.white.withOpacity(0.4),
                                             width: 1.5,
                                           ),
                                         ),
@@ -1326,13 +1247,8 @@ class CalendarStateO extends State<Calendar> {
                                         fontSize: 16,
                                         color: Colors.grey[500],
                                       ),
-                                      disabledTextStyle: TextStyle(
-                                        color: Colors.grey[600],
-                                        decoration: TextDecoration.lineThrough,
-                                        decorationColor: Colors.grey[400],
-                                        decorationThickness: 2,
-                                      ),
-                                      markersMaxCount: 6,
+                                      // Custom marker settings
+                                      markersMaxCount: 6, // Show up to 5 markers per day
                                       markersAnchor: 1.0,
                                       cellPadding: EdgeInsets.symmetric(
                                           vertical: 12.0, horizontal: 8.0),
@@ -1366,8 +1282,7 @@ class CalendarStateO extends State<Calendar> {
                                                 return Container(
                                                   margin: const EdgeInsets
                                                       .symmetric(horizontal: 1),
-                                                  width:
-                                                      30 - (events.length * 4),
+                                                  width: 30 - (events.length * 4),
                                                   height: 8,
                                                   decoration: BoxDecoration(
                                                     borderRadius:
@@ -1383,25 +1298,6 @@ class CalendarStateO extends State<Calendar> {
                                         );
                                       },
                                     ),
-                                    enabledDayPredicate: (day) {
-                                      // Always enable the test day, regardless of exclusion settings
-                                      if (testDay != null) {
-                                        DateTime normalizedTestDay = DateTime(
-                                            testDay!.year,
-                                            testDay!.month,
-                                            testDay!.day);
-                                        DateTime normalizedDay = DateTime(
-                                            day.year, day.month, day.day);
-                                        if (isSameDay(
-                                            normalizedTestDay, normalizedDay)) {
-                                          return true; // Always enable the test day
-                                        }
-                                      }
-
-                                      // For other days, apply normal exclusion rules
-                                      final dayName = _getDayName(day.weekday);
-                                      return !revisionDays.contains(dayName);
-                                    },
                                   ),
                                 ],
                               ),
@@ -1511,40 +1407,6 @@ class CalendarStateO extends State<Calendar> {
                                     ? SizedBox.shrink()
                                     : const Text(
                                         "Add New Event",
-                                        style: TextStyle(fontSize: 22),
-                                      ),
-                              ),
-                              SizedBox(width: isSmallScreen ? 8 : 12),
-                              // Homepage Button
-                              ElevatedButton.icon(
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => const Landing()),
-                                  );
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.lightBlue,
-                                  foregroundColor: Colors.white,
-                                  shape: isSmallScreen
-                                      ? RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(12))
-                                      : RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(20)),
-                                  padding: isSmallScreen
-                                      ? EdgeInsets.all(20)
-                                      : EdgeInsets.symmetric(
-                                          horizontal: 24, vertical: 12),
-                                ),
-                                icon: Icon(Icons.home,
-                                    size: isSmallScreen ? 32 : 25),
-                                label: isSmallScreen
-                                    ? SizedBox.shrink()
-                                    : const Text(
-                                        "Homepage",
                                         style: TextStyle(fontSize: 22),
                                       ),
                               ),
@@ -1912,27 +1774,5 @@ class CalendarStateO extends State<Calendar> {
         ],
       ),
     );
-  }
-
-  // Add the helper function for day names
-  String _getDayName(int weekday) {
-    switch (weekday) {
-      case 1:
-        return "Monday";
-      case 2:
-        return "Tuesday";
-      case 3:
-        return "Wednesday";
-      case 4:
-        return "Thursday";
-      case 5:
-        return "Friday";
-      case 6:
-        return "Saturday";
-      case 7:
-        return "Sunday";
-      default:
-        return "";
-    }
   }
 }
