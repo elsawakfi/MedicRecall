@@ -371,7 +371,10 @@ class HomePageState extends State<HomePage> {
       Event? eventsForDate;
       Event? futureEvents;
       DateTime now = DateTime.now();
-      DateTime targetDate = DateTime(_firstStudyDate.year, _firstStudyDate.month, _firstStudyDate.day-2, 0, 0, 0, 0);
+      //To test this feature locally please change "_firstStudyDate.day" to "_firstStudyDate.day-2" and then edit 
+      //One of the flashcard decks in the calendar to be before the first study day. This will trigger the new 
+      //features 
+      DateTime targetDate = DateTime(_firstStudyDate.year, _firstStudyDate.month, _firstStudyDate.day, 0, 0, 0, 0);
       DateTime remainingDays = DateTime(now.year,now.month,now.day+1,0,0,0,0);
       List<(String,String)> allTopicNames = [];
       List<(String,String)> onlyFutureNames = [];
