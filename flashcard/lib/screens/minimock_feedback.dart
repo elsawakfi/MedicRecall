@@ -225,7 +225,8 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
           maxWidth: maxScreenWidth > maxPreferredWidth ? maxScreenWidth : maxPreferredWidth,
         ),
         padding: EdgeInsets.all(16),
-        child:  Column(
+        child:  SingleChildScrollView(child:
+        Column(
           children: [
             Row(
               children: [
@@ -284,51 +285,44 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                 )
               ]
             ),
-            Expanded(child: Column(children: [
-            // Display the current question text
-            Text(
-              questions[currentQuestion]['question'],
-              style: TextStyle(fontSize: 18),
-            ),
-            SizedBox(height: 20),
+            Column(children: [
+              // Display the current question text
+              Text(
+                questions[currentQuestion]['question'],
+                style: TextStyle(fontSize: 18),
+              ),
+              SizedBox(height: 20),
             // If the question is a ranking question, display a reorderable list of options
             if (questions[currentQuestion]['type'] == "ranking") ...[
-              Flexible(
-                flex: 3,
-                child: Scrollbar(
-                controller: _optionScrollController,
-                thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    controller: _optionScrollController,
-                    child: Column( children: [
-                      Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
+              Column( children: [
+                Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  // USER ANSWERS
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        // USER ANSWERS
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text('  Given Answer:', style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,fontSize: 18)),
-                              ...userOptions[currentQuestion].asMap().entries.map<Widget>((entry) {
-                                int optionIndex = entry.key;
-                                MapEntry<String, String> currentEntry = entry.value;
-                                String optionLetter = currentEntry.key;
-                                String optionText = currentEntry.value;
-                                return Card(
-                                  color: (questions[currentQuestion]['correct_answers'][optionIndex] == optionLetter)
-                                      ? Colors.green
-                                      : Colors.red.shade400,
-                                    child: SizedBox(
-                                    width: double.infinity, // Define the width
-                                    child: ListTile(
-                                      title: Text('$optionLetter. $optionText', style: TextStyle(color: Colors.white,fontSize: 18))
-                                    ))
-                                );
-                              })
-                            ]
-                        )),
+                        Text('  Given Answer:', style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,fontSize: 18)),
+                        ...userOptions[currentQuestion].asMap().entries.map<Widget>((entry) {
+                          int optionIndex = entry.key;
+                          MapEntry<String, String> currentEntry = entry.value;
+                          String optionLetter = currentEntry.key;
+                          String optionText = currentEntry.value;
+                          return Card(
+                            color: (questions[currentQuestion]['correct_answers'][optionIndex] == optionLetter)
+                                ? Colors.green
+                                : Colors.red.shade400,
+                              child: SizedBox(
+                              width: double.infinity, // Define the width
+                              child: ListTile(
+                                title: Text('$optionLetter. $optionText', style: TextStyle(color: Colors.white,fontSize: 18))
+                              ))
+                          );
+                        })
+                      ]
+                  )),
                   // CORRECT ANSWERS
                   Expanded(
                       child: Column(
@@ -353,32 +347,21 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                       ))
                       ])
                     ])
-                  ))
-              )
             ]
             // If the question is a multiple choice question, display checkboxes
             else if(questions[currentQuestion]['type'] == "multiple choice") ...[
               //Line below takes the result of the map() and spreads its widgets into the children of Column
-              Flexible(
-                flex: 1,
-                child: Scrollbar(
-                  controller: _optionScrollController,
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    controller: _optionScrollController,
-                      child: Column(
-                          children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
-                            int optionIndex = entry.key;
-                            String option = entry.value;
-                            String optionLetter = String.fromCharCode(optionIndex + 65);
-                            return ListTile(
-                              title: Text('$optionLetter. $option', style: TextStyle(fontSize: 18, color: Theme.of(context).textTheme.bodyMedium?.color)),
-                              enabled: false,
-                            );
-                          }).toList()
-                      )
-                  )
-              )),
+              Column(
+                children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
+                  int optionIndex = entry.key;
+                  String option = entry.value;
+                  String optionLetter = String.fromCharCode(optionIndex + 65);
+                  return ListTile(
+                    title: Text('$optionLetter. $option', style: TextStyle(fontSize: 18, color: Theme.of(context).textTheme.bodyMedium?.color)),
+                    enabled: false,
+                  );
+                }).toList()
+              ),
               SizedBox(height: 10),
               //display the selected answers and the correct answers
               Align(
@@ -402,21 +385,11 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
               ))
             ],
             SizedBox(height: 10),
-            Flexible(
-                fit: FlexFit.tight,
-                child: Scrollbar(
-                  controller: _explanationScrollController,
-                  thumbVisibility: true,
-                  child: SingleChildScrollView(
-                    controller: _explanationScrollController,
-                   //Display the explanation of the question
-                    child: Text(
-                      questions[currentQuestion]['explanation'],
-                      style: TextStyle(fontSize: 18),
-                    )
-                  )
-              )
-            )])),
+            Text(
+              questions[currentQuestion]['explanation'],
+              style: TextStyle(fontSize: 18),
+            )
+            ]),
             //compare the answers keys and the user's answers and provided
             //format tbd
 
@@ -491,7 +464,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
               ],
             )),
           ],
-        ),
+        )),
       ),
         );
       })
