@@ -746,7 +746,9 @@ class CalendarStateO extends State<Calendar> {
         centerTitle: true,
       ),
       body: loading 
-      ? CircularProgressIndicator()
+      ? const Center(
+        child: CircularProgressIndicator(),
+      )
       : Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
