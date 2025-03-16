@@ -554,10 +554,12 @@ class MiniMockExamState extends State<MiniMockExam> {
                             currentQuestion--; // Move to previous question
                           });
                         },
-                        icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0)),
-                        label: Text('Previous', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 16)),
+                        icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0), size:9),
+                        label: Text('Previous', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 9)),
                         style: ElevatedButton.styleFrom(
                           backgroundColor:Color.fromARGB(255, 222, 221, 222),
+                          padding: EdgeInsets.symmetric(horizontal: 5, vertical: 3),
+                          minimumSize: Size(60,32),
                         ),
                       ),
                     const SizedBox(width: 16),
@@ -568,12 +570,17 @@ class MiniMockExamState extends State<MiniMockExam> {
                             currentQuestion++; // Move to next question
                           });
                         },
-                        icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 0, 0, 0)),
-                        label: Text('Next', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 16)),
+                        icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 0, 0, 0), size:9),
+                        label: Text('Next', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 9)
+                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Color.fromARGB(255, 217, 216, 217),
+                          padding: EdgeInsets.symmetric(horizontal: 5, vertical: 3),
+                          minimumSize: Size(60,32),
                         ),
                       ),
+                    //  const SizedBox(width: 8),
+
                     if (currentQuestion == questions.length - 1)
                       ElevatedButton.icon(
                         onPressed: () async {
