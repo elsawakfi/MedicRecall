@@ -34,7 +34,6 @@ class HomePageState extends State<HomePage> {
   CollectionReference users = FirebaseFirestore.instance.collection('users');
   final FirebaseAuth auth = FirebaseAuth.instance;
   bool loading = true;
-  List<(String,String)> topicNames = [];
   List<Map<String, dynamic>> topics = [];
   Map<String, bool> checked = {};
   Map<String, int> seenCards = {};
@@ -370,13 +369,27 @@ class HomePageState extends State<HomePage> {
   //Formats the checkbox categories according to colour depending on whether the review date is due and how many flashcards have been seen.
   List<ExpansionTile> makeCheckboxList()   {
       Event? eventsForDate;
-      DateTime targetDate = DateTime(_firstStudyDate.year, _firstStudyDate.month, _firstStudyDate.day-1, 0, 0, 0, 0);
+      Event? futureEvents;
+      DateTime now = DateTime.now();
+      DateTime targetDate = DateTime(_firstStudyDate.year, _firstStudyDate.month, _firstStudyDate.day-2, 0, 0, 0, 0);
+      DateTime remainingDays = DateTime(now.year,now.month,now.day+1,0,0,0,0);
+      List<(String,String)> allTopicNames = [];
+      List<(String,String)> onlyFutureNames = [];
+      
+      //Having all the events since the first study day lets us know how many times the user has reviewed a specific deck
+      //We also need the remaining days to ensure that we do not reschedule an event too often
       while (targetDate.isBefore(testDay)){
         eventsForDate = selectedEvents[targetDate]?.last;
+        futureEvents = selectedEvents[remainingDays]?.last;
         if (eventsForDate != null && eventsForDate.title.contains("Flashcards")){
            String formattedDate = DateFormat('dd/MM/yyy').format(targetDate);
-          topicNames.add((eventsForDate.title,formattedDate));
+          allTopicNames.add((eventsForDate.title,formattedDate));
         }
+        if (futureEvents != null && futureEvents.title.contains("Flashcards")){
+           String formattedDate = DateFormat('dd/MM/yyy').format(targetDate);
+          onlyFutureNames.add((futureEvents.title,formattedDate));
+        }
+        remainingDays = remainingDays.add(Duration(days: 1));
         targetDate = targetDate.add(Duration(days: 1));
       }
   
@@ -402,104 +415,71 @@ class HomePageState extends State<HomePage> {
         topicCount![i]=dateToColourMap.length-1;
       }
 
-      DateTime now = DateTime.now();
+      
       String formattedDate = DateFormat('dd/MM/yyy').format(DateTime.now());
-      DateTime targetDate = DateTime(_firstStudyDate.year, _firstStudyDate.month, _firstStudyDate.day-3, 0, 0, 0, 0);
+      //DateTime targetDate = DateTime(_firstStudyDate.year, _firstStudyDate.month, _firstStudyDate.day-3, 0, 0, 0, 0);
       
       //this tuple gives us fast access to the date that corresponds to this flashcards' study session
-      var format = topicNames.firstWhere(
+      var format = allTopicNames.firstWhere(
       (tuple) => tuple.$1.contains(map["topic"]),
       orElse: () => ("", "N/A"), 
       );
 
+       var eventFuture = onlyFutureNames.lastWhere( (tuple) => tuple.$1.contains(map["topic"]),
+      orElse: () => ("", "N/A"), 
+      );
 
       //we remove the current topic we are on, to ensure that we do not iterate through it again. 
-      topicNames.remove(format);
+      allTopicNames.remove(format);
 
-      DateTime elDia = DateTime.now();
-      if(format.$2 != "N/A") elDia = DateFormat("dd/MM/yyyy").parse(format.$2);
+      DateTime eventDay = DateTime.now();
+      if(format.$2 != "N/A") eventDay = DateFormat("dd/MM/yyyy").parse(format.$2);
 
-     
+      // var eventHistory = allTopicNames.where(
+      // (tuple) => tuple.$1.contains(map["topic"]));
 
-      if(elDia.isAtSameMomentAs(DateTime(now.year, now.month, now.day, 0, 0, 0, 0))){
-                formattedDate = "Today";
+      if(eventDay.isAtSameMomentAs(DateTime(now.year, now.month, now.day, 0, 0, 0, 0))){
+                if (eventFuture.$2 == "N/A"){ //this means that if there are no other future events 
+                    formattedDate = "Today";
+                    topicColour = Colors.grey;
+                }
+
       }
 
-      if(elDia.isBefore(DateTime(now.year, now.month, now.day, 0, 0, 0, 0))){
+      //At the moment all this does is greedily look for the next free day in the calendar, a queue should be
+      //Implemented in the future, i.e the flashcard deck that has been reviewed the least, should be scheduled 
+      //ASAP and the rest are not a priority. 
+      if(eventDay.isBefore(DateTime(now.year, now.month, now.day, 0, 0, 0, 0)) && eventFuture.$2 == "N/A" ){
                 DateTime rescheduledDate = DateTime(now.year, now.month, now.day+1, 0, 0, 0, 0);
                
                 while (rescheduledDate.isBefore(testDay) && selectedEvents[rescheduledDate] != null && selectedEvents[rescheduledDate] != [] && !selectedEvents[rescheduledDate]!.last.toString().contains(map["topic"]))  {
-                    print("Event from day: ${selectedEvents[rescheduledDate]}\n");
                     rescheduledDate = rescheduledDate.add(Duration(days: 1));
                 }
-                if (selectedEvents[rescheduledDate] == [] || selectedEvents[rescheduledDate] == null){
-                    print("Exiting while loop hopefully\n");
+                if (selectedEvents[rescheduledDate] == [] || selectedEvents[rescheduledDate] == null && rescheduledDate != testDay){
                     selectedEvents[rescheduledDate] = [];
-                    addSingleEvent(rescheduledDate, "${topics[i]["topic"]} flashcards", user);
+                    print("Rescheduling\n");
+                    addSingleEvent(rescheduledDate, "${topics[i]["topic"]} Flashcards", user);
+                    formattedDate = DateFormat('dd/MM/yyy').format(rescheduledDate);
                    
-                  }
-                   formattedDate = DateFormat('dd/MM/yyy').format(rescheduledDate);
-                   
-                }
-                
-                     
-      
+                  } else{
+                  formattedDate = "N/A";
+                }   
+                if (shade <= 20) {topicColour = Colors.red;}
+                else if (shade == 100) {
+                  topicColour = Colors.green;
+                  } else{topicColour = Colors.grey;}
+          }
       else{
-                formattedDate = format.$2;
+                //This block should run only if there is no past record of the specified
+                //flashcard deck therefore the event is in the fture 
+                formattedDate = eventFuture.$2;
+        
+                if (shade == 100) {
+                  formattedDate = "Done Early";
+                  topicColour = Colors.green;
+                  }
+                else{topicColour = Colors.grey;}
             }
-        if ( shade >= 70 ){ topicColour = Colors.green;}
-              else{topicColour = Colors.grey;}
-      //Way of extracting the corresponding date in a faster way than iterating over the whole calendar 
-      //int increment = 0; 
-      //Event? eventsForDate;
-     
-      //it takes way too long to iterate over every single day for every flashcard deck, would be better to do the other
-      //way around. Iterate through all the dates, if we see a flashcard, do the necessary functions. It'll be a runtime 
-      //of number of days between exam and first study day as opposed to number of flashcards*number of days between exam 
-      
-      // while (targetDate.isBefore(testDay)){
-      //   eventsForDate = selectedEvents[targetDate]?.last;
-      //   if (eventsForDate == null){
-          
-      //   }
-      //   else{        
-            
-            
-      //       if (eventsForDate.toString().contains(map["topic"])){  
-              
-      //         if(targetDate.isAtSameMomentAs(DateTime(now.year, now.month, now.day, 0, 0, 0, 0))){
-      //           formattedDate = "Today";
-      //           //formattedDate = DateFormat('dd/MM/yyy').format(rescheduledDate);
-      //         }
-
-      //        else if(targetDate.isBefore(DateTime(now.year, now.month, now.day, 0, 0, 0, 0)) && !rescheduled){
-      //           //reschedule study session.....
-      //           //print("Rescheduling: ${map["topic"]}\n");
-      //           DateTime rescheduledDate = DateTime(targetDate.year, targetDate.month, targetDate.day+3, 0, 0, 0, 0);
-      //           //Skip a week and look greedily for next available day? 
-      //           if (selectedEvents[rescheduledDate] != null && rescheduledDate.isBefore(testDay) && !rescheduled)  {
-      //             rescheduledDate = DateTime(rescheduledDate.year, rescheduledDate.month, rescheduledDate.day+1, 0, 0, 0, 0);
-      //           }
-
-      //           selectedEvents[rescheduledDate] = [];
-      //           addSingleEvent(rescheduledDate, "${topics[i]["topic"]} flashcards", user);
-                
-      //           setState((){
-      //             rescheduled = true; 
-      //             targetDate = DateTime(now.year, now.month, now.day, 0, 0, 0, 0);
-      //              formattedDate = DateFormat('dd/MM/yyy').format(rescheduledDate);
-      //           });
-               
-      //           //print("Value of rescheduled: $rescheduled");
-                
-      //         }
-      //       else{
-      //           formattedDate = DateFormat('dd/MM/yyy').format(targetDate);
-                
-      //           //print("$map is scheduled for $formattedDate\n");
-      //       }  
-      //         }
-          
 
     int nextReviewDateMilliseconds = (((dateToColourMap[topicCount![i]]! * 24 * 60 * 60) + topicLastSeen![i].seconds) * 1000).toInt();
     DateTime nextReviewDate = DateTime.fromMillisecondsSinceEpoch(nextReviewDateMilliseconds, isUtc: true).toLocal();
