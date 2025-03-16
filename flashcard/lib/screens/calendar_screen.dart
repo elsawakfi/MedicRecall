@@ -293,59 +293,92 @@ class CalendarStateO extends State<Calendar> {
 
   //with UTD we want to update the date on the calendar, and change in firebase
   Future<void> updateTestDay(DateTime date) async {
-    // Normalize both dates to avoid time-based mismatches
-    date = DateTime(date.year, date.month, date.day);
-    if (testDay != null) {
-      testDay = DateTime(testDay!.year, testDay!.month, testDay!.day);
-    }
+    try {
+      // Normalize both dates to avoid time-based mismatches
+      date = DateTime(date.year, date.month, date.day);
+      DateTime? oldTestDay = testDay != null 
+          ? DateTime(testDay!.year, testDay!.month, testDay!.day)
+          : null;
 
-    // Remove test day event from all dates to prevent duplicates
-    selectedEvents.forEach((key, events) {
-      events.removeWhere((event) => event.title == "Test Day");
-      if (events.isEmpty) {
-        selectedEvents.remove(key);
+      // Create a copy of the keys to avoid concurrent modification
+      final dateKeys = List<DateTime?>.from(selectedEvents.keys);
+      
+      // Remove test day event from all dates to prevent duplicates
+      for (var key in dateKeys) {
+        if (key != null && selectedEvents.containsKey(key)) {
+          final events = selectedEvents[key]!;
+          final newEvents = events.where((event) => event.title != "Test Day").toList();
+          
+          if (newEvents.isEmpty) {
+            selectedEvents.remove(key);
+          } else {
+            selectedEvents[key] = newEvents;
+          }
+        }
       }
-    });
 
-    // Update Firebase
-    QuerySnapshot u = await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
-    var id = u.docs.last.id;
-    await _userCollectionRef.doc(id).update({
-      "TestDay": date,
-    });
+      // Update Firebase
+      QuerySnapshot u = await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
+      if (u.docs.isNotEmpty) {
+        var id = u.docs.last.id;
+        await _userCollectionRef.doc(id).update({
+          "TestDay": date,
+        });
+      }
 
-    // Update local test day
-    testDay = date;
+      // Update local test day
+      testDay = date;
 
-    // Add test day event to the new date
-    if (!selectedEvents.containsKey(date)) {
-      selectedEvents[date] = [];
-    }
-    selectedEvents[date]?.add(
-      Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94))
-    );
+      // Add test day event to the new date
+      if (!selectedEvents.containsKey(date)) {
+        selectedEvents[date] = [];
+      }
+      selectedEvents[date]?.add(
+        Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94))
+      );
 
-    // Update events in Firebase
-    await updateEventsToDB(user);
+      // Update events in Firebase - create a safe copy of the events map for updating
+      await updateEventsToDB(user);
 
-    // Update the focused day to show the new test day
-    setState(() {
-      focusedDay = date;
-      selectedDay = date;
-    });
-
-    // Rebuild the entire screen to refresh countdown button
-    if (context.mounted) {
-      // Use a microtask to ensure state updates are complete
-      Future.microtask(() {
-        Navigator.of(context).pushReplacement(
-          PageRouteBuilder(
-            pageBuilder: (context, animation1, animation2) => const Calendar(),
-            transitionDuration: Duration.zero,
-            reverseTransitionDuration: Duration.zero,
-          ),
-        );
+      // Update the focused day to show the new test day
+      setState(() {
+        focusedDay = date;
+        selectedDay = date;
       });
+
+      // Rebuild the entire screen to refresh countdown button
+      if (context.mounted) {
+        // Use a microtask to ensure state updates are complete
+        Future.microtask(() {
+          Navigator.of(context).pushReplacement(
+            PageRouteBuilder(
+              pageBuilder: (context, animation1, animation2) => const Calendar(),
+              transitionDuration: Duration.zero,
+              reverseTransitionDuration: Duration.zero,
+            ),
+          );
+        });
+      }
+    } catch (e) {
+      print("Error updating test day: $e");
+      // Show error dialog to the user
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Error'),
+              content: Text('Failed to update Test Day: ${e.toString()}'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      }
     }
   }
 
@@ -476,7 +509,8 @@ class CalendarStateO extends State<Calendar> {
     if (title.contains('mini mock')) {
       return "mini_mock";
     }
-    if (title.contains('full-sized mock') || title.contains('full mock')) {
+    if (title.contains('full-sized mock') || 
+        title.contains('full mock')) {
       return "full_mock";
     }
     if (title.contains('flashcard')) {
@@ -892,15 +926,69 @@ class CalendarStateO extends State<Calendar> {
           TextButton(
             onPressed: () async {
               if (_eventController.text.isNotEmpty) {
+                // Show loading indicator while adding event
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      backgroundColor: Colors.white,
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              const Color.fromRGBO(51, 178, 73, 1),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'Adding event...',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Color.fromRGBO(21, 58, 103, 1),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
 
-                
-                await addSingleEvent(selectedDay, _eventController.text, user);
-                updateEventsToDB(user);
-                Navigator.pop(context);
-                _eventController.clear();
-                setState(() {});
-              
-            }},
+                try {
+                  await addSingleEvent(selectedDay, _eventController.text, user);
+                  await updateEventsToDB(user);
+                  
+                  // Close the loading dialog
+                  Navigator.of(context).pop();
+                  // Close the add event dialog
+                  Navigator.of(context).pop();
+                  
+                  _eventController.clear();
+                  setState(() {});
+                } catch (e) {
+                  // Close the loading dialog
+                  Navigator.of(context).pop();
+                  
+                  // Show error dialog
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Error'),
+                        content: Text('Failed to add event: ${e.toString()}'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                }
+              }
+            },
             style: TextButton.styleFrom(
               foregroundColor: Colors.white,
               backgroundColor: Colors.blue,
@@ -1725,15 +1813,72 @@ class CalendarStateO extends State<Calendar> {
           TextButton(
             onPressed: () async {
               if (_editEventController.text.isNotEmpty && _selectedDate != null) {
-                if (event.title == "Test Day") {
-                  // For Test Day events, use updateTestDay
-                  await updateTestDay(_selectedDate!);
-                } else {
-                  // For other events, use updateOneEvent
-                  await updateOneEvent(event, _editEventController.text, _selectedDate!);
+                // Show loading indicator while saving
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      backgroundColor: Colors.white,
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              const Color.fromRGBO(51, 178, 73, 1),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'Updating event...',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Color.fromRGBO(21, 58, 103, 1),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+
+                try {
+                  if (event.title == "Test Day") {
+                    // For Test Day events, use updateTestDay
+                    await updateTestDay(_selectedDate!);
+                  } else {
+                    // For other events, use updateOneEvent
+                    await updateOneEvent(event, _editEventController.text, _selectedDate!);
+                  }
+                  
+                  // Close the loading dialog
+                  Navigator.of(context).pop();
+                  // Close the event edit dialog
+                  Navigator.of(context).pop();
+                  
+                  // Update the state
+                  setState(() {});
+                } catch (e) {
+                  // Close the loading dialog
+                  Navigator.of(context).pop();
+                  
+                  // Show error dialog
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Error'),
+                        content: Text('Failed to update event: ${e.toString()}'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
                 }
-                Navigator.pop(context);
-                setState(() {});
               }
             },
             style: TextButton.styleFrom(
