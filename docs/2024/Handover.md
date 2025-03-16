@@ -9,6 +9,7 @@
 - [Testing & Debugging](#️-testing--debugging)
 - [Database Structure](#-database-structure)
 - [Cloud Functions](#️-cloud-functions)
+- [2024/2025 Progress](#-2024-2025-progress)
 
 ## 📌 Project Overview
 - **Project Name:** MedicRecall
@@ -227,8 +228,11 @@ This will execute all tests inside the `test/` directory.
 ### ⚙️ CI/CD Diagram
 The following diagram illustrates the MedicRecall CI/CD system, highlighting the key paths for running both testing and deployment.
 <p align="left">
-  <img width="621" alt="ci/cd image" src="./CI-CD-diagram/CI-CD-Diagram.png" style="box-shadow: 5px 5px 10px rgba(0,0,0,0.5)";>
+  <img width="621" alt="ci/cd image" src="./CI-CD-diagram/CI-CD-Diagram.png" style="box-shadow: 5px 5px 10px rgba(0,0,0,0.5)">
 </p>
+
+> [!NOTE]
+> If you need to test 
 
 <p align="right">(<a href="#contents">back to top</a>)</p>
 
@@ -240,6 +244,9 @@ This section provides an overview of the [firestore](https://firebase.google.com
 - [Mocks](#-mocks)
 - [Topics](#-topics)
 - [Users](#-users)
+
+> [!NOTE]
+> When uploading documents to the firestore you can use JSON files along with the Firebase CLI to make large data uploads significantly less time consuming. Trust us, it is worth doing however does require a service key file so make sure not to commit any important data.
 
 ### 📇 Flashcards
 The flashcard collection contains documents that detail each of the default flashcards available to the user.
@@ -254,7 +261,7 @@ Each document within the **flashcard** collection contains:
 | ```topic```           | String    | The related flashcard topic |
 
 ### 📑 Markscheme
-The marksheme collection contain a vast array of question documents which are queried from the app when the user is interacting with the markscheme system.
+The mark scheme collection contains a vast array of question documents which are queried from the app when the user is interacting with the mark scheme system.
 
 Each document within the **markscheme** collection contains: 
 | Field                 | Data Type       | Explanation |
@@ -400,3 +407,29 @@ The current functions consist of:
     ```
 
 <p align="right">(<a href="#contents">back to top</a>)</p>
+
+## 🏆 2024/2025 Progress
+As MedicRecall 2 we have completed a plethora of new features for our client, mostly in two separate teams allowing us to focus in on set areas.
+### Mock Team
+The Mock Team, consisting of Rowan, Dennis and Elsa have implemented:
+
+| Feature                  | Explanation                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+|--------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ```Mock Landing Page```  | The mock landing page displays the available mocks to the user, whether that be mini-mocks or full mocks. The mocks are only unlocked on the day they are scheduled in the calendar and onwards, as calculated on the page itself.                                                                                                                                                                                                                                                                                                                                                                                        |
+| ```Mini-Mock Exam```     | The main mock page implemented. It is used by both the mini-mocks and the full mock provided by our client which were then uploaded to the firestore by us. The mini-mock exam screen is quite large and complex however its main purpose is to store the user exam data and display the questions to the user, allowing them to interact and answer them efficiently. Other key widgets displayed are: the navigation buttons, the timer, the question number, the help menu, the flagging button and the review page shortcut.                                                                                          |
+| ```Ranking UI```         | The ranking UI is a list drag and droppable widgets that display the available options to the user, allowing them to rearrange them into the order they think is correct. The options are automatically updated to reflect the position they are in.                                                                                                                                                                                                                                                                                                                                                                      |
+| ```Multiple Choice UI``` | The multiple choice UI is a list of interactable checkboxes that display the options to the user, allowing them to select a maximum of three options per question.                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ```Timer```              | The timer is counts down from the assigned total exam time, and when it runs out it redirects the user to the scoring page                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| ```Question Flagging```  | The flagging widget allows users to store which questions they are unsure on in a quick and simple format. By pressing te button the associated question is added to an array, which is then used to display flagged questions on the review page.                                                                                                                                                                                                                                                                                                                                                                        |
+| ```Review Page```        | The review page is used for both quick, non-linear navigation as well as a convenient place to see and go back to flagged questions. The page displays two sets of questions which are arranged based on their number and question type. When a question is clicked the user is redirected to the question page they clicked on. To get to the review page the user can either click on the shortcut available on each question screen, or use the review button on the final question. The review page is also where the user completes the exam, which then triggers the data formatting and upload on the exam screen. |
+| ```Help Menu```          | There are help menus on both the landing page and the exam pages. The menus provide brief details on how the user can complete actions.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ```Scoring Page```       | The scoring page is the first screen provided to the user after they complete the exam. On this screen all the user answer data is compared to the correct exam answers and scored as the mark scheme dictates. Once the total score has been calculated it is uploaded to the firestore, triggering the update_exam_score cloud function. The user's score is displayed in an indicator widget, alongside the database's average score for that mock.                                                                                                                                                                    |
+| ```update_exam_score```  | As aforementioned this is a cloud function that is triggered whenever a user's score is updated inside of any user mock answers associated document. It extracts the user's previous score and compares it with the most recent one, if they are the same it does nothing however if they are different then the old score is removed from the associated mocks scores array and replaced with their new score. This scores array is then used to calculate a new median average score of that mock.                                                                                                                      |
+| ```Feedback Page```      | The feedback page is used to help the user's compare their answers to the correct ones. Each question screen provides the question number, the user's score for that question, the question text itself, the given answer vs the correct answer and then a rationale explaining why the correct answer is what it is. The answer comparisons are coloured to help with user readability.                                                                                                                                                                                                                                  |
+| ```Updated Themes```     | We updated the themes of the project, mainly light mode, to allow for the mocks to be more readable. The file that defines this is located at flashcard/utils/theme_provider.dart.                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+
+### General
+| Feature(s)                       | Explanation                                                                                                                                   |
+|----------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| ```Updated Firestore Security``` | We updated the client's firestore rules to prevent unnecessary read and write access within the database as there previously was no security. |
+
