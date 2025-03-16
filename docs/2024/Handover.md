@@ -150,8 +150,6 @@ To keep things clear, we recommend maintaining two separate templates:
 
 📖 More Info: [GitHub Issue Templates Guide](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/manually-creating-a-single-issue-template-for-your-repository).
 
-<p align="right">(<a href="#contents">back to top</a>)</p>
-
 ### 📱 ./flashcard
 The `flashcard/` directory contains the **main source code** for the app, which includes the Flutter source code, Firebase functions for the backend, and platform-specific configurations (Android, iOS, and Web).
 ```
@@ -180,16 +178,66 @@ flashcard/
 <p align="right">(<a href="#contents">back to top</a>)</p>
 
 ## 🛠️ Testing & Debugging
+This section provides an overview to testing in Flutter.
+- [Unit and Widget Tests](#-unit-and-widget-tests)
+- [Continuous Integration Tests](#-continuous-integration-tests)
 
-**Running Unit & Widget Tests**
-Run unit and widget tests to verify core functionalities:
-  ```sh
-  cd flashcard/
-  flutter test
-  ```
-This will execute all tests inside the `test/` directory.
+### 🔧 Unit and Widget Tests
+**Unit Tests:** Test individual functions, methods, or classes.
 
-**Running CI Locally:**
+**Widget Tests:** Test individual widgets in isolation.
+
+#### Writing Unit and Widget Tests
+To add new unit or widget tests:
+1. Navigate to the test directory:
+    ```bash
+    cd flashcard/test
+    ```
+2. Create a new file associated to the widgets you want to test e.g.
+    ```bash
+    touch placeholder_test.dart
+    ```
+3. Write a test for the class/widget you want to test, within the main function using the test package.
+
+#### Running Unit & Widget Tests Locally
+
+To run unit tests, follow these steps:
+1. Navigate to the app directory
+      ```sh
+      cd flashcard/
+      ```
+2. To execute all tests inside the `test/` directory, run:
+    ```bash
+    flutter test
+    ```
+
+    To execute only a specified test, run:
+    ```bash
+    flutter test test/placeholder_test.dart
+    ```
+
+> [!NOTE]
+> For more help visit the [Flutter docs](https://docs.flutter.dev/cookbook/testing/unit/introduction)
+
+### 🔨 Continuous Integration Tests
+**Integration Tests:** Test the entire app or large parts of it, simulating user interactions.
+
+#### Writing Continuous Integration Tests
+To add new integration tests:
+1. Navigate to the integration test directory:
+    ```bash
+    cd flashcard/integration_test
+    ```
+2. Create a new file associated to the widgets you want to test e.g.
+    ```bash
+    touch placeholder_test.dart
+    ```
+3. Write a test to simulate a user's actions and then link it to the main function within **app_test.dart** (the target location of the test driver).
+
+> [!NOTE]
+> For more help visit the [Flutter docs](https://docs.flutter.dev/testing/integration-tests)
+
+#### Running Continuous Integration Tests Locally
 
    To run Continuous Integration (CI) locally, follow these steps:
 
@@ -197,7 +245,7 @@ This will execute all tests inside the `test/` directory.
 
       In the first terminal, start the ChromeDriver by running the following command:
 
-      ```console
+      ```bash
       chromedriver --port=4444
       ```
 
@@ -207,13 +255,13 @@ This will execute all tests inside the `test/` directory.
 
       In the second terminal, execute the following command to run the Flutter integration test:
 
-      ```sh
+      ```bash
       flutter drive --driver=test_driver/integration_test_driver.dart --target=integration_test/app_test.dart -d web-server --headless
       ```
 
       Alternatively, you can use `"Chrome"` instead of `web-server --headless`:
 
-      ```sh
+      ```bash
       flutter drive --driver=test_driver/integration_test_driver.dart --target=integration_test/app_test.dart -d Chrome
       ```
 
@@ -230,9 +278,6 @@ The following diagram illustrates the MedicRecall CI/CD system, highlighting the
 <p align="left">
   <img width="621" alt="ci/cd image" src="./CI-CD-diagram/CI-CD-Diagram.png" style="box-shadow: 5px 5px 10px rgba(0,0,0,0.5)">
 </p>
-
-> [!NOTE]
-> If you need to test 
 
 <p align="right">(<a href="#contents">back to top</a>)</p>
 
