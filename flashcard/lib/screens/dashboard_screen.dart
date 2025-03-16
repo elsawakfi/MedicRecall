@@ -380,23 +380,29 @@ class HomePageState extends State<HomePage> {
       //We also need the remaining days to ensure that we do not reschedule an event too often
       while (targetDate.isBefore(testDay)){
         eventsForDate = selectedEvents[targetDate]?.last;
-        futureEvents = selectedEvents[remainingDays]?.last;
+       
         if (eventsForDate != null && eventsForDate.title.contains("Flashcards")){
            String formattedDate = DateFormat('dd/MM/yyy').format(targetDate);
           allTopicNames.add((eventsForDate.title,formattedDate));
         }
+        
+        targetDate = targetDate.add(Duration(days: 1));
+      }
+
+      while (remainingDays.isBefore(testDay)){
+        futureEvents = selectedEvents[remainingDays]?.last;
         if (futureEvents != null && futureEvents.title.contains("Flashcards")){
            String formattedDate = DateFormat('dd/MM/yyy').format(targetDate);
           onlyFutureNames.add((futureEvents.title,formattedDate));
         }
         remainingDays = remainingDays.add(Duration(days: 1));
-        targetDate = targetDate.add(Duration(days: 1));
       }
   
     List<ExpansionTile> value = [];
     for (var i = 0; i < topics.length; i++) {
 
       var map = topics[i];
+      bool overdue = false;
       int numCards = seenCards[map["topic"]] ?? 0;
       
       var shade = numCards / (totalCards[map["topic"]]?? 1)*100;
@@ -425,7 +431,7 @@ class HomePageState extends State<HomePage> {
       orElse: () => ("", "N/A"), 
       );
 
-       var eventFuture = onlyFutureNames.lastWhere( (tuple) => tuple.$1.contains(map["topic"]),
+       var eventFuture = allTopicNames.lastWhere( (tuple) => tuple.$1.contains(map["topic"]),
       orElse: () => ("", "N/A"), 
       );
 
@@ -449,7 +455,7 @@ class HomePageState extends State<HomePage> {
       //At the moment all this does is greedily look for the next free day in the calendar, a queue should be
       //Implemented in the future, i.e the flashcard deck that has been reviewed the least, should be scheduled 
       //ASAP and the rest are not a priority. 
-      if(eventDay.isBefore(DateTime(now.year, now.month, now.day, 0, 0, 0, 0)) && eventFuture.$2 == "N/A" ){
+      if(eventDay.isBefore(DateTime(now.year, now.month, now.day, 0, 0, 0, 0)) && (eventFuture == format) ){
                 DateTime rescheduledDate = DateTime(now.year, now.month, now.day+1, 0, 0, 0, 0);
                
                 while (rescheduledDate.isBefore(testDay) && selectedEvents[rescheduledDate] != null && selectedEvents[rescheduledDate] != [] && !selectedEvents[rescheduledDate]!.last.toString().contains(map["topic"]))  {
@@ -457,21 +463,28 @@ class HomePageState extends State<HomePage> {
                 }
                 if (selectedEvents[rescheduledDate] == [] || selectedEvents[rescheduledDate] == null && rescheduledDate != testDay){
                     selectedEvents[rescheduledDate] = [];
-                    print("Rescheduling\n");
                     addSingleEvent(rescheduledDate, "${topics[i]["topic"]} Flashcards", user);
                     formattedDate = DateFormat('dd/MM/yyy').format(rescheduledDate);
                    
                   } else{
                   formattedDate = "N/A";
                 }   
-                if (shade <= 20) {topicColour = Colors.red;}
+                
+          }
+       else if (eventFuture != format && eventFuture.$2 != "N/A"){ 
+                formattedDate = eventFuture.$2;
+        
+                if (shade <= 20) {
+                  topicColour = Colors.red;
+                  formattedDate = "${eventFuture.$2} (Did not complete previous review)";
+                  }
                 else if (shade == 100) {
                   topicColour = Colors.green;
                   } else{topicColour = Colors.grey;}
-          }
-      else{
+            }
+      else {
                 //This block should run only if there is no past record of the specified
-                //flashcard deck therefore the event is in the fture 
+                //flashcard deck therefore the event only occurs in the future 
                 formattedDate = eventFuture.$2;
         
                 if (shade == 100) {
@@ -480,6 +493,7 @@ class HomePageState extends State<HomePage> {
                   }
                 else{topicColour = Colors.grey;}
             }
+      if (overdue == true){topicColour = Colors.red;}
 
     int nextReviewDateMilliseconds = (((dateToColourMap[topicCount![i]]! * 24 * 60 * 60) + topicLastSeen![i].seconds) * 1000).toInt();
     DateTime nextReviewDate = DateTime.fromMillisecondsSinceEpoch(nextReviewDateMilliseconds, isUtc: true).toLocal();
