@@ -9,7 +9,7 @@
 - [Testing & Debugging](#️-testing--debugging)
 - [Database Structure](#-database-structure)
 - [Cloud Functions](#️-cloud-functions)
-- [2024/2025 Progress](#-2024-2025-progress)
+- [2024/2025 Progress](#-20242025-progress)
 
 ## 📌 Project Overview
 - **Project Name:** MedicRecall
@@ -462,9 +462,13 @@ The current functions consist of:
 <p align="right">(<a href="#contents">back to top</a>)</p>
 
 ## 🏆 2024/2025 Progress
-As MedicRecall 2 we have completed a plethora of new features for our client, mostly in two separate teams allowing us to focus in on set areas.
-### Mock Team
-The Mock Team, consisting of Rowan, Dennis and Elsa have implemented:
+As MedicRecall 2 we have completed a plethora of new features for our client, mostly mock and scheduling related.
+- [Mock Related](#-flashcards)
+- [Scheduling Related](#)
+- [General](#️-general)
+
+### 📑 Mock Related
+The mock related features:
 
 | Feature                  | Explanation                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 |--------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -481,7 +485,8 @@ The Mock Team, consisting of Rowan, Dennis and Elsa have implemented:
 | ```Feedback Page```      | The feedback page is used to help the user's compare their answers to the correct ones. Each question screen provides the question number, the user's score for that question, the question text itself, the given answer vs the correct answer and then a rationale explaining why the correct answer is what it is. The answer comparisons are coloured to help with user readability.                                                                                                                                                                                                                                  |
 | ```Updated Themes```     | We updated the themes of the project, mainly light mode, to allow for the mocks to be more readable. The file that defines this is located at flashcard/utils/theme_provider.dart.                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 
-### General
+### ⚖️ General
+The general features:
 | Feature(s)                       | Explanation                                                                                                                                   |
 |----------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
 | ```Updated Firestore Security``` | We updated the client's firestore rules to prevent unnecessary read and write access within the database as there previously was no security. |
