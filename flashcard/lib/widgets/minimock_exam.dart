@@ -11,10 +11,11 @@ import 'minimock_help_button.dart';
 
 abstract class MiniMockExam extends StatefulWidget {
   final String title;
+  final String shortTitle;
   final String questionDirectory;
   final String answerDirectory;
   final int time;
-  const MiniMockExam({super.key, required this.title, required this.questionDirectory, required this.answerDirectory, required this.time});
+  const MiniMockExam({super.key, required this.title, required this.shortTitle, required this.questionDirectory, required this.answerDirectory, required this.time});
 
   @override
   State<MiniMockExam> createState() => MiniMockExamState();
@@ -207,7 +208,7 @@ class MiniMockExamState extends State<MiniMockExam> {
     } else {
       return Align(
         alignment: Alignment.center,
-        child: Text("Mock 1")); // Add a fallback widget here
+        child: Text(widget.shortTitle)); // Add a fallback widget here
     }
   },
 ),
