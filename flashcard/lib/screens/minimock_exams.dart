@@ -1,4 +1,5 @@
 import '../widgets/minimock_exam.dart';
+import 'package:flashcard_x/widgets/minimock_exam.dart';
 
 class MiniMockExam1 extends MiniMockExam {
   const MiniMockExam1({super.key}): super(
@@ -17,3 +18,13 @@ class MiniMockExam2 extends MiniMockExam {
       time: 2700,
   );
 }
+
+
+class FullMockExam1 extends MiniMockExam {
+  const FullMockExam1({super.key}): super(
+      title: "Full Mock Exam",
+      questionDirectory: "full-mock-1",
+      answerDirectory: "full-mock-1-answers",
+      time: 5700,
+  );
+} 

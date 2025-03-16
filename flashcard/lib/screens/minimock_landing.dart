@@ -6,9 +6,7 @@ import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/drawer_widget.dart';
 import 'package:flashcard_x/screens/minimock1_rules_page.dart';
-import 'package:flashcard_x/screens/button_screen.dart';
-
-import 'minimock_exams.dart';
+import 'package:flashcard_x/widgets/countdown_button.dart';
 
 
 class MiniMockLanding extends StatefulWidget {

@@ -3,9 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:collection/collection.dart';
 import '../widgets/drawer_widget.dart';
+import 'fullmock_landing.dart';
 import 'minimock_landing.dart';
 
 class MiniMockFeedBack extends StatefulWidget {
@@ -138,7 +138,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
        var id = snapshot.docs.last.id;
        DocumentSnapshot<
            Map<String, dynamic>> userAnswers = await FirebaseFirestore.instance
-           .collection('users').doc(id).collection('Exam answers').doc(
+           .collection('users').doc(id).collection('examAnswers').doc(
            widget.answerDirectory).get();
        Map<String, dynamic> userAnswerMap = userAnswers.get('answers');
        return userAnswerMap;
@@ -468,14 +468,22 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                 if (currentQuestion == questions.length - 1)
                   ElevatedButton.icon(
                     onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const MiniMockLanding(),
-                        ),
-                      );
+                      if(widget.questionDirectory.contains("mini-mock")){
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const MiniMockLanding(),
+                          ),
+                        );
+                      }else if (widget.questionDirectory.contains("full-mock")){
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const FullMockLanding(),
+                          ),
+                        );
+                      }
                     },
                     icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139)),
-                    label: Text('Mini-Mock Menu', style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 98, 86, 139))),
+                    label: Text('Menu', style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 98, 86, 139))),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color.fromARGB(255, 235, 230, 239),
                     ),
