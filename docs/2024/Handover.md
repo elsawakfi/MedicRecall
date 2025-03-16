@@ -59,7 +59,7 @@ Before you begin, make sure you have the following installed:
 > - `google-services.json` (Android)
 > - `GoogleService-Info.plist` (iOS/macOS)
 > Without these files, Firebase-related features will not function properly.
-<p align="right">(<a href="#contents">back to top</a>)</p>
+
 
 ### ⚙️ Setup Guide
 1. Clone the repository using either HTTPS or SSH:
@@ -179,15 +179,18 @@ flashcard/
 
 ## 🛠️ Testing & Debugging
 This section provides an overview to testing in Flutter.
-- [Unit and Widget Tests](#-unit-and-widget-tests)
+- [Unit & Widget Tests](#-unit--widget-tests)
 - [Continuous Integration Tests](#-continuous-integration-tests)
+- [CI/CD Diagram](#️-cicd-diagram)
 
-### 🔧 Unit and Widget Tests
+### 🔧 Unit & Widget Tests
 **Unit Tests:** Test individual functions, methods, or classes.
 
 **Widget Tests:** Test individual widgets in isolation.
+- [Writing Unit & Widget Tests](#-writing-unit--widget-tests)
+- [Running Unit & Widget Tests Locally](#-running-unit--widget-tests-locally)
 
-#### Writing Unit and Widget Tests
+#### 📌 Writing Unit & Widget Tests
 To add new unit or widget tests:
 1. Navigate to the test directory:
     ```bash
@@ -199,7 +202,7 @@ To add new unit or widget tests:
     ```
 3. Write a test for the class/widget you want to test, within the main function using the test package.
 
-#### Running Unit & Widget Tests Locally
+#### ✅ Running Unit & Widget Tests Locally
 
 To run unit tests, follow these steps:
 1. Navigate to the app directory
@@ -221,8 +224,10 @@ To run unit tests, follow these steps:
 
 ### 🔨 Continuous Integration Tests
 **Integration Tests:** Test the entire app or large parts of it, simulating user interactions.
+- [Writing Continuous Integration Tests](#-writing-continuous-integration-tests)
+- [Running Continuous Integration Tests Locally](#-running-continuous-integration-tests-locally)
 
-#### Writing Continuous Integration Tests
+#### 📌 Writing Continuous Integration Tests
 To add new integration tests:
 1. Navigate to the integration test directory:
     ```bash
@@ -237,7 +242,7 @@ To add new integration tests:
 > [!NOTE]
 > For more help visit the [Flutter docs](https://docs.flutter.dev/testing/integration-tests)
 
-#### Running Continuous Integration Tests Locally
+#### ✅ Running Continuous Integration Tests Locally
 
    To run Continuous Integration (CI) locally, follow these steps:
 
@@ -274,10 +279,13 @@ To add new integration tests:
 > - Check Firebase logs in the Firebase Console for backend-related issues.
 
 ### ⚙️ CI/CD Diagram
-The following diagram illustrates the MedicRecall CI/CD system, highlighting the key paths for running both testing and deployment.
+The following diagram illustrates the MedicRecall2 CI/CD system, highlighting the key paths for running both testing and deployment.
 <p align="left">
   <img width="621" alt="ci/cd image" src="./CI-CD-diagram/CI-CD-Diagram.png" style="box-shadow: 5px 5px 10px rgba(0,0,0,0.5)">
 </p>
+
+> [!NOTE]
+> The associated files can be found within [github/workflows](../../.github/workflows/).
 
 <p align="right">(<a href="#contents">back to top</a>)</p>
 
