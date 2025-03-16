@@ -827,18 +827,73 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
             ),
             TextButton(
               onPressed: () async {
-                // Generate and save study sessions before navigating to calendar
-                final studySessionManager = StudySessionManager();
-                final events = await studySessionManager.generateStudySessions(user!);
-                await studySessionManager.saveStudySessionsToDB(user!, events);
-                
-                // Navigate to Calendar screen to see the new schedule
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => Calendar(),
-                  ),
+                // Show loading indicator while processing
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      backgroundColor: Colors.white,
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              const Color.fromRGBO(51, 178, 73, 1),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'Generating your schedule...', 
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Color.fromRGBO(21, 58, 103, 1),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 );
+                
+                try {
+                  // Generate and save study sessions before navigating to calendar
+                  final studySessionManager = StudySessionManager();
+                  final events = await studySessionManager.generateStudySessions(user!);
+                  await studySessionManager.saveStudySessionsToDB(user!, events);
+                  
+                  // Close the loading dialog
+                  Navigator.of(context).pop();
+                  // Close the current dialog
+                  Navigator.of(context).pop();
+                  
+                  // Navigate to Calendar screen to see the new schedule
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Calendar(),
+                    ),
+                  );
+                } catch (e) {
+                  // Close the loading dialog
+                  Navigator.of(context).pop();
+                  // Show error dialog
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Error'),
+                        content: Text('Failed to generate schedule: ${e.toString()}'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                }
               },
               style: TextButton.styleFrom(
                 foregroundColor: Colors.white,
