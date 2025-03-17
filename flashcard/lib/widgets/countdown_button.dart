@@ -1133,122 +1133,136 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
   @override
   Widget build(BuildContext context) {
     buildCount++;
-    return Container(
-      margin: const EdgeInsets.only(bottom: 55),
-      width: 210,
-      height: 40.31,
-      decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            spreadRadius: 0,
-            blurRadius: 5,
-            offset: const Offset(0, 3), // changes position of shadow
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        bool isSmallScreen = constraints.maxWidth < 600;
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 55),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          height: 40.31,
+          decoration: BoxDecoration(
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                spreadRadius: 0,
+                blurRadius: 5,
+                offset: const Offset(0, 3),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: FloatingActionButton.extended(
-        label: Text(
-          _examDate == null
-              ? 'Set Your Exam Date'
-              : _calculateDaysUntilExam(_examDate!) < 0
-                  ? 'Exam has already passed'
-                  : _calculateDaysUntilExam(_examDate!) == 0
-                      ? "Exam is Today"
-                      : '${_calculateDaysUntilExam(_examDate!)} Days to Your Exam',
-          style: const TextStyle(
-            color: Color.fromARGB(255, 98, 86, 139),
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        onPressed: () {
-          buttonPressed = true;
-          getTestDay();
-          if (testDayBool) {
-            _showRevisionPlanDialog(context);
-          } else if (!testDayBool) {
-            showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return _buildAlertDialog(
-                    title: 'Exam Date Already Set',
-                    content: Text.rich(
-                      TextSpan(
-                        children: [
+          child: FloatingActionButton.extended(
+            label: Text(
+              _examDate == null
+                  ? isSmallScreen
+                      ? 'Set Exam Date'
+                      : 'Set Your Exam Date'
+                  : _calculateDaysUntilExam(_examDate!) < 0
+                      ? isSmallScreen
+                          ? 'Passed'
+                          : 'Exam has already passed'
+                      : _calculateDaysUntilExam(_examDate!) == 0
+                          ? isSmallScreen
+                              ? "Today"
+                              : "Exam is Today"
+                          : isSmallScreen
+                              ? '${_calculateDaysUntilExam(_examDate!)} Days'
+                              : '${_calculateDaysUntilExam(_examDate!)} Days to Your Exam',
+              style: const TextStyle(
+                color: Color.fromARGB(255, 98, 86, 139),
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            onPressed: () {
+              buttonPressed = true;
+              getTestDay();
+              if (testDayBool) {
+                _showRevisionPlanDialog(context);
+              } else if (!testDayBool) {
+                showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return _buildAlertDialog(
+                        title: 'Exam Date Already Set',
+                        content: Text.rich(
                           TextSpan(
-                            text: 'Your exam date is already set to ',
-                            style: TextStyle(
-                              color: const Color.fromRGBO(21, 58, 103, 1),
-                              fontSize: 17,
-                            ),
+                            children: [
+                              TextSpan(
+                                text: 'Your exam date is already set to ',
+                                style: TextStyle(
+                                  color: const Color.fromRGBO(21, 58, 103, 1),
+                                  fontSize: 17,
+                                ),
+                              ),
+                              TextSpan(
+                                text: '${testDayString}',
+                                style: TextStyle(
+                                  color: const Color.fromRGBO(21, 58, 103, 1),
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              TextSpan(
+                                text: '.\nDo you want to change it?',
+                                style: TextStyle(
+                                  color: const Color.fromRGBO(21, 58, 103, 1),
+                                  fontSize: 17,
+                                ),
+                              ),
+                            ],
                           ),
-                          TextSpan(
-                            text: '${testDayString}',
-                            style: TextStyle(
-                              color: const Color.fromRGBO(21, 58, 103, 1),
-                              fontSize: 17,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          TextSpan(
-                            text: '.\nDo you want to change it?',
-                            style: TextStyle(
-                              color: const Color.fromRGBO(21, 58, 103, 1),
-                              fontSize: 17,
-                            ),
-                          ),
+                        ),
+                        actions: [
+                          TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 24, vertical: 12),
+                                minimumSize: Size(120, 45),
+                              ),
+                              child: Text(
+                                'Cancel',
+                                style: TextStyle(fontSize: 16),
+                              )),
+                          TextButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => Calendar()),
+                                );
+                              },
+                              style: TextButton.styleFrom(
+                                foregroundColor: Colors.white,
+                                backgroundColor: Color.fromRGBO(243, 90, 90, 1),
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 24, vertical: 12),
+                                minimumSize: Size(120, 45),
+                              ),
+                              child: Text(
+                                'Change Exam Date',
+                                style: TextStyle(fontSize: 16),
+                              )),
                         ],
-                      ),
-                    ),
-                    actions: [
-                      TextButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 24, vertical: 12),
-                            minimumSize:
-                                Size(120, 45), // Sets minimum width and height
-                          ),
-                          child: Text(
-                            'Cancel',
-                            style: TextStyle(fontSize: 16),
-                          )),
-                      TextButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => Calendar()),
-                            );
-                          },
-                          style: TextButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            backgroundColor: Color.fromRGBO(243, 90, 90, 1),
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 24, vertical: 12),
-                            minimumSize:
-                                Size(120, 45), // Sets minimum width and height
-                          ),
-                          child: Text(
-                            'Change Exam Date',
-                            style: TextStyle(fontSize: 16),
-                          )),
-                    ],
-                  );
-                });
-          }
-        },
-        clipBehavior: Clip.none,
-        backgroundColor: const Color.fromARGB(255, 235, 230, 239),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        icon: const Icon(
-          Icons.calendar_today,
-          color: Color.fromARGB(255, 98, 86, 139),
-        ),
-      ),
+                      );
+                    });
+              }
+            },
+            clipBehavior: Clip.none,
+            backgroundColor: const Color.fromARGB(255, 235, 230, 239),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            icon: isSmallScreen
+                ? null
+                : const Icon(
+                    Icons.calendar_today,
+                    color: Color.fromARGB(255, 98, 86, 139),
+                  ),
+          ),
+        );
+      },
     );
   }
 }
