@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flashcard_x/screens/fullmock_landing.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
@@ -77,6 +78,7 @@ class CalendarStateO extends State<Calendar> {
   DateTime? testDay = DateTime.now();
   DateTime selectedDay = DateTime(2020, 1, 1);
   DateTime focusedDay = DateTime.now();
+  bool loading = false; 
   final DateTime today =
       DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
   final TextEditingController _eventController = TextEditingController();
@@ -181,8 +183,7 @@ class CalendarStateO extends State<Calendar> {
           title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
     }
 
-    updateEventsToDB(
-        user); // add these events to the database, so they can be pulled later on.
+    updateEventsToDB(user); // add these events to the database, so they can be pulled later on.
   }
 
   //Calls generateEvents and sets the state to rebuild the UI with changes
@@ -191,13 +192,66 @@ class CalendarStateO extends State<Calendar> {
     setState(() {});
   }
 
+  
   Future<void> generateStudySessions(User user) async {
-    var studySessions = await studySessionManager.generateStudySessions(user);
-    setState(() {
-      selectedEvents.addAll(studySessions);
-    });
-    // add to database
-    await studySessionManager.saveStudySessionsToDB(user, studySessions);
+    try {
+      // Get user document to check for selected resources
+      QuerySnapshot userSnapshot = await _userCollectionRef
+          .where("userID", isEqualTo: user.uid)
+          .get();
+
+      if (userSnapshot.docs.isEmpty) {
+        print("No user document found for generating study sessions");
+        return;
+      }
+
+      var userDoc = userSnapshot.docs.last.data() as Map<String, dynamic>;
+
+      // Check if user has selected resources
+      if (!userDoc.containsKey("selectedResources") || 
+          !(userDoc["selectedResources"] is List) ||
+          (userDoc["selectedResources"] as List).isEmpty) {
+        print("No resources selected for study sessions");
+        return;
+      }
+
+      // Generate study sessions using StudySessionManager
+      var studySessions = await studySessionManager.generateStudySessions(user);
+
+      if (studySessions.isNotEmpty) {
+        // Merge new study sessions with existing events
+        setState(() {
+          for (var entry in studySessions.entries) {
+            // Normalize date to avoid time comparison issues
+            DateTime normalizedDate = DateTime(
+              entry.key.year, entry.key.month, entry.key.day);
+
+            if (selectedEvents.containsKey(normalizedDate)) {
+              // Filter out any duplicate events
+              List<Event> newEvents = entry.value.where((newEvent) => 
+                !selectedEvents[normalizedDate]!.any((existingEvent) => 
+                  existingEvent.title == newEvent.title)).toList();
+
+              selectedEvents[normalizedDate]!.addAll(newEvents);
+            } else {
+              selectedEvents[normalizedDate] = entry.value;
+            }
+          }
+        });
+
+        // Save to database
+        await studySessionManager.saveStudySessionsToDB(user, studySessions);
+
+        // Also update events in our Firebase events collection
+        await updateEventsToDB(user);
+
+        print("Successfully generated and saved ${studySessions.length} study session days");
+      } else {
+        print("No study sessions were generated");
+      }
+    } catch (e) {
+      print("Error in generateStudySessions: $e");
+    }
   }
 
   // DATABASE FUNCTIONS:
@@ -219,46 +273,132 @@ class CalendarStateO extends State<Calendar> {
 
   // We pull the testDay if its in the database to be updated in the calendar UI
   Future<void> getTestDay() async {
-    QuerySnapshot querySnapshot =
-        await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+    try {
+      QuerySnapshot querySnapshot =
+          await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
 
-    var userFromDb = querySnapshot.docs.first;
-    Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
-    //if the Test Day field isn't null and is in the database we update the UI with it. Otherwise it is displayed as being not set.
-    if ((data.containsKey("TestDay") || data["TestDay"] != null) &&
-        (testDay != null)) {
-      testDayBool = false;
-      testDay = DateTime.fromMicrosecondsSinceEpoch(userFromDb["TestDay"]
-          .microsecondsSinceEpoch); //firebase is weird. conversion from TimeStamp to DateTime object
-    } else {
-      testDayBool = true;
+      if (querySnapshot.docs.isEmpty) {
+        setState(() {
+          testDayBool = true;
+          testDay = null;
+        });
+        return;
+      }
+
+      var userFromDb = querySnapshot.docs.first;
+      Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
+
+      // Check if TestDay exists in Firestore document
+      if (data.containsKey("TestDay") && data["TestDay"] != null) {
+        setState(() {
+          testDayBool = false;
+          testDay = DateTime.fromMicrosecondsSinceEpoch(data["TestDay"].microsecondsSinceEpoch);
+        });
+      } else {
+        // No test day in database
+        setState(() {
+          testDayBool = true;
+          testDay = null;
+        });
+      }
+    } catch (e) {
+      print("Error retrieving test day: $e");
+      setState(() {
+        testDayBool = true;
+        testDay = null;
+      });
     }
-    setState(() {});
   }
 
   //with UTD we want to update the date on the calendar, and change in firebase
   Future<void> updateTestDay(DateTime date) async {
-    QuerySnapshot u =
-        await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
+    try {
+      // Normalize both dates to avoid time-based mismatches
+      date = DateTime(date.year, date.month, date.day);
+      DateTime? oldTestDay = testDay != null 
+          ? DateTime(testDay!.year, testDay!.month, testDay!.day)
+          : null;
 
-    /*  FIRST update on database */
-    var id = u.docs.last.id; // id being where the user's id details
+      // Create a copy of the keys to avoid concurrent modification
+      final dateKeys = List<DateTime?>.from(selectedEvents.keys);
 
-    var userFromDb = u.docs.first;
-    Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
+      // Remove test day event from all dates to prevent duplicates
+      for (var key in dateKeys) {
+        if (key != null && selectedEvents.containsKey(key)) {
+          final events = selectedEvents[key]!;
+          final newEvents = events.where((event) => event.title != "Test Day").toList();
 
-    _userCollectionRef.doc(id).update({
-      "TestDay": date,
-      // "firstStudyDay": data.containsKey("firstStudyDay") && data["firstStudyDay"] != null
-      //   ? data["firstStudyDay"] // Keep existing firstStudyDay if it exists
-      //   : DateTime.now(), // Otherwise, set it to now
-    });
+          if (newEvents.isEmpty) {
+            selectedEvents.remove(key);
+          } else {
+            selectedEvents[key] = newEvents;
+          }
+        }
+      }
 
-    selectedEvents[testDay]?.remove(Event(
-        title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
-    // update field testday to what is passed as param
-    await getTestDay();
-    setState(() {});
+      // Update Firebase
+      QuerySnapshot u = await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
+      if (u.docs.isNotEmpty) {
+        var id = u.docs.last.id;
+        await _userCollectionRef.doc(id).update({
+          "TestDay": date,
+        });
+      }
+
+      // Update local test day
+      testDay = date;
+
+      // Add test day event to the new date
+      if (!selectedEvents.containsKey(date)) {
+        selectedEvents[date] = [];
+      }
+      selectedEvents[date]?.add(
+        Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94))
+      );
+
+      // Update events in Firebase - create a safe copy of the events map for updating
+      await updateEventsToDB(user);
+
+      // Update the focused day to show the new test day
+      setState(() {
+        focusedDay = date;
+        selectedDay = date;
+      });
+
+      // Rebuild the entire screen to refresh countdown button
+      if (context.mounted) {
+        // Use a microtask to ensure state updates are complete
+        Future.microtask(() {
+          Navigator.of(context).pushReplacement(
+            PageRouteBuilder(
+              pageBuilder: (context, animation1, animation2) => const Calendar(),
+              transitionDuration: Duration.zero,
+              reverseTransitionDuration: Duration.zero,
+            ),
+          );
+        });
+      }
+    } catch (e) {
+      print("Error updating test day: $e");
+      // Show error dialog to the user
+      if (context.mounted) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Error'),
+              content: Text('Failed to update Test Day: ${e.toString()}'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      }
+    }
   }
 
   //updates the UI with the events collected from firebase
@@ -315,12 +455,9 @@ class CalendarStateO extends State<Calendar> {
     ];
     if (title == "Test Day") return const Color.fromARGB(255, 255, 89, 94);
     if (title.contains("Mini Mock")) return StudySessionManager.kMiniMockColor;
-    if (title.contains("Full-sized Mock"))
-      return StudySessionManager.kFullMockColor;
-    if (title.contains("Official MSRA Practice Paper"))
-      return StudySessionManager.kOfficialPaperColor;
-    if (title.contains("Official SJT Practice Paper"))
-      return StudySessionManager.kSJTPaperColor;
+    if (title.contains("Full-sized Mock")) return StudySessionManager.kFullMockColor;
+    if (title.contains("Official MSRA Practice Paper")) return StudySessionManager.kOfficialPaperColor;
+    if (title.contains("Official SJT Practice Paper")) return StudySessionManager.kSJTPaperColor;
 
     for (String flashcard in flashcards) {
       if (title.contains(flashcard)) return StudySessionManager.kFlashcardColor;
@@ -332,8 +469,7 @@ class CalendarStateO extends State<Calendar> {
   //When creating a new revision plan we update the database with the revision topics and dates in the calendar
   Future<void> updateEventsToDB(User user) async {
     for (var entry in selectedEvents.entries) {
-      DateTime normalizedDate =
-          DateTime(entry.key!.year, entry.key!.month, entry.key!.day);
+      DateTime normalizedDate = DateTime(entry.key!.year, entry.key!.month, entry.key!.day);
 
       // Convert events to a list of strings
       List<String> updatedEvents = entry.value.map((e) => e.title).toList();
@@ -368,7 +504,8 @@ class CalendarStateO extends State<Calendar> {
     if (title.contains('mini mock')) {
       return "mini_mock";
     }
-    if (title.contains('full-sized mock') || title.contains('full mock')) {
+    if (title.contains('full-sized mock') || 
+        title.contains('full mock')) {
       return "full_mock";
     }
     if (title.contains('flashcard')) {
@@ -451,8 +588,7 @@ class CalendarStateO extends State<Calendar> {
     String eventType = _getEventType(event.title);
 
     if (eventType == 'official_msra_paper') {
-      final String url =
-          'https://medical.hee.nhs.uk/medical-training-recruitment/medical-specialty-training/publications/multi-specialty-recruitment-assessment-%28msra%29-practice-paper/section-1--professional-dilemma-pd';
+      final String url = 'https://medical.hee.nhs.uk/medical-training-recruitment/medical-specialty-training/publications/multi-specialty-recruitment-assessment-%28msra%29-practice-paper/section-1--professional-dilemma-pd';
       try {
         if (!await launcher.launch(url)) {
           if (context.mounted) {
@@ -475,8 +611,7 @@ class CalendarStateO extends State<Calendar> {
         }
       }
     } else if (eventType == 'official_sjt_paper') {
-      final String url =
-          'https://foundationprogramme.nhs.uk/programmes/f2-stand-alone/f2sa2025-sjt/preparation-materials/';
+      final String url = 'https://foundationprogramme.nhs.uk/programmes/f2-stand-alone/f2sa2025-sjt/preparation-materials/';
       try {
         if (!await launcher.launch(url)) {
           if (context.mounted) {
@@ -511,9 +646,9 @@ class CalendarStateO extends State<Calendar> {
     } else if (eventType == 'test_day') {
       _showTestDayInfoDialog();
     } else if (eventType == 'full_mock') {
-      _showFeatureNotAvailableDialog(
-        'Feature Not Available',
-        'Full-sized mock feature is not available yet.',
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const FullMockLanding()),
       );
     } else {
       _showFeatureNotAvailableDialog(
@@ -566,16 +701,17 @@ class CalendarStateO extends State<Calendar> {
 
   //deletes all events and testDay in UI calendar and firebase
   Future<void> deleteAllEvents() async {
-    selectedEvents
-        .clear(); // sets the selectedEvents list to empty - delete all events being stored locally.
+    setState((){
+      loading = true;
+    });
 
-    QuerySnapshot u =
-        await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+    selectedEvents.clear(); // sets the selectedEvents list to empty - delete all events being stored locally. // sets the selectedEvents list to empty - delete all events being stored locally.
+
+    QuerySnapshot u = await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
     String id = u.docs.last.id;
-    String docID = u.docs.first.id;
-    _eventsCollectionRef =
-        // FirebaseFirestore.instance.collection('users/' + id + "/events");
-        FirebaseFirestore.instance.collection('users/$id/events');
+    // Setup events collection reference
+    _eventsCollectionRef = FirebaseFirestore.instance.collection('users/$id/events');
+    
     var snapshots = await _eventsCollectionRef.get();
     for (var doc in snapshots.docs) {
       await doc.reference.delete();
@@ -585,25 +721,52 @@ class CalendarStateO extends State<Calendar> {
     Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
     CollectionReference users = FirebaseFirestore.instance.collection('users');
 
-    if (data.containsKey("TestDay") || data["TestDay"] != null) {
-      data.remove("TestDay");
-      users.doc(id).update({
-        "TestDay": FieldValue.delete()
-      }); // update field TestDay to be removed from database
-    }
+    Map<String, dynamic> updates = {};
 
+    if (data.containsKey("TestDay") || data["TestDay"] != null) {
+      updates["TestDay"] = FieldValue.delete();
+    }
+   
     selectedEvents[testDay]?.remove(Event(
         title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
     getTestDay();
+    setState((){
+      loading = false;
+    });
 
-    await _eventsCollectionRef.doc(docID).update({"events": []});
-  }
+    // Clear excluded days
+    if (data.containsKey("excludedDays") || data["excludedDays"] != null) {
+      updates["excludedDays"] = [];
+      // Also clear local state
+      setState(() {
+        revisionDays = [];
+      });
+    }
+    
+    // Apply all updates at once
+    if (updates.isNotEmpty) {
+      await users.doc(id).update(updates);
+    }
 
-  @override
-  void initState() {
-    super.initState();
-    selectedEvents = {};
-    initializeUserAndTestDay();
+    // Reset test day locally
+    testDay = null;
+    testDayBool = true;
+    
+    // Clear any lingering events
+    if (u.docs.isNotEmpty) {
+      String docID = u.docs.first.id;
+      try {
+        await _eventsCollectionRef.doc(docID).update({"events": []});
+      } catch (e) {
+        print("Error clearing events: $e");
+      }
+    }
+    
+    // Update UI
+    setState((){
+      loading = false;
+    });
+
   }
 
   Future<void> initializeUserAndTestDay() async {
@@ -660,8 +823,7 @@ class CalendarStateO extends State<Calendar> {
 
   @override
   void dispose() {
-    _eventController
-        .dispose(); // when page is closed, event controller disposes of the unadded events.
+    _eventController.dispose(); // when page is closed, event controller disposes of the unadded events.
     super.dispose();
   }
 
@@ -694,11 +856,67 @@ class CalendarStateO extends State<Calendar> {
           TextButton(
             onPressed: () async {
               if (_eventController.text.isNotEmpty) {
-                await addSingleEvent(selectedDay, _eventController.text, user);
-                updateEventsToDB(user);
-                Navigator.pop(context);
-                _eventController.clear();
-                setState(() {});
+                // Show loading indicator while adding event
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      backgroundColor: Colors.white,
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              const Color.fromRGBO(51, 178, 73, 1),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'Adding event...',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Color.fromRGBO(21, 58, 103, 1),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+
+                try {
+                  await addSingleEvent(selectedDay, _eventController.text, user);
+                  await updateEventsToDB(user);
+                  
+                  // Close the loading dialog
+                  Navigator.of(context).pop();
+                  // Close the add event dialog
+                  Navigator.of(context).pop();
+                  
+                  _eventController.clear();
+                  setState(() {});
+                } catch (e) {
+                  // Close the loading dialog
+                  Navigator.of(context).pop();
+                  
+                  // Show error dialog
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Error'),
+                        content: Text('Failed to add event: ${e.toString()}'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                }
               }
             },
             style: TextButton.styleFrom(
@@ -759,14 +977,14 @@ class CalendarStateO extends State<Calendar> {
                 _buildLabelItem(
                     'Full-Sized Mock', StudySessionManager.kFullMockColor),
                 const SizedBox(height: 20),
-                _buildLabelItem('Official MRSA Paper',
+                _buildLabelItem('Official MRSA Practice Paper',
                     StudySessionManager.kOfficialPaperColor),
                 const SizedBox(height: 20),
                 _buildLabelItem(
                     'Flashcards', StudySessionManager.kFlashcardColor),
                 const SizedBox(height: 20),
                 _buildLabelItem(
-                    'Official SJT Paper', StudySessionManager.kSJTPaperColor),
+                    'Official SJT Practice Paper', StudySessionManager.kSJTPaperColor),
                 const SizedBox(height: 20),
                 _buildLabelItem(
                     'Custom Events', Color.fromARGB(200, 0, 0, 100)),
@@ -829,7 +1047,11 @@ class CalendarStateO extends State<Calendar> {
         ),
         centerTitle: true,
       ),
-      body: Stack(
+      body: loading 
+      ? const Center(
+        child: CircularProgressIndicator(),
+      )
+      :  Stack(
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -844,88 +1066,59 @@ class CalendarStateO extends State<Calendar> {
                         child: Column(
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 16.0, vertical: 8.0),
+                              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                               child: Column(
                                 children: [
                                   // Custom Header with Dropdown
                                   Container(
-                                    padding:
-                                        EdgeInsets.symmetric(vertical: 16.0),
+                                    padding: EdgeInsets.symmetric(vertical: 16.0),
                                     child: LayoutBuilder(
                                       builder: (context, constraints) {
                                         // Check if we're on a small screen
-                                        bool isSmallScreen =
-                                            constraints.maxWidth < 600;
+                                        bool isSmallScreen = constraints.maxWidth < 600;
 
                                         return Column(
                                           children: [
                                             Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                               children: [
                                                 // Month Title
                                                 Flexible(
                                                   child: Text(
-                                                    DateFormat('MMMM y')
-                                                        .format(focusedDay),
+                                                    DateFormat('MMMM y').format(focusedDay),
                                                     style: TextStyle(
-                                                      fontSize: isSmallScreen
-                                                          ? 24
-                                                          : 40,
-                                                      fontWeight:
-                                                          FontWeight.bold,
+                                                      fontSize: isSmallScreen ? 24 : 40,
+                                                      fontWeight: FontWeight.bold,
                                                       color: Colors.white,
                                                     ),
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
+                                                    overflow: TextOverflow.ellipsis,
                                                   ),
                                                 ),
                                                 // Navigation Controls
                                                 if (!isSmallScreen) ...[
                                                   // Desktop view - original layout
                                                   Row(
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
+                                                    mainAxisSize: MainAxisSize.min,
                                                     children: [
                                                       Container(
                                                         child: Material(
-                                                          color:
-                                                              Colors.lightBlue,
+                                                          color:Colors.lightBlue,
                                                           shape: RoundedRectangleBorder(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          30)),
+                                                              borderRadius: BorderRadius.circular(30)
+                                                          ),
                                                           child: InkWell(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        30),
+                                                            borderRadius: BorderRadius.circular(30),
                                                             onTap: () {
                                                               setState(() {
-                                                                focusedDay =
-                                                                    DateTime
-                                                                        .now();
+                                                                focusedDay = DateTime.now();
                                                               });
                                                             },
                                                             child: Padding(
-                                                              padding: EdgeInsets
-                                                                  .symmetric(
-                                                                      horizontal:
-                                                                          30,
-                                                                      vertical:
-                                                                          13),
-                                                              child: Text(
-                                                                'TODAY',
-                                                                style:
-                                                                    TextStyle(
-                                                                  color: Colors
-                                                                      .white,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w600,
+                                                              padding: EdgeInsets.symmetric( horizontal: 30, vertical: 13),
+                                                              child: Text( 'TODAY',
+                                                                style: TextStyle(
+                                                                  color: Colors.white,
+                                                                  fontWeight: FontWeight.w600,
                                                                   fontSize: 16,
                                                                 ),
                                                               ),
@@ -937,39 +1130,25 @@ class CalendarStateO extends State<Calendar> {
                                                       // Chevrons and dropdown
                                                       Container(
                                                         child: Material(
-                                                          color:
-                                                              Colors.lightBlue,
-                                                          shape:
-                                                              RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        30),
+                                                          color:Colors.lightBlue,
+                                                          shape: RoundedRectangleBorder(
+                                                            borderRadius: BorderRadius.circular(30),
                                                           ),
                                                           child: InkWell(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        30),
+                                                            borderRadius: BorderRadius.circular(30),
                                                             onTap: () {
                                                               setState(() {
                                                                 focusedDay = focusedDay.subtract(Duration(
-                                                                    days: format == CalendarFormat.month
-                                                                        ? 30
-                                                                        : format == CalendarFormat.twoWeeks
-                                                                            ? 14
-                                                                            : 7));
+                                                                    days: format == CalendarFormat.month ? 30
+                                                                        : format == CalendarFormat.twoWeeks ? 14
+                                                                        : 7));
                                                               });
                                                             },
                                                             child: Padding(
-                                                              padding:
-                                                                  EdgeInsets
-                                                                      .all(13),
+                                                              padding: EdgeInsets.all(13),
                                                               child: Icon(
-                                                                Icons
-                                                                    .chevron_left,
-                                                                color: Colors
-                                                                    .white,
+                                                                Icons.chevron_left,
+                                                                color: Colors.white,
                                                                 size: 24,
                                                               ),
                                                             ),
@@ -979,39 +1158,24 @@ class CalendarStateO extends State<Calendar> {
                                                       SizedBox(width: 8),
                                                       Container(
                                                         child: Material(
-                                                          color:
-                                                              Colors.lightBlue,
-                                                          shape:
-                                                              RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        30),
+                                                          color:Colors.lightBlue,
+                                                          shape: RoundedRectangleBorder(
+                                                            borderRadius: BorderRadius.circular(30),
                                                           ),
                                                           child: InkWell(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        30),
+                                                            borderRadius: BorderRadius.circular(30),
                                                             onTap: () {
                                                               setState(() {
                                                                 focusedDay = focusedDay.add(Duration(
-                                                                    days: format == CalendarFormat.month
-                                                                        ? 30
-                                                                        : format == CalendarFormat.twoWeeks
-                                                                            ? 14
-                                                                            : 7));
+                                                                    days: format == CalendarFormat.month ? 30
+                                                                        : format == CalendarFormat.twoWeeks ? 14
+                                                                        : 7));
                                                               });
                                                             },
                                                             child: Padding(
-                                                              padding:
-                                                                  EdgeInsets
-                                                                      .all(13),
-                                                              child: Icon(
-                                                                Icons
-                                                                    .chevron_right,
-                                                                color: Colors
-                                                                    .white,
+                                                              padding: EdgeInsets.all(13),
+                                                              child: Icon( Icons.chevron_right,
+                                                                color: Colors.white,
                                                                 size: 24,
                                                               ),
                                                             ),
@@ -1023,97 +1187,58 @@ class CalendarStateO extends State<Calendar> {
                                                       Container(
                                                         child: Material(
                                                           color: Colors.blue,
-                                                          shape:
-                                                              RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        30),
+                                                          shape: RoundedRectangleBorder(
+                                                            borderRadius: BorderRadius.circular(30),
                                                           ),
                                                           child: PopupMenuButton<
                                                               CalendarFormat>(
                                                             color: Colors.blue,
-                                                            initialValue:
-                                                                format,
-                                                            onSelected:
-                                                                (CalendarFormat
-                                                                    result) {
+                                                            initialValue: format,
+                                                            onSelected: (CalendarFormat result) {
                                                               setState(() {
                                                                 format = result;
                                                               });
                                                             },
                                                             itemBuilder:
-                                                                (BuildContext
-                                                                        context) =>
-                                                                    [
-                                                              PopupMenuItem(
-                                                                value:
-                                                                    CalendarFormat
-                                                                        .month,
-                                                                child: Text(
-                                                                    'Month',
+                                                              (BuildContext context) => [
+                                                                PopupMenuItem(
+                                                                  value: CalendarFormat.month,
+                                                                  child: Text('Month',
                                                                     style: TextStyle(
-                                                                        color: Colors
-                                                                            .white)),
+                                                                    color: Colors.white)
+                                                                  ),
+                                                                ),
+                                                              PopupMenuItem(
+                                                                value: CalendarFormat.twoWeeks,
+                                                                child: Text('2 Weeks',
+                                                                  style: TextStyle(
+                                                                    color: Colors.white)),
                                                               ),
                                                               PopupMenuItem(
-                                                                value:
-                                                                    CalendarFormat
-                                                                        .twoWeeks,
-                                                                child: Text(
-                                                                    '2 Weeks',
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .white)),
-                                                              ),
-                                                              PopupMenuItem(
-                                                                value:
-                                                                    CalendarFormat
-                                                                        .week,
-                                                                child: Text(
-                                                                    'Week',
-                                                                    style: TextStyle(
-                                                                        color: Colors
-                                                                            .white)),
+                                                                value:CalendarFormat.week,
+                                                                child: Text('Week',
+                                                                  style: TextStyle(
+                                                                    color: Colors.white)),
                                                               ),
                                                             ],
                                                             child: Padding(
-                                                              padding: EdgeInsets
-                                                                  .symmetric(
-                                                                      horizontal:
-                                                                          20,
-                                                                      vertical:
-                                                                          13),
+                                                              padding: EdgeInsets.symmetric(horizontal:20, vertical:13),
                                                               child: Row(
-                                                                mainAxisSize:
-                                                                    MainAxisSize
-                                                                        .min,
+                                                                mainAxisSize:MainAxisSize.min,
                                                                 children: [
                                                                   Text(
-                                                                    format ==
-                                                                            CalendarFormat
-                                                                                .month
-                                                                        ? 'Month'
-                                                                        : format ==
-                                                                                CalendarFormat.twoWeeks
-                                                                            ? '2 Weeks'
-                                                                            : 'Week',
-                                                                    style:
-                                                                        TextStyle(
-                                                                      color: Colors
-                                                                          .white,
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .w600,
-                                                                      fontSize:
-                                                                          16,
+                                                                    format == CalendarFormat.month ? 'Month'
+                                                                    : format == CalendarFormat.twoWeeks ? '2 Weeks'
+                                                                    : 'Week',
+                                                                    style: TextStyle(
+                                                                      color: Colors.white,
+                                                                      fontWeight: FontWeight.w600,
+                                                                      fontSize: 16,
                                                                     ),
                                                                   ),
                                                                   Icon(
-                                                                    Icons
-                                                                        .arrow_drop_down,
-                                                                    color: Colors
-                                                                        .white,
+                                                                    Icons.arrow_drop_down,
+                                                                    color: Colors.white,
                                                                   ),
                                                                 ],
                                                               ),
@@ -1381,6 +1506,12 @@ class CalendarStateO extends State<Calendar> {
                                         fontSize: 16,
                                         color: Colors.grey[500],
                                       ),
+                                      disabledTextStyle: TextStyle(
+                                        color: Colors.grey[600],
+                                        decoration: TextDecoration.lineThrough,
+                                        decorationColor: Colors.grey[400],
+                                        decorationThickness: 2,
+                                      ),
                                       // Custom marker settings
                                       markersMaxCount:
                                           6, // Show up to 5 markers per day
@@ -1389,6 +1520,20 @@ class CalendarStateO extends State<Calendar> {
                                           vertical: 12.0, horizontal: 8.0),
                                       cellMargin: EdgeInsets.all(2.0),
                                     ),
+                                    enabledDayPredicate: (day) {
+                                      // Always enable the test day, regardless of exclusion settings
+                                      if (testDay != null) {
+                                        DateTime normalizedTestDay = DateTime(testDay!.year, testDay!.month, testDay!.day);
+                                        DateTime normalizedDay = DateTime(day.year, day.month, day.day);
+                                        if (isSameDay(normalizedTestDay, normalizedDay)) {
+                                          return true;  // Always enable the test day
+                                        }
+                                      }
+
+                                      // For other days, apply normal exclusion rules
+                                      final dayName = _getDayName(day.weekday);
+                                      return !revisionDays.contains(dayName);
+                                    },
                                     headerStyle: HeaderStyle(
                                       formatButtonVisible: false,
                                       headerPadding: EdgeInsets.zero,
@@ -1398,34 +1543,26 @@ class CalendarStateO extends State<Calendar> {
                                     ),
                                     calendarBuilders: CalendarBuilders(
                                       headerTitleBuilder: (context, day) {
-                                        return SizedBox
-                                            .shrink(); // Return empty widget
+                                        return SizedBox.shrink(); // Return empty widget
                                       },
                                       markerBuilder: (context, date, events) {
                                         if (events.isEmpty) return null;
                                         return Positioned(
                                           bottom: 2,
                                           child: Container(
-                                            width:
-                                                60, // Increased container width significantly
+                                            width: 60, // Increased container width significantly
                                             child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
+                                              mainAxisAlignment: MainAxisAlignment.center,
                                               mainAxisSize: MainAxisSize.min,
                                               children:
                                                   events.take(3).map((event) {
                                                 return Container(
-                                                  margin: const EdgeInsets
-                                                      .symmetric(horizontal: 1),
-                                                  width:
-                                                      30 - (events.length * 4),
+                                                  margin: const EdgeInsets.symmetric(horizontal: 1),
+                                                  width: 30 - (events.length * 4),
                                                   height: 8,
                                                   decoration: BoxDecoration(
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            10),
-                                                    color:
-                                                        (event as Event).color,
+                                                    borderRadius: BorderRadius.circular(10),
+                                                    color:(event as Event).color,
                                                   ),
                                                 );
                                               }).toList(),
@@ -1443,8 +1580,7 @@ class CalendarStateO extends State<Calendar> {
                               //This block of code will need to be re run if we are to have live updates,
                               //This is necessary for both the add and edit event functions
                               (Event event) => Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16.0, vertical: 8.0),
+                                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                                 child: ListTile(
                                   title: Text(
                                     event.title,
@@ -1891,12 +2027,74 @@ class CalendarStateO extends State<Calendar> {
             child: const Text("Cancel", style: TextStyle(fontSize: 16)),
           ),
           TextButton(
-            onPressed: () {
-              if (_editEventController.text.isNotEmpty &&
-                  _selectedDate != null) {
-                updateOneEvent(
-                    event, _editEventController.text, _selectedDate!);
-                Navigator.pop(context);
+            onPressed: () async {
+              if (_editEventController.text.isNotEmpty && _selectedDate != null) {
+                // Show loading indicator while saving
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      backgroundColor: Colors.white,
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              const Color.fromRGBO(51, 178, 73, 1),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'Updating event...',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Color.fromRGBO(21, 58, 103, 1),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+
+                try {
+                  if (event.title == "Test Day") {
+                    // For Test Day events, use updateTestDay
+                    await updateTestDay(_selectedDate!);
+                  } else {
+                    // For other events, use updateOneEvent
+                    await updateOneEvent(event, _editEventController.text, _selectedDate!);
+                  }
+                  
+                  // Close the loading dialog
+                  Navigator.of(context).pop();
+                  // Close the event edit dialog
+                  Navigator.of(context).pop();
+                  
+                  // Update the state
+                  setState(() {});
+                } catch (e) {
+                  // Close the loading dialog
+                  Navigator.of(context).pop();
+                  
+                  // Show error dialog
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: const Text('Error'),
+                        content: Text('Failed to update event: ${e.toString()}'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                }
               }
             },
             style: TextButton.styleFrom(
@@ -1912,6 +2110,28 @@ class CalendarStateO extends State<Calendar> {
     );
   }
 
+  // Helper function to get day name
+  String _getDayName(int weekday) {
+    switch (weekday) {
+      case 1:
+        return "Monday";
+      case 2:
+        return "Tuesday";
+      case 3:
+        return "Wednesday";
+      case 4:
+        return "Thursday";
+      case 5:
+        return "Friday";
+      case 6:
+        return "Saturday";
+      case 7:
+        return "Sunday";
+      default:
+        return "";
+    }
+  }
+  
   Widget _buildFormatChip(CalendarFormat chipFormat, String label) {
     return FilterChip(
       selected: format == chipFormat,

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flashcard_x/screens/fullmock_review.dart';
 import 'package:flashcard_x/screens/minimock_scoring.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
@@ -128,7 +129,7 @@ class MiniMockExamState extends State<MiniMockExam> {
     DocumentReference userDocRef = FirebaseFirestore.instance.collection(
         'users').doc(id);
     DocumentReference examAnswersDocRef = userDocRef.collection(
-        'Exam answers').doc(widget.answerDirectory);
+        'examAnswers').doc(widget.answerDirectory);
 
     // Add user's answers to user answer document
     await examAnswersDocRef.set({
@@ -218,7 +219,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                     borderRadius: BorderRadius.circular(16),
                     color:  (remainingSeconds <= 600)
                     ? Colors.red.shade400
-                    : const Color.fromARGB(255, 235, 230, 239),
+                    : const Color.fromARGB(255, 222, 221, 222),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.2),
@@ -233,7 +234,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                         style: TextStyle(
                           color: (remainingSeconds <= 600)
                               ? Colors.white
-                              : Color.fromARGB(255, 98, 86, 139),
+                              : Color.fromARGB(255, 0, 0, 0),
                           fontSize: 18.5,
                           fontWeight: FontWeight.w500,
                         ),
@@ -247,9 +248,21 @@ class MiniMockExamState extends State<MiniMockExam> {
                 double maxScreenWidth = constraints.maxWidth * 0.5;
                 double maxPreferredWidth = 960; // 1920/2
 
+
                 return
                 Center(
                   child: Container(
+                    decoration: BoxDecoration(
+                        boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              spreadRadius: 5,
+                              blurRadius: 5,
+                              offset: const Offset(0, 3), // changes position of shadow
+                          ),
+                        ],
+                      color:   Color.fromARGB(255, 255, 255, 255),
+                    ),
                   constraints: BoxConstraints(
                     maxWidth: maxScreenWidth > maxPreferredWidth ? maxScreenWidth : maxPreferredWidth,
                   ),
@@ -259,17 +272,23 @@ class MiniMockExamState extends State<MiniMockExam> {
                     children: [
                       Center(
                         child: SizedBox(
-                    child: (
+                          //
+                          child: Row(
+                          children: [
+                            Align(alignment: Alignment.centerLeft,
 
-                    Row(
-                    children: [
-                      Container(
+
+                    // child: (
+
+                    // Wrap(
+                    // children: [
+                      child: Container(
                         margin: const EdgeInsets.only(bottom: 10),
                         width: 160,
                         height: 40.31,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
-                          color: const Color.fromARGB(255, 235, 230, 239),
+                          color: const Color.fromARGB(255, 222, 221, 222),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.2),
@@ -284,7 +303,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                             ? 'Flagged'
                             : 'Flag for review',
                               style: const TextStyle(
-                                color: Color.fromARGB(255, 98, 86, 139),
+                                color: Color.fromARGB(255, 0, 0, 0),
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -298,9 +317,10 @@ class MiniMockExamState extends State<MiniMockExam> {
                               flaggedQuestions[currentQuestion]
                                   ? Icons.flag
                                   : Icons.flag_outlined,
-                              color: Color.fromARGB(255, 98, 86, 139),
-                            )
+                              color: Color.fromARGB(255, 0, 0, 0),
+                            ),
                         ),
+                      ),
                       ),
                       Spacer(),
                       Container(
@@ -309,7 +329,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                           height: 40.31,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(16),
-                            color: const Color.fromARGB(255, 235, 230, 239),
+                            color: const Color.fromARGB(255, 222, 221, 222),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withOpacity(0.2),
@@ -322,7 +342,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                           child: Center(
                             child: Text('Question ${currentQuestion+1}/${questions.length}',
                               style: const TextStyle(
-                                color: Color.fromARGB(255, 98, 86, 139),
+                                color: Color.fromARGB(255, 0, 0, 0),
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -330,56 +350,60 @@ class MiniMockExamState extends State<MiniMockExam> {
                           )
                       ),
                     ])
-                ))),
+                )),
                 // Display the current question text
                   Text(
                   questions[currentQuestion]['question'],
-                  style: TextStyle(fontSize: 20),
+                  style: TextStyle(fontSize: 20, color: Colors.black),
+
                 ),
                 const SizedBox(height: 20),
 
                 // If the question is a ranking question, display a reorderable list of options
                 if (questions[currentQuestion]['type'] == "ranking") ...[
-                  Expanded(
-                    child: ReorderableListView(
-                      buildDefaultDragHandles: false,
-                      proxyDecorator:  (Widget child, int index, Animation<double> animation) {
-                        return Material(
-                          color: Colors.transparent,
-                          child: child,
-                        );
-                      },
-                      onReorder: (oldIndex, newIndex) {
-                        setState(() {
-                          if(newIndex > oldIndex) newIndex --; // Adjust the list based on movement of item
-                          // Update position of option in answer list
-                          final ranking = rankingAnswers[currentQuestion].removeAt(oldIndex);
-                          rankingAnswers[currentQuestion].insert(newIndex, ranking);
-                          // Update position of option text in question list
-                          final option = questions[currentQuestion]['options'].removeAt(oldIndex);
-                          questions[currentQuestion]['options'].insert(newIndex, option);
-                        });
-                      },
-                      // Create children for the reorderable list using questions
-                      children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
-                        int optionIndex = entry.key;
-                        String option = entry.value;
-                        String optionLetter = rankingAnswers[currentQuestion][optionIndex];
-                        return ReorderableDragStartListener(
-                            key: ValueKey(option),
-                            index: optionIndex,
-                            child: Card(
-                              elevation: 3,
-                              color: Color.fromARGB(255, 235, 230, 239),
-                                child: ListTile(
-                                  title: Text('${optionIndex+1}:   $optionLetter. $option', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 20)),
-                                  trailing: Icon(Icons.drag_handle , color: Color.fromARGB(255, 98, 86, 139), size: 30),
-                                )
-                            )
-                        );
-                      }).toList(),
-                    ),
-                  )
+                        // Reorderable Options Column
+                        Expanded(
+                          child: ReorderableListView(
+                            buildDefaultDragHandles: false,
+                            proxyDecorator: (Widget child, int index, Animation<double> animation) {
+                              return Material(
+                                color: Colors.transparent,
+                                child: child,
+                              );
+                            },
+                            onReorder: (oldIndex, newIndex) {
+                              setState(() {
+
+                                if (newIndex > oldIndex) newIndex--; // Adjust the list based on movement of item
+                                // Update position of option in answer list
+                                final ranking = rankingAnswers[currentQuestion].removeAt(oldIndex);
+                                rankingAnswers[currentQuestion].insert(newIndex, ranking);
+                                // Update position of option text in question list
+                                final option = questions[currentQuestion]['options'].removeAt(oldIndex);
+                                    questions[currentQuestion]['options'].insert(newIndex, option);
+                              });
+                            },
+                            children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
+                              int optionIndex = entry.key;
+                              String option = entry.value;
+                              String optionLetter = rankingAnswers[currentQuestion][optionIndex];
+                              return ReorderableDragStartListener(
+                                key: ValueKey(optionLetter),
+                                index: optionIndex,
+                                child: Card(
+                                  elevation: 3,
+                                  color:Color.fromARGB(255, 222, 221, 222),
+                                  child: ListTile(
+                                    title: Text('${optionIndex+1}:  $optionLetter. $option',
+                                      style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
+                                    ),
+                                    trailing: Icon(Icons.drag_handle, color: Color.fromARGB(255, 0, 0, 0), size: 30),
+                                  )
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        )
                 ]
                 // If the question is a multiple choice question, display checkboxes
                 else if(questions[currentQuestion]['type'] == "multiple choice") ...[
@@ -393,16 +417,18 @@ class MiniMockExamState extends State<MiniMockExam> {
                                 int questionIndex = currentQuestion - rankingAnswers.length;
                                 String optionLetter = options[optionIndex];
                                 return CheckboxListTile(
+                                  key: ValueKey(optionLetter),
                                   fillColor: WidgetStateProperty.resolveWith<Color?>(
-                                        (states) {
+                                    (states) {
                                       if (states.contains(WidgetState.selected)) {
-                                        return Theme.of(context).textTheme.bodyMedium?.color; // Color when the checkbox is checked
+                                        return Colors.black; // Black box when selected
                                       }
-                                      return Colors.transparent; // Transparent when unchecked
+                                      return Colors.transparent; // Default color when unselected
                                     },
                                   ),
-                                  checkColor: Theme.of(context).scaffoldBackgroundColor,
-                                  title: Text('$optionLetter. $option', style: TextStyle(fontSize: 20, color: Theme.of(context).textTheme.bodyMedium?.color)),
+                                  checkColor: Colors.white, // White tick inside black box
+                                  side: const BorderSide(color: Colors.black, width: 1),
+                                  title: Text('$optionLetter. $option', style: TextStyle(fontSize: 20, color: Colors.black)),
                                   value: multiChoiceAnswers[questionIndex][optionIndex],
                                   onChanged: (value) {
                                     int checkedCount = multiChoiceAnswers[questionIndex].where((element) => element).length;
@@ -439,7 +465,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                         height: 45,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
-                          color: const Color.fromARGB(255, 235, 230, 239),
+                          color: const Color.fromARGB(255, 222, 221, 222),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.2),
@@ -450,29 +476,53 @@ class MiniMockExamState extends State<MiniMockExam> {
                           ],
                         ),
                         child: TextButton.icon(onPressed: () async{
-                          int? newIndex = await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => MiniMockReview(
-                                miniMockWidget: this,
-                                rankingLength: rankingAnswers.length,
-                                multiChoiceLength: multiChoiceAnswers.length,
-                                flaggedQuestions: flaggedQuestions,
-                                displayTime: _displayTime,
-                                remainingSeconds: remainingSeconds,
+                          if (widget.questionDirectory.contains('mini-mock')) {
+                            int? newIndex = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => MiniMockReview(
+                                  miniMockWidget: this,
+                                  rankingLength: rankingAnswers.length,
+                                  multiChoiceLength: multiChoiceAnswers.length,
+                                  flaggedQuestions: flaggedQuestions,
+                                  displayTime: _displayTime,
+                                  remainingSeconds: remainingSeconds,
+                                ),
                               ),
-                            ),
-                          );
-                          // statement bellow allows for faster page update
-                          // Must check for null in case user finishes exam and no value is returned
-                          if (newIndex != null && newIndex != currentQuestion){
-                            setState(() {
-                              currentQuestion = newIndex;
-                            });
-                          }
+                            );
+                            // statement bellow allows for faster page update
+                            // Must check for null in case user finishes exam and no value is returned
+                            if (newIndex != null && newIndex != currentQuestion){
+                              setState(() {
+                                currentQuestion = newIndex;
+                              });
+                            }
+                          } else if (widget.questionDirectory.contains('full-mock')) {
+                            // On pressed load new page and wait for a returned value
+                            int? newIndex = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => FullMockReview(
+                                  fullMockWidget: this,
+                                  rankingLength: rankingAnswers.length,
+                                  multiChoiceLength: multiChoiceAnswers.length,
+                                  flaggedQuestions: flaggedQuestions,
+                                  displayTime: _displayTime,
+                                  remainingSeconds: remainingSeconds,
+                                ),
+                              ),
+                            );
+                            // statement bellow allows for faster page update
+                            // Must check for null in case user finishes exam and no value is returned
+                            if (newIndex != null && newIndex != currentQuestion){
+                              setState(() {
+                                currentQuestion = newIndex;
+                              });
+                            }
+                          };
                         },
-                        label: Text('Review Page', style: TextStyle(color:  Color.fromARGB(255, 98, 86, 139), fontSize: 16)),
-                        icon: Icon(Icons.search, color:  Color.fromARGB(255, 98, 86, 139),),
+                        label: Text('Review Page', style: TextStyle(color:  Color.fromARGB(255, 0, 0, 0), fontSize: 16)),
+                        icon: Icon(Icons.search, color:  Color.fromARGB(255, 0, 0, 0),),
                     )),
                     const Spacer(),
                     if (currentQuestion > 0) //Prevents button being shown if no previous questions available
@@ -482,10 +532,10 @@ class MiniMockExamState extends State<MiniMockExam> {
                             currentQuestion--; // Move to previous question
                           });
                         },
-                        icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 98, 86, 139)),
-                        label: Text('Previous', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 16)),
+                        icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0)),
+                        label: Text('Previous', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 16)),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Color.fromARGB(255, 235, 230, 239),
+                          backgroundColor:Color.fromARGB(255, 222, 221, 222),
                         ),
                       ),
                     const SizedBox(width: 16),
@@ -496,42 +546,64 @@ class MiniMockExamState extends State<MiniMockExam> {
                             currentQuestion++; // Move to next question
                           });
                         },
-                        icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139)),
-                        label: Text('Next', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 16)),
+                        icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 0, 0, 0)),
+                        label: Text('Next', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 16)),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Color.fromARGB(255, 235, 230, 239),
+                          backgroundColor: Color.fromARGB(255, 217, 216, 217),
                         ),
                       ),
                     if (currentQuestion == questions.length - 1)
                       ElevatedButton.icon(
                         onPressed: () async {
-                          // On pressed load new page and wait for a returned value
-                          int? newIndex = await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => MiniMockReview(
-                                miniMockWidget: this,
-                                rankingLength: rankingAnswers.length,
-                                multiChoiceLength: multiChoiceAnswers.length,
-                                flaggedQuestions: flaggedQuestions,
-                                displayTime: _displayTime,
-                                remainingSeconds: remainingSeconds,
+                          if (widget.questionDirectory.contains('mini-mock')) {
+                            int? newIndex = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => MiniMockReview(
+                                  miniMockWidget: this,
+                                  rankingLength: rankingAnswers.length,
+                                  multiChoiceLength: multiChoiceAnswers.length,
+                                  flaggedQuestions: flaggedQuestions,
+                                  displayTime: _displayTime,
+                                  remainingSeconds: remainingSeconds,
+                                ),
                               ),
-                            ),
-                          );
-                          // statement bellow allows for faster page update
-                          // Must check for null in case user finishes exam and no value is returned
-                          if (newIndex != null && newIndex != currentQuestion){
-                            setState(() {
-                              currentQuestion = newIndex;
-                            });
-                          }
-
+                            );
+                            // statement bellow allows for faster page update
+                            // Must check for null in case user finishes exam and no value is returned
+                            if (newIndex != null && newIndex != currentQuestion){
+                              setState(() {
+                                currentQuestion = newIndex;
+                              });
+                            }
+                          } else if (widget.questionDirectory.contains('full-mock')) {
+                            // On pressed load new page and wait for a returned value
+                            int? newIndex = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => FullMockReview(
+                                  fullMockWidget: this,
+                                  rankingLength: rankingAnswers.length,
+                                  multiChoiceLength: multiChoiceAnswers.length,
+                                  flaggedQuestions: flaggedQuestions,
+                                  displayTime: _displayTime,
+                                  remainingSeconds: remainingSeconds,
+                                ),
+                              ),
+                            );
+                            // statement bellow allows for faster page update
+                            // Must check for null in case user finishes exam and no value is returned
+                            if (newIndex != null && newIndex != currentQuestion){
+                              setState(() {
+                                currentQuestion = newIndex;
+                              });
+                            }
+                          };
                         },
-                        icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139)),
-                        label: Text('Review', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 16)),
+                        icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 0, 0, 0)),
+                        label: Text('Review', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 16)),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Color.fromARGB(255, 235, 230, 239),
+                          backgroundColor:Color.fromARGB(255, 222, 221, 222),
                         ),
                       ),
                     ],
