@@ -78,6 +78,7 @@ class CalendarStateO extends State<Calendar> {
   DateTime? testDay = DateTime.now();
   DateTime selectedDay = DateTime(2020, 1, 1);
   DateTime focusedDay = DateTime.now();
+  bool loading = false; 
   final DateTime today =
       DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
   final TextEditingController _eventController = TextEditingController();
@@ -703,8 +704,12 @@ class CalendarStateO extends State<Calendar> {
 
   //deletes all events and testDay in UI calendar and firebase
   Future<void> deleteAllEvents() async {
+    setState((){
+      loading = true;
+    });
+
     // Clear all events from local state
-    selectedEvents.clear();
+    selectedEvents.clear(); // sets the selectedEvents list to empty - delete all events being stored locally.
 
     // Get user document
     QuerySnapshot u =
@@ -716,11 +721,16 @@ class CalendarStateO extends State<Calendar> {
     }
     
     String id = u.docs.last.id;
-    
     // Setup events collection reference
-    _eventsCollectionRef = FirebaseFirestore.instance.collection('users/$id/events');
+    // String docID = u.docs.first.id;
+    _eventsCollectionRef =
+        // FirebaseFirestore.instance.collection('users/' + id + "/events");
+        FirebaseFirestore.instance.collection('users/$id/events');
     
-    // Delete all event documents
+   
+    
+
+
     var snapshots = await _eventsCollectionRef.get();
     for (var doc in snapshots.docs) {
       await doc.reference.delete();
@@ -738,7 +748,15 @@ class CalendarStateO extends State<Calendar> {
     if (data.containsKey("TestDay") || data["TestDay"] != null) {
       updates["TestDay"] = FieldValue.delete();
     }
-    
+   
+
+    selectedEvents[testDay]?.remove(Event(
+        title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
+    getTestDay();
+    setState((){
+      loading = false;
+    });
+
     // Clear excluded days
     if (data.containsKey("excludedDays") || data["excludedDays"] != null) {
       updates["excludedDays"] = [];
@@ -768,7 +786,10 @@ class CalendarStateO extends State<Calendar> {
     }
     
     // Update UI
-    setState(() {});
+    setState((){
+      loading = false;
+    });
+
   }
 
   Future<void> initializeUserAndTestDay() async {
@@ -1019,6 +1040,7 @@ class CalendarStateO extends State<Calendar> {
 
   @override
   Widget build(BuildContext context) {
+   
     return Scaffold(
       drawer: const DrawMain(),
       appBar: AppBar(
@@ -1055,7 +1077,11 @@ class CalendarStateO extends State<Calendar> {
         ),
         centerTitle: true,
       ),
-      body: Row(
+      body: loading 
+      ? const Center(
+        child: CircularProgressIndicator(),
+      )
+      : Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Labels section (Left side of the page)
@@ -1391,10 +1417,11 @@ class CalendarStateO extends State<Calendar> {
                       // Delete All Events Button
                       ElevatedButton.icon(
                         key: const Key('deleteButton'),
-                        onPressed: () {
+                        onPressed: () async {
                           testDay = null;
                           testDayBool = true;
-                          deleteAllEvents();
+                          await deleteAllEvents();
+                          //Should add a pop up that tells the user to wait while their events are being deleted
                           setState(() {});
 
                           // Show confirmation popup
