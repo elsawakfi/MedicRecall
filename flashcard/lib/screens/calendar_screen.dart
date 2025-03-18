@@ -744,7 +744,7 @@ class CalendarStateO extends State<Calendar> {
       if (data.containsKey("TestDay") || data["TestDay"] != null) {
         updates["TestDay"] = FieldValue.delete();
       }
-      
+
       selectedEvents[testDay]?.remove(Event(
         title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
         getTestDay();
@@ -1998,7 +1998,7 @@ class CalendarStateO extends State<Calendar> {
                     onPressed: () => _showLabelsDialog(context),
                     backgroundColor: const Color.fromARGB(255, 235, 230, 239),
                     child: const Icon(
-                      Icons.key,
+                      Icons.event_rounded,
                       size: 30,
                       color: Color.fromARGB(255, 98, 86, 139),
                     ),

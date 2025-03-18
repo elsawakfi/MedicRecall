@@ -1141,16 +1141,6 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
           margin: const EdgeInsets.only(bottom: 55),
           padding: const EdgeInsets.symmetric(horizontal: 16),
           height: 40.31,
-          decoration: BoxDecoration(
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                spreadRadius: 0,
-                blurRadius: 5,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
           child: FloatingActionButton.extended(
             label: Text(
               _examDate == null
