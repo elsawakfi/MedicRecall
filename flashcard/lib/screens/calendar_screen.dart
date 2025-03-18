@@ -748,9 +748,7 @@ class CalendarStateO extends State<Calendar> {
       selectedEvents[testDay]?.remove(Event(
         title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
         getTestDay();
-        setState((){
-        loading = false;
-      });
+       
 
       if (data.containsKey("excludedDays") || data["excludedDays"] != null) {
         updates["excludedDays"] = [];
@@ -769,12 +767,83 @@ class CalendarStateO extends State<Calendar> {
         revisionDays = [];
         loading = false;
       });
+       // Show confirmation popup
+      showDialog(
+                                          context: context,
+                                          builder: (context) => AlertDialog(
+                                            backgroundColor:
+                                                const Color(0xFFE6EDF2),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(0),
+                                            ),
+                                            title: const Text(
+                                              "All Events Deleted",
+                                              style: TextStyle(
+                                                color: Color.fromRGBO(
+                                                    21, 58, 103, 1),
+                                                fontSize: 21,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                            content: const Text(
+                                              "Go to the homepage to schedule your study schedule.",
+                                              style: TextStyle(
+                                                color: Color.fromRGBO(
+                                                    21, 58, 103, 1),
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w400,
+                                              ),
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () =>
+                                                    Navigator.pop(context),
+                                                style: TextButton.styleFrom(
+                                                  padding: EdgeInsets.symmetric(
+                                                      horizontal: 24,
+                                                      vertical: 12),
+                                                  minimumSize: Size(120, 45),
+                                                ),
+                                                child: Text(
+                                                  'OK',
+                                                  style:
+                                                      TextStyle(fontSize: 16),
+                                                ),
+                                              ),
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            Landing()),
+                                                  );
+                                                },
+                                                style: TextButton.styleFrom(
+                                                  foregroundColor: Colors.white,
+                                                  backgroundColor: Colors.blue,
+                                                  padding: EdgeInsets.symmetric(
+                                                      horizontal: 24,
+                                                      vertical: 12),
+                                                  minimumSize: Size(120, 45),
+                                                ),
+                                                child: Text(
+                                                  'Go to Homepage',
+                                                  style:
+                                                      TextStyle(fontSize: 16),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        );
     } catch (e) {
       print("Error clearing events: $e");
       setState(() {
         loading = false;
       });
     }
+    
   }
 
   Future<void> initializeUserAndTestDay() async {
@@ -1878,82 +1947,14 @@ class CalendarStateO extends State<Calendar> {
                                     // Delete All Events Button
                                     ElevatedButton.icon(
                                       key: const Key('deleteButton'),
-                                      onPressed: () {
+                                      onPressed: () async {
                                         testDay = null;
                                         testDayBool = true;
-                                        deleteAllEvents();
-                                        setState(() {});
+                                        await deleteAllEvents();
+                                        
 
-                                        // Show confirmation popup
-                                        showDialog(
-                                          context: context,
-                                          builder: (context) => AlertDialog(
-                                            backgroundColor:
-                                                const Color(0xFFE6EDF2),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(0),
-                                            ),
-                                            title: const Text(
-                                              "All Events Deleted",
-                                              style: TextStyle(
-                                                color: Color.fromRGBO(
-                                                    21, 58, 103, 1),
-                                                fontSize: 21,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                            content: const Text(
-                                              "Go to the homepage to schedule your study schedule.",
-                                              style: TextStyle(
-                                                color: Color.fromRGBO(
-                                                    21, 58, 103, 1),
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w400,
-                                              ),
-                                            ),
-                                            actions: [
-                                              TextButton(
-                                                onPressed: () =>
-                                                    Navigator.pop(context),
-                                                style: TextButton.styleFrom(
-                                                  padding: EdgeInsets.symmetric(
-                                                      horizontal: 24,
-                                                      vertical: 12),
-                                                  minimumSize: Size(120, 45),
-                                                ),
-                                                child: Text(
-                                                  'OK',
-                                                  style:
-                                                      TextStyle(fontSize: 16),
-                                                ),
-                                              ),
-                                              TextButton(
-                                                onPressed: () {
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            Landing()),
-                                                  );
-                                                },
-                                                style: TextButton.styleFrom(
-                                                  foregroundColor: Colors.white,
-                                                  backgroundColor: Colors.blue,
-                                                  padding: EdgeInsets.symmetric(
-                                                      horizontal: 24,
-                                                      vertical: 12),
-                                                  minimumSize: Size(120, 45),
-                                                ),
-                                                child: Text(
-                                                  'Go to Homepage',
-                                                  style:
-                                                      TextStyle(fontSize: 16),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        );
+                                       
+                                        
                                       },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.redAccent,
