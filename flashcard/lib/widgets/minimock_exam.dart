@@ -171,6 +171,7 @@ class MiniMockExamState extends State<MiniMockExam> {
 
   @override
   Widget build(BuildContext context) {
+    double deviceHeight = MediaQuery.of(context).size.height;
     return PopScope(
         canPop: true,
         child: Scaffold(
@@ -271,9 +272,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                 double maxScreenWidth = constraints.maxWidth * 0.5;
                 double maxPreferredWidth = 960; // 1920/2
 
-
-                return
-                Center(
+            return Align(
                   child: Container(
                     decoration: BoxDecoration(
                         boxShadow: [
@@ -398,6 +397,10 @@ class MiniMockExamState extends State<MiniMockExam> {
                     ])
                 )),
                 // Display the current question text
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                        children: [
                   Text(
                   questions[currentQuestion]['question'],
                   style: TextStyle(fontSize: 20, color: Colors.black),
@@ -408,8 +411,10 @@ class MiniMockExamState extends State<MiniMockExam> {
                 // If the question is a ranking question, display a reorderable list of options
                 if (questions[currentQuestion]['type'] == "ranking") ...[
                         // Reorderable Options Column
-                        Expanded(
-                          child: ReorderableListView(
+                  SizedBox(
+                      height: deviceHeight,
+                      child: ReorderableListView(
+                            physics: NeverScrollableScrollPhysics(),
                             buildDefaultDragHandles: false,
                             proxyDecorator: (Widget child, int index, Animation<double> animation) {
                               return Material(
@@ -448,50 +453,47 @@ class MiniMockExamState extends State<MiniMockExam> {
                                 ),
                               );
                             }).toList(),
-                          ),
-                        )
+                          )),
                 ]
                 // If the question is a multiple choice question, display checkboxes
                 else if(questions[currentQuestion]['type'] == "multiple choice") ...[
                   //Line below takes the result of the map() and spreads its widgets into the children of Column
-                  Expanded(
-                      child: SingleChildScrollView(
-                          child: Column(
-                              children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
-                                int optionIndex = entry.key;
-                                String option = entry.value;
-                                int questionIndex = currentQuestion - rankingAnswers.length;
-                                String optionLetter = options[optionIndex];
-                                return CheckboxListTile(
-                                  key: ValueKey(optionLetter),
-                                  fillColor: WidgetStateProperty.resolveWith<Color?>(
-                                    (states) {
-                                      if (states.contains(WidgetState.selected)) {
-                                        return Colors.black; // Black box when selected
-                                      }
-                                      return Colors.transparent; // Default color when unselected
-                                    },
-                                  ),
-                                  checkColor: Colors.white, // White tick inside black box
-                                  side: const BorderSide(color: Colors.black, width: 1),
-                                  title: Text('$optionLetter. $option', style: TextStyle(fontSize: 20, color: Colors.black)),
-                                  value: multiChoiceAnswers[questionIndex][optionIndex],
-                                  onChanged: (value) {
-                                    int checkedCount = multiChoiceAnswers[questionIndex].where((element) => element).length;
-                                    if (checkedCount < 3 || value == false) {
-                                      setState(() {
-                                        multiChoiceAnswers[questionIndex][optionIndex] = value!;
-                                      });
-                                    }
-                                  },
-                                  enableFeedback: false,
-                                  controlAffinity: ListTileControlAffinity.leading,
-                                );
-                              }).toList()
-                          )
-                      )
-                  )
+                  Column(
+                        children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
+                          int optionIndex = entry.key;
+                          String option = entry.value;
+                          int questionIndex = currentQuestion - rankingAnswers.length;
+                          String optionLetter = options[optionIndex];
+                          return CheckboxListTile(
+                            key: ValueKey(optionLetter),
+                            fillColor: WidgetStateProperty.resolveWith<Color?>(
+                              (states) {
+                                if (states.contains(WidgetState.selected)) {
+                                  return Colors.black; // Black box when selected
+                                }
+                                return Colors.transparent; // Default color when unselected
+                              },
+                            ),
+                            checkColor: Colors.white, // White tick inside black box
+                            side: const BorderSide(color: Colors.black, width: 1),
+                            title: Text('$optionLetter. $option', style: TextStyle(fontSize: 20, color: Colors.black)),
+                            value: multiChoiceAnswers[questionIndex][optionIndex],
+                            onChanged: (value) {
+                              int checkedCount = multiChoiceAnswers[questionIndex].where((element) => element).length;
+                              if (checkedCount < 3 || value == false) {
+                                setState(() {
+                                  multiChoiceAnswers[questionIndex][optionIndex] = value!;
+                                });
+                              }
+                            },
+                            enableFeedback: false,
+                            controlAffinity: ListTileControlAffinity.leading,
+                          );
+                        }).toList()
+                    )
                 ],
+                    ]))
+                ),
                 // Buttons to change questions
                 SizedBox(height: 20),
                 Center(
