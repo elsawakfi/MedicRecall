@@ -19,6 +19,7 @@ import 'feed_screen.dart'; // Contains AboveEverything widget
 import '../widgets/drawer_widget.dart';
 import '../widgets/event.dart';
 import 'package:flashcard_x/screens/dashboard_screen.dart';
+import 'package:flashcard_x/widgets/app_bar.dart';
 
 /*
 Important note for devs
@@ -1129,39 +1130,12 @@ class CalendarStateO extends State<Calendar> {
 
   @override
   Widget build(BuildContext context) {
+    bool isSmallScreen = MediaQuery.of(context).size.width < 600;
     return Scaffold(
       drawer: const DrawMain(),
-      appBar: AppBar(
-        elevation: 0,
-        toolbarHeight: 60,
-        leading: Builder(
-          builder: (context) => GestureDetector(
-            onTap: () => Scaffold.of(context).openDrawer(),
-            child: const Icon(Icons.menu),
-          ),
-        ),
-        title: LayoutBuilder(
-          builder: (context, constraints) {
-            bool isSmallScreen = MediaQuery.of(context).size.width < 600;
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Image.asset(
-                  'assets/newlogo.png',
-                  fit: BoxFit.cover,
-                  height: 34,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  isSmallScreen ? 'Calendar' : 'Revision Calendar',
-                  style: const TextStyle(fontSize: 20),
-                ),
-              ],
-            );
-          },
-        ),
-        centerTitle: true,
+      appBar: CustomAppBar(
+        title: 'Revision Calendar',
+        mobileTitle: 'Calendar',
       ),
       body: loading
           ? const Center(
