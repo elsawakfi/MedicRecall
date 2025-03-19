@@ -766,95 +766,82 @@ class CalendarStateO extends State<Calendar> {
         revisionDays = [];
         loading = false;
       });
-       // Show confirmation popup
+      // Show confirmation popup
       showDialog(
-                                          context: context,
-                                          builder: (context) => AlertDialog(
-                                            backgroundColor:
-                                                const Color(0xFFE6EDF2),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(0),
-                                            ),
-                                            title: const Text(
-                                              "All Events Deleted",
-                                              style: TextStyle(
-                                                color: Color.fromRGBO(
-                                                    21, 58, 103, 1),
-                                                fontSize: 21,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                            content: const Text(
-                                              "Go to the homepage to schedule your study schedule.",
-                                              style: TextStyle(
-                                                color: Color.fromRGBO(
-                                                    21, 58, 103, 1),
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w400,
-                                              ),
-                                            ),
-                                            actions: [
-                                              TextButton(
-                                                onPressed: () =>
-                                                    Navigator.pop(context),
-                                                style: TextButton.styleFrom(
-                                                  padding: EdgeInsets.symmetric(
-                                                      horizontal: 24,
-                                                      vertical: 12),
-                                                  minimumSize: Size(120, 45),
-                                                ),
-                                                child: Text(
-                                                  'OK',
-                                                  style:
-                                                      TextStyle(fontSize: 16),
-                                                ),
-                                              ),
-                                              TextButton(
-                                                onPressed: () {
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            Landing()),
-                                                  );
-                                                },
-                                                style: TextButton.styleFrom(
-                                                  foregroundColor: Colors.white,
-                                                  backgroundColor: Colors.blue,
-                                                  padding: EdgeInsets.symmetric(
-                                                      horizontal: 24,
-                                                      vertical: 12),
-                                                  minimumSize: Size(120, 45),
-                                                ),
-                                                child: Text(
-                                                  'Go to Homepage',
-                                                  style:
-                                                      TextStyle(fontSize: 16),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        );
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: const Color(0xFFE6EDF2),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(0),
+          ),
+          title: const Text(
+            "All Events Deleted",
+            style: TextStyle(
+              color: Color.fromRGBO(21, 58, 103, 1),
+              fontSize: 21,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          content: const Text(
+            "Go to the homepage to schedule your study schedule.",
+            style: TextStyle(
+              color: Color.fromRGBO(21, 58, 103, 1),
+              fontSize: 16,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                minimumSize: Size(120, 45),
+              ),
+              child: Text(
+                'OK',
+                style: TextStyle(fontSize: 16),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Landing()),
+                );
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: Colors.blue,
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                minimumSize: Size(120, 45),
+              ),
+              child: Text(
+                'Go to Homepage',
+                style: TextStyle(fontSize: 16),
+              ),
+            ),
+          ],
+        ),
+      );
     } catch (e) {
       print("Error clearing events: $e");
       setState(() {
         loading = false;
       });
     }
-    
   }
 
   Future<void> initializeUserAndTestDay() async {
     await getUser();
     await getTestDay();
     await _loadExcludedDays();
-   // Only proceed with test day handling if a test day exists
+    // Only proceed with test day handling if a test day exists
     if (testDay != null && !testDayBool) {
       await getEventsFromDB(); // Then load events from database
 
       // First add Test Day event if not already present
-      DateTime normalizedTestDay = DateTime(testDay!.year, testDay!.month, testDay!.day);
+      DateTime normalizedTestDay =
+          DateTime(testDay!.year, testDay!.month, testDay!.day);
       if (!selectedEvents.containsKey(normalizedTestDay)) {
         selectedEvents[normalizedTestDay] = [];
       }
@@ -862,21 +849,21 @@ class CalendarStateO extends State<Calendar> {
       // Check if the Test Day event already exists
       bool testDayEventExists = false;
       if (selectedEvents[normalizedTestDay] != null) {
-        testDayEventExists = selectedEvents[normalizedTestDay]!.any((event) => event.title == "Test Day");
+        testDayEventExists = selectedEvents[normalizedTestDay]!
+            .any((event) => event.title == "Test Day");
       }
 
       if (!testDayEventExists) {
-        selectedEvents[normalizedTestDay]!.add(
-          Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94))
-        );
+        selectedEvents[normalizedTestDay]!.add(Event(
+            title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
       }
 
       // Check for study sessions by examining event titles
       bool hasStudySessions = false;
       for (var events in selectedEvents.values) {
         for (var event in events) {
-          if (event.title.contains("Mini Mock") || 
-              event.title.contains("Full-sized Mock") || 
+          if (event.title.contains("Mini Mock") ||
+              event.title.contains("Full-sized Mock") ||
               event.title.contains("Official MSRA Paper") ||
               event.title.contains("Flashcard")) {
             hasStudySessions = true;
@@ -1630,9 +1617,9 @@ class CalendarStateO extends State<Calendar> {
                                           daysOfWeekVisible: true,
                                           daysOfWeekHeight: 40.0,
                                           daysOfWeekStyle: DaysOfWeekStyle(
-                                            // decoration: 
+                                            // decoration:
                                             decoration: BoxDecoration(
-                                              color: Colors.black.withOpacity(0.4),
+                                              color: Theme.of(context).shadowColor.withOpacity(0.4),
                                               border: Border(
                                                 bottom: BorderSide(
                                                   color: Colors.white
@@ -1668,8 +1655,7 @@ class CalendarStateO extends State<Calendar> {
                                           eventLoader: _getEventsfromDay,
                                           calendarStyle: CalendarStyle(
                                             rowDecoration: BoxDecoration(
-                                              color:
-                                                  Colors.black.withOpacity(0.1),
+                                              color: Theme.of(context).shadowColor.withOpacity(0.1)
                                             ),
                                             // Make selected day more visible with a darker blue
                                             selectedDecoration: BoxDecoration(
@@ -1714,8 +1700,7 @@ class CalendarStateO extends State<Calendar> {
                                               fontSize: 16,
                                             ),
                                             // Custom marker settings
-                                            markersMaxCount:
-                                                6, // Show up to 5 markers per day
+                                            markersMaxCount:6, // Show up to 5 markers per day
                                             markersAnchor: 1.0,
                                             cellPadding: EdgeInsets.symmetric(
                                                 vertical: 12.0,
@@ -1811,7 +1796,7 @@ class CalendarStateO extends State<Calendar> {
                                         title: Text(
                                           event.title,
                                           style: TextStyle(
-                                            color: Colors.white,
+                                            color: Theme.of(context).textTheme.bodyMedium?.color,
                                             fontWeight: FontWeight.w500,
                                           ),
                                         ),
@@ -1823,7 +1808,7 @@ class CalendarStateO extends State<Calendar> {
                                             shape: BoxShape.circle,
                                           ),
                                         ),
-                                        tileColor: event.color.withOpacity(0.4),
+                                        tileColor: event.color.withOpacity(0.5),
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
                                               BorderRadius.circular(8),
@@ -1835,14 +1820,14 @@ class CalendarStateO extends State<Calendar> {
                                           children: [
                                             IconButton(
                                               icon: Icon(Icons.edit,
-                                                  color: Colors.white),
+                                                  color: Theme.of(context).textTheme.bodyMedium?.color),
                                               onPressed: () => _editEventDate(
                                                   context, event),
                                             ),
                                             const SizedBox(width: 10),
                                             IconButton(
                                               icon: Icon(Icons.link,
-                                                  color: Colors.white),
+                                                  color: Theme.of(context).textTheme.bodyMedium?.color),
                                               onPressed: () =>
                                                   _navigateToEventDetails(
                                                       event),

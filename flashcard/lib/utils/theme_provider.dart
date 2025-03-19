@@ -78,9 +78,9 @@ class MyTheme {
       displayMedium: const TextStyle(fontFamily: 'Akshar'),
       displaySmall: const TextStyle(fontFamily: 'Akshar'),
       headlineMedium: const TextStyle(fontFamily: 'Akshar'),
-      titleLarge: TextStyle(color: Colors.blueGrey[300], fontFamily: 'Akshar'),
+      titleLarge: TextStyle(color: Colors.blueGrey[700], fontFamily: 'Akshar'),
       titleSmall: TextStyle(color: Colors.blueGrey[400], fontFamily: 'Akshar'),
-      labelLarge: TextStyle(color: Colors.blueGrey[400], fontFamily: 'Akshar'),
+      labelLarge: const TextStyle(fontFamily: 'Akshar'),
     ),
   );
 

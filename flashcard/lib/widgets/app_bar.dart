@@ -31,9 +31,16 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
             ),
             Container(
-                margin: const EdgeInsets.only(left: 32),
-                padding: const EdgeInsets.all(8.0),
-                child: Text(isSmallScreen ? (mobileTitle ?? title) : title)),
+              margin: const EdgeInsets.only(left: 40),
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                isSmallScreen ? (mobileTitle ?? title) : title,
+                style: TextStyle(
+                  fontSize: isSmallScreen ? 18 : 20,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
           ],
         ),
       ),

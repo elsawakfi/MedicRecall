@@ -9,7 +9,7 @@ import '../screens/calendar_screen.dart';
 class DesignMain {
   static String getThemeBasedLogo(BuildContext context) {
     final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
-    return isDarkTheme ? 'assets/newlogo.png' : 'assets/app-logo-boxed.png';
+    return isDarkTheme ? 'assets/app-logo-boxed.png' : 'assets/newlogo.png';
   }
 
   static AppBar appBarMain(String title, BuildContext context) {
