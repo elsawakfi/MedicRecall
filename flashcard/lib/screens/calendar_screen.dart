@@ -20,7 +20,7 @@ import '../widgets/drawer_widget.dart';
 import '../widgets/event.dart';
 import 'package:flashcard_x/screens/dashboard_screen.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
-
+import 'package:flashcard_x/utils/theme_provider.dart';
 /*
 Important note for devs
 
@@ -747,9 +747,8 @@ class CalendarStateO extends State<Calendar> {
       }
 
       selectedEvents[testDay]?.remove(Event(
-        title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
-        getTestDay();
-       
+          title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
+      getTestDay();
 
       if (data.containsKey("excludedDays") || data["excludedDays"] != null) {
         updates["excludedDays"] = [];
@@ -759,7 +758,6 @@ class CalendarStateO extends State<Calendar> {
       if (updates.isNotEmpty) {
         await _userCollectionRef.doc(id).update(updates);
       }
-
 
       // Reset local state
       setState(() {
@@ -1190,7 +1188,7 @@ class CalendarStateO extends State<Calendar> {
                                                                     : 40,
                                                             fontWeight:
                                                                 FontWeight.bold,
-                                                            color: Colors.white,
+                                                            color: Theme.of(context).textTheme.bodyMedium?.color,
                                                           ),
                                                           overflow: TextOverflow
                                                               .ellipsis,
@@ -1632,9 +1630,9 @@ class CalendarStateO extends State<Calendar> {
                                           daysOfWeekVisible: true,
                                           daysOfWeekHeight: 40.0,
                                           daysOfWeekStyle: DaysOfWeekStyle(
+                                            // decoration: 
                                             decoration: BoxDecoration(
-                                              color:
-                                                  Colors.black.withOpacity(0.4),
+                                              color: Colors.black.withOpacity(0.4),
                                               border: Border(
                                                 bottom: BorderSide(
                                                   color: Colors.white
@@ -1647,14 +1645,13 @@ class CalendarStateO extends State<Calendar> {
                                             weekdayStyle: TextStyle(
                                               fontWeight: FontWeight.bold,
                                               fontSize: 17.0,
-                                              color: Colors
-                                                  .white, // Changed to white for dark mode
+                                              color: Theme.of(context).textTheme.bodyMedium?.color, // Changed to white for dark mode
                                             ),
                                             // Style for weekend names
                                             weekendStyle: TextStyle(
                                               fontWeight: FontWeight.bold,
                                               fontSize: 17.0,
-                                              color: Colors.grey[400],
+                                              color: Theme.of(context).textTheme.titleLarge?.color,
                                             ),
                                           ),
                                           onDaySelected: (DateTime selectDay,
@@ -1694,13 +1691,13 @@ class CalendarStateO extends State<Calendar> {
                                             // Make default days more visible on dark background
                                             defaultTextStyle: TextStyle(
                                               fontSize: 16,
-                                              color: Colors.white,
+                                              color: Theme.of(context).textTheme.bodyMedium?.color,
                                               fontWeight: FontWeight.w500,
                                             ),
                                             // Make weekend days match default days
                                             weekendTextStyle: TextStyle(
                                               fontSize: 16,
-                                              color: Colors.white,
+                                              color: Theme.of(context).textTheme.titleSmall?.color,
                                               fontWeight: FontWeight.w500,
                                             ),
                                             // Improve visibility of outside days
@@ -1925,10 +1922,6 @@ class CalendarStateO extends State<Calendar> {
                                         testDay = null;
                                         testDayBool = true;
                                         await deleteAllEvents();
-                                        
-
-                                       
-                                        
                                       },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.redAccent,
@@ -2054,7 +2047,7 @@ class CalendarStateO extends State<Calendar> {
       DateTime date, String eventTitle, User user) async {
     date = DateTime(date.year, date.month, date.day);
 
-     if (!selectedEvents.containsKey(date)) {
+    if (!selectedEvents.containsKey(date)) {
       print("No events found for date: ${date.toString().split(' ')[0]}");
       return;
     }
@@ -2316,9 +2309,8 @@ class CalendarStateO extends State<Calendar> {
   // Load excluded days from Firebase
   Future<void> _loadExcludedDays() async {
     try {
-      QuerySnapshot querySnapshot = await _userCollectionRef
-          .where("userID", isEqualTo: user.uid)
-          .get();
+      QuerySnapshot querySnapshot =
+          await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
 
       if (querySnapshot.docs.isNotEmpty) {
         var userDoc = querySnapshot.docs.first.data() as Map<String, dynamic>;
