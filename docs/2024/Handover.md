@@ -381,7 +381,7 @@ Each document within the **users** collection contains:
 | ```userID```            | String    | The user's auth ID (different to their document ID) |
 |```firstStudyDay```| DateTime| The day that the user starts their revision plan. |
 |```excludedDays```| List<String>| All the days that the user wishes to exclude from their study plan. |
-|``stopShowing```| boolean | User can set this to true to pause the revision plan pop up from showing.|
+|```stopShowing```| boolean | User can set this to true to pause the revision plan pop up from showing.|
 |```popUpTime```| DateTime | Stores the time at which the user pauses the pop up and unpauses after a 1 minute |
 
 
