@@ -44,7 +44,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     getTestDay();
     getStopShowing(user!);
     getFirstStudyDay();
-    if(mounted) setState(() {});
+    if (mounted) setState(() {});
     _isHovered['checkbox1'] = false;
     _isHovered['checkbox2'] = false;
     _isHovered['checkbox3'] = false;
@@ -60,7 +60,10 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
   }
 
   Future<void> getStopShowing(User user) async {
-  DocumentSnapshot doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+    DocumentSnapshot doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .get();
 
     if (doc.exists) {
       Timestamp? timestamp = doc['popUpTime'];
@@ -69,19 +72,20 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
         DateTime savedTime = timestamp.toDate();
         DateTime currentTime = DateTime.now();
 
-      if (currentTime.difference(savedTime).inMinutes >= 1) {
-        await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
-          'stopShowing': false,
-        });
-       
+        if (currentTime.difference(savedTime).inMinutes >= 1) {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .update({
+            'stopShowing': false,
+          });
+        }
+      } else {
+        setStopShowing(user);
       }
+      stopShowing = doc['stopShowing'];
     }
-  else{
-    setStopShowing(user);
   }
-  stopShowing = doc['stopShowing'];
-  }
-}
 
   // Helper method
   Widget _buildAlertDialog({
@@ -119,23 +123,27 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
 
       var userFromDb = querySnapshot.docs.first;
       Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
-      
-      if (data.containsKey("TestDay") && data["TestDay"] != null) {
+      // If the Test Day field isn't null and is in the database we update the UI with it. Otherwise it is displayed as being not set.
+      if ((data.containsKey("TestDay") || data["TestDay"] != null) &&
+          (buildCount <= 2 || (_examDate != null && buildCount > 2))) {
         testDayBool = false;
-        _examDate = DateTime.fromMicrosecondsSinceEpoch(
-            data["TestDay"].microsecondsSinceEpoch);
-        
+        _examDate = DateTime.fromMicrosecondsSinceEpoch(userFromDb["TestDay"]
+            .microsecondsSinceEpoch); // Firebase is weird. Conversion from TimeStamp to DateTime object
         String? day = _examDate?.day.toString();
-        String? month = _examDate?.month != null 
-            ? DateFormat('MMMM').format(DateTime(_examDate!.year, _examDate!.month))
+        // String? month = _examDate?.month.toString();
+
+        // Convert month number to month name
+        String? month = _examDate?.month != null
+            ? DateFormat('MMMM')
+                .format(DateTime(_examDate!.year, _examDate!.month))
             : null;
         String? year = _examDate?.year.toString();
+        // testDayString = '$day-$month-$year';
         testDayString = '$day ${month} $year';
       } else {
         testDayBool = true;
-        testDayString = "Test day not set";
       }
-      if(mounted) setState(() {});
+      if (mounted) setState(() {});
     }
   }
 
@@ -153,14 +161,15 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     _userCollectionRef.doc(id).update({
       "TestDay": _examDate,
 
-      "firstStudyDay": data.containsKey("firstStudyDay") && data["firstStudyDay"] != null
-        ? data["firstStudyDay"] // Keep existing firstStudyDay if it exists
-        : DateTime.now(), // Otherwise, set it to now
-      });
+      "firstStudyDay": data.containsKey("firstStudyDay") &&
+              data["firstStudyDay"] != null
+          ? data["firstStudyDay"] // Keep existing firstStudyDay if it exists
+          : DateTime.now(), // Otherwise, set it to now
+    });
 
     // update field testday to what is passed as param
     await getTestDay();
-    if(mounted) setState(() {});
+    if (mounted) setState(() {});
   }
 
   Future<void> getUser() async {
@@ -193,7 +202,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
         _firstStudyDate = DateTime.fromMicrosecondsSinceEpoch(
             userFromDb["firstStudyDay"].microsecondsSinceEpoch);
       }
-      if(mounted) setState(() {});
+      if (mounted) setState(() {});
     }
   }
 
@@ -217,70 +226,71 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       builder: (BuildContext context) {
         return _buildAlertDialog(
           title: 'Do you want to start your revision plan today?',
-          content: 
-          SizedBox(
-            child: buttonPressed
-                ? Text('')
-                : Text(
-                  'If you want to stop seeing this pop up please press the "Don\'t Show Again" below to pause pop up during your session',
-                  style: TextStyle(fontSize: 16, color:Color.fromRGBO(21, 58, 103, 1))
-                  )),
-          actions :  
-           [       
-             TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: const Color.fromRGBO(243, 90, 90, 1),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          content: SizedBox(
+              child: buttonPressed
+                  ? Text('')
+                  : Text(
+                      'If you want to stop seeing this pop up please press the "Don\'t Show Again" below to pause pop up during your session',
+                      style: TextStyle(
+                          fontSize: 16,
+                          color: Color.fromRGBO(21, 58, 103, 1)))),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: const Color.fromRGBO(243, 90, 90, 1),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
+              child: const Text(
+                'No',
+                style: TextStyle(fontSize: 16),
+              ),
             ),
-            child: const Text(
-              'No',
-              style: TextStyle(fontSize: 16),
+            TextButton(
+              key: const ValueKey('yesButton'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _setFirstStudyDay(); // Ensure this function is defined
+                _showExamDateDialog(context); // Ensure this function is defined
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                minimumSize:
+                    const Size(120, 45), // Sets minimum width and height
+              ),
+              child: const Text(
+                'Yes',
+                style: TextStyle(fontSize: 16),
+              ),
             ),
-          ),
-          TextButton(
-            key: const ValueKey('yesButton'),
-            onPressed: () {
-              Navigator.of(context).pop();
-              _setFirstStudyDay(); // Ensure this function is defined
-              _showExamDateDialog(context); // Ensure this function is defined
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.white,
-              backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              minimumSize: const Size(120, 45), // Sets minimum width and height
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                setStopShowing(user!, true);
+                //need to save the date here and then add another condition that checks later on
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: const Color.fromARGB(255, 160, 160, 160),
+                backgroundColor: Colors.transparent,
+                //padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                //minimumSize: const Size(120, 45), // Sets minimum width and height
+              ),
+              child: const Text(
+                'Don\'t Show Again',
+                style: TextStyle(fontSize: 16),
+              ),
             ),
-            child: const Text(
-              'Yes',
-              style: TextStyle(fontSize: 16),
-            ),
-          ),  
-              TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              setStopShowing(user!,true);
-              //need to save the date here and then add another condition that checks later on 
-
-            },
-            style: TextButton.styleFrom(
-              foregroundColor: const Color.fromARGB(255, 160, 160, 160),
-               backgroundColor:  Colors.transparent,
-              //padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              //minimumSize: const Size(120, 45), // Sets minimum width and height
-            ),
-            child: const Text(
-              'Don\'t Show Again',
-              style: TextStyle(fontSize: 16),
-            ),
-          ),
           ],
         );
       },
     );
-    if(mounted) setState(() {});
+    if (mounted) setState(() {});
   }
 
   // Show the date picker dialog to select exam date
@@ -290,8 +300,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       builder: (BuildContext context) {
         return _buildAlertDialog(
           title: 'When is your exam date?',
-          content: 
-          Column(
+          content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               ElevatedButton(
@@ -304,7 +313,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     locale: const Locale('en', 'GB'),
                   );
                   if (picked != null) {
-                    if(mounted) {
+                    if (mounted) {
                       setState(() {
                         _examDate = picked;
                         updateTestDay(picked); // Update parent state
@@ -320,8 +329,10 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                 },
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.white, // Text color
-                  backgroundColor: const Color.fromRGBO(51, 178, 73, 1), // Same color as 'Yes' button
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  backgroundColor: const Color.fromRGBO(
+                      51, 178, 73, 1), // Same color as 'Yes' button
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                   minimumSize: const Size(120, 45),
                 ),
                 child: const Text(
@@ -442,7 +453,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               },
               style: TextButton.styleFrom(
                 foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 minimumSize: const Size(120, 45),
               ),
               child: const Text(
@@ -455,11 +467,14 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               onPressed: () async {
                 // Check which resources were selected
                 List<String> selectedResources = [];
-                if (checkbox1.value) selectedResources.add('Official MSRA Practice Paper');
-                if (checkbox2.value) selectedResources.add('Full-sized Mock Exam');
+                if (checkbox1.value)
+                  selectedResources.add('Official MSRA Practice Paper');
+                if (checkbox2.value)
+                  selectedResources.add('Full-sized Mock Exam');
                 if (checkbox3.value) selectedResources.add('Mini-mocks');
                 if (checkbox4.value) selectedResources.add('Flashcards');
-                if (checkbox5.value) selectedResources.add('Official SJT Practice Paper');
+                if (checkbox5.value)
+                  selectedResources.add('Official SJT Practice Paper');
 
                 if (selectedResources.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -495,7 +510,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               style: TextButton.styleFrom(
                 foregroundColor: Colors.white,
                 backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
               child: const Text(
                 'Submit',
@@ -509,8 +525,9 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
   }
 
   // Show dialog to ask for number of repetitions
-  void _showRepetitionDialog(BuildContext context, List<String> selectedResources) {
-  final List<int> repetitionOptions = [2, 3, 4, 5, 6];
+  void _showRepetitionDialog(
+      BuildContext context, List<String> selectedResources) {
+    final List<int> repetitionOptions = [2, 3, 4, 5, 6];
 
     // Define separate variables for each resource's repetition count
     int? officialMSRARepetitions;
@@ -581,7 +598,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                                 ),
                                 selected: officialMSRARepetitions == value,
                                 onSelected: (bool selected) {
-                                  if(mounted) {
+                                  if (mounted) {
                                     setState(() {
                                       officialMSRARepetitions =
                                           selected ? value : null;
@@ -625,7 +642,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                                 ),
                                 selected: fullSizedMockRepetitions == value,
                                 onSelected: (bool selected) {
-                                  if(mounted) {
+                                  if (mounted) {
                                     setState(() {
                                       fullSizedMockRepetitions =
                                           selected ? value : null;
@@ -729,7 +746,13 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
 
   void _showExclusionDialog(BuildContext context) {
     List<String> daysOfTheWeek = [
-      "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday"
     ];
 
     Map<String, ValueNotifier<bool>> selectedDays = {
@@ -746,7 +769,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: selectedDays.keys.map((day) {
-                  return _buildCheckbox(selectedDays[day]!, day, showInfo: false); // Hide info icon
+                  return _buildCheckbox(selectedDays[day]!, day,
+                      showInfo: false); // ✅ Hide info icon
                 }).toList(),
               ),
               actions: [
@@ -756,7 +780,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     _showExamDateDialog(context);
                   },
                   style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
                   ),
                   child: const Text(
                     'Previous',
@@ -788,7 +813,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                   style: TextButton.styleFrom(
                     foregroundColor: Colors.white,
                     backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
                     minimumSize: const Size(120, 45),
                   ),
                   child: const Text(
@@ -851,7 +877,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                           ),
                           const SizedBox(height: 16),
                           const Text(
-                            'Generating your schedule...', 
+                            'Generating your schedule...',
                             style: TextStyle(
                               fontSize: 16,
                               color: Color.fromRGBO(21, 58, 103, 1),
@@ -862,18 +888,20 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     );
                   },
                 );
-                
+
                 try {
                   // Generate and save study sessions before navigating to calendar
                   final studySessionManager = StudySessionManager();
-                  final events = await studySessionManager.generateStudySessions(user!);
-                  await studySessionManager.saveStudySessionsToDB(user!, events);
-                  
+                  final events =
+                      await studySessionManager.generateStudySessions(user!);
+                  await studySessionManager.saveStudySessionsToDB(
+                      user!, events);
+
                   // Close the loading dialog
                   Navigator.of(context).pop();
                   // Close the current dialog
                   Navigator.of(context).pop();
-                  
+
                   // Navigate to Calendar screen to see the new schedule
                   Navigator.push(
                     context,
@@ -890,7 +918,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     builder: (BuildContext context) {
                       return AlertDialog(
                         title: const Text('Error'),
-                        content: Text('Failed to generate schedule: ${e.toString()}'),
+                        content: Text(
+                            'Failed to generate schedule: ${e.toString()}'),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(),
@@ -905,7 +934,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               style: TextButton.styleFrom(
                 foregroundColor: Colors.white,
                 backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 minimumSize: const Size(120, 45),
               ),
               child: const Text(
@@ -1053,7 +1083,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     );
   }
 
-  Widget _buildCheckbox(ValueNotifier<bool> notifier, String text, {String? description, bool showInfo = true}) {
+  Widget _buildCheckbox(ValueNotifier<bool> notifier, String text,
+      {String? description, bool showInfo = true}) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       padding: const EdgeInsets.all(12.0),
@@ -1065,7 +1096,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               data: ThemeData(
                 unselectedWidgetColor: const Color.fromRGBO(21, 58, 103, 1),
                 checkboxTheme: CheckboxThemeData(
-                  side: const BorderSide(color: Color.fromRGBO(21, 58, 103, 1), width: 2),
+                  side: const BorderSide(
+                      color: Color.fromRGBO(21, 58, 103, 1), width: 2),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(4.0),
                   ),
@@ -1109,7 +1141,9 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                         ),
                       ),
                     ),
-                    if (showInfo && description != null) _buildInfoIcon(text, description), // Show only if required
+                    if (showInfo && description != null)
+                      _buildInfoIcon(
+                          text, description), // Show only if required
                   ],
                 ),
               ),
@@ -1130,122 +1164,125 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
   @override
   Widget build(BuildContext context) {
     buildCount++;
-    return Container(
-      margin: const EdgeInsets.only(bottom: 55),
-      width: 210,
-      height: 40.31,
-      decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            spreadRadius: 0,
-            blurRadius: 5,
-            offset: const Offset(0, 3), // changes position of shadow
-          ),
-        ],
-      ),
-      child: FloatingActionButton.extended(
-        label: Text(
-          _examDate == null
-              ? 'Set Your Exam Date'
-              : _calculateDaysUntilExam(_examDate!) < 0
-                  ? 'Exam has already passed'
-                  : _calculateDaysUntilExam(_examDate!) == 0
-                      ? "Exam is Today"
-                      : '${_calculateDaysUntilExam(_examDate!)} Days to Your Exam',
-          style: const TextStyle(
-            color: Color.fromARGB(255, 98, 86, 139),
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        onPressed: () {
-          buttonPressed = true;
-          getTestDay();
-          if (testDayBool) {
-            _showRevisionPlanDialog(context);
-          } else if (!testDayBool) {
-            showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return _buildAlertDialog(
-                    title: 'Exam Date Already Set',
-                    content: Text.rich(
-                      TextSpan(
-                        children: [
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        bool isSmallScreen = constraints.maxWidth < 600;
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 55, right: 0),
+          height: 40.31,
+          child: FloatingActionButton.extended(
+            label: Text(
+              _examDate == null
+                  ? isSmallScreen
+                      ? 'Set Exam Date'
+                      : 'Set Your Exam Date'
+                  : _calculateDaysUntilExam(_examDate!) < 0
+                      ? isSmallScreen
+                          ? 'Passed'
+                          : 'Exam has already passed'
+                      : _calculateDaysUntilExam(_examDate!) == 0
+                          ? isSmallScreen
+                              ? "Today"
+                              : "Exam is Today"
+                          : isSmallScreen
+                              ? '${_calculateDaysUntilExam(_examDate!)} Days'
+                              : '${_calculateDaysUntilExam(_examDate!)} Days to Your Exam',
+              style: const TextStyle(
+                color: Color.fromARGB(255, 98, 86, 139),
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            onPressed: () {
+              buttonPressed = true;
+              getTestDay();
+              if (testDayBool) {
+                _showRevisionPlanDialog(context);
+              } else if (!testDayBool) {
+                showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return _buildAlertDialog(
+                        title: 'Exam Date Already Set',
+                        content: Text.rich(
                           TextSpan(
-                            text: 'Your exam date is already set to ',
-                            style: TextStyle(
-                              color: const Color.fromRGBO(21, 58, 103, 1),
-                              fontSize: 17,
-                            ),
+                            children: [
+                              TextSpan(
+                                text: 'Your exam date is already set to ',
+                                style: TextStyle(
+                                  color: const Color.fromRGBO(21, 58, 103, 1),
+                                  fontSize: 17,
+                                ),
+                              ),
+                              TextSpan(
+                                text: '${testDayString}',
+                                style: TextStyle(
+                                  color: const Color.fromRGBO(21, 58, 103, 1),
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              TextSpan(
+                                text: '.\nDo you want to change it?',
+                                style: TextStyle(
+                                  color: const Color.fromRGBO(21, 58, 103, 1),
+                                  fontSize: 17,
+                                ),
+                              ),
+                            ],
                           ),
-                          TextSpan(
-                            text: '${testDayString}',
-                            style: TextStyle(
-                              color: const Color.fromRGBO(21, 58, 103, 1),
-                              fontSize: 17,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          TextSpan(
-                            text: '.\nDo you want to change it?',
-                            style: TextStyle(
-                              color: const Color.fromRGBO(21, 58, 103, 1),
-                              fontSize: 17,
-                            ),
-                          ),
+                        ),
+                        actions: [
+                          TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 24, vertical: 12),
+                                minimumSize: Size(120, 45),
+                              ),
+                              child: Text(
+                                'Cancel',
+                                style: TextStyle(fontSize: 16),
+                              )),
+                          TextButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => Calendar()),
+                                );
+                              },
+                              style: TextButton.styleFrom(
+                                foregroundColor: Colors.white,
+                                backgroundColor: Color.fromRGBO(243, 90, 90, 1),
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 24, vertical: 12),
+                                minimumSize: Size(120, 45),
+                              ),
+                              child: Text(
+                                'Change Exam Date',
+                                style: TextStyle(fontSize: 16),
+                              )),
                         ],
-                      ),
-                    ),
-                    actions: [
-                      TextButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 24, vertical: 12),
-                            minimumSize:
-                                Size(120, 45), // Sets minimum width and height
-                          ),
-                          child: Text(
-                            'Cancel',
-                            style: TextStyle(fontSize: 16),
-                          )),
-                      TextButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => Calendar()),
-                            );
-                          },
-                          style: TextButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            backgroundColor: Color.fromRGBO(243, 90, 90, 1),
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 24, vertical: 12),
-                            minimumSize:
-                                Size(120, 45), // Sets minimum width and height
-                          ),
-                          child: Text(
-                            'Change Exam Date',
-                            style: TextStyle(fontSize: 16),
-                          )),
-                    ],
-                  );
-                });
-          }
-        },
-        clipBehavior: Clip.none,
-        backgroundColor: const Color.fromARGB(255, 235, 230, 239),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        icon: const Icon(
-          Icons.calendar_today,
-          color: Color.fromARGB(255, 98, 86, 139),
-        ),
-      ),
+                      );
+                    });
+              }
+            },
+            clipBehavior: Clip.none,
+            backgroundColor: const Color.fromARGB(255, 235, 230, 239),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            icon: isSmallScreen
+                ? null
+                : const Icon(
+                    Icons.calendar_today,
+                    color: Color.fromARGB(255, 98, 86, 139),
+                  ),
+          ),
+        );
+      },
     );
   }
 }
