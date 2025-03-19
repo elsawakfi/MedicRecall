@@ -4,6 +4,7 @@ import 'package:flashcard_x/screens/fullmock_review.dart';
 import 'package:flashcard_x/screens/minimock_scoring.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
+import 'dart:math';
 import '../screens/minimock_review.dart';
 import '../utils/timer.dart';
 import 'drawer_widget.dart';
@@ -496,6 +497,12 @@ class MiniMockExamState extends State<MiniMockExam> {
                 ),
                 // Buttons to change questions
                 SizedBox(height: 20),
+                LayoutBuilder(builder: (context, constraints) {
+                  final iconSize = constraints.maxWidth * 0.1; // 8% of container width
+                  final buttonWidth = constraints.maxWidth * 0.08; // 30% of container width
+                  final paddingValue = constraints.maxWidth * 0.01;
+
+                  return
                 Center(
                     child:
                     SizedBox(
@@ -510,8 +517,8 @@ class MiniMockExamState extends State<MiniMockExam> {
                     ),
                     const SizedBox(width: 16),
                     Container(
-                        width: 120,
-                        height: 35,
+                        width: MediaQuery.of(context).size.width < 600 ? 130 : 140,
+                        height: 40,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
                           color: const Color.fromARGB(255, 222, 221, 222),
@@ -570,9 +577,9 @@ class MiniMockExamState extends State<MiniMockExam> {
                             }
                           };
                         },
-                        label: Text('Review Page', style: TextStyle(color:  Color.fromARGB(255, 0, 0, 0), fontSize: 13)
+                        label: Text('Review Page', style: TextStyle(color:  Color.fromARGB(255, 0, 0, 0), fontSize: min(MediaQuery.of(context).size.width * 0.75, 15)),
                         ),
-                        icon: Icon(Icons.search, color:  Color.fromARGB(255, 0, 0, 0), size:14
+                        icon: Icon(Icons.search, color:  Color.fromARGB(255, 0, 0, 0), size: min(MediaQuery.of(context).size.width * 0.45, 17)
                         ),
                       
                         
@@ -586,12 +593,12 @@ class MiniMockExamState extends State<MiniMockExam> {
                             currentQuestion--; // Move to previous question
                           });
                         },
-                        icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0), size:20),
+                        icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0), size:iconSize.clamp(16, 24)),
                         label: SizedBox(),
                         style: ElevatedButton.styleFrom(
                           backgroundColor:Color.fromARGB(255, 222, 221, 222),
-                          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          minimumSize: Size(55,30),
+                          padding: EdgeInsets.all(paddingValue),
+                          minimumSize: Size(buttonWidth, buttonWidth * 0.5),
                         ),
                       ),
                     const SizedBox(width: 8),
@@ -602,12 +609,12 @@ class MiniMockExamState extends State<MiniMockExam> {
                             currentQuestion++; // Move to next question
                           });
                         },
-                        icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 0, 0, 0), size: 20),
+                        icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 0, 0, 0), size: iconSize.clamp(16, 24)),
                         label: SizedBox(), //Empty SizedBox to ensure no text is displayed
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Color.fromARGB(255, 217, 216, 217),
-                          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          minimumSize: Size(55,30),
+                          padding:EdgeInsets.all(paddingValue),
+                          minimumSize: Size(buttonWidth, buttonWidth * 0.5),
                        
                       
                      ),
@@ -674,7 +681,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                       ),
                     ),
                     ],
-                  ))),
+                  )));}),
                 ]
               ),
             )
