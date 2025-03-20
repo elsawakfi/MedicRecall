@@ -248,9 +248,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                 double maxScreenWidth = constraints.maxWidth * 0.5;
                 double maxPreferredWidth = 960; // 1920/2
 
-
-                return
-                Center(
+                return Center(
                   child: Container(
                     decoration: BoxDecoration(
                         boxShadow: [
@@ -362,48 +360,89 @@ class MiniMockExamState extends State<MiniMockExam> {
                 // If the question is a ranking question, display a reorderable list of options
                 if (questions[currentQuestion]['type'] == "ranking") ...[
                         // Reorderable Options Column
-                        Expanded(
-                          child: ReorderableListView(
-                            buildDefaultDragHandles: false,
-                            proxyDecorator: (Widget child, int index, Animation<double> animation) {
-                              return Material(
-                                color: Colors.transparent,
-                                child: child,
-                              );
-                            },
-                            onReorder: (oldIndex, newIndex) {
-                              setState(() {
-
-                                if (newIndex > oldIndex) newIndex--; // Adjust the list based on movement of item
-                                // Update position of option in answer list
-                                final ranking = rankingAnswers[currentQuestion].removeAt(oldIndex);
-                                rankingAnswers[currentQuestion].insert(newIndex, ranking);
-                                // Update position of option text in question list
-                                final option = questions[currentQuestion]['options'].removeAt(oldIndex);
-                                    questions[currentQuestion]['options'].insert(newIndex, option);
-                              });
-                            },
-                            children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
-                              int optionIndex = entry.key;
-                              String option = entry.value;
-                              String optionLetter = rankingAnswers[currentQuestion][optionIndex];
-                              return ReorderableDragStartListener(
-                                key: ValueKey(optionLetter),
-                                index: optionIndex,
-                                child: Card(
-                                  elevation: 3,
-                                  color:Color.fromARGB(255, 222, 221, 222),
-                                  child: ListTile(
-                                    title: Text('${optionIndex+1}:  $optionLetter. $option',
-                                      style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
-                                    ),
-                                    trailing: Icon(Icons.drag_handle, color: Color.fromARGB(255, 0, 0, 0), size: 30),
-                                  )
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        )
+                        // Expanded(
+                        //   child: ReorderableListView(
+                        //     buildDefaultDragHandles: false,
+                        //     proxyDecorator: (Widget child, int index, Animation<double> animation) {
+                        //       return Material(
+                        //         color: Colors.transparent,
+                        //         child: child,
+                        //       );
+                        //     },
+                        //     onReorder: (oldIndex, newIndex) {
+                        //       setState(() {
+                        //
+                        //         if (newIndex > oldIndex) newIndex--; // Adjust the list based on movement of item
+                        //         // Update position of option in answer list
+                        //         final ranking = rankingAnswers[currentQuestion].removeAt(oldIndex);
+                        //         rankingAnswers[currentQuestion].insert(newIndex, ranking);
+                        //         // Update position of option text in question list
+                        //         final option = questions[currentQuestion]['options'].removeAt(oldIndex);
+                        //             questions[currentQuestion]['options'].insert(newIndex, option);
+                        //       });
+                        //     },
+                        //     children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
+                        //       int optionIndex = entry.key;
+                        //       String option = entry.value;
+                        //       String optionLetter = rankingAnswers[currentQuestion][optionIndex];
+                        //       return ReorderableDragStartListener(
+                        //         key: ValueKey(optionLetter),
+                        //         index: optionIndex,
+                        //         child: Card(
+                        //           elevation: 3,
+                        //           color:Color.fromARGB(255, 222, 221, 222),
+                        //           child: ListTile(
+                        //             title: Text('${optionIndex+1}:  $optionLetter. $option',
+                        //               style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
+                        //             ),
+                        //             trailing: Icon(Icons.drag_handle, color: Color.fromARGB(255, 0, 0, 0), size: 30),
+                        //           )
+                        //         ),
+                        //       );
+                        //     }).toList(),
+                        //   ),
+                        // )
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ListView.builder(
+                                itemCount: questions[currentQuestion]['options'].length(),
+                                itemBuilder: (context, index) {
+                                  int optionIndex = index;
+                                  String option = questions[currentQuestion]['options'][optionIndex];
+                                  String optionLetter = rankingAnswers[currentQuestion][optionIndex];
+                                  return Draggable(
+                                      key: ValueKey(optionLetter),
+                                      feedback: Card(
+                                          elevation: 3,
+                                          color:Color.fromARGB(255, 222, 221, 222),
+                                          child: ListTile(
+                                            title: Text('${optionIndex+1}:  $optionLetter. $option',
+                                              style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
+                                            ),
+                                            trailing: Icon(Icons.drag_handle, color: Color.fromARGB(255, 0, 0, 0), size: 30),
+                                          )
+                                      ),
+                                      childWhenDragging: Card(
+                                        elevation: 3,
+                                        color:Color.fromARGB(255, 222, 221, 222),
+                                      ),
+                                      child: Card( //Reused code
+                                        elevation: 3,
+                                        color:Color.fromARGB(255, 222, 221, 222),
+                                        child: ListTile(
+                                          title: Text('${optionIndex+1}:  $optionLetter. $option',
+                                            style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
+                                          ),
+                                          trailing: Icon(Icons.drag_handle, color: Color.fromARGB(255, 0, 0, 0), size: 30),
+                                        )
+                                      )
+                                  );
+                                }
+                              )
+                            ),
+                          ],
+                        ),
                 ]
                 // If the question is a multiple choice question, display checkboxes
                 else if(questions[currentQuestion]['type'] == "multiple choice") ...[
