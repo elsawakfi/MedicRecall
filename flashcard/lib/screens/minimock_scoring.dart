@@ -252,11 +252,13 @@ Future<void> fetchAverageScore() async {
                 maxWidth: maxScreenWidth > maxPreferredWidth ? maxScreenWidth : maxPreferredWidth,
               ),
             padding: EdgeInsets.all(16),
+            child: SingleChildScrollView(
             child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Spacer(),
-              Row(
+              // const Spacer(),
+              //SizedBox(width: 30),
+              Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Align(
@@ -265,28 +267,28 @@ Future<void> fetchAverageScore() async {
                       title: 'Your Score: ',
                       totalScore: '$totalScore/$maxScore',
                       percentageScore: userPercentageScore,
-                      radius: 130.0,
-                      lineWidth: 30.0,
+                      radius: 90.0,
+                      lineWidth: 20.0,
                       progressColor: Colors.red,
                       backgroundColor: Colors.green
                     ),
                   ),
-                  SizedBox(width: 60),
+                  SizedBox(width: 50),
                   Align(
                     alignment: Alignment.center,
                     child: ScoreIndicator(
                       title: 'Average Score: ',
                       totalScore: '$averageScore/$maxScore',
                       percentageScore: averagePercentageScore,
-                      radius: 130.0,
-                      lineWidth:  30.0,
+                      radius: 90.0,
+                      lineWidth:  20.0,
                       progressColor: Colors.red,
                       backgroundColor:  Colors.green
                     ),
                   ),
-                ]
+                ],
               ),
-              const Spacer(),
+            SizedBox(width: 30),
               Align(
                 alignment: Alignment.topRight,
                 child: ElevatedButton.icon(
@@ -311,8 +313,8 @@ Future<void> fetchAverageScore() async {
               ),
             ],
           )
-        )
-      );
+        )  
+      ));
     })));
   }
 }
