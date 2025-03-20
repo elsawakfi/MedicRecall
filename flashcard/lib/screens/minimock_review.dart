@@ -113,7 +113,7 @@ Widget build(BuildContext context) {
       actions: [
         Container(
           margin: const EdgeInsets.only(right: 16),
-        width: 210,
+        width: MediaQuery.of(context).size.width < 600 ? 120 : 210,
         height: 40.31,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
@@ -128,17 +128,29 @@ Widget build(BuildContext context) {
           ],
         ),
         child: Center(
-          child: Text(
+          child: LayoutBuilder(builder: (context, constraints) {
+          if (MediaQuery.of(context).size.width >= 600){
+          return Text(
             'Time Remaining: $_displayTime',
             style: TextStyle(
               color: Color.fromARGB(255, 0, 0, 0),
               fontSize: 18.5,
               fontWeight: FontWeight.w500,
-            ),
-          ),
-        )),
-      ],
-    ),
+             ));
+          } else {
+            return Center(
+              child: Text('$_displayTime',
+                style: TextStyle(
+                  color: (remainingSeconds <= 600)
+                      ? Colors.white
+                      : Color.fromARGB(255, 0, 0, 0),
+                  fontSize: 18.5,
+                  fontWeight: FontWeight.w500,
+                )));
+          }
+        })),)
+],
+   ),
     body: LayoutBuilder( builder: (context, constraints) {
       double maxScreenWidth = constraints.maxWidth * 0.5;
       double maxPreferredWidth = 960; // 1920/2
