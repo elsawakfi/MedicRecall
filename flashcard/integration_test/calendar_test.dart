@@ -83,8 +83,20 @@ void main() {
         await tester.tap(find.text('Next'));
         await tester.pumpAndSettle();
 
-        expect(find.byType(Checkbox), findsAny);
+
+        //Checks that the checkbox builds correctly 
+        expect(find.byType(Checkbox), findsWidgets);
         await tester.tap(find.byKey(ValueKey('Official MSRA Practice Paper')));
+         await tester.pump();
+        await tester.tap(find.byKey(ValueKey('Full-sized Mock Exam')));
+         await tester.pump();
+        await tester.tap (find.byKey(ValueKey('Mini-mocks')));
+         await tester.pump();
+        await tester.tap(find.byKey(ValueKey('Flashcard Decks')));
+         await tester.pump();
+        await tester.tap(find.byKey(ValueKey('Official SJT Practice Paper')));
+         await tester.pump();
+
         // await tester.tap((find.byWidgetPredicate((widget) {
         //   return widget is Checkbox && widget.value == false;
         // })).first);
