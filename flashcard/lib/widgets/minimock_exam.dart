@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/fullmock_review.dart';
 import 'package:flashcard_x/screens/minimock_scoring.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
+import 'package:flashcard_x/widgets/ranking_card_ui.dart';
 import 'package:flutter/material.dart';
 import '../screens/minimock_review.dart';
 import '../utils/timer.dart';
@@ -416,7 +417,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                           children: [
                             Expanded(
                               child: Column(
-                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: rankingAnswers[currentQuestion].asMap().entries.map<Widget>((entry) {
                                   int optionIndex = entry.key; // List index
@@ -448,50 +449,18 @@ class MiniMockExamState extends State<MiniMockExam> {
                                             feedback: SizedBox(
                                                 width: 400, // Set a fixed width
                                                 height: 60, // Set a fixed height
-                                                child: Card(
-                                                    elevation: 3,
-                                                    color:Color.fromARGB(255, 222, 221, 222),
-                                                    child: ListTile(
-                                                      title: Text(text,
-                                                        style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
-                                                      ),
-                                                    )
-                                                )),
-                                            childWhenDragging: Card(
-                                                elevation: 3,
-                                                color:Color.fromARGB(255, 222, 221, 222),
-                                                child: ListTile(
-                                                  title: Text('',
-                                                    style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
-                                                  ),
-                                                )
-                                            ),
-                                            child: Card( //Reused code
-                                                elevation: 3,
-                                                color:Color.fromARGB(255, 222, 221, 222),
-                                                child: ListTile(
-                                                  title: Text(text,
-                                                    style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
-                                                  ),
-                                                )
-                                            )
+                                                child: OptionCard(text: text)),
+                                            childWhenDragging: OptionCard(text: ''),
+                                            child: OptionCard(text: text)
                                         )
-                                        : Card(
-                                          elevation: 3,
-                                          color:Color.fromARGB(255, 222, 221, 222),
-                                            child: ListTile(
-                                              title: Text('',
-                                              style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
-                                            ),
-                                          )
-                                        );
+                                        : OptionCard(text: '');
                                       },
                                     );
                               }).toList())
                             ),
                             Expanded(
                               child: Column(
-                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
                                   int optionIndex = entry.key;
@@ -504,43 +473,11 @@ class MiniMockExamState extends State<MiniMockExam> {
                                     feedback: SizedBox(
                                       width: 400, // Set a fixed width
                                       height: 60, // Set a fixed height
-                                      child: Card(
-                                        elevation: 3,
-                                        color:Color.fromARGB(255, 222, 221, 222),
-                                        child: ListTile(
-                                          title: Text('$optionLetter. $option',
-                                            style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
-                                          ),
-                                        )
-                                    )),
-                                    childWhenDragging: Card(
-                                        elevation: 3,
-                                        color:Color.fromARGB(255, 222, 221, 222),
-                                        child: ListTile(
-                                          title: Text('',
-                                            style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
-                                          ),
-                                        )
-                                    ),
-                                    child: Card( //Reused code
-                                      elevation: 3,
-                                      color:Color.fromARGB(255, 222, 221, 222),
-                                      child: ListTile(
-                                        title: Text('$optionLetter. $option',
-                                          style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
-                                        ),
-                                      )
-                                    )
+                                      child: OptionCard(text: '$optionLetter. $option')),
+                                    childWhenDragging: OptionCard(text: ''),
+                                    child: OptionCard(text: '$optionLetter. $option')
                                   )
-                                  : Card(
-                                      elevation: 3,
-                                      color:Color.fromARGB(255, 222, 221, 222),
-                                      child: ListTile(
-                                        title: Text('',
-                                          style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
-                                        ),
-                                      )
-                                  );
+                                  : OptionCard(text: '');
                               }).toList())
                             ),
                           ],
