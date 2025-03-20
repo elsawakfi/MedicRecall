@@ -269,7 +269,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                         style: TextStyle(
                           color: (remainingSeconds <= 600)
                               ? Colors.white
-                              : Color.fromARGB(255, 98, 86, 139),
+                              : Color.fromARGB(255, 0, 0, 0),
                           fontSize: 18.5,
                           fontWeight: FontWeight.w500,
                   )));}
