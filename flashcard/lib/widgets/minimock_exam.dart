@@ -192,12 +192,19 @@ class MiniMockExamState extends State<MiniMockExam> {
               elevation: 0,
               title: LayoutBuilder(
   builder: (context, constraints) {
+    
     if (MediaQuery.of(context).size.width >= 600) {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Stack(
+      return PopScope(
+          canPop: false,
+        child: Scaffold(
+        drawer: const DrawMain(),
+        appBar: AppBar(
+           elevation: 0,
+          title:  Align(
+            alignment: const Alignment(-10,0),
+        // mainAxisAlignment: MainAxisAlignment.center,
+        // mainAxisSize: MainAxisSize.min,
+         child: Stack(
             children: [
               Positioned(
                 top: 2.3,
@@ -214,8 +221,8 @@ class MiniMockExamState extends State<MiniMockExam> {
               ),
             ],
           )
-        ],
-      );
+          ),
+      )));
     } else {
       return Align(
         alignment: Alignment.center,

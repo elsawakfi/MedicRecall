@@ -98,9 +98,11 @@ Widget build(BuildContext context) {
             Container(
               margin: const EdgeInsets.only(left: 32),
               padding: const EdgeInsets.all(8.0),
-              child: const Text('Review Page'),
+              child: const Text(
+                'Review Page',
+                style: TextStyle(fontSize: 22,),
             ),
-          ],
+          )],
         ),
       ]),
       centerTitle: true,
@@ -370,8 +372,8 @@ Widget build(BuildContext context) {
                   ),
                   const SizedBox(width: 16),
                   Container(
-                    width: 160,
-                    height: 45,
+                    width: 45,
+                    height: 32,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
                       color: const Color.fromARGB(255, 235, 230, 239),
@@ -384,34 +386,37 @@ Widget build(BuildContext context) {
                         ),
                       ],
                     ),
-                    child: TextButton.icon(
+                                       child: TextButton.icon(
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0)),
-                      label: Text('Back',  style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 16)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 222, 221, 222),
+                       icon: const Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0), size: 21),
+                        label: const SizedBox(),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:Color.fromARGB(255, 222, 221, 222),
+                          
+                          padding: EdgeInsets.all(8.0),
+                          minimumSize: Size(20, 20),
                       ),
                     )
                   ),
                   const Spacer(),
                   SizedBox(
-                    height: 50,
-                    width: 200,
+                  height: 30,
+                    width: 150,
                     child:
                       ElevatedButton.icon(
                         onPressed: () {
                           widget.miniMockWidget.examEnd();
                         },
                         icon: Icon(Icons.check_outlined, color: Theme.of(context).textTheme.bodyMedium?.color),
-                        label: Text('Complete Exam',  style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 16)
+                        label: Text('Complete',  style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 16)
                         ),
-                         style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.green, // Green button color
-      foregroundColor: Colors.white, // Text/Icon color
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(50), // Rounded corners
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green, // Green button color
+                            foregroundColor: Colors.white, // Text/Icon color
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(50), // Rounded corners
                       )
                          )
                       )

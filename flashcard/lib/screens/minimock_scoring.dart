@@ -210,7 +210,7 @@ Future<void> fetchAverageScore() async {
           // backgroundColor: Colors.blue,
           elevation: 0,
           title:  Align(
-            alignment: const Alignment(-0.05,0),
+            alignment: const Alignment(-0.5,0),
             child: Stack(
               children: [
                 Positioned(
@@ -222,7 +222,8 @@ Future<void> fetchAverageScore() async {
                   ),
                 ),
                 Container(
-                  margin: const EdgeInsets.only(left: 32),
+                  
+                  margin: const EdgeInsets.only(left:32),
                   padding: const EdgeInsets.all(8.0),
                   child: Text('Scoring',
                   ),
