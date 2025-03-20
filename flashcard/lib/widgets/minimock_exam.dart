@@ -418,37 +418,41 @@ class MiniMockExamState extends State<MiniMockExam> {
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
-                                  int optionIndex = entry.key;
-                                  String text = '';
+                                children: rankingAnswers[currentQuestion].asMap().entries.map<Widget>((entry) {
+                                  int optionIndex = entry.key; // List index
+                                  String optionLetter = entry.value.key; // MapEntry key
+                                  String text = (rankingOptionTracker[currentQuestion][optionIndex]) ? '$optionLetter. ${rankingAnswers[currentQuestion][optionIndex].value}'
+                                                                        : '';
                                     return DragTarget<String>(
                                       onAcceptWithDetails: (data) => ({
                                           setState(() {
+                                            int sourceIndex = int.parse(data.data.split(':')[1]);
                                             if (data.data.startsWith('internal')) {
-                                              int sourceIndex = int.parse(data.data.split(':')[1]);
                                               // Item came from within the list so swap their data
                                               MapEntry<String, String> temp = rankingAnswers[currentQuestion][optionIndex];
                                               rankingAnswers[currentQuestion][optionIndex] = rankingAnswers[currentQuestion][sourceIndex];
                                               rankingAnswers[currentQuestion][sourceIndex] = temp;
+
                                             } else if (data.data.startsWith('external')) {
-                                              int sourceIndex = int.parse(data.data.split(':')[1]);
                                               if(text == ''){
                                                 rankingAnswers[currentQuestion][optionIndex] = rankingAnswers[currentQuestion][sourceIndex];
+                                                rankingOptionTracker[currentQuestion][optionIndex] = true;
                                               }
                                             }
                                           })
                                       }),
                                       builder: (context, candidateData, rejectedData) {
-                                        return Draggable<String>(
+                                        return (rankingOptionTracker[currentQuestion][optionIndex])
+                                        ? Draggable<String>(
                                             data: 'internal: $optionIndex',
                                             feedback: SizedBox(
-                                                width: 200, // Set a fixed width
+                                                width: 400, // Set a fixed width
                                                 height: 60, // Set a fixed height
                                                 child: Card(
                                                     elevation: 3,
                                                     color:Color.fromARGB(255, 222, 221, 222),
                                                     child: ListTile(
-                                                      title: Text('',
+                                                      title: Text(text,
                                                         style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
                                                       ),
                                                     )
@@ -466,11 +470,20 @@ class MiniMockExamState extends State<MiniMockExam> {
                                                 elevation: 3,
                                                 color:Color.fromARGB(255, 222, 221, 222),
                                                 child: ListTile(
-                                                  title: Text(rankingAnswers[currentQuestion][optionIndex].value,
+                                                  title: Text(text,
                                                     style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
                                                   ),
                                                 )
                                             )
+                                        )
+                                        : Card(
+                                          elevation: 3,
+                                          color:Color.fromARGB(255, 222, 221, 222),
+                                            child: ListTile(
+                                              title: Text('',
+                                              style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
+                                            ),
+                                          )
                                         );
                                       },
                                     );
@@ -484,10 +497,12 @@ class MiniMockExamState extends State<MiniMockExam> {
                                   int optionIndex = entry.key;
                                   String option = questions[currentQuestion]['options'][optionIndex];
                                   String optionLetter = options[optionIndex];
-                                  return Draggable<String>(
+                                  // If the option hasn't already been ranked, load it, otherwise don't reload it
+                                  return (!rankingOptionTracker[currentQuestion][optionIndex])
+                                  ? Draggable<String>(
                                     data: 'external: $optionIndex',
                                     feedback: SizedBox(
-                                      width: 200, // Set a fixed width
+                                      width: 400, // Set a fixed width
                                       height: 60, // Set a fixed height
                                       child: Card(
                                         elevation: 3,
@@ -502,7 +517,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                                         elevation: 3,
                                         color:Color.fromARGB(255, 222, 221, 222),
                                         child: ListTile(
-                                          title: Text('                    ',
+                                          title: Text('',
                                             style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
                                           ),
                                         )
@@ -516,6 +531,15 @@ class MiniMockExamState extends State<MiniMockExam> {
                                         ),
                                       )
                                     )
+                                  )
+                                  : Card(
+                                      elevation: 3,
+                                      color:Color.fromARGB(255, 222, 221, 222),
+                                      child: ListTile(
+                                        title: Text('',
+                                          style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
+                                        ),
+                                      )
                                   );
                               }).toList())
                             ),
