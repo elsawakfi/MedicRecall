@@ -10,6 +10,15 @@ class FullMockRules extends StatefulWidget {
   State<FullMockRules> createState() => FullMockRulesState();
 }
 
+class AdaptiveTextSize {
+      const AdaptiveTextSize();
+
+      getadaptiveTextSize(BuildContext context, dynamic value) {
+    // 720 is medium screen height
+        return (value / 720) * MediaQuery.of(context).size.height;
+      }
+    }
+
 class FullMockRulesState extends State<FullMockRules> {
   @override
   Widget build(BuildContext context) {
@@ -53,18 +62,21 @@ class FullMockRulesState extends State<FullMockRules> {
                 ),
        body: SafeArea(
   child: SingleChildScrollView(
-    child: Padding(
+    child: LayoutBuilder(builder: (context, constraints){ 
+
+      return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Center(
-            child: const Text(
+            child: Text(
               'MedicRecall Full Mock 1 Exam Instructions: \n',
-              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 30), fontWeight: FontWeight.bold),
             ),
           ),
           //const SizedBox(height: 10),
+          Spacer(),
           Center(child: 
           SizedBox(
             width: 800,
@@ -73,7 +85,7 @@ class FullMockRulesState extends State<FullMockRules> {
               'encounter, and you will be asked questions about dealing with them. When answering questions, '
               'please consider yourself to be an FY2 Doctor unless stated otherwise and answer based on what you '
               'should do in each scenario.\n',
-              style: TextStyle(fontSize: 21),
+              style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 21)),
               textAlign: TextAlign.center,
             ),
           )),
@@ -85,7 +97,7 @@ class FullMockRulesState extends State<FullMockRules> {
               child: 
             Text(
               'The paper is divided into two parts: ',
-              style: TextStyle(fontSize: 23, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 23), fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
           )),
@@ -100,11 +112,11 @@ class FullMockRulesState extends State<FullMockRules> {
            Text.rich( 
               TextSpan(
                 text: 'Part 1: Ranking Questions (Q1-29).',
-                style: TextStyle(fontSize: 21, decoration:TextDecoration.underline,),
+                style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 21), decoration:TextDecoration.underline,),
                 children: <TextSpan>[
                   TextSpan(text:' In this part you are presented with scenarios followed by a number of possible options. For each scenario select the 3 options which together are the most '  
                     'appropriate to the least appropriate given the circumstances described. \n',
-                    style: TextStyle(fontSize: 21,decoration:TextDecoration.none)),
+                    style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 21),decoration:TextDecoration.none)),
                 ],),
             ),
           )),
@@ -116,11 +128,11 @@ class FullMockRulesState extends State<FullMockRules> {
            Text.rich( 
               TextSpan(
                 text: 'Part 2: Multiple Choice Questions (Q30-50).',
-                style: TextStyle(fontSize: 21, decoration:TextDecoration.underline,),
+                style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 21), decoration:TextDecoration.underline,),
                 children: <TextSpan>[
                   TextSpan(text:' In this part you are presented with scenarios followed by a number of possible options. For each scenario select the 3 options which together are the most '
               'appropriate responses to the situation given the circumstances described. \n',
-                    style: TextStyle(fontSize: 21,decoration:TextDecoration.none)),
+                    style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 21),decoration:TextDecoration.none)),
                 ],),
             ),
           )),
@@ -132,7 +144,7 @@ class FullMockRulesState extends State<FullMockRules> {
           Text(
               'The paper contains 50 questions in total. You have 95 minutes to complete the exam. This is to '
               'simulate the amount of time you will have to complete the exam on the day. \n',
-              style: TextStyle(fontSize: 21),
+              style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 21)),
             ),
           )),
            Center(
@@ -153,13 +165,13 @@ class FullMockRulesState extends State<FullMockRules> {
                         borderRadius: BorderRadius.circular(5),
                       ),
                       backgroundColor: Colors.green
-                    ), child: Text('Begin Exam', style: TextStyle(color:Colors.white, fontSize: 20)),
+                    ), child: Text('Begin Exam', style: TextStyle(color:Colors.white, fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 23))),
                   )
                 )
            )
         ],
       ),
-    ),
+    );}),
   ),
 ));
 
