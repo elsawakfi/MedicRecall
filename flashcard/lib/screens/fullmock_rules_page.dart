@@ -62,9 +62,8 @@ class FullMockRulesState extends State<FullMockRules> {
                 ),
        body: SafeArea(
   child: SingleChildScrollView(
-    child: LayoutBuilder(builder: (context, constraints){ 
-
-      return Padding(
+    child: 
+    Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,8 +74,7 @@ class FullMockRulesState extends State<FullMockRules> {
               style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 30), fontWeight: FontWeight.bold),
             ),
           ),
-          //const SizedBox(height: 10),
-          Spacer(),
+          const SizedBox(height: 10),
           Center(child: 
           SizedBox(
             width: 800,
@@ -171,9 +169,9 @@ class FullMockRulesState extends State<FullMockRules> {
            )
         ],
       ),
-    );}),
+    )),
   ),
-));
+);
 
   }
 }

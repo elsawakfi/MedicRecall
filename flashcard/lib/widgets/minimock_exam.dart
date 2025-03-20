@@ -22,6 +22,15 @@ abstract class MiniMockExam extends StatefulWidget {
   State<MiniMockExam> createState() => MiniMockExamState();
 }
 
+class AdaptiveTextSize {
+      const AdaptiveTextSize();
+
+      getadaptiveTextSize(BuildContext context, dynamic value) {
+    // 720 is medium screen height
+        return (value / 720) * MediaQuery.of(context).size.height;
+      }
+    }
+
 class MiniMockExamState extends State<MiniMockExam> {
   final FirebaseAuth auth = FirebaseAuth.instance;
   late User user;
@@ -404,7 +413,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                         children: [
                   Text(
                   questions[currentQuestion]['question'],
-                  style: TextStyle(fontSize: 20, color: Colors.black),
+                  style: TextStyle(fontSize:AdaptiveTextSize().getadaptiveTextSize(context, 20), color: Colors.black),
 
                 ),
                 const SizedBox(height: 20),
@@ -447,7 +456,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                                   color:Color.fromARGB(255, 222, 221, 222),
                                   child: ListTile(
                                     title: Text('${optionIndex+1}:  $optionLetter. $option',
-                                      style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
+                                      style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 21)),
                                     ),
                                     trailing: Icon(Icons.drag_handle, color: Color.fromARGB(255, 0, 0, 0), size: 30),
                                   )
@@ -477,7 +486,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                             ),
                             checkColor: Colors.white, // White tick inside black box
                             side: const BorderSide(color: Colors.black, width: 1),
-                            title: Text('$optionLetter. $option', style: TextStyle(fontSize: 20, color: Colors.black)),
+                            title: Text('$optionLetter. $option', style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 20), color: Colors.black)),
                             value: multiChoiceAnswers[questionIndex][optionIndex],
                             onChanged: (value) {
                               int checkedCount = multiChoiceAnswers[questionIndex].where((element) => element).length;
@@ -577,8 +586,8 @@ class MiniMockExamState extends State<MiniMockExam> {
                             }
                           };
                         },
-                        label: Text('Review Page', style: TextStyle(color:  Color.fromARGB(255, 0, 0, 0), fontSize: min(MediaQuery.of(context).size.width * 0.75, 15)),
-                        ),
+                        label: Text('Review Page', style: TextStyle(color:  Color.fromARGB(255, 0, 0, 0), fontSize: min(MediaQuery.of(context).size.width * 0.45, 15),
+                        )),
                         icon: Icon(Icons.search, color:  Color.fromARGB(255, 0, 0, 0), size: min(MediaQuery.of(context).size.width * 0.45, 17)
                         ),
                       
@@ -623,8 +632,7 @@ class MiniMockExamState extends State<MiniMockExam> {
 
                     if (currentQuestion == questions.length - 1)
                     SizedBox(
-                    width: 40, // Force the button width
-                    height: 16, // Force the button height
+                     // Force the button height
                       child: ElevatedButton.icon(
                         onPressed: () async {
                           if (widget.questionDirectory.contains('mini-mock')) {
@@ -672,12 +680,14 @@ class MiniMockExamState extends State<MiniMockExam> {
                             }
                           };
                         },
-                        icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 0, 0, 0), size:9),
-                        label: Text('Review', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 11)),
+                        icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 0, 0, 0), size:iconSize.clamp(16, 24)),
+                        label: SizedBox(),
                         style: ElevatedButton.styleFrom(
                           backgroundColor:Color.fromARGB(255, 222, 221, 222),
-                         
-                        ),
+                          padding:EdgeInsets.all(paddingValue),
+                          minimumSize: Size(buttonWidth, buttonWidth * 0.5),
+                       ),
+                       iconAlignment: IconAlignment.end,
                       ),
                     ),
                     ],
