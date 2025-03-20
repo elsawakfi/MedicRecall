@@ -403,43 +403,76 @@ class MiniMockExamState extends State<MiniMockExam> {
                         //   ),
                         // )
                         Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             Expanded(
-                              child: ListView.builder(
-                                itemCount: questions[currentQuestion]['options'].length(),
-                                itemBuilder: (context, index) {
-                                  int optionIndex = index;
-                                  String option = questions[currentQuestion]['options'][optionIndex];
-                                  String optionLetter = rankingAnswers[currentQuestion][optionIndex];
-                                  return Draggable(
-                                      key: ValueKey(optionLetter),
-                                      feedback: Card(
-                                          elevation: 3,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
+                                  int optionIndex = entry.key;
+                                  String text = '';
+                                    return DragTarget<int>(
+                                      onAcceptWithDetails: (data) => ({
+                                          text = questions[currentQuestion]['options'][data.data]
+                                      }),
+                                      builder: (context, candidateData, rejectedData) {
+                                        return Card(
+                                          elevation: 0,
                                           color:Color.fromARGB(255, 222, 221, 222),
                                           child: ListTile(
-                                            title: Text('${optionIndex+1}:  $optionLetter. $option',
+                                            title: Text(text,
                                               style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
                                             ),
-                                            trailing: Icon(Icons.drag_handle, color: Color.fromARGB(255, 0, 0, 0), size: 30),
                                           )
-                                      ),
-                                      childWhenDragging: Card(
-                                        elevation: 3,
-                                        color:Color.fromARGB(255, 222, 221, 222),
-                                      ),
-                                      child: Card( //Reused code
+                                        );
+                                      },
+                                    );
+                              }).toList())
+                            ),
+                            Expanded(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
+                                  int optionIndex = entry.key;
+                                  String option = questions[currentQuestion]['options'][optionIndex];
+                                  String optionLetter = options[optionIndex];
+                                  return Draggable<int>(
+                                    data: optionIndex,
+                                    key: ValueKey(optionLetter),
+                                    feedback: SizedBox(
+                                      width: 200, // Set a fixed width
+                                      height: 60, // Set a fixed height
+                                      child: Card(
                                         elevation: 3,
                                         color:Color.fromARGB(255, 222, 221, 222),
                                         child: ListTile(
-                                          title: Text('${optionIndex+1}:  $optionLetter. $option',
+                                          title: Text('$optionLetter. $option',
                                             style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
                                           ),
-                                          trailing: Icon(Icons.drag_handle, color: Color.fromARGB(255, 0, 0, 0), size: 30),
                                         )
+                                    )),
+                                    childWhenDragging: Card(
+                                        elevation: 3,
+                                        color:Color.fromARGB(255, 222, 221, 222),
+                                        child: ListTile(
+                                          title: Text('                    ',
+                                            style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
+                                          ),
+                                        )
+                                    ),
+                                    child: Card( //Reused code
+                                      elevation: 3,
+                                      color:Color.fromARGB(255, 222, 221, 222),
+                                      child: ListTile(
+                                        title: Text('$optionLetter. $option',
+                                          style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
+                                        ),
                                       )
+                                    )
                                   );
-                                }
-                              )
+                              }).toList())
                             ),
                           ],
                         ),
