@@ -26,7 +26,9 @@ class MiniMockExamState extends State<MiniMockExam> {
   int currentQuestion = 0;
   int remainingSeconds = 2700; // Temp fix for late initialisation error
   List<List<bool>> multiChoiceAnswers = []; // For each question store selected options as a list of booleans
-  List<List<String>> rankingAnswers = [];
+  // List<List<String>> rankingAnswers = [];
+  List<List<MapEntry<String,String>>> rankingAnswers = [];
+  List<List<bool>> rankingOptionTracker = [];
   List<Map<String, dynamic>> questions = []; // Store question data with the question number as key e.g Q14
   List<bool> flaggedQuestions = [];
   final options = 'ABCDEFGH';
@@ -103,7 +105,10 @@ class MiniMockExamState extends State<MiniMockExam> {
             String modifiedQuestion = doc['question'].replaceFirst('Rank', '\nRank');
             doc['question'] = modifiedQuestion; // Add a newline between the question (could store a newline in the firebase itself but this allows for easier customisation)
             // Add a list of ordered letter 'A', 'B', ... based on quesiton index
-            rankingAnswers.add(List<String>.generate(doc['options'].length, (index) => String.fromCharCode(65 + index)));
+            int length = doc['options'].length;
+            // rankingAnswers.add(List<String>.generate(doc['options'].length, (index) => String.fromCharCode(65 + index)));
+            rankingAnswers.add(List<MapEntry<String,String>>.generate(length, (index) => MapEntry(String.fromCharCode(65 + index),doc['options'][index])));
+            rankingOptionTracker.add(List<bool>.generate(length, (index) => false));
             break;
           case 'multiple choice':
             String modifiedQuestion = doc['question'].replaceFirst('Choose', '\nChoose');
@@ -155,7 +160,11 @@ class MiniMockExamState extends State<MiniMockExam> {
     _timerController.stopTimer();
     List<List<String>> multiChoiceFormatted = booleanToString(multiChoiceAnswers);
     List<List<String>> finalAnswerList = [];
-    finalAnswerList.addAll(rankingAnswers);
+    for(var i = 0; i < rankingAnswers.length; i++){
+      finalAnswerList.add(List<String>.generate(rankingAnswers[i].length,
+                          (index) => rankingAnswers[i][index].key));
+    }
+    // finalAnswerList.addAll(rankingAnswers);
     finalAnswerList.addAll(multiChoiceFormatted);
     updateExamResults(finalAnswerList);
     Navigator.of(context).pushReplacement(
@@ -412,19 +421,56 @@ class MiniMockExamState extends State<MiniMockExam> {
                                 children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
                                   int optionIndex = entry.key;
                                   String text = '';
-                                    return DragTarget<int>(
+                                    return DragTarget<String>(
                                       onAcceptWithDetails: (data) => ({
-                                          text = questions[currentQuestion]['options'][data.data]
+                                          setState(() {
+                                            if (data.data.startsWith('internal')) {
+                                              int sourceIndex = int.parse(data.data.split(':')[1]);
+                                              // Item came from within the list so swap their data
+                                              MapEntry<String, String> temp = rankingAnswers[currentQuestion][optionIndex];
+                                              rankingAnswers[currentQuestion][optionIndex] = rankingAnswers[currentQuestion][sourceIndex];
+                                              rankingAnswers[currentQuestion][sourceIndex] = temp;
+                                            } else if (data.data.startsWith('external')) {
+                                              int sourceIndex = int.parse(data.data.split(':')[1]);
+                                              if(text == ''){
+                                                rankingAnswers[currentQuestion][optionIndex] = rankingAnswers[currentQuestion][sourceIndex];
+                                              }
+                                            }
+                                          })
                                       }),
                                       builder: (context, candidateData, rejectedData) {
-                                        return Card(
-                                          elevation: 0,
-                                          color:Color.fromARGB(255, 222, 221, 222),
-                                          child: ListTile(
-                                            title: Text(text,
-                                              style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
+                                        return Draggable<String>(
+                                            data: 'internal: $optionIndex',
+                                            feedback: SizedBox(
+                                                width: 200, // Set a fixed width
+                                                height: 60, // Set a fixed height
+                                                child: Card(
+                                                    elevation: 3,
+                                                    color:Color.fromARGB(255, 222, 221, 222),
+                                                    child: ListTile(
+                                                      title: Text('',
+                                                        style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
+                                                      ),
+                                                    )
+                                                )),
+                                            childWhenDragging: Card(
+                                                elevation: 3,
+                                                color:Color.fromARGB(255, 222, 221, 222),
+                                                child: ListTile(
+                                                  title: Text('',
+                                                    style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
+                                                  ),
+                                                )
                                             ),
-                                          )
+                                            child: Card( //Reused code
+                                                elevation: 3,
+                                                color:Color.fromARGB(255, 222, 221, 222),
+                                                child: ListTile(
+                                                  title: Text(rankingAnswers[currentQuestion][optionIndex].value,
+                                                    style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
+                                                  ),
+                                                )
+                                            )
                                         );
                                       },
                                     );
@@ -438,9 +484,8 @@ class MiniMockExamState extends State<MiniMockExam> {
                                   int optionIndex = entry.key;
                                   String option = questions[currentQuestion]['options'][optionIndex];
                                   String optionLetter = options[optionIndex];
-                                  return Draggable<int>(
-                                    data: optionIndex,
-                                    key: ValueKey(optionLetter),
+                                  return Draggable<String>(
+                                    data: 'external: $optionIndex',
                                     feedback: SizedBox(
                                       width: 200, // Set a fixed width
                                       height: 60, // Set a fixed height
