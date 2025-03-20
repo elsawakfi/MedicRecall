@@ -83,7 +83,7 @@ class FullMockLandingState extends State<FullMockLanding> {
             children: [
               SizedBox(height: 10),
               SizedBox(
-                height: 50,
+                height: 55,
                 width: 960, // Set a fixed width for the button
                 child: ElevatedButton.icon(
                   onPressed: daysUntilTest! > -1
