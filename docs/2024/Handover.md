@@ -4,11 +4,11 @@
 - [Project Overview](#project-overview)
 - [Repository Details](#repository-details)
 - [Installation & Setup](#installation--setup)
-- [Architecture Overview](#️architecture)
+- [Architecture Overview](#️-architecture-overview)
 - [Project Structure](#project-structure)
 - [Testing & Debugging](#️testing)
 - [Database Structure](#database-structure)
-- [Cloud Functions](#️cloud-functions)
+- [Cloud Functions](#️-cloud-functions)
 - [2024/2025 Progress](#20242025-progress)
 
 ## 📌 Project Overview <a id = "project-overview"></a>
@@ -101,7 +101,7 @@ Before you begin, make sure you have the following installed:
    ```
 <p align="right">(<a href="#contents">back to top</a>)</p>
 
-## 🏗️ Architecture Overview <a id = "architecture"></a>
+## 🏗️ Architecture Overview
 The following diagram illustrates the MedicRecall system architecture, highlighting the interaction between the frontend Flutter application and Firebase backend services.
 
 <p align="left">
@@ -387,7 +387,7 @@ Each document within the **users** collection contains:
 
 <p align="right">(<a href="#contents">back to top</a>)</p>
 
-## ☁️ Cloud Functions <a id = "cloud-functions"></a>
+## ☁️ Cloud Functions
 [Cloud Functions](https://firebase.google.com/docs/functions) are serverless functions that allow you to run code in response to [events](https://cloud.google.com/functions/docs/calling) without managing the underlying infrastructure.
 The current functions consist of:
 - `sendEmail` - A HTTP triggered function used to notify users of their revision schedule, and
@@ -506,14 +506,10 @@ Features related to the calendar and scheduling events:
 
 
 
-
-
-
-<p align="right">(<a href="#contents">back to top</a>)</p>
-
 ### ⚖️ General <a id = "general"></a>
 The general features:
 | Feature(s)                       | Explanation                                                                                                                                   |
 |----------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
 | ```Updated Firestore Security``` | We updated the client's firestore rules to prevent unnecessary read and write access within the database as there previously was no security. |
 
+<p align="right">(<a href="#contents">back to top</a>)</p>
