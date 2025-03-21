@@ -29,9 +29,8 @@ class MiniMockExamState extends State<MiniMockExam> {
   List<List<bool>> multiChoiceAnswers = []; // For each question store selected options as a list of booleans
   // List<List<String>> rankingAnswers = [];
   // List<List<MapEntry<String,String>>> rankingAnswers = [];
-  List<List<String>> rankingAnswers = []; // Desktop left set
+  List<List<String>> rankingAnswers = []; // Desktop left set -> Also used for mobile
   List<List<String>> rankingOptions = []; // Desktop right set
-  List<List<bool>> rankingOptionTracker = [];
   List<Map<String, dynamic>> questions = []; // Store question data with the question number as key e.g Q14
   List<bool> flaggedQuestions = [];
   final options = 'ABCDEFGH';
@@ -108,11 +107,8 @@ class MiniMockExamState extends State<MiniMockExam> {
             String modifiedQuestion = doc['question'].replaceFirst('Rank', '\nRank');
             doc['question'] = modifiedQuestion; // Add a newline between the question (could store a newline in the firebase itself but this allows for easier customisation)
             // Add a list of ordered letter 'A', 'B', ... based on quesiton index
-            int length = doc['options'].length;
             rankingOptions.add(List<String>.generate(doc['options'].length, (index) => String.fromCharCode(65 + index)));
             rankingAnswers.add(List<String>.generate(doc['options'].length, (index) => ''));
-            // rankingAnswers.add(List<MapEntry<String,String>>.generate(length, (index) => MapEntry(String.fromCharCode(65 + index),doc['options'][index])));
-            rankingOptionTracker.add(List<bool>.generate(length, (index) => false));
             break;
           case 'multiple choice':
             String modifiedQuestion = doc['question'].replaceFirst('Choose', '\nChoose');
@@ -162,13 +158,9 @@ class MiniMockExamState extends State<MiniMockExam> {
 
   void examEnd(){
     _timerController.stopTimer();
-    List<List<String>> multiChoiceFormatted = booleanToString(multiChoiceAnswers);
     List<List<String>> finalAnswerList = [];
-    // for(var i = 0; i < rankingAnswers.length; i++){
-    //   finalAnswerList.add(List<String>.generate(rankingAnswers[i].length,
-    //                       (index) => rankingAnswers[i][index].key));
-    // }
-    // finalAnswerList.addAll(rankingAnswers);
+    finalAnswerList = mergeRankedLists(rankingAnswers, rankingOptions);
+    List<List<String>> multiChoiceFormatted = booleanToString(multiChoiceAnswers);
     finalAnswerList.addAll(multiChoiceFormatted);
     updateExamResults(finalAnswerList);
     Navigator.of(context).pushReplacement(
@@ -179,6 +171,22 @@ class MiniMockExamState extends State<MiniMockExam> {
         ),
       ),
     );
+  }
+
+  List<List<String>> mergeRankedLists(List<List<String>> answers, options){
+    List<List<String>> combinedList = [];
+    for (int i = 0; i < answers.length; i++) {
+      combinedList.add([]);
+      for (int j = 0; j < answers[i].length; j++) {
+        if (answers[i][j].isNotEmpty) {
+          combinedList[i].add(answers[i][j]); // Keep the non-empty element from the left list
+        } else if (options[i][j].isNotEmpty) {
+          combinedList[i].add(options[i][j]); // Fill with the non-empty element from the right list
+        }
+        options[i][j] = '';
+      }
+    }
+    return combinedList;
   }
 
   @override
@@ -259,8 +267,7 @@ class MiniMockExamState extends State<MiniMockExam> {
               ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
               : LayoutBuilder( builder: (context, constraints) {
                 double maxScreenWidth = constraints.maxWidth * 0.5;
-                double maxPreferredWidth = 960; // 1920/2
-
+                double maxPreferredWidth = (maxScreenWidth > 960) ? maxScreenWidth : 960;
                 return Center(
                   child: Container(
                     decoration: BoxDecoration(
@@ -275,7 +282,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                       color:   Color.fromARGB(255, 255, 255, 255),
                     ),
                   constraints: BoxConstraints(
-                    maxWidth: maxScreenWidth > maxPreferredWidth ? maxScreenWidth : maxPreferredWidth,
+                    maxWidth: maxPreferredWidth,
                   ),
                   padding: EdgeInsets.all(16),
                   child: Column(
@@ -287,12 +294,6 @@ class MiniMockExamState extends State<MiniMockExam> {
                           child: Row(
                           children: [
                             Align(alignment: Alignment.centerLeft,
-
-
-                    // child: (
-
-                    // Wrap(
-                    // children: [
                       child: Container(
                         margin: const EdgeInsets.only(bottom: 10),
                         width: 160,
@@ -458,10 +459,10 @@ class MiniMockExamState extends State<MiniMockExam> {
                                       ? Draggable<String>(
                                           data: 'internal:$optionIndex:$optionLetter',
                                           feedback: SizedBox(
-                                              width: 400, // Set a fixed width
-                                              height: 60, // Set a fixed height
+                                              width: (maxPreferredWidth/2) - 16,
+                                              height: 85,
                                               child: OptionCard(text: text)),
-                                          childWhenDragging: OptionCard(text: ''),
+                                          childWhenDragging: OptionCard(text: '${optionIndex+1}'),
                                           child: OptionCard(text: text)
                                       )
                                       : OptionCard(text: text);
@@ -499,8 +500,8 @@ class MiniMockExamState extends State<MiniMockExam> {
                                           ? Draggable<String>(
                                           data: 'external:$optionIndex:$optionLetter',
                                           feedback: SizedBox(
-                                              width: 400, // Set a fixed width
-                                              height: 60, // Set a fixed height
+                                              width: (maxPreferredWidth/2) - 16,
+                                              height: 85,
                                               child: OptionCard(text: text)),
                                           childWhenDragging: OptionCard(text: ''),
                                           child: OptionCard(text: text)
