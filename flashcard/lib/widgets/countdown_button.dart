@@ -107,9 +107,10 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
         ),
       ),
       content: SizedBox(
-        // height: 130,
         width: 300,
-        child: content,
+        child: SingleChildScrollView(
+          child: content,
+        ),
       ),
       actions: actions,
       actionsAlignment: MainAxisAlignment.end,
