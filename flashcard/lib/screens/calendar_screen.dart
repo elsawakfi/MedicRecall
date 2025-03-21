@@ -19,7 +19,8 @@ import 'feed_screen.dart'; // Contains AboveEverything widget
 import '../widgets/drawer_widget.dart';
 import '../widgets/event.dart';
 import 'package:flashcard_x/screens/dashboard_screen.dart';
-
+import 'package:flashcard_x/widgets/app_bar.dart';
+import 'package:flashcard_x/utils/theme_provider.dart';
 /*
 Important note for devs
 
@@ -746,9 +747,8 @@ class CalendarStateO extends State<Calendar> {
       }
 
       selectedEvents[testDay]?.remove(Event(
-        title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
-        getTestDay();
-       
+          title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
+      getTestDay();
 
       if (data.containsKey("excludedDays") || data["excludedDays"] != null) {
         updates["excludedDays"] = [];
@@ -759,7 +759,6 @@ class CalendarStateO extends State<Calendar> {
         await _userCollectionRef.doc(id).update(updates);
       }
 
-
       // Reset local state
       setState(() {
         testDay = null;
@@ -767,95 +766,82 @@ class CalendarStateO extends State<Calendar> {
         revisionDays = [];
         loading = false;
       });
-       // Show confirmation popup
+      // Show confirmation popup
       showDialog(
-                                          context: context,
-                                          builder: (context) => AlertDialog(
-                                            backgroundColor:
-                                                const Color(0xFFE6EDF2),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(0),
-                                            ),
-                                            title: const Text(
-                                              "All Events Deleted",
-                                              style: TextStyle(
-                                                color: Color.fromRGBO(
-                                                    21, 58, 103, 1),
-                                                fontSize: 21,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                            content: const Text(
-                                              "Go to the homepage to schedule your study schedule.",
-                                              style: TextStyle(
-                                                color: Color.fromRGBO(
-                                                    21, 58, 103, 1),
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w400,
-                                              ),
-                                            ),
-                                            actions: [
-                                              TextButton(
-                                                onPressed: () =>
-                                                    Navigator.pop(context),
-                                                style: TextButton.styleFrom(
-                                                  padding: EdgeInsets.symmetric(
-                                                      horizontal: 24,
-                                                      vertical: 12),
-                                                  minimumSize: Size(120, 45),
-                                                ),
-                                                child: Text(
-                                                  'OK',
-                                                  style:
-                                                      TextStyle(fontSize: 16),
-                                                ),
-                                              ),
-                                              TextButton(
-                                                onPressed: () {
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            Landing()),
-                                                  );
-                                                },
-                                                style: TextButton.styleFrom(
-                                                  foregroundColor: Colors.white,
-                                                  backgroundColor: Colors.blue,
-                                                  padding: EdgeInsets.symmetric(
-                                                      horizontal: 24,
-                                                      vertical: 12),
-                                                  minimumSize: Size(120, 45),
-                                                ),
-                                                child: Text(
-                                                  'Go to Homepage',
-                                                  style:
-                                                      TextStyle(fontSize: 16),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        );
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: const Color(0xFFE6EDF2),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(0),
+          ),
+          title: const Text(
+            "All Events Deleted",
+            style: TextStyle(
+              color: Color.fromRGBO(21, 58, 103, 1),
+              fontSize: 21,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          content: const Text(
+            "Go to the homepage to schedule your study schedule.",
+            style: TextStyle(
+              color: Color.fromRGBO(21, 58, 103, 1),
+              fontSize: 16,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                minimumSize: Size(120, 45),
+              ),
+              child: Text(
+                'OK',
+                style: TextStyle(fontSize: 16),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Landing()),
+                );
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: Colors.blue,
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                minimumSize: Size(120, 45),
+              ),
+              child: Text(
+                'Go to Homepage',
+                style: TextStyle(fontSize: 16),
+              ),
+            ),
+          ],
+        ),
+      );
     } catch (e) {
       print("Error clearing events: $e");
       setState(() {
         loading = false;
       });
     }
-    
   }
 
   Future<void> initializeUserAndTestDay() async {
     await getUser();
     await getTestDay();
     await _loadExcludedDays();
-   // Only proceed with test day handling if a test day exists
+    // Only proceed with test day handling if a test day exists
     if (testDay != null && !testDayBool) {
       await getEventsFromDB(); // Then load events from database
 
       // First add Test Day event if not already present
-      DateTime normalizedTestDay = DateTime(testDay!.year, testDay!.month, testDay!.day);
+      DateTime normalizedTestDay =
+          DateTime(testDay!.year, testDay!.month, testDay!.day);
       if (!selectedEvents.containsKey(normalizedTestDay)) {
         selectedEvents[normalizedTestDay] = [];
       }
@@ -863,21 +849,21 @@ class CalendarStateO extends State<Calendar> {
       // Check if the Test Day event already exists
       bool testDayEventExists = false;
       if (selectedEvents[normalizedTestDay] != null) {
-        testDayEventExists = selectedEvents[normalizedTestDay]!.any((event) => event.title == "Test Day");
+        testDayEventExists = selectedEvents[normalizedTestDay]!
+            .any((event) => event.title == "Test Day");
       }
 
       if (!testDayEventExists) {
-        selectedEvents[normalizedTestDay]!.add(
-          Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94))
-        );
+        selectedEvents[normalizedTestDay]!.add(Event(
+            title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
       }
 
       // Check for study sessions by examining event titles
       bool hasStudySessions = false;
       for (var events in selectedEvents.values) {
         for (var event in events) {
-          if (event.title.contains("Mini Mock") || 
-              event.title.contains("Full-sized Mock") || 
+          if (event.title.contains("Mini Mock") ||
+              event.title.contains("Full-sized Mock") ||
               event.title.contains("Official MSRA Paper") ||
               event.title.contains("Flashcard")) {
             hasStudySessions = true;
@@ -1129,39 +1115,12 @@ class CalendarStateO extends State<Calendar> {
 
   @override
   Widget build(BuildContext context) {
+    bool isSmallScreen = MediaQuery.of(context).size.width < 600;
     return Scaffold(
       drawer: const DrawMain(),
-      appBar: AppBar(
-        elevation: 0,
-        toolbarHeight: 60,
-        leading: Builder(
-          builder: (context) => GestureDetector(
-            onTap: () => Scaffold.of(context).openDrawer(),
-            child: const Icon(Icons.menu),
-          ),
-        ),
-        title: LayoutBuilder(
-          builder: (context, constraints) {
-            bool isSmallScreen = MediaQuery.of(context).size.width < 600;
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Image.asset(
-                  'assets/newlogo.png',
-                  fit: BoxFit.cover,
-                  height: 34,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  isSmallScreen ? 'Calendar' : 'Revision Calendar',
-                  style: const TextStyle(fontSize: 20),
-                ),
-              ],
-            );
-          },
-        ),
-        centerTitle: true,
+      appBar: CustomAppBar(
+        title: 'Revision Calendar',
+        mobileTitle: 'Calendar',
       ),
       body: loading
           ? const Center(
@@ -1216,7 +1175,7 @@ class CalendarStateO extends State<Calendar> {
                                                                     : 40,
                                                             fontWeight:
                                                                 FontWeight.bold,
-                                                            color: Colors.white,
+                                                            color: Theme.of(context).textTheme.bodyMedium?.color,
                                                           ),
                                                           overflow: TextOverflow
                                                               .ellipsis,
@@ -1658,9 +1617,9 @@ class CalendarStateO extends State<Calendar> {
                                           daysOfWeekVisible: true,
                                           daysOfWeekHeight: 40.0,
                                           daysOfWeekStyle: DaysOfWeekStyle(
+                                            // decoration:
                                             decoration: BoxDecoration(
-                                              color:
-                                                  Colors.black.withOpacity(0.4),
+                                              color: Theme.of(context).shadowColor.withOpacity(0.4),
                                               border: Border(
                                                 bottom: BorderSide(
                                                   color: Colors.white
@@ -1673,14 +1632,13 @@ class CalendarStateO extends State<Calendar> {
                                             weekdayStyle: TextStyle(
                                               fontWeight: FontWeight.bold,
                                               fontSize: 17.0,
-                                              color: Colors
-                                                  .white, // Changed to white for dark mode
+                                              color: Theme.of(context).textTheme.bodyMedium?.color, // Changed to white for dark mode
                                             ),
                                             // Style for weekend names
                                             weekendStyle: TextStyle(
                                               fontWeight: FontWeight.bold,
                                               fontSize: 17.0,
-                                              color: Colors.grey[400],
+                                              color: Theme.of(context).textTheme.titleLarge?.color,
                                             ),
                                           ),
                                           onDaySelected: (DateTime selectDay,
@@ -1697,8 +1655,7 @@ class CalendarStateO extends State<Calendar> {
                                           eventLoader: _getEventsfromDay,
                                           calendarStyle: CalendarStyle(
                                             rowDecoration: BoxDecoration(
-                                              color:
-                                                  Colors.black.withOpacity(0.1),
+                                              color: Theme.of(context).shadowColor.withOpacity(0.1)
                                             ),
                                             // Make selected day more visible with a darker blue
                                             selectedDecoration: BoxDecoration(
@@ -1720,13 +1677,13 @@ class CalendarStateO extends State<Calendar> {
                                             // Make default days more visible on dark background
                                             defaultTextStyle: TextStyle(
                                               fontSize: 16,
-                                              color: Colors.white,
+                                              color: Theme.of(context).textTheme.bodyMedium?.color,
                                               fontWeight: FontWeight.w500,
                                             ),
                                             // Make weekend days match default days
                                             weekendTextStyle: TextStyle(
                                               fontSize: 16,
-                                              color: Colors.white,
+                                              color: Theme.of(context).textTheme.titleSmall?.color,
                                               fontWeight: FontWeight.w500,
                                             ),
                                             // Improve visibility of outside days
@@ -1743,8 +1700,7 @@ class CalendarStateO extends State<Calendar> {
                                               fontSize: 16,
                                             ),
                                             // Custom marker settings
-                                            markersMaxCount:
-                                                6, // Show up to 5 markers per day
+                                            markersMaxCount:6, // Show up to 5 markers per day
                                             markersAnchor: 1.0,
                                             cellPadding: EdgeInsets.symmetric(
                                                 vertical: 12.0,
@@ -1840,7 +1796,7 @@ class CalendarStateO extends State<Calendar> {
                                         title: Text(
                                           event.title,
                                           style: TextStyle(
-                                            color: Colors.white,
+                                            color: Theme.of(context).textTheme.bodyMedium?.color,
                                             fontWeight: FontWeight.w500,
                                           ),
                                         ),
@@ -1852,7 +1808,7 @@ class CalendarStateO extends State<Calendar> {
                                             shape: BoxShape.circle,
                                           ),
                                         ),
-                                        tileColor: event.color.withOpacity(0.4),
+                                        tileColor: event.color.withOpacity(0.5),
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
                                               BorderRadius.circular(8),
@@ -1864,14 +1820,14 @@ class CalendarStateO extends State<Calendar> {
                                           children: [
                                             IconButton(
                                               icon: Icon(Icons.edit,
-                                                  color: Colors.white),
+                                                  color: Theme.of(context).textTheme.bodyMedium?.color),
                                               onPressed: () => _editEventDate(
                                                   context, event),
                                             ),
                                             const SizedBox(width: 10),
                                             IconButton(
                                               icon: Icon(Icons.link,
-                                                  color: Colors.white),
+                                                  color: Theme.of(context).textTheme.bodyMedium?.color),
                                               onPressed: () =>
                                                   _navigateToEventDetails(
                                                       event),
@@ -1951,10 +1907,6 @@ class CalendarStateO extends State<Calendar> {
                                         testDay = null;
                                         testDayBool = true;
                                         await deleteAllEvents();
-                                        
-
-                                       
-                                        
                                       },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.redAccent,
@@ -2080,7 +2032,7 @@ class CalendarStateO extends State<Calendar> {
       DateTime date, String eventTitle, User user) async {
     date = DateTime(date.year, date.month, date.day);
 
-     if (!selectedEvents.containsKey(date)) {
+    if (!selectedEvents.containsKey(date)) {
       print("No events found for date: ${date.toString().split(' ')[0]}");
       return;
     }
@@ -2342,9 +2294,8 @@ class CalendarStateO extends State<Calendar> {
   // Load excluded days from Firebase
   Future<void> _loadExcludedDays() async {
     try {
-      QuerySnapshot querySnapshot = await _userCollectionRef
-          .where("userID", isEqualTo: user.uid)
-          .get();
+      QuerySnapshot querySnapshot =
+          await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
 
       if (querySnapshot.docs.isNotEmpty) {
         var userDoc = querySnapshot.docs.first.data() as Map<String, dynamic>;

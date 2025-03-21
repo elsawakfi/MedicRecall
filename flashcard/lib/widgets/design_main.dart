@@ -7,6 +7,11 @@ import 'package:flashcard_x/screens/sign_in_screen.dart';
 import '../screens/calendar_screen.dart';
 
 class DesignMain {
+  static String getThemeBasedLogo(BuildContext context) {
+    final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
+    return isDarkTheme ? 'assets/app-logo-boxed.png' : 'assets/newlogo.png';
+  }
+
   static AppBar appBarMain(String title, BuildContext context) {
     return AppBar(
       title: Align(
@@ -16,7 +21,7 @@ class DesignMain {
             Positioned(
               top: 2.3,
               child: Image.asset(
-                'assets/newlogo.png',
+                getThemeBasedLogo(context),
                 fit: BoxFit.cover,
                 height: 34,
               ),
@@ -29,15 +34,13 @@ class DesignMain {
           ],
         ),
       ),
-
       centerTitle: true,
       leading: GestureDetector(
         key: const ValueKey('HomePage'),
         onTap: () => Navigator.pop(context),
-
         child: const Icon(
-           Icons.arrow_back, // add custom icons also
-         ),
+          Icons.arrow_back,
+        ),
       ),
     );
   }
@@ -47,23 +50,18 @@ class RefreshDesignMain {
   final FirebaseAuth auth = FirebaseAuth.instance;
   late User user;
   final CollectionReference _userCollectionRef =
-  FirebaseFirestore.instance.collection('users');
+      FirebaseFirestore.instance.collection('users');
 
   //AppBar where the back button pops entire stack and goes back to flashcard page. Also, back button updates calendar revision events in database.
   AppBar appBarMain(String title, BuildContext context) {
-
     Future<void> getUser() async {
       NavigatorState nav = Navigator.of(context);
       if (auth.currentUser == null) {
-        var tmp = await auth
-            .authStateChanges()
-            .first;
+        var tmp = await auth.authStateChanges().first;
         if (tmp == null) {
-          nav.push(
-              MaterialPageRoute(
-                builder: (context) => const SignInScreen(),
-              )
-          );
+          nav.push(MaterialPageRoute(
+            builder: (context) => const SignInScreen(),
+          ));
         } else {
           user = tmp;
         }
@@ -75,7 +73,7 @@ class RefreshDesignMain {
     Future<void> updateCalendarEvents() async {
       getUser();
       QuerySnapshot querySnapshot =
-      await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+          await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
       var userFromDb = querySnapshot.docs.first;
       if ((userFromDb.data() as Map<String, dynamic>).containsKey("TestDay")) {
         Timestamp timestamp = userFromDb["TestDay"];
@@ -88,7 +86,8 @@ class RefreshDesignMain {
     void home() {
       updateCalendarEvents();
       Navigator.of(context).popUntil((route) => false);
-      Navigator.of(context).push(MaterialPageRoute(builder: (context) => const HomePage(title: 'Home')));
+      Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => const HomePage(title: 'Home')));
     }
 
     return AppBar(
@@ -112,7 +111,6 @@ class RefreshDesignMain {
           ],
         ),
       ),
-
       centerTitle: true,
       leading: GestureDetector(
         key: const ValueKey('HomePage'),

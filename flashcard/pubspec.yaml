@@ -127,6 +127,7 @@ flutter:
     - assets/ranking_image.png
     - assets/graph.png
     - assets/timings.png
+    - assets/app-logo-boxed.png
   
   fonts:
     - family: Akshar
