@@ -92,6 +92,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     required String title,
     required Widget content,
     required List<Widget> actions,
+    bool showScrollIndicator = false,
   }) {
     return AlertDialog(
       backgroundColor: const Color(0xFFE6EDF2),
@@ -109,27 +110,29 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 5),
-          // Scroll indicator at the top
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              Icon(
-                Icons.swipe_vertical,
-                size: 16,
-                color: Color.fromRGBO(21, 58, 103, 0.6),
-              ),
-              SizedBox(width: 5),
-              Text(
-                'Scroll for more options',
-                style: TextStyle(
-                  fontSize: 12,
+          if (showScrollIndicator) ...[
+            const SizedBox(height: 5),
+            // Scroll indicator at the top
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                Icon(
+                  Icons.swipe_vertical,
+                  size: 16,
                   color: Color.fromRGBO(21, 58, 103, 0.6),
-                  fontStyle: FontStyle.italic,
                 ),
-              ),
-            ],
-          ),
+                SizedBox(width: 5),
+                Text(
+                  'Scroll for more options',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Color.fromRGBO(21, 58, 103, 0.6),
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
       content: SizedBox(
@@ -482,8 +485,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               },
               style: TextButton.styleFrom(
                 foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 minimumSize: const Size(120, 45),
               ),
               child: const Text(
@@ -539,8 +541,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               style: TextButton.styleFrom(
                 foregroundColor: Colors.white,
                 backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
               child: const Text(
                 'Submit',
@@ -548,6 +549,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               ),
             ),
           ],
+          showScrollIndicator: true, // Show scroll indicator for resources dialog
         );
       },
     );
@@ -570,23 +572,11 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
             // Check if the screen is small
             bool isSmallScreen = MediaQuery.of(context).size.width < 600;
             
-            return AlertDialog(
-              backgroundColor: const Color(0xFFE6EDF2),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(5.0),
-              ),
-              title: Column(
+            return _buildAlertDialog(
+              title: 'How many times would you like to practice each selected resource?',
+              content: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'How many times would you like to practice each selected resource?',
-                    style: TextStyle(
-                      color: Color.fromRGBO(21, 58, 103, 1),
-                      fontSize: 21,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 11),
                   const Text(
                     'It is recommended to practice at least three times.\n'
                     'Your chosen number of repetitions will apply to each resource individually.',
@@ -596,106 +586,101 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                       fontWeight: FontWeight.w400, // Regular font weight
                     ),
                   ),
+                  const SizedBox(height: 15),
+                  if (selectedResources
+                      .contains('Official MSRA Practice Paper'))
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Official MSRA Practice Paper',
+                          style: TextStyle(
+                            color: Color.fromRGBO(21, 58, 103, 1),
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Wrap(
+                          spacing: 10, // Horizontal spacing
+                          runSpacing: 10, // Vertical spacing for wrapping
+                          children: repetitionOptions.map((int value) {
+                            return ChoiceChip(
+                              label: Text(
+                                '$value',
+                                style: TextStyle(
+                                  color: officialMSRARepetitions == value
+                                      ? Colors.white
+                                      : const Color.fromRGBO(21, 58, 103, 1),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              selected: officialMSRARepetitions == value,
+                              onSelected: (bool selected) {
+                                if (mounted) {
+                                  setState(() {
+                                    officialMSRARepetitions =
+                                        selected ? value : null;
+                                  });
+                                }
+                              },
+                              selectedColor:
+                                  const Color.fromRGBO(73, 148, 236, 1),
+                              backgroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            );
+                          }).toList(),
+                        ),
+                        const SizedBox(height: 20),
+                      ],
+                    ),
+                  if (selectedResources.contains('Full-sized Mock Exam'))
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Full-sized Mock Exam',
+                          style: TextStyle(
+                            color: Color.fromRGBO(21, 58, 103, 1),
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Wrap(
+                          spacing: 10, // Horizontal spacing
+                          runSpacing: 10, // Vertical spacing for wrapping
+                          children: repetitionOptions.map((int value) {
+                            return ChoiceChip(
+                              label: Text(
+                                '$value',
+                                style: TextStyle(
+                                  color: fullSizedMockRepetitions == value
+                                      ? Colors.white
+                                      : const Color.fromRGBO(21, 58, 103, 1),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              selected: fullSizedMockRepetitions == value,
+                              onSelected: (bool selected) {
+                                if (mounted) {
+                                  setState(() {
+                                    fullSizedMockRepetitions =
+                                        selected ? value : null;
+                                  });
+                                }
+                              },
+                              selectedColor:
+                                  const Color.fromRGBO(73, 148, 236, 1),
+                              backgroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            );
+                          }).toList(),
+                        ),
+                        const SizedBox(height: 20),
+                      ],
+                    ),
                 ],
-              ),
-              content: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    if (selectedResources
-                        .contains('Official MSRA Practice Paper'))
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Official MSRA Practice Paper',
-                            style: TextStyle(
-                              color: Color.fromRGBO(21, 58, 103, 1),
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          Wrap(
-                            spacing: 10, // Horizontal spacing
-                            runSpacing: 10, // Vertical spacing for wrapping
-                            children: repetitionOptions.map((int value) {
-                              return ChoiceChip(
-                                label: Text(
-                                  '$value',
-                                  style: TextStyle(
-                                    color: officialMSRARepetitions == value
-                                        ? Colors.white
-                                        : const Color.fromRGBO(21, 58, 103, 1),
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                selected: officialMSRARepetitions == value,
-                                onSelected: (bool selected) {
-                                  if (mounted) {
-                                    setState(() {
-                                      officialMSRARepetitions =
-                                          selected ? value : null;
-                                    });
-                                  }
-                                },
-                                selectedColor:
-                                    const Color.fromRGBO(73, 148, 236, 1),
-                                backgroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                              );
-                            }).toList(),
-                          ),
-                          const SizedBox(height: 20),
-                        ],
-                      ),
-                    if (selectedResources.contains('Full-sized Mock Exam'))
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Full-sized Mock Exam',
-                            style: TextStyle(
-                              color: Color.fromRGBO(21, 58, 103, 1),
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          Wrap(
-                            spacing: 10, // Horizontal spacing
-                            runSpacing: 10, // Vertical spacing for wrapping
-                            children: repetitionOptions.map((int value) {
-                              return ChoiceChip(
-                                label: Text(
-                                  '$value',
-                                  style: TextStyle(
-                                    color: fullSizedMockRepetitions == value
-                                        ? Colors.white
-                                        : const Color.fromRGBO(21, 58, 103, 1),
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                selected: fullSizedMockRepetitions == value,
-                                onSelected: (bool selected) {
-                                  if (mounted) {
-                                    setState(() {
-                                      fullSizedMockRepetitions =
-                                          selected ? value : null;
-                                    });
-                                  }
-                                },
-                                selectedColor:
-                                    const Color.fromRGBO(73, 148, 236, 1),
-                                backgroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                              );
-                            }).toList(),
-                          ),
-                          const SizedBox(height: 20),
-                        ],
-                      ),
-                  ],
-                ),
               ),
               actions: isSmallScreen
                   ? [
@@ -756,10 +741,11 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                                 _scheduleCompleteDialog(context);
                               }
                             } else {
+                              // Show a message if validation fails
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   content: Text(
-                                      'Please select number of repetitions for all resources'),
+                                      'Please select repetition counts for all resources'),
                                 ),
                               );
                             }
@@ -767,6 +753,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                           style: TextButton.styleFrom(
                             foregroundColor: Colors.white,
                             backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 12),
                             minimumSize: const Size(double.infinity, 45),
                           ),
                           child: const Text(
@@ -829,10 +817,11 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                               _scheduleCompleteDialog(context);
                             }
                           } else {
+                            // Show a message if validation fails
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text(
-                                    'Please select number of repetitions for all resources'),
+                                    'Please select repetition counts for all resources'),
                               ),
                             );
                           }
@@ -840,6 +829,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                         style: TextButton.styleFrom(
                           foregroundColor: Colors.white,
                           backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
                           minimumSize: const Size(120, 45),
                         ),
                         child: const Text(
@@ -848,7 +839,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                         ),
                       ),
                     ],
-              actionsPadding: const EdgeInsets.all(16),
+              showScrollIndicator: true, // Show scroll indicator for repetition dialog
             );
           },
         );
@@ -879,26 +870,13 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
             // Check if the screen is small
             bool isSmallScreen = MediaQuery.of(context).size.width < 600;
             
-            return AlertDialog(
-              backgroundColor: const Color(0xFFE6EDF2),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(5.0),
-              ),
-              title: const Text(
-                'Select Days to Exclude from Study',
-                style: TextStyle(
-                  color: Color.fromRGBO(21, 58, 103, 1),
-                  fontSize: 21,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              content: SingleChildScrollView(
-                child: Column(
-                  children: selectedDays.keys.map((day) {
-                    return _buildCheckbox(selectedDays[day]!, day,
-                        showInfo: false); // Hide info icon
-                  }).toList(),
-                ),
+            return _buildAlertDialog(
+              title: 'Select Days to Exclude from Study',
+              content: Column(
+                children: selectedDays.keys.map((day) {
+                  return _buildCheckbox(selectedDays[day]!, day,
+                      showInfo: false); // Hide info icon
+                }).toList(),
               ),
               actions: isSmallScreen
                   ? [
@@ -1011,7 +989,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                         ),
                       ),
                     ],
-              actionsPadding: const EdgeInsets.all(16),
+              showScrollIndicator: true, // Show scroll indicator for excluded days dialog
             );
           },
         );
