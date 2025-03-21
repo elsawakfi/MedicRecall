@@ -111,28 +111,9 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
         width: 300,
         child: content,
       ),
-      actions: [
-        LayoutBuilder(
-          builder: (context, constraints) {
-            bool isSmallScreen = MediaQuery.of(context).size.width < 600;
-            return isSmallScreen
-                ? Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: actions.map((action) {
-                      return Container(
-                        width: double.infinity,
-                        margin: const EdgeInsets.only(bottom: 8.0),
-                        child: action,
-                      );
-                    }).toList(),
-                  )
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: actions,
-                  );
-          },
-        ),
-      ],
+      actions: actions,
+      actionsAlignment: MainAxisAlignment.end,
+      actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     );
   }
 
@@ -559,6 +540,9 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
+            // Check if the screen is small
+            bool isSmallScreen = MediaQuery.of(context).size.width < 600;
+            
             return AlertDialog(
               backgroundColor: const Color(0xFFE6EDF2),
               shape: RoundedRectangleBorder(
@@ -606,6 +590,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                           const SizedBox(height: 10),
                           Wrap(
                             spacing: 10, // Horizontal spacing
+                            runSpacing: 10, // Vertical spacing for wrapping
                             children: repetitionOptions.map((int value) {
                               return ChoiceChip(
                                 label: Text(
@@ -629,6 +614,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                                 selectedColor:
                                     const Color.fromRGBO(73, 148, 236, 1),
                                 backgroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                               );
                             }).toList(),
                           ),
@@ -650,6 +636,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                           const SizedBox(height: 10),
                           Wrap(
                             spacing: 10, // Horizontal spacing
+                            runSpacing: 10, // Vertical spacing for wrapping
                             children: repetitionOptions.map((int value) {
                               return ChoiceChip(
                                 label: Text(
@@ -673,6 +660,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                                 selectedColor:
                                     const Color.fromRGBO(73, 148, 236, 1),
                                 backgroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                               );
                             }).toList(),
                           ),
@@ -682,82 +670,158 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                   ],
                 ),
               ),
-              actions: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        _showOptionsDialog(context);
-                      },
-                      style: TextButton.styleFrom(
-                        foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 12),
-                        minimumSize: const Size(120, 45),
-                      ),
-                      child: const Text(
-                        'Previous',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    TextButton(
-                      key: const ValueKey('submitButton2'),
-                      onPressed: () async {
-                        // Validate that all selected resources have a repetition count
-                        bool isValid = true;
-                        if (selectedResources
-                                .contains('Official MSRA Practice Paper') &&
-                            officialMSRARepetitions == null) {
-                          isValid = false;
-                        }
-                        if (selectedResources
-                                .contains('Full-sized Mock Exam') &&
-                            fullSizedMockRepetitions == null) {
-                          isValid = false;
-                        }
-
-                        if (isValid) {
-                          // Save repetition counts to the database
-                          QuerySnapshot u = await _userCollectionRef
-                              .where("userID", isEqualTo: user?.uid)
-                              .get();
-
-                          var id = u.docs.last.id;
-                          await _userCollectionRef.doc(id).update({
-                            'officialMSRARepetitions': officialMSRARepetitions,
-                            'fullSizedMockRepetitions':
-                                fullSizedMockRepetitions,
-                          });
-
-                          if (context.mounted) {
+              actions: isSmallScreen
+                  ? [
+                      // For small screens, show buttons in a column
+                      SizedBox(
+                        width: double.infinity,
+                        child: TextButton(
+                          onPressed: () {
                             Navigator.of(context).pop();
-                            _scheduleCompleteDialog(context);
+                            _showOptionsDialog(context);
+                          },
+                          style: TextButton.styleFrom(
+                            foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 12),
+                            minimumSize: const Size(double.infinity, 45),
+                          ),
+                          child: const Text(
+                            'Previous',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        width: double.infinity,
+                        child: TextButton(
+                          key: const ValueKey('submitButton2'),
+                          onPressed: () async {
+                            // Validate that all selected resources have a repetition count
+                            bool isValid = true;
+                            if (selectedResources
+                                    .contains('Official MSRA Practice Paper') &&
+                                officialMSRARepetitions == null) {
+                              isValid = false;
+                            }
+                            if (selectedResources
+                                    .contains('Full-sized Mock Exam') &&
+                                fullSizedMockRepetitions == null) {
+                              isValid = false;
+                            }
+
+                            if (isValid) {
+                              // Save repetition counts to the database
+                              QuerySnapshot u = await _userCollectionRef
+                                  .where("userID", isEqualTo: user?.uid)
+                                  .get();
+
+                              var id = u.docs.last.id;
+                              await _userCollectionRef.doc(id).update({
+                                'officialMSRARepetitions': officialMSRARepetitions,
+                                'fullSizedMockRepetitions':
+                                    fullSizedMockRepetitions,
+                              });
+
+                              if (context.mounted) {
+                                Navigator.of(context).pop();
+                                _scheduleCompleteDialog(context);
+                              }
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                      'Please select number of repetitions for all resources'),
+                                ),
+                              );
+                            }
+                          },
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
+                            minimumSize: const Size(double.infinity, 45),
+                          ),
+                          child: const Text(
+                            'Submit',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ),
+                      ),
+                    ]
+                  : [
+                      // For larger screens, show buttons in a row
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          _showOptionsDialog(context);
+                        },
+                        style: TextButton.styleFrom(
+                          foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
+                          minimumSize: const Size(120, 45),
+                        ),
+                        child: const Text(
+                          'Previous',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      TextButton(
+                        key: const ValueKey('submitButton2'),
+                        onPressed: () async {
+                          // Validate that all selected resources have a repetition count
+                          bool isValid = true;
+                          if (selectedResources
+                                  .contains('Official MSRA Practice Paper') &&
+                              officialMSRARepetitions == null) {
+                            isValid = false;
                           }
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                  'Please select number of repetitions for all resources'),
-                            ),
-                          );
-                        }
-                      },
-                      style: TextButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
-                        minimumSize: const Size(120, 45),
+                          if (selectedResources
+                                  .contains('Full-sized Mock Exam') &&
+                              fullSizedMockRepetitions == null) {
+                            isValid = false;
+                          }
+
+                          if (isValid) {
+                            // Save repetition counts to the database
+                            QuerySnapshot u = await _userCollectionRef
+                                .where("userID", isEqualTo: user?.uid)
+                                .get();
+
+                            var id = u.docs.last.id;
+                            await _userCollectionRef.doc(id).update({
+                              'officialMSRARepetitions': officialMSRARepetitions,
+                              'fullSizedMockRepetitions':
+                                  fullSizedMockRepetitions,
+                            });
+
+                            if (context.mounted) {
+                              Navigator.of(context).pop();
+                              _scheduleCompleteDialog(context);
+                            }
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                    'Please select number of repetitions for all resources'),
+                              ),
+                            );
+                          }
+                        },
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
+                          minimumSize: const Size(120, 45),
+                        ),
+                        child: const Text(
+                          'Submit',
+                          style: TextStyle(fontSize: 16),
+                        ),
                       ),
-                      child: const Text(
-                        'Submit',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+              actionsPadding: const EdgeInsets.all(16),
             );
           },
         );
@@ -785,65 +849,142 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return _buildAlertDialog(
-              title: 'Select Days to Exclude from Study',
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: selectedDays.keys.map((day) {
-                  return _buildCheckbox(selectedDays[day]!, day,
-                      showInfo: false); // Hide info icon
-                }).toList(),
+            // Check if the screen is small
+            bool isSmallScreen = MediaQuery.of(context).size.width < 600;
+            
+            return AlertDialog(
+              backgroundColor: const Color(0xFFE6EDF2),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5.0),
               ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    _showExamDateDialog(context);
-                  },
-                  style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 12),
-                  ),
-                  child: const Text(
-                    'Previous',
-                    style: TextStyle(fontSize: 16),
-                  ),
+              title: const Text(
+                'Select Days to Exclude from Study',
+                style: TextStyle(
+                  color: Color.fromRGBO(21, 58, 103, 1),
+                  fontSize: 21,
+                  fontWeight: FontWeight.w500,
                 ),
-                TextButton(
-                  onPressed: () async {
-                    List<String> excludedDays = selectedDays.entries
-                        .where((entry) => entry.value.value)
-                        .map((entry) => entry.key)
-                        .toList();
-
-                    // Save excluded days to Firestore or local storage
-                    QuerySnapshot u = await _userCollectionRef
-                        .where("userID", isEqualTo: user?.uid)
-                        .get();
-
-                    var id = u.docs.last.id;
-                    await _userCollectionRef.doc(id).update({
-                      'excludedDays': excludedDays,
-                    });
-
-                    if (context.mounted) {
-                      Navigator.of(context).pop();
-                      _showOptionsDialog(context);
-                    }
-                  },
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 12),
-                    minimumSize: const Size(120, 45),
-                  ),
-                  child: const Text(
-                    'Next',
-                    style: TextStyle(fontSize: 16),
-                  ),
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  children: selectedDays.keys.map((day) {
+                    return _buildCheckbox(selectedDays[day]!, day,
+                        showInfo: false); // Hide info icon
+                  }).toList(),
                 ),
-              ],
+              ),
+              actions: isSmallScreen
+                  ? [
+                      // For small screens, show buttons in a column
+                      SizedBox(
+                        width: double.infinity,
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            _showExamDateDialog(context);
+                          },
+                          style: TextButton.styleFrom(
+                            foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 12),
+                            minimumSize: const Size(double.infinity, 45),
+                          ),
+                          child: const Text(
+                            'Previous',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        width: double.infinity,
+                        child: TextButton(
+                          onPressed: () async {
+                            List<String> excludedDays = selectedDays.entries
+                                .where((entry) => entry.value.value)
+                                .map((entry) => entry.key)
+                                .toList();
+
+                            // Save excluded days to Firestore or local storage
+                            QuerySnapshot u = await _userCollectionRef
+                                .where("userID", isEqualTo: user?.uid)
+                                .get();
+
+                            var id = u.docs.last.id;
+                            await _userCollectionRef.doc(id).update({
+                              'excludedDays': excludedDays,
+                            });
+
+                            if (context.mounted) {
+                              Navigator.of(context).pop();
+                              _showOptionsDialog(context);
+                            }
+                          },
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
+                            minimumSize: const Size(double.infinity, 45),
+                          ),
+                          child: const Text(
+                            'Next',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ),
+                      ),
+                    ]
+                  : [
+                      // For larger screens, show buttons in a row
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          _showExamDateDialog(context);
+                        },
+                        style: TextButton.styleFrom(
+                          foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
+                          minimumSize: const Size(120, 45),
+                        ),
+                        child: const Text(
+                          'Previous',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      TextButton(
+                        onPressed: () async {
+                          List<String> excludedDays = selectedDays.entries
+                              .where((entry) => entry.value.value)
+                              .map((entry) => entry.key)
+                              .toList();
+
+                          // Save excluded days to Firestore or local storage
+                          QuerySnapshot u = await _userCollectionRef
+                              .where("userID", isEqualTo: user?.uid)
+                              .get();
+
+                          var id = u.docs.last.id;
+                          await _userCollectionRef.doc(id).update({
+                            'excludedDays': excludedDays,
+                          });
+
+                          if (context.mounted) {
+                            Navigator.of(context).pop();
+                            _showOptionsDialog(context);
+                          }
+                        },
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
+                          minimumSize: const Size(120, 45),
+                        ),
+                        child: const Text(
+                          'Next',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
+                    ],
+              actionsPadding: const EdgeInsets.all(16),
             );
           },
         );
@@ -855,116 +996,248 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return _buildAlertDialog(
-          title: 'Schedule Complete!',
-          content: const Text(
-            'Your study schedule has been successfully generated.\n'
-            'You can view it in the calendar page.',
-            style: TextStyle(
-              fontSize: 16,
-              color: Color.fromRGBO(21, 58, 103, 1),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              style: TextButton.styleFrom(
-                foregroundColor: const Color.fromARGB(255, 160, 160, 160),
-                backgroundColor: Colors.transparent,
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            // Check if the screen is small
+            bool isSmallScreen = MediaQuery.of(context).size.width < 600;
+            
+            return AlertDialog(
+              backgroundColor: const Color(0xFFE6EDF2),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5.0),
               ),
-              child: const Text(
-                'Ok',
-                style: TextStyle(fontSize: 16),
+              title: const Text(
+                'Schedule Complete!',
+                style: TextStyle(
+                  color: Color.fromRGBO(21, 58, 103, 1),
+                  fontSize: 21,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-            ),
-            TextButton(
-              onPressed: () async {
-                // Show loading indicator while processing
-                showDialog(
-                  context: context,
-                  barrierDismissible: false,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      backgroundColor: Colors.white,
-                      content: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              const Color.fromRGBO(51, 178, 73, 1),
-                            ),
+              content: const Text(
+                'Your study schedule has been successfully generated.\n'
+                'You can view it in the calendar page.',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Color.fromRGBO(21, 58, 103, 1),
+                ),
+              ),
+              actions: isSmallScreen
+                  ? [
+                      // For small screens, show buttons in a column
+                      SizedBox(
+                        width: double.infinity,
+                        child: TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          style: TextButton.styleFrom(
+                            foregroundColor: const Color.fromARGB(255, 160, 160, 160),
+                            backgroundColor: Colors.transparent,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 12),
+                            minimumSize: const Size(double.infinity, 45),
                           ),
-                          const SizedBox(height: 16),
-                          const Text(
-                            'Generating your schedule...',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Color.fromRGBO(21, 58, 103, 1),
-                            ),
+                          child: const Text(
+                            'Ok',
+                            style: TextStyle(fontSize: 16),
                           ),
-                        ],
+                        ),
                       ),
-                    );
-                  },
-                );
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        width: double.infinity,
+                        child: TextButton(
+                          onPressed: () async {
+                            // Show loading indicator while processing
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  backgroundColor: Colors.white,
+                                  content: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      CircularProgressIndicator(
+                                        valueColor: AlwaysStoppedAnimation<Color>(
+                                          const Color.fromRGBO(51, 178, 73, 1),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      const Text(
+                                        'Generating your schedule...',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Color.fromRGBO(21, 58, 103, 1),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            );
 
-                try {
-                  // Generate and save study sessions before navigating to calendar
-                  final studySessionManager = StudySessionManager();
-                  final events =
-                      await studySessionManager.generateStudySessions(user!);
-                  await studySessionManager.saveStudySessionsToDB(
-                      user!, events);
+                            try {
+                              // Generate and save study sessions before navigating to calendar
+                              final studySessionManager = StudySessionManager();
+                              final events =
+                                  await studySessionManager.generateStudySessions(user!);
+                              await studySessionManager.saveStudySessionsToDB(
+                                  user!, events);
 
-                  // Close the loading dialog
-                  Navigator.of(context).pop();
-                  // Close the current dialog
-                  Navigator.of(context).pop();
+                              // Close the loading dialog
+                              Navigator.of(context).pop();
+                              // Close the current dialog
+                              Navigator.of(context).pop();
 
-                  // Navigate to Calendar screen to see the new schedule
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Calendar(),
-                    ),
-                  );
-                } catch (e) {
-                  // Close the loading dialog
-                  Navigator.of(context).pop();
-                  // Show error dialog
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: const Text('Error'),
-                        content: Text(
-                            'Failed to generate schedule: ${e.toString()}'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            child: const Text('OK'),
+                              // Navigate to Calendar screen to see the new schedule
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => Calendar(),
+                                ),
+                              );
+                            } catch (e) {
+                              // Close the loading dialog
+                              Navigator.of(context).pop();
+                              // Show error dialog
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text('Error'),
+                                    content: Text(
+                                        'Failed to generate schedule: ${e.toString()}'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.of(context).pop(),
+                                        child: const Text('OK'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            }
+                          },
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
+                            minimumSize: const Size(double.infinity, 45),
                           ),
-                        ],
-                      );
-                    },
-                  );
-                }
-              },
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                minimumSize: const Size(120, 45),
-              ),
-              child: const Text(
-                'View Schedule',
-                style: TextStyle(fontSize: 16),
-              ),
-            ),
-          ],
+                          child: const Text(
+                            'View Schedule',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ),
+                      ),
+                    ]
+                  : [
+                      // For larger screens, show buttons in a row
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        style: TextButton.styleFrom(
+                          foregroundColor: const Color.fromARGB(255, 160, 160, 160),
+                          backgroundColor: Colors.transparent,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
+                          minimumSize: const Size(120, 45),
+                        ),
+                        child: const Text(
+                          'Ok',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      TextButton(
+                        onPressed: () async {
+                          // Show loading indicator while processing
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                backgroundColor: Colors.white,
+                                content: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    CircularProgressIndicator(
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        const Color.fromRGBO(51, 178, 73, 1),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    const Text(
+                                      'Generating your schedule...',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Color.fromRGBO(21, 58, 103, 1),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          );
+
+                          try {
+                            // Generate and save study sessions before navigating to calendar
+                            final studySessionManager = StudySessionManager();
+                            final events =
+                                await studySessionManager.generateStudySessions(user!);
+                            await studySessionManager.saveStudySessionsToDB(
+                                user!, events);
+
+                            // Close the loading dialog
+                            Navigator.of(context).pop();
+                            // Close the current dialog
+                            Navigator.of(context).pop();
+
+                            // Navigate to Calendar screen to see the new schedule
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => Calendar(),
+                              ),
+                            );
+                          } catch (e) {
+                            // Close the loading dialog
+                            Navigator.of(context).pop();
+                            // Show error dialog
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('Error'),
+                                  content: Text(
+                                      'Failed to generate schedule: ${e.toString()}'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.of(context).pop(),
+                                      child: const Text('OK'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          }
+                        },
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
+                          minimumSize: const Size(120, 45),
+                        ),
+                        child: const Text(
+                          'View Schedule',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
+                    ],
+              actionsPadding: const EdgeInsets.all(16),
+            );
+          },
         );
       },
     );
