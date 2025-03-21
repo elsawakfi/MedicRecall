@@ -98,13 +98,39 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(0),
       ),
-      title: Text(
-        title,
-        style: const TextStyle(
-          color: Color.fromRGBO(21, 58, 103, 1),
-          fontSize: 21,
-          fontWeight: FontWeight.w500,
-        ),
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              color: Color.fromRGBO(21, 58, 103, 1),
+              fontSize: 21,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 5),
+          // Scroll indicator at the top
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              Icon(
+                Icons.swipe_vertical,
+                size: 16,
+                color: Color.fromRGBO(21, 58, 103, 0.6),
+              ),
+              SizedBox(width: 5),
+              Text(
+                'Scroll for more options',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Color.fromRGBO(21, 58, 103, 0.6),
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
       content: SizedBox(
         width: 300,
