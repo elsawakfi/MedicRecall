@@ -28,7 +28,9 @@ class MiniMockExamState extends State<MiniMockExam> {
   int remainingSeconds = 2700; // Temp fix for late initialisation error
   List<List<bool>> multiChoiceAnswers = []; // For each question store selected options as a list of booleans
   // List<List<String>> rankingAnswers = [];
-  List<List<MapEntry<String,String>>> rankingAnswers = [];
+  // List<List<MapEntry<String,String>>> rankingAnswers = [];
+  List<List<String>> rankingAnswers = []; // Desktop left set
+  List<List<String>> rankingOptions = []; // Desktop right set
   List<List<bool>> rankingOptionTracker = [];
   List<Map<String, dynamic>> questions = []; // Store question data with the question number as key e.g Q14
   List<bool> flaggedQuestions = [];
@@ -107,8 +109,9 @@ class MiniMockExamState extends State<MiniMockExam> {
             doc['question'] = modifiedQuestion; // Add a newline between the question (could store a newline in the firebase itself but this allows for easier customisation)
             // Add a list of ordered letter 'A', 'B', ... based on quesiton index
             int length = doc['options'].length;
-            // rankingAnswers.add(List<String>.generate(doc['options'].length, (index) => String.fromCharCode(65 + index)));
-            rankingAnswers.add(List<MapEntry<String,String>>.generate(length, (index) => MapEntry(String.fromCharCode(65 + index),doc['options'][index])));
+            rankingOptions.add(List<String>.generate(doc['options'].length, (index) => String.fromCharCode(65 + index)));
+            rankingAnswers.add(List<String>.generate(doc['options'].length, (index) => ''));
+            // rankingAnswers.add(List<MapEntry<String,String>>.generate(length, (index) => MapEntry(String.fromCharCode(65 + index),doc['options'][index])));
             rankingOptionTracker.add(List<bool>.generate(length, (index) => false));
             break;
           case 'multiple choice':
@@ -161,10 +164,10 @@ class MiniMockExamState extends State<MiniMockExam> {
     _timerController.stopTimer();
     List<List<String>> multiChoiceFormatted = booleanToString(multiChoiceAnswers);
     List<List<String>> finalAnswerList = [];
-    for(var i = 0; i < rankingAnswers.length; i++){
-      finalAnswerList.add(List<String>.generate(rankingAnswers[i].length,
-                          (index) => rankingAnswers[i][index].key));
-    }
+    // for(var i = 0; i < rankingAnswers.length; i++){
+    //   finalAnswerList.add(List<String>.generate(rankingAnswers[i].length,
+    //                       (index) => rankingAnswers[i][index].key));
+    // }
     // finalAnswerList.addAll(rankingAnswers);
     finalAnswerList.addAll(multiChoiceFormatted);
     updateExamResults(finalAnswerList);
@@ -414,6 +417,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                         // )
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Expanded(
                               child: Column(
@@ -421,29 +425,26 @@ class MiniMockExamState extends State<MiniMockExam> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: rankingAnswers[currentQuestion].asMap().entries.map<Widget>((entry) {
                                   int optionIndex = entry.key; // List index
-                                  String optionLetter = entry.value.key; // MapEntry key
-                                  String text = (rankingOptionTracker[currentQuestion][optionIndex]) ? '$optionLetter. ${rankingAnswers[currentQuestion][optionIndex].value}'
-                                                                        : '';
+                                  String optionLetter = entry.value;
+                                  bool optionEmpty = rankingAnswers[currentQuestion][optionIndex].isNotEmpty;
+                                  String text = (optionEmpty) ? '$optionLetter. ${questions[currentQuestion]['options'][optionLetter.codeUnitAt(0) - 65]}'
+                                                              : '${optionIndex+1}';
                                     return DragTarget<String>(
                                       onAcceptWithDetails: (data) => ({
                                           setState(() {
                                             int sourceIndex = int.parse(data.data.split(':')[1]);
                                             if (data.data.startsWith('internal')) {
-                                              // Item came from within the list so swap their data
-                                              MapEntry<String, String> temp = rankingAnswers[currentQuestion][optionIndex];
+                                              String temp = rankingAnswers[currentQuestion][optionIndex];
                                               rankingAnswers[currentQuestion][optionIndex] = rankingAnswers[currentQuestion][sourceIndex];
                                               rankingAnswers[currentQuestion][sourceIndex] = temp;
-
                                             } else if (data.data.startsWith('external')) {
-                                              if(text == ''){
-                                                rankingAnswers[currentQuestion][optionIndex] = rankingAnswers[currentQuestion][sourceIndex];
-                                                rankingOptionTracker[currentQuestion][optionIndex] = true;
-                                              }
+                                              rankingAnswers[currentQuestion][optionIndex] = rankingOptions[currentQuestion][sourceIndex];
+                                              rankingOptions[currentQuestion][sourceIndex] = '';
                                             }
                                           })
                                       }),
                                       builder: (context, candidateData, rejectedData) {
-                                        return (rankingOptionTracker[currentQuestion][optionIndex])
+                                        return (true)
                                         ? Draggable<String>(
                                             data: 'internal: $optionIndex',
                                             feedback: SizedBox(
@@ -462,20 +463,22 @@ class MiniMockExamState extends State<MiniMockExam> {
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.end,
-                                children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
+                                children: rankingOptions[currentQuestion].asMap().entries.map<Widget>((entry) {
                                   int optionIndex = entry.key;
-                                  String option = questions[currentQuestion]['options'][optionIndex];
-                                  String optionLetter = options[optionIndex];
+                                  String optionLetter = rankingOptions[currentQuestion][optionIndex];
+                                  bool optionEmpty = rankingOptions[currentQuestion][optionIndex].isNotEmpty;
+                                  String text = (optionEmpty) ? '$optionLetter. ${questions[currentQuestion]['options'][optionIndex]}'
+                                                              : '';
                                   // If the option hasn't already been ranked, load it, otherwise don't reload it
-                                  return (!rankingOptionTracker[currentQuestion][optionIndex])
+                                  return (true)
                                   ? Draggable<String>(
                                     data: 'external: $optionIndex',
                                     feedback: SizedBox(
                                       width: 400, // Set a fixed width
                                       height: 60, // Set a fixed height
-                                      child: OptionCard(text: '$optionLetter. $option')),
+                                      child: OptionCard(text: text)),
                                     childWhenDragging: OptionCard(text: ''),
-                                    child: OptionCard(text: '$optionLetter. $option')
+                                    child: OptionCard(text: text)
                                   )
                                   : OptionCard(text: '');
                               }).toList())
