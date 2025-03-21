@@ -419,6 +419,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            // Answer slots
                             Expanded(
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.start,
@@ -426,39 +427,49 @@ class MiniMockExamState extends State<MiniMockExam> {
                                 children: rankingAnswers[currentQuestion].asMap().entries.map<Widget>((entry) {
                                   int optionIndex = entry.key; // List index
                                   String optionLetter = entry.value;
-                                  bool optionEmpty = rankingAnswers[currentQuestion][optionIndex].isNotEmpty;
-                                  String text = (optionEmpty) ? '$optionLetter. ${questions[currentQuestion]['options'][optionLetter.codeUnitAt(0) - 65]}'
+                                  bool optionNotEmpty = rankingAnswers[currentQuestion][optionIndex].isNotEmpty;
+                                  String text = (optionNotEmpty) ? '$optionLetter. ${questions[currentQuestion]['options'][optionLetter.codeUnitAt(0) - 65]}'
                                                               : '${optionIndex+1}';
-                                    return DragTarget<String>(
-                                      onAcceptWithDetails: (data) => ({
-                                          setState(() {
-                                            int sourceIndex = int.parse(data.data.split(':')[1]);
-                                            if (data.data.startsWith('internal')) {
-                                              String temp = rankingAnswers[currentQuestion][optionIndex];
-                                              rankingAnswers[currentQuestion][optionIndex] = rankingAnswers[currentQuestion][sourceIndex];
-                                              rankingAnswers[currentQuestion][sourceIndex] = temp;
-                                            } else if (data.data.startsWith('external')) {
+                                  return DragTarget<String>(
+                                    onAcceptWithDetails: (data) => ({
+                                        setState(() {
+                                          int sourceIndex = int.parse(data.data.split(':')[1]);
+                                          if (data.data.startsWith('internal')) {
+                                            // Swap data
+                                            String temp = rankingAnswers[currentQuestion][optionIndex];
+                                            rankingAnswers[currentQuestion][optionIndex] = rankingAnswers[currentQuestion][sourceIndex];
+                                            rankingAnswers[currentQuestion][sourceIndex] = temp;
+                                          } else if (data.data.startsWith('external')) {
+                                            if(optionNotEmpty){
+                                              // Return current data to its original option card and accept new data
+                                              rankingOptions[currentQuestion][optionLetter.codeUnitAt(0) - 65] = rankingAnswers[currentQuestion][optionIndex];
+                                              rankingAnswers[currentQuestion][optionIndex] = rankingOptions[currentQuestion][sourceIndex];
+                                              rankingOptions[currentQuestion][sourceIndex] = '';
+                                            }else {
+                                              // Accept new data and remove the external option
                                               rankingAnswers[currentQuestion][optionIndex] = rankingOptions[currentQuestion][sourceIndex];
                                               rankingOptions[currentQuestion][sourceIndex] = '';
                                             }
-                                          })
-                                      }),
-                                      builder: (context, candidateData, rejectedData) {
-                                        return (true)
-                                        ? Draggable<String>(
-                                            data: 'internal: $optionIndex',
-                                            feedback: SizedBox(
-                                                width: 400, // Set a fixed width
-                                                height: 60, // Set a fixed height
-                                                child: OptionCard(text: text)),
-                                            childWhenDragging: OptionCard(text: ''),
-                                            child: OptionCard(text: text)
-                                        )
-                                        : OptionCard(text: '');
-                                      },
-                                    );
+                                          }
+                                        })
+                                    }),
+                                    builder: (context, candidateData, rejectedData) {
+                                      return (optionNotEmpty)
+                                      ? Draggable<String>(
+                                          data: 'internal:$optionIndex:$optionLetter',
+                                          feedback: SizedBox(
+                                              width: 400, // Set a fixed width
+                                              height: 60, // Set a fixed height
+                                              child: OptionCard(text: text)),
+                                          childWhenDragging: OptionCard(text: ''),
+                                          child: OptionCard(text: text)
+                                      )
+                                      : OptionCard(text: text);
+                                    },
+                                  );
                               }).toList())
                             ),
+                            // Preloaded Options
                             Expanded(
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.start,
@@ -466,21 +477,37 @@ class MiniMockExamState extends State<MiniMockExam> {
                                 children: rankingOptions[currentQuestion].asMap().entries.map<Widget>((entry) {
                                   int optionIndex = entry.key;
                                   String optionLetter = rankingOptions[currentQuestion][optionIndex];
-                                  bool optionEmpty = rankingOptions[currentQuestion][optionIndex].isNotEmpty;
-                                  String text = (optionEmpty) ? '$optionLetter. ${questions[currentQuestion]['options'][optionIndex]}'
+                                  bool optionNotEmpty = rankingOptions[currentQuestion][optionIndex].isNotEmpty;
+                                  String text = (optionNotEmpty) ? '$optionLetter. ${questions[currentQuestion]['options'][optionLetter.codeUnitAt(0) - 65]}'
                                                               : '';
                                   // If the option hasn't already been ranked, load it, otherwise don't reload it
-                                  return (true)
-                                  ? Draggable<String>(
-                                    data: 'external: $optionIndex',
-                                    feedback: SizedBox(
-                                      width: 400, // Set a fixed width
-                                      height: 60, // Set a fixed height
-                                      child: OptionCard(text: text)),
-                                    childWhenDragging: OptionCard(text: ''),
-                                    child: OptionCard(text: text)
-                                  )
-                                  : OptionCard(text: '');
+                                  return DragTarget<String>(
+                                    onAcceptWithDetails: (data) => ({
+                                      setState(() {
+                                        List<String> parts = data.data.split(':').toList();
+                                        int sourceIndex = int.parse(parts[1]);
+                                        String sourceLetter = parts[2];
+                                        if (data.data.startsWith('internal')) {
+                                          // Reset answer card and return its data to its original option card
+                                          rankingOptions[currentQuestion][sourceLetter.codeUnitAt(0) - 65] = rankingAnswers[currentQuestion][sourceIndex];
+                                          rankingAnswers[currentQuestion][sourceIndex] = '';
+                                        }
+                                      })
+                                    }),
+                                    builder: (context, candidateData, rejectedData) {
+                                      return (optionNotEmpty)
+                                          ? Draggable<String>(
+                                          data: 'external:$optionIndex:$optionLetter',
+                                          feedback: SizedBox(
+                                              width: 400, // Set a fixed width
+                                              height: 60, // Set a fixed height
+                                              child: OptionCard(text: text)),
+                                          childWhenDragging: OptionCard(text: ''),
+                                          child: OptionCard(text: text)
+                                      )
+                                          : OptionCard(text: text);
+                                    },
+                                  );
                               }).toList())
                             ),
                           ],
