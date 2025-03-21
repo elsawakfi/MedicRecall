@@ -1,17 +1,17 @@
 # MedicRecall2 Handover Document
 
 ## Contents
-- [Project Overview](#-project-overview)
-- [Repository Details](#-repository-details)
-- [Installation & Setup](#-installation--setup)
-- [Architecture Overview](#️-architecture-overview)
-- [Project Structure](#-project-structure)
-- [Testing & Debugging](#️-testing--debugging)
-- [Database Structure](#-database-structure)
-- [Cloud Functions](#️-cloud-functions)
-- [2024/2025 Progress](#-20242025-progress)
+- [Project Overview](#project-overview)
+- [Repository Details](#repository-details)
+- [Installation & Setup](#installation--setup)
+- [Architecture Overview](#️architecture)
+- [Project Structure](#project-structure)
+- [Testing & Debugging](#️testing)
+- [Database Structure](#database-structure)
+- [Cloud Functions](#️cloud-functions)
+- [2024/2025 Progress](#20242025-progress)
 
-## 📌 Project Overview
+## 📌 Project Overview <a id = "project-overview"></a>
 - **Project Name:** MedicRecall
 - **Description:** A cross-platform application built with Flutter, using Firebase for backend services such as authentication, Firestore database, and cloud functions.
 - **Tech Stack:**
@@ -21,7 +21,7 @@
 
 <p align="right">(<a href="#contents">back to top</a>)</p>
 
-## 📂 Repository Details
+## 📂 Repository Details <a id = "repository-details"></a>
 - **🔗 GitHub Repository URL:** [2024-MedicRecall2](https://github.com/spe-uob/2024-MedicRecall2)
 - **🛠 Branching Strategy:**
   - `main` → Stable production branch
@@ -30,18 +30,18 @@
   - Firebase access is managed via Firebase Console (Google Cloud IAM roles required).
 <p align="right">(<a href="#contents">back to top</a>)</p>
 
-## 🚀 Installation & Setup
+## 🚀 Installation & Setup <a id = "installation--setup"></a>
 This guide will walk you through setting up and running MedicRecall on your local machine.
 
 **🔗 Quick Links**
-- [Prerequisites](#-prerequisites)
-- [Setup Guide](#️-setup-guide)
+- [Prerequisites](#prerequisites)
+- [Setup Guide](#️setup-guide)
 
 > [!WARNING]
 > We highly recommend using the specified Flutter, Dart, and Firebase versions mentioned below. 
 > Using different versions may lead to compatibility issues. Additionally, ensure that all dependencies are properly installed before running the application.
 
-### 📌 Prerequisites
+### 📌 Prerequisites <a id = "prerequisites"></a>
 Before you begin, make sure you have the following installed:
 - **Flutter SDK version 3.24.3** ([Flutter Install Guide](https://docs.flutter.dev/release/archive))
   - Running **Dart v3.5.3** ([Dart Install Guide](https://dart.dev/get-dart))
@@ -61,7 +61,7 @@ Before you begin, make sure you have the following installed:
 > Without these files, Firebase-related features will not function properly.
 
 
-### ⚙️ Setup Guide
+### ⚙️ Setup Guide <a id = "setup-guide"></a>
 1. Clone the repository using either HTTPS or SSH:
    ```sh
    git clone https://github.com/spe-uob/2024-MedicRecall2.git #https
@@ -101,7 +101,7 @@ Before you begin, make sure you have the following installed:
    ```
 <p align="right">(<a href="#contents">back to top</a>)</p>
 
-## 🏗️ Architecture Overview
+## 🏗️ Architecture Overview <a id = "architecture"></a>
 The following diagram illustrates the MedicRecall system architecture, highlighting the interaction between the frontend Flutter application and Firebase backend services.
 
 <p align="left">
@@ -109,13 +109,13 @@ The following diagram illustrates the MedicRecall system architecture, highlight
 </p>
 <p align="right">(<a href="#contents">back to top</a>)</p>
 
-## 📂 Project Structure
+## 📂 Project Structure <a id = "project-structure"></a>
 This section provides an overview of the important files contained within the project structure:
-- [Root Directory](#-root-directory)
-- [./.github](#️-github)
-- [./flashcard](#-flashcard)
+- [Root Directory](#root-directory)
+- [./.github](#️github)
+- [./flashcard](#flashcard-)
 
-### 🏠 Root Directory
+### 🏠 Root Directory <a id = "root-directory"></a>
 The root directory contains essential files for **project setup, documentation, and configuration**.
 ```
 2024-MedicRecall2
@@ -125,7 +125,7 @@ The root directory contains essential files for **project setup, documentation, 
 └── README.md        # General overview
 ```
 
-### ⚙️ ./.github
+### ⚙️ ./.github <a id = "github"></a>
 The `.github` directory houses our GitHub configurations, such as **Continuous Integration/ Deployment pipelines, issue templates, and pull request guidelines**.
 ```
 .github/
@@ -150,7 +150,7 @@ To keep things clear, we recommend maintaining two separate templates:
 
 📖 More Info: [GitHub Issue Templates Guide](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/manually-creating-a-single-issue-template-for-your-repository).
 
-### 📱 ./flashcard
+### 📱 ./flashcard <a id = "flashcard-"></a>
 The `flashcard/` directory contains the **main source code** for the app, which includes the Flutter source code, Firebase functions for the backend, and platform-specific configurations (Android, iOS, and Web).
 ```
 flashcard/
@@ -178,19 +178,19 @@ flashcard/
 <p align="right">(<a href="#contents">back to top</a>)</p>
 
 ## 🛠️ Testing & Debugging
-This section provides an overview to testing in Flutter.
-- [Unit & Widget Tests](#-unit--widget-tests)
-- [Continuous Integration Tests](#-continuous-integration-tests)
-- [CI/CD Diagram](#️-cicd-diagram)
+This section provides an overview to testing in Flutter.  <a id = "testing"></a>
+- [Unit & Widget Tests](#unit-tests)
+- [Continuous Integration Tests](#continuous-integration)
+- [CI/CD Diagram](#️cicd)
 
-### 🔧 Unit & Widget Tests
+### 🔧 Unit & Widget Tests <a id = "unit-tests"></a>
 **Unit Tests:** Test individual functions, methods, or classes.
 
 **Widget Tests:** Test individual widgets in isolation.
 - [Writing Unit & Widget Tests](#-writing-unit--widget-tests)
 - [Running Unit & Widget Tests Locally](#-running-unit--widget-tests-locally)
 
-#### 📌 Writing Unit & Widget Tests
+#### 📌 Writing Unit & Widget Tests 
 To add new unit or widget tests:
 1. Navigate to the test directory:
     ```bash
@@ -222,7 +222,7 @@ To run unit tests, follow these steps:
 > [!NOTE]
 > For more help visit the [Flutter docs](https://docs.flutter.dev/cookbook/testing/unit/introduction)
 
-### 🔨 Continuous Integration Tests
+### 🔨 Continuous Integration Tests <a id = "continuous-integration"></a>
 **Integration Tests:** Test the entire app or large parts of it, simulating user interactions.
 - [Writing Continuous Integration Tests](#-writing-continuous-integration-tests)
 - [Running Continuous Integration Tests Locally](#-running-continuous-integration-tests-locally)
@@ -278,7 +278,7 @@ To add new integration tests:
 > - Add `tester.printToConsole()` statements inside tests or your code for debugging purposes.
 > - Check Firebase logs in the Firebase Console for backend-related issues.
 
-### ⚙️ CI/CD Diagram
+### ⚙️ CI/CD Diagram <a id = "cicd"></a>
 The following diagram illustrates the MedicRecall2 CI/CD system, highlighting the key paths for running both testing and deployment.
 <p align="left">
   <img width="621" alt="ci/cd image" src="./CI-CD-diagram/CI-CD-Diagram.png" style="box-shadow: 5px 5px 10px rgba(0,0,0,0.5)">
@@ -290,18 +290,18 @@ The following diagram illustrates the MedicRecall2 CI/CD system, highlighting th
 <p align="right">(<a href="#contents">back to top</a>)</p>
 
 
-## 💾 Database Structure
+## 💾 Database Structure <a id = "database-structure"></a>
 This section provides an overview of the [firestore](https://firebase.google.com/docs/firestore) and the main root collections:
-- [Flashcards](#-flashcards)
-- [Markscheme](#-markscheme)
-- [Mocks](#-mocks)
-- [Topics](#-topics)
-- [Users](#-users)
+- [Flashcards](#flashcards)
+- [Markscheme](#markscheme)
+- [Mocks](#mocks)
+- [Topics](#topics)
+- [Users](#users)
 
 > [!NOTE]
 > When uploading documents to the firestore you can use JSON files along with the Firebase CLI to make large data uploads significantly less time consuming. Trust us, it is worth doing however does require a service key file so make sure not to commit any important data.
 
-### 📇 Flashcards
+### 📇 Flashcards  <a id = "flashcards"></a>
 The flashcard collection contains documents that detail each of the default flashcards available to the user.
 
 Each document within the **flashcard** collection contains: 
@@ -313,7 +313,7 @@ Each document within the **flashcard** collection contains:
 | ```subtopic```        | String    | For fine tuning the specific segment of the flashcard's topic |
 | ```topic```           | String    | The related flashcard topic |
 
-### 📑 Markscheme
+### 📑 Markscheme <a id = "markscheme"></a>
 The mark scheme collection contains a vast array of question documents which are queried from the app when the user is interacting with the mark scheme system.
 
 Each document within the **markscheme** collection contains: 
@@ -328,7 +328,7 @@ Each document within the **markscheme** collection contains:
 | ```Situation```  | String    | The text that provides context to the scenario |
 | ```type```            | String    | Details whether the question is of type `rating`, `ranking` or `multiple choice` for easier filtering |
 
-### 📝 Mocks
+### 📝 Mocks <a id = "mocks"></a>
 The mock collections follow the same principle as the markscheme collection, however whilst the markscheme and mock documents are similar, they do contain different fields. The mock documents are queried whenever the user is interacting with their related mock exam.
 
 Each document within the **mock** collections contains:
@@ -344,7 +344,7 @@ Each document within the **mock** collections contains:
 > [!NOTE]
 >The markscheme collection was created by our ancestors whilst the mock collections were created by the MedicRecall2 2024 team hence the difference in document structure.
 
-### 📖 Topics
+### 📖 Topics <a id = "topics"></a>
 The topics collection is referenced in flashcards as each document of topics contains a topic used to group flashcards.
 
 Each document within the **topics** collection contains: 
@@ -357,7 +357,7 @@ Each document within the **topics** collection contains:
 | ```subtopics```  | Array&lt;String&gt;    | The subtopics of the topic |
 | ```topic```            | String    | The name of the topic itself |
 
-### 🗿 Users
+### 🗿 Users <a id = "users"></a>
 The users collection contains documents associated to each user on the platform.
 
 Each document within the **users** collection contains:
@@ -387,7 +387,7 @@ Each document within the **users** collection contains:
 
 <p align="right">(<a href="#contents">back to top</a>)</p>
 
-## ☁️ Cloud Functions
+## ☁️ Cloud Functions <a id = "cloud-functions"></a>
 [Cloud Functions](https://firebase.google.com/docs/functions) are serverless functions that allow you to run code in response to [events](https://cloud.google.com/functions/docs/calling) without managing the underlying infrastructure.
 The current functions consist of:
 - `sendEmail` - A HTTP triggered function used to notify users of their revision schedule, and
@@ -466,13 +466,13 @@ The current functions consist of:
 
 <p align="right">(<a href="#contents">back to top</a>)</p>
 
-## 🏆 2024/2025 Progress
+## 🏆 2024/2025 Progress <a id = "20242025-progress"></a>
 As MedicRecall 2 we have completed a plethora of new features for our client, mostly mock and scheduling related.
-- [Mock Related](#-flashcards)
-- [Scheduling Related](#)
-- [General](#️-general)
+- [Mock Related](#mock-related)
+- [Calendar Related](#calendar-related)
+- [General](#general)
 
-### 📑 Mock Related
+### 📑 Mock Related <a id = "mock-related"></a>
 The mock related features:
 
 | Feature                  | Explanation                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
@@ -491,7 +491,7 @@ The mock related features:
 | ```Updated Themes```     | We updated the themes of the project, mainly light mode, to allow for the mocks to be more readable. The file that defines this is located at flashcard/utils/theme_provider.dart.                                                                                                                                                                                                                       
 
 
-### 📑 Scheduling Related
+### 📑 Calendar Related <a id = "calendar-related"></a>
 Features related to the calendar and scheduling events:
 | Feature         | Explanation                             | File |
 |-----------------|-----------------------------------------|------|             
@@ -511,7 +511,7 @@ Features related to the calendar and scheduling events:
 
 <p align="right">(<a href="#contents">back to top</a>)</p>
 
-### ⚖️ General
+### ⚖️ General <a id = "general"></a>
 The general features:
 | Feature(s)                       | Explanation                                                                                                                                   |
 |----------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
