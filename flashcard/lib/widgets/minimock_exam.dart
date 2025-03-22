@@ -190,20 +190,12 @@ class MiniMockExamState extends State<MiniMockExam> {
           appBar: AppBar(
               automaticallyImplyLeading: false,
               elevation: 0,
-              title: LayoutBuilder(
-  builder: (context, constraints) {
-    
-    if (MediaQuery.of(context).size.width >= 600) {
-      return PopScope(
-          canPop: false,
-        child: Scaffold(
-        drawer: const DrawMain(),
-        appBar: AppBar(
-           elevation: 0,
-          title:  Align(
-            alignment: const Alignment(-10,0),
-        // mainAxisAlignment: MainAxisAlignment.center,
-        // mainAxisSize: MainAxisSize.min,
+        title: LayoutBuilder(builder:  (context, constraints) { return 
+         MediaQuery.of(context).size.width >= 600 ? 
+         Align(
+            alignment: const Alignment(0.18,0),
+         //mainAxisAlignment: MainAxisAlignment.center,
+         //mainAxisSize: MainAxisSize.min,
          child: Stack(
             children: [
               Positioned(
@@ -221,17 +213,12 @@ class MiniMockExamState extends State<MiniMockExam> {
               ),
             ],
           )
-          ),
-      )));
-    } else {
-      return Align(
-        alignment: Alignment.center,
-        child: Text(widget.shortTitle)); // Add a fallback widget here
-    }
-  },
-),
-
-              centerTitle: true,
+          ):Align(
+            alignment: Alignment.center,
+            child: Text(widget.shortTitle)
+            
+          );}),
+      centerTitle: true,
               leading: Builder(
                 builder: (context) => GestureDetector(
                   onTap: () => Scaffold.of(context).openDrawer(),
@@ -290,6 +277,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                 double maxPreferredWidth = 960; // 1920/2
 
             return Align(
+                  alignment: Alignment.center,
                   child: Container(
                     decoration: BoxDecoration(
                         boxShadow: [
@@ -420,7 +408,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                         children: [
                   Text(
                   questions[currentQuestion]['question'],
-                  style: TextStyle(fontSize:AdaptiveTextSize().getadaptiveTextSize(context, 20), color: Colors.black),
+                  style: TextStyle(fontSize:AdaptiveTextSize().getadaptiveTextSize(context, 18), color: Colors.black),
 
                 ),
                 const SizedBox(height: 20),
@@ -463,7 +451,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                                   color:Color.fromARGB(255, 222, 221, 222),
                                   child: ListTile(
                                     title: Text('${optionIndex+1}:  $optionLetter. $option',
-                                      style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 21)),
+                                      style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 18)),
                                     ),
                                     trailing: Icon(Icons.drag_handle, color: Color.fromARGB(255, 0, 0, 0), size: 30),
                                   )
@@ -493,7 +481,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                             ),
                             checkColor: Colors.white, // White tick inside black box
                             side: const BorderSide(color: Colors.black, width: 1),
-                            title: Text('$optionLetter. $option', style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 20), color: Colors.black)),
+                            title: Text('$optionLetter. $option', style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 18), color: Colors.black)),
                             value: multiChoiceAnswers[questionIndex][optionIndex],
                             onChanged: (value) {
                               int checkedCount = multiChoiceAnswers[questionIndex].where((element) => element).length;
