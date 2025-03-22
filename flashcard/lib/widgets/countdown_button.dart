@@ -94,56 +94,95 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     required List<Widget> actions,
     bool showScrollIndicator = false,
   }) {
-    return AlertDialog(
-      backgroundColor: const Color(0xFFE6EDF2),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(0),
-      ),
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              color: Color.fromRGBO(21, 58, 103, 1),
-              fontSize: 21,
-              fontWeight: FontWeight.w500,
-            ),
+    return Builder(
+      builder: (context) {
+        // Get screen width to determine layout
+        final screenWidth = MediaQuery.of(context).size.width;
+        final isSmallScreen = screenWidth < 450; // Threshold for small devices
+        
+        return AlertDialog(
+          backgroundColor: const Color(0xFFE6EDF2),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(0),
           ),
-          if (showScrollIndicator) ...[
-            const SizedBox(height: 5),
-            // Scroll indicator at the top
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Icon(
-                  Icons.swipe_vertical,
-                  size: 16,
-                  color: Color.fromRGBO(21, 58, 103, 0.6),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  color: Color.fromRGBO(21, 58, 103, 1),
+                  fontSize: 21,
+                  fontWeight: FontWeight.w500,
                 ),
-                SizedBox(width: 5),
-                Text(
-                  'Scroll for more options',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Color.fromRGBO(21, 58, 103, 0.6),
-                    fontStyle: FontStyle.italic,
-                  ),
+              ),
+              if (showScrollIndicator) ...[
+                const SizedBox(height: 5),
+                // Scroll indicator at the top
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Icon(
+                      Icons.swipe_vertical,
+                      size: 16,
+                      color: Color.fromRGBO(21, 58, 103, 0.6),
+                    ),
+                    SizedBox(width: 5),
+                    Text(
+                      'Scroll for more options',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Color.fromRGBO(21, 58, 103, 0.6),
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ],
                 ),
               ],
+            ],
+          ),
+          // Adjust content width based on screen size
+          content: SizedBox(
+            width: isSmallScreen ? screenWidth * 0.8 : 300,
+            child: SingleChildScrollView(
+              child: content,
             ),
+          ),
+          // Use responsive layout for action buttons
+          actions: [
+            if (isSmallScreen)
+              // Vertical layout for small screens
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  for (int i = 0; i < actions.length; i++) ...[
+                    SizedBox(
+                      width: double.infinity,
+                      child: actions[i],
+                    ),
+                    if (i < actions.length - 1) 
+                      const SizedBox(height: 8), // Vertical spacing between buttons
+                  ],
+                ],
+              )
+            else
+              // Horizontal layout for larger screens
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  for (int i = 0; i < actions.length; i++) ...[
+                    actions[i],
+                    if (i < actions.length - 1) 
+                      const SizedBox(width: 12), // Add spacing between buttons
+                  ],
+                ],
+              ),
           ],
-        ],
-      ),
-      content: SizedBox(
-        width: 300,
-        child: SingleChildScrollView(
-          child: content,
-        ),
-      ),
-      actions: actions,
-      actionsAlignment: MainAxisAlignment.end,
-      actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          actionsAlignment: MainAxisAlignment.end,
+          actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        );
+      }
     );
   }
 
@@ -1319,8 +1358,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                       children: [
                         // Animated effects - only shown on hover (desktop) not on tap (mobile)
                         if (value > 0 && Theme.of(context).platform != TargetPlatform.android && 
-                            Theme.of(context).platform != TargetPlatform.iOS)
-                          ...[
+                            Theme.of(context).platform != TargetPlatform.iOS) ...[
                             // Position the wave effects in fixed positions with absolute positioning
                             Positioned.fill(
                               child: Center(
@@ -1379,7 +1417,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                                 ),
                               ),
                             ),
-                          ],
+                        ],
                         
                         // Base icon (always shown)
                         Tooltip(
@@ -1528,7 +1566,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     buildCount++;
     return LayoutBuilder(
       builder: (context, constraints) {
-        bool isSmallScreen = constraints.maxWidth < 600;
+        bool isSmallScreen = constraints.maxWidth < 450;
 
         return Container(
           margin: const EdgeInsets.only(bottom: 55, right: 0),
