@@ -491,7 +491,7 @@ The mock related features:
 | ```Updated Themes```     | We updated the themes of the project, mainly light mode, to allow for the mocks to be more readable. The file that defines this is located at flashcard/utils/theme_provider.dart.                                                                                                                                                                                                                       
 
 
-### 📑 Calendar Related <a id = "calendar-related"></a>
+### 📆 Calendar Related <a id = "calendar-related"></a>
 Features related to the calendar and scheduling events:
 | Feature         | Explanation                             | File |
 |-----------------|-----------------------------------------|------|             
