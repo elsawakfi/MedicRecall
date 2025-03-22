@@ -159,7 +159,8 @@ class MiniMockExamState extends State<MiniMockExam> {
   void examEnd(){
     _timerController.stopTimer();
     List<List<String>> finalAnswerList = [];
-    finalAnswerList = mergeRankedLists(rankingAnswers, rankingOptions);
+    // finalAnswerList = mergeRankedLists(rankingAnswers, rankingOptions);
+    finalAnswerList = rankingAnswers;
     List<List<String>> multiChoiceFormatted = booleanToString(multiChoiceAnswers);
     finalAnswerList.addAll(multiChoiceFormatted);
     updateExamResults(finalAnswerList);
