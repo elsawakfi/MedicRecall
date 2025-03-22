@@ -13,13 +13,13 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Check if we're on a small screen
+    final theme = Theme.of(context);
     final isSmallScreen = MediaQuery.of(context).size.width < 600;
 
     return AppBar(
       elevation: 0,
       title: Align(
-        alignment: const Alignment(-0.05, 0),
+        alignment: isSmallScreen ? const Alignment(-0.4, 0) : const Alignment(-0.06, 0),
         child: Stack(
           children: [
             Positioned(
@@ -27,17 +27,17 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               child: Image.asset(
                 DesignMain.getThemeBasedLogo(context),
                 fit: BoxFit.cover,
-                height: 34,
+                height: isSmallScreen ? 28 : 34,
               ),
             ),
             Container(
-              margin: const EdgeInsets.only(left: 40),
+              margin: EdgeInsets.only(left: isSmallScreen ? 24 : 40),
               padding: const EdgeInsets.all(8.0),
               child: Text(
                 isSmallScreen ? (mobileTitle ?? title) : title,
-                style: TextStyle(
-                  fontSize: isSmallScreen ? 18 : 20,
-                  fontWeight: FontWeight.w500,
+                style: theme.appBarTheme.titleTextStyle?.copyWith(
+                  fontSize: isSmallScreen ? 18 : 23,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),

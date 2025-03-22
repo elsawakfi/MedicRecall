@@ -261,7 +261,7 @@ class LandingState extends State<Landing> {
                           : 'MedicRecall: Evidence-Based revision for the MSRA',
                       style: TextStyle(
                         fontSize: isMobile ? 18 : 20,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.bold,
                       ),
                     );
                   },
