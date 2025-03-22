@@ -1254,169 +1254,190 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
         // Track if the tooltip is being manually shown (for mobile)
         bool isTooltipVisible = _isHovered[id] ?? false;
 
-        return GestureDetector(
-          onTap: () {
-            // Show info dialog for mobile
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  backgroundColor: const Color.fromRGBO(21, 58, 103, 1),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                    side: const BorderSide(color: Colors.white, width: 1),
-                  ),
-                  content: SizedBox(
-                    width: 200,
-                    child: Text(
-                      description,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 13,
-                        height: 1.4,
+        return Container(
+          constraints: const BoxConstraints(
+            minWidth: 44,
+            minHeight: 44,
+          ),
+          padding: const EdgeInsets.all(8),
+          alignment: Alignment.center,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(22),
+              onTap: () {
+                // Show info dialog for mobile
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      backgroundColor: const Color.fromRGBO(21, 58, 103, 1),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        side: const BorderSide(color: Colors.white, width: 1),
                       ),
-                    ),
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: const Text(
-                        'OK',
-                        style: TextStyle(color: Colors.white),
+                      content: SizedBox(
+                        width: 200,
+                        child: Text(
+                          description,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 13,
+                            height: 1.4,
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: const Text(
+                            'OK',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 );
               },
-            );
-            // Still toggle the animation
-            setState(() => _isHovered[id] = !isTooltipVisible);
-          },
-          child: MouseRegion(
-            onEnter: (_) => setState(() => _isHovered[id] = true),
-            onExit: (_) => setState(() => _isHovered[id] = false),
-            child: TweenAnimationBuilder(
-              duration: const Duration(milliseconds: 300),
-              tween: Tween<double>(
-                begin: 0,
-                end: isTooltipVisible ? 1.0 : 0.0,
-              ),
-              builder: (context, double value, child) {
-                final primaryColor = const Color.fromRGBO(21, 58, 103, 1);
-
-                return SizedBox(
-                  width: 32,
-                  height: 32,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      // Outer wave
-                      if (value > 0)
-                        Transform.scale(
-                          scale: 1.0 + (value * 0.8),
-                          child: Container(
-                            width: 32,
-                            height: 32,
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: primaryColor.withOpacity(0.45 * value),
-                                width: 2.5,
+              child: MouseRegion(
+                onEnter: (_) => setState(() => _isHovered[id] = true),
+                onExit: (_) => setState(() => _isHovered[id] = false),
+                child: TweenAnimationBuilder(
+                  duration: const Duration(milliseconds: 300),
+                  tween: Tween<double>(
+                    begin: 0,
+                    end: isTooltipVisible ? 1.0 : 0.0,
+                  ),
+                  builder: (context, double value, child) {
+                    final primaryColor = const Color.fromRGBO(21, 58, 103, 1);
+                    
+                    return Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // Animated effects - only shown on hover (desktop) not on tap (mobile)
+                        if (value > 0 && Theme.of(context).platform != TargetPlatform.android && 
+                            Theme.of(context).platform != TargetPlatform.iOS)
+                          ...[
+                            // Position the wave effects in fixed positions with absolute positioning
+                            Positioned.fill(
+                              child: Center(
+                                child: Transform.scale(
+                                  scale: 1.0 + (value * 0.8),
+                                  child: Container(
+                                    width: 32,
+                                    height: 32,
+                                    decoration: BoxDecoration(
+                                      color: Colors.transparent,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: primaryColor.withOpacity(0.45 * value),
+                                        width: 2.5,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Positioned.fill(
+                              child: Center(
+                                child: Transform.scale(
+                                  scale: 1.0 + (value * 0.5),
+                                  child: Container(
+                                    width: 28,
+                                    height: 28,
+                                    decoration: BoxDecoration(
+                                      color: Colors.transparent,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: primaryColor.withOpacity(0.55 * value),
+                                        width: 2.5,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Positioned.fill(
+                              child: Center(
+                                child: Transform.scale(
+                                  scale: 1.0 + (value * 0.2),
+                                  child: Container(
+                                    width: 24,
+                                    height: 24,
+                                    decoration: BoxDecoration(
+                                      color: Colors.transparent,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: primaryColor.withOpacity(0.65 * value),
+                                        width: 2.5,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        
+                        // Base icon (always shown)
+                        Tooltip(
+                          richMessage: WidgetSpan(
+                            alignment: PlaceholderAlignment.baseline,
+                            baseline: TextBaseline.alphabetic,
+                            child: SizedBox(
+                              width: 200,
+                              child: Text(
+                                description,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 13,
+                                  height: 1.4,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      // Middle wave
-                      if (value > 0)
-                        Transform.scale(
-                          scale: 1.0 + (value * 0.5),
-                          child: Container(
-                            width: 28,
-                            height: 28,
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: primaryColor.withOpacity(0.55 * value),
-                                width: 2.5,
-                              ),
-                            ),
-                          ),
-                        ),
-                      // Inner wave
-                      if (value > 0)
-                        Transform.scale(
-                          scale: 1.0 + (value * 0.2),
-                          child: Container(
-                            width: 24,
-                            height: 24,
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: primaryColor.withOpacity(0.65 * value),
-                                width: 2.5,
-                              ),
-                            ),
-                          ),
-                        ),
-                      // Base icon
-                      Tooltip(
-                        richMessage: WidgetSpan(
-                          alignment: PlaceholderAlignment.baseline,
-                          baseline: TextBaseline.alphabetic,
-                          child: SizedBox(
-                            width: 200,
-                            child: Text(
-                              description,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 13,
-                                height: 1.4,
-                              ),
-                            ),
-                          ),
-                        ),
-                        padding: const EdgeInsets.all(12),
-                        margin: const EdgeInsets.symmetric(horizontal: 12),
-                        preferBelow: true,
-                        decoration: BoxDecoration(
-                          color: const Color.fromRGBO(21, 58, 103, 1),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.white, width: 1),
-                        ),
-                        child: Container(
-                          width: 22,
-                          height: 22,
+                          padding: const EdgeInsets.all(12),
+                          margin: const EdgeInsets.symmetric(horizontal: 12),
+                          preferBelow: true,
                           decoration: BoxDecoration(
                             color: const Color.fromRGBO(21, 58, 103, 1),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.white.withOpacity(0.8),
-                              width: 1.5,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color.fromRGBO(21, 58, 103, 0.4),
-                                blurRadius: 8,
-                                spreadRadius: 0,
-                              ),
-                            ],
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.white, width: 1),
                           ),
-                          child: const Center(
-                            child: FaIcon(
-                              FontAwesomeIcons.info,
-                              size: 12,
-                              color: Colors.white,
+                          child: Container(
+                            width: 22,
+                            height: 22,
+                            decoration: BoxDecoration(
+                              color: const Color.fromRGBO(21, 58, 103, 1),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.8),
+                                width: 1.5,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color.fromRGBO(21, 58, 103, 0.4),
+                                  blurRadius: 8,
+                                  spreadRadius: 0,
+                                ),
+                              ],
+                            ),
+                            child: const Center(
+                              child: FaIcon(
+                                FontAwesomeIcons.info,
+                                size: 12,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                );
-              },
+                      ],
+                    );
+                  },
+                ),
+              ),
             ),
           ),
         );
