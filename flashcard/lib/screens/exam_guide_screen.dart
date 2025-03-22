@@ -1,6 +1,7 @@
 import 'dart:core';
 
 import 'package:flashcard_x/widgets/drawer_widget.dart';
+import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flutter/material.dart';
 
 
@@ -16,44 +17,14 @@ class Information extends StatelessWidget {
 
    */
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         drawer: const DrawMain(),
-        appBar: AppBar(
-          // backgroundColor: Colors.blue,
-            elevation: 0,
-            title:  Align(
-              alignment: const Alignment(-0.05,0),
-              child: Stack(
-                children: [
-                  Positioned(
-                    top: 2.3,
-                    child: Image.asset(
-                      'assets/newlogo.png',
-                      fit: BoxFit.cover,
-                      height: 34,
-                    ),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.only(left: 32),
-                    padding: const EdgeInsets.all(8.0),
-                    child: const Text('Professional Dilemmas Revision Guide',
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            centerTitle: true,
-            leading: Builder(
-                builder: (context) => GestureDetector(
-                  onTap: () => Scaffold.of(context).openDrawer(),
-                  child: const Icon(
-                    Icons.menu,
-                  ),
-                ))),
+        appBar: CustomAppBar(
+          title: 'Professional Dilemmas Revision Guide',
+          mobileTitle: 'Revision Guide',
+        ),
         body: SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(16),

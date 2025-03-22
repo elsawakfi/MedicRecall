@@ -7,11 +7,6 @@ import 'package:flashcard_x/screens/sign_in_screen.dart';
 import '../screens/calendar_screen.dart';
 
 class DesignMain {
-  static String getThemeBasedLogo(BuildContext context) {
-    final isDarkTheme = Theme.of(context).brightness == Brightness.dark;
-    return isDarkTheme ? 'assets/app-logo-boxed.png' : 'assets/newlogo.png';
-  }
-
   static AppBar appBarMain(String title, BuildContext context) {
     return AppBar(
       title: Align(
@@ -20,10 +15,17 @@ class DesignMain {
           children: [
             Positioned(
               top: 2.3,
-              child: Image.asset(
-                getThemeBasedLogo(context),
-                fit: BoxFit.cover,
-                height: 34,
+              child: ColorFiltered(
+                colorFilter: ColorFilter.mode(
+                  Theme.of(context).appBarTheme.iconTheme?.color ??
+                      Colors.white,
+                  BlendMode.srcIn,
+                ),
+                child: Image.asset(
+                  'assets/newlogo.png',
+                  fit: BoxFit.cover,
+                  height: 34,
+                ),
               ),
             ),
             Container(
@@ -97,10 +99,17 @@ class RefreshDesignMain {
           children: [
             Positioned(
               top: 2.3,
-              child: Image.asset(
-                'assets/newlogo.png',
-                fit: BoxFit.cover,
-                height: 34,
+              child: ColorFiltered(
+                colorFilter: ColorFilter.mode(
+                  Theme.of(context).appBarTheme.iconTheme?.color ??
+                      Colors.white,
+                  BlendMode.srcIn,
+                ),
+                child: Image.asset(
+                  'assets/newlogo.png',
+                  fit: BoxFit.cover,
+                  height: 34,
+                ),
               ),
             ),
             Container(
