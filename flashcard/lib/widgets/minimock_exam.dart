@@ -26,12 +26,13 @@ class MiniMockExamState extends State<MiniMockExam> {
   late User user;
   int currentQuestion = 0;
   int remainingSeconds = 2700; // Temp fix for late initialisation error
+
   List<List<bool>> multiChoiceAnswers = []; // For each question store selected options as a list of booleans
-  // List<List<String>> rankingAnswers = [];
-  // List<List<MapEntry<String,String>>> rankingAnswers = [];
   List<List<String>> rankingAnswers = []; // Desktop left set -> Also used for mobile
   List<List<String>> rankingOptions = []; // Desktop right set
+  bool rankingMerged = false; // Have the ranking options been merged? -> Occurs on screen sizes < 600 -> Prevents unnecessary computation
   List<Map<String, dynamic>> questions = []; // Store question data with the question number as key e.g Q14
+
   List<bool> flaggedQuestions = [];
   final options = 'ABCDEFGH';
 
@@ -107,8 +108,14 @@ class MiniMockExamState extends State<MiniMockExam> {
             String modifiedQuestion = doc['question'].replaceFirst('Rank', '\nRank');
             doc['question'] = modifiedQuestion; // Add a newline between the question (could store a newline in the firebase itself but this allows for easier customisation)
             // Add a list of ordered letter 'A', 'B', ... based on quesiton index
-            rankingOptions.add(List<String>.generate(doc['options'].length, (index) => String.fromCharCode(65 + index)));
-            rankingAnswers.add(List<String>.generate(doc['options'].length, (index) => ''));
+            if (MediaQuery.of(context).size.width < 600){
+              rankingOptions.add(List<String>.generate(doc['options'].length, (index) => ''));
+              rankingAnswers.add(List<String>.generate(doc['options'].length, (index) => String.fromCharCode(65 + index)));
+              rankingMerged = true;
+            }else{
+              rankingOptions.add(List<String>.generate(doc['options'].length, (index) => String.fromCharCode(65 + index)));
+              rankingAnswers.add(List<String>.generate(doc['options'].length, (index) => ''));
+            }
             break;
           case 'multiple choice':
             String modifiedQuestion = doc['question'].replaceFirst('Choose', '\nChoose');
@@ -190,6 +197,13 @@ class MiniMockExamState extends State<MiniMockExam> {
     return combinedList;
   }
 
+  void screenSizeCheck(){
+    if (MediaQuery.of(context).size.width < 600 && !rankingMerged){
+      rankingAnswers = mergeRankedLists(rankingAnswers, rankingOptions);
+      rankingMerged = true;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -239,7 +253,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                   height: 40.31,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
-                    color:  (remainingSeconds <= 600)
+                    color: (remainingSeconds <= 600)
                     ? Colors.red.shade400
                     : const Color.fromARGB(255, 222, 221, 222),
                     boxShadow: [
@@ -264,11 +278,12 @@ class MiniMockExamState extends State<MiniMockExam> {
                 )
               ],
           ),
-          body: questions.isEmpty
+          body: questions.isEmpty || rankingAnswers.isEmpty
               ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
               : LayoutBuilder( builder: (context, constraints) {
                 double maxScreenWidth = constraints.maxWidth * 0.5;
                 double maxPreferredWidth = (maxScreenWidth > 960) ? maxScreenWidth : 960;
+                screenSizeCheck();
                 return Center(
                   child: Container(
                     decoration: BoxDecoration(
@@ -374,50 +389,52 @@ class MiniMockExamState extends State<MiniMockExam> {
 
                 // If the question is a ranking question, display a reorderable list of options
                 if (questions[currentQuestion]['type'] == "ranking") ...[
+                  (constraints.maxWidth < 600)
                         // Reorderable Options Column
-                        // Expanded(
-                        //   child: ReorderableListView(
-                        //     buildDefaultDragHandles: false,
-                        //     proxyDecorator: (Widget child, int index, Animation<double> animation) {
-                        //       return Material(
-                        //         color: Colors.transparent,
-                        //         child: child,
-                        //       );
-                        //     },
-                        //     onReorder: (oldIndex, newIndex) {
-                        //       setState(() {
-                        //
-                        //         if (newIndex > oldIndex) newIndex--; // Adjust the list based on movement of item
-                        //         // Update position of option in answer list
-                        //         final ranking = rankingAnswers[currentQuestion].removeAt(oldIndex);
-                        //         rankingAnswers[currentQuestion].insert(newIndex, ranking);
-                        //         // Update position of option text in question list
-                        //         final option = questions[currentQuestion]['options'].removeAt(oldIndex);
-                        //             questions[currentQuestion]['options'].insert(newIndex, option);
-                        //       });
-                        //     },
-                        //     children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
-                        //       int optionIndex = entry.key;
-                        //       String option = entry.value;
-                        //       String optionLetter = rankingAnswers[currentQuestion][optionIndex];
-                        //       return ReorderableDragStartListener(
-                        //         key: ValueKey(optionLetter),
-                        //         index: optionIndex,
-                        //         child: Card(
-                        //           elevation: 3,
-                        //           color:Color.fromARGB(255, 222, 221, 222),
-                        //           child: ListTile(
-                        //             title: Text('${optionIndex+1}:  $optionLetter. $option',
-                        //               style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
-                        //             ),
-                        //             trailing: Icon(Icons.drag_handle, color: Color.fromARGB(255, 0, 0, 0), size: 30),
-                        //           )
-                        //         ),
-                        //       );
-                        //     }).toList(),
-                        //   ),
-                        // )
-                        Row(
+                          ? Expanded(
+                          child: ReorderableListView(
+                            buildDefaultDragHandles: false,
+                            proxyDecorator: (Widget child, int index, Animation<double> animation) {
+                              return Material(
+                                color: Colors.transparent,
+                                child: child,
+                              );
+                            },
+                            onReorder: (oldIndex, newIndex) {
+                              setState(() {
+
+                                if (newIndex > oldIndex) newIndex--; // Adjust the list based on movement of item
+                                // Update position of option in answer list
+                                final ranking = rankingAnswers[currentQuestion].removeAt(oldIndex);
+                                rankingAnswers[currentQuestion].insert(newIndex, ranking);
+                                // Update position of option text in question list
+                                final option = questions[currentQuestion]['options'].removeAt(oldIndex);
+                                    questions[currentQuestion]['options'].insert(newIndex, option);
+                              });
+                            },
+                            children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
+                              int optionIndex = entry.key;
+                              String option = entry.value;
+                              String optionLetter = rankingAnswers[currentQuestion][optionIndex];
+                              return ReorderableDragStartListener(
+                                key: ValueKey(optionIndex),
+                                index: optionIndex,
+                                child: Card(
+                                  elevation: 3,
+                                  color:Color.fromARGB(255, 222, 221, 222),
+                                  child: ListTile(
+                                    title: Text('${optionIndex+1}:  $optionLetter. $option',
+                                      style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
+                                    ),
+                                    trailing: Icon(Icons.drag_handle, color: Color.fromARGB(255, 0, 0, 0), size: 30),
+                                  )
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        )
+
+                        : Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -493,6 +510,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                                           // Reset answer card and return its data to its original option card
                                           rankingOptions[currentQuestion][sourceLetter.codeUnitAt(0) - 65] = rankingAnswers[currentQuestion][sourceIndex];
                                           rankingAnswers[currentQuestion][sourceIndex] = '';
+                                          rankingMerged = false;
                                         }
                                       })
                                     }),
