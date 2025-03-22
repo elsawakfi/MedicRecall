@@ -71,7 +71,7 @@ class MiniMock2RulesState extends State<MiniMock2Rules> {
           Center(
             child:  Text(
               'MedicRecall Mini-Mock 2 Exam Instructions:\n',
-              style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 30), fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 27), fontWeight: FontWeight.bold),
             ),
           ),
           //const SizedBox(height: 10),
@@ -83,7 +83,7 @@ class MiniMock2RulesState extends State<MiniMock2Rules> {
               'encounter, and you will be asked questions about dealing with them. When answering questions, '
               'please consider yourself to be an FY2 Doctor unless stated otherwise and answer based on what you '
               'should do in each scenario.\n',
-              style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 21)),
+              style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 18)),
               textAlign: TextAlign.center,
             ),
           )),
@@ -109,11 +109,11 @@ class MiniMock2RulesState extends State<MiniMock2Rules> {
            Text.rich( 
               TextSpan(
                 text: 'Part 1: Ranking Questions (Q1-13).',
-                style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 21), decoration:TextDecoration.underline,),
+                style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 18), decoration:TextDecoration.underline,),
                 children: <TextSpan>[
                   TextSpan(text:' In this part you are presented with scenarios followed by a number of possible options. For each scenario you are required to rank each option in order from the most '
                     'appropriate to the least appropriate given the circumstances described in the scenario. \n',
-                    style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 21),decoration:TextDecoration.none)),
+                    style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 18),decoration:TextDecoration.none)),
                 ],),
             ),
           )),
@@ -125,11 +125,11 @@ class MiniMock2RulesState extends State<MiniMock2Rules> {
            Text.rich( 
               TextSpan(
                 text: 'Part 2: Rating Questions (Q14-25).',
-                style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 21), decoration:TextDecoration.underline,),
+                style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 18), decoration:TextDecoration.underline,),
                 children: <TextSpan>[
                   TextSpan(text:' In this part you are presented with scenarios followed by a number of possible options. For each scenario select the 3 options which together are the most '
               'appropriate responses to the situation given the circumstances described. \n',
-                    style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 21),decoration:TextDecoration.none)),
+                    style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 18),decoration:TextDecoration.none)),
                 ],),
             ),
           )),
@@ -141,9 +141,11 @@ class MiniMock2RulesState extends State<MiniMock2Rules> {
           Text(
               'The paper contains 25 questions in total. You have 45 minutes to complete the exam. This is to '
               'simulate the amount of time you will have to complete the exam on the day. \n',
-              style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 21)),
+              style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 18)),
             ),
           )),
+          SizedBox(
+            height: 20),
            Center(
                 child:
                 SizedBox(
