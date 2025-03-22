@@ -36,9 +36,15 @@ class DrawMain extends StatelessWidget {
                     width: 32,
                     height: 32,
                     child: FittedBox(
-                      child: Image(
-                        image:
-                            AssetImage(DesignMain.getThemeBasedLogo(context)),
+                      child: ColorFiltered(
+                        colorFilter: ColorFilter.mode(
+                          Theme.of(context).appBarTheme.iconTheme?.color ??
+                              Colors.white,
+                          BlendMode.srcIn,
+                        ),
+                        child: Image(
+                          image: AssetImage('assets/newlogo.png'),
+                        ),
                       ),
                     ),
                   )

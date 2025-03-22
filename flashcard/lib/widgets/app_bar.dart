@@ -19,15 +19,23 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       elevation: 0,
       title: Align(
-        alignment: isSmallScreen ? const Alignment(-0.4, 0) : const Alignment(-0.06, 0),
+        alignment: isSmallScreen
+            ? const Alignment(-0.4, 0)
+            : const Alignment(-0.06, 0),
         child: Stack(
           children: [
             Positioned(
               top: 2.3,
-              child: Image.asset(
-                DesignMain.getThemeBasedLogo(context),
-                fit: BoxFit.cover,
-                height: isSmallScreen ? 28 : 34,
+              child: ColorFiltered(
+                colorFilter: ColorFilter.mode(
+                  theme.appBarTheme.iconTheme?.color ?? Colors.white,
+                  BlendMode.srcIn,
+                ),
+                child: Image.asset(
+                  'assets/newlogo.png',
+                  fit: BoxFit.cover,
+                  height: isSmallScreen ? 28 : 34,
+                ),
               ),
             ),
             Container(

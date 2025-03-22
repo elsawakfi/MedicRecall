@@ -241,10 +241,17 @@ class LandingState extends State<Landing> {
             children: [
               Positioned(
                 top: 1.3,
-                child: Image.asset(
-                  'assets/newlogo.png',
-                  fit: BoxFit.cover,
-                  height: 38,
+                child: ColorFiltered(
+                  colorFilter: ColorFilter.mode(
+                    Theme.of(context).appBarTheme.iconTheme?.color ??
+                        Colors.white,
+                    BlendMode.srcIn,
+                  ),
+                  child: Image.asset(
+                    'assets/newlogo.png',
+                    fit: BoxFit.cover,
+                    height: 38,
+                  ),
                 ),
               ),
               Container(

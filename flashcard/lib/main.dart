@@ -27,19 +27,19 @@ Future<void> main() async {
   );
 
   await Firebase.initializeApp(
-  options: DefaultFirebaseOptions.currentPlatform,
-);
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive).then((_) {
     // full screen mode
     SharedPreferences.getInstance().then((prefs) {
+      bool isDarkMode =
+          prefs.getBool('darkMode') ?? true; // Default to dark mode
       runApp(
         ChangeNotifierProvider<ThemeProvider>(
             create: (context) => ThemeProvider(
-                MyTheme.darkTheme),
+                isDarkMode ? MyTheme.lightTheme : MyTheme.darkTheme),
             child: const Flashcard()),
-        // child: Login(), //run to log into the app
-        // child: SignInScreen()), //run to log into the app
       );
     });
   });
@@ -66,8 +66,7 @@ class Flashcard extends StatelessWidget {
             SignUpScreen.id: (context) => const SignUpScreen(),
             HomePage.id: (context) => const HomePage(title: "Medicine Upload"),
             Landing.id: (context) => const Landing(),
-          }
-          );
+          });
     });
   }
 }
