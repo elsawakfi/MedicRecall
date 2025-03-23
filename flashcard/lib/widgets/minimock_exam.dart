@@ -380,61 +380,61 @@ class MiniMockExamState extends State<MiniMockExam> {
                     ])
                 )),
                 // Display the current question text
-                  Text(
+                Text(
                   questions[currentQuestion]['question'],
                   style: TextStyle(fontSize: 20, color: Colors.black),
-
                 ),
                 const SizedBox(height: 20),
 
                 // If the question is a ranking question, display a reorderable list of options
                 if (questions[currentQuestion]['type'] == "ranking") ...[
                   (constraints.maxWidth < 600)
-                        // Reorderable Options Column
-                          ? Expanded(
-                          child: ReorderableListView(
-                            buildDefaultDragHandles: false,
-                            proxyDecorator: (Widget child, int index, Animation<double> animation) {
-                              return Material(
-                                color: Colors.transparent,
-                                child: child,
-                              );
-                            },
-                            onReorder: (oldIndex, newIndex) {
-                              setState(() {
+                    // MOBILE VERSION
+                    ? Expanded(
+                      child: ReorderableListView(
+                          buildDefaultDragHandles: false,
+                          proxyDecorator: (Widget child, int index, Animation<double> animation) {
+                            return Material(
+                              color: Colors.transparent,
+                              child: child,
+                            );
+                          },
+                          onReorder: (oldIndex, newIndex) {
+                            setState(() {
 
-                                if (newIndex > oldIndex) newIndex--; // Adjust the list based on movement of item
-                                // Update position of option in answer list
-                                final ranking = rankingAnswers[currentQuestion].removeAt(oldIndex);
-                                rankingAnswers[currentQuestion].insert(newIndex, ranking);
-                                // Update position of option text in question list
-                                final option = questions[currentQuestion]['options'].removeAt(oldIndex);
-                                    questions[currentQuestion]['options'].insert(newIndex, option);
-                              });
-                            },
-                            children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
-                              int optionIndex = entry.key;
-                              String option = entry.value;
-                              String optionLetter = rankingAnswers[currentQuestion][optionIndex];
-                              return ReorderableDragStartListener(
-                                key: ValueKey(optionIndex),
-                                index: optionIndex,
-                                child: Card(
-                                  elevation: 3,
-                                  color:Color.fromARGB(255, 222, 221, 222),
-                                  child: ListTile(
-                                    title: Text('${optionIndex+1}:  $optionLetter. $option',
-                                      style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
-                                    ),
-                                    trailing: Icon(Icons.drag_handle, color: Color.fromARGB(255, 0, 0, 0), size: 30),
-                                  )
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        )
+                              if (newIndex > oldIndex) newIndex--; // Adjust the list based on movement of item
+                              // Update position of option in answer list
+                              final ranking = rankingAnswers[currentQuestion].removeAt(oldIndex);
+                              rankingAnswers[currentQuestion].insert(newIndex, ranking);
+                              // Update position of option text in question list
+                              final option = questions[currentQuestion]['options'].removeAt(oldIndex);
+                                  questions[currentQuestion]['options'].insert(newIndex, option);
+                            });
+                          },
+                          children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
+                            int optionIndex = entry.key;
+                            String option = entry.value;
+                            String optionLetter = rankingAnswers[currentQuestion][optionIndex];
+                            return ReorderableDragStartListener(
+                              key: ValueKey(optionIndex),
+                              index: optionIndex,
+                              child: Card(
+                                elevation: 3,
+                                color:Color.fromARGB(255, 222, 221, 222),
+                                child: ListTile(
+                                  title: Text('${optionIndex+1}:  $optionLetter. $option',
+                                    style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
+                                  ),
+                                  trailing: Icon(Icons.drag_handle, color: Color.fromARGB(255, 0, 0, 0), size: 30),
+                                )
+                              ),
+                            );
+                          }).toList(),
+                      ))
 
-                        : Row(
+                    //DESKTOP VERSION
+                    : Expanded(
+                      child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -448,7 +448,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                                   String optionLetter = entry.value;
                                   bool optionNotEmpty = rankingAnswers[currentQuestion][optionIndex].isNotEmpty;
                                   String text = (optionNotEmpty) ? '$optionLetter. ${questions[currentQuestion]['options'][optionLetter.codeUnitAt(0) - 65]}'
-                                                              : '${optionIndex+1}';
+                                                              : '${optionIndex+1}:';
                                   return DragTarget<String>(
                                     onAcceptWithDetails: (data) => ({
                                         setState(() {
@@ -480,8 +480,8 @@ class MiniMockExamState extends State<MiniMockExam> {
                                               width: (maxPreferredWidth/2) - 16,
                                               height: 85,
                                               child: OptionCard(text: text)),
-                                          childWhenDragging: OptionCard(text: '${optionIndex+1}'),
-                                          child: OptionCard(text: text)
+                                          childWhenDragging: OptionCard(text: '${optionIndex+1}:'),
+                                          child: OptionCard(text: '${optionIndex+1}: $text')
                                       )
                                       : OptionCard(text: text);
                                     },
@@ -531,7 +531,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                               }).toList())
                             ),
                           ],
-                        ),
+                        )),
                 ]
                 // If the question is a multiple choice question, display checkboxes
                 else if(questions[currentQuestion]['type'] == "multiple choice") ...[
