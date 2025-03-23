@@ -517,12 +517,16 @@ class MiniMockExamState extends State<MiniMockExam> {
                   children: [
                     Align(
                         alignment: Alignment.centerLeft,
-                        child: MiniMockHelpButton(),
+                        child: SizedBox(
+                          height: MediaQuery.of(context).size.width < 600 ? 40 : 50,
+                          width: MediaQuery.of(context).size.width < 600 ? 40 : 50,
+                          child:  MiniMockHelpButton()
+                        ),
                     ),
                     const SizedBox(width: 16),
                     Container(
-                        width: MediaQuery.of(context).size.width < 600 ? 130 : 140,
-                        height: 40,
+                        width: MediaQuery.of(context).size.width < 600 ? 135 : 160,
+                        height: MediaQuery.of(context).size.width < 600 ? 40 : 45,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
                           color: const Color.fromARGB(255, 222, 221, 222),
@@ -581,7 +585,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                             }
                           };
                         },
-                        label: Text('Review Page', style: TextStyle(color:  Color.fromARGB(255, 0, 0, 0), fontSize: min(MediaQuery.of(context).size.width * 0.45, 15),
+                        label: Text('Review Page', style: TextStyle(color:  Color.fromARGB(255, 0, 0, 0), fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 17) ,
                         )),
                         icon: Icon(Icons.search, color:  Color.fromARGB(255, 0, 0, 0), size: min(MediaQuery.of(context).size.width * 0.45, 17)
                         ),
@@ -598,11 +602,11 @@ class MiniMockExamState extends State<MiniMockExam> {
                           });
                         },
                         icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0), size:iconSize.clamp(16, 24)),
-                        label: SizedBox(),
+                        label: MediaQuery.of(context).size.width < 600 ? SizedBox() : Text('Back', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 16)),
                         style: ElevatedButton.styleFrom(
                           backgroundColor:Color.fromARGB(255, 222, 221, 222),
                           padding: EdgeInsets.all(paddingValue),
-                          minimumSize: Size(buttonWidth, buttonWidth * 0.5),
+                          minimumSize: Size(buttonWidth, buttonWidth * 0.6),
                         ),
                       ),
                     const SizedBox(width: 8),
@@ -614,11 +618,11 @@ class MiniMockExamState extends State<MiniMockExam> {
                           });
                         },
                         icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 0, 0, 0), size: iconSize.clamp(16, 24)),
-                        label: SizedBox(), //Empty SizedBox to ensure no text is displayed
+                        label: MediaQuery.of(context).size.width < 600 ? SizedBox() : Text('Next', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 16)) , //Empty SizedBox to ensure no text is displayed
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Color.fromARGB(255, 217, 216, 217),
                           padding:EdgeInsets.all(paddingValue),
-                          minimumSize: Size(buttonWidth, buttonWidth * 0.5),
+                          minimumSize: Size(buttonWidth, buttonWidth * 0.6),
                        
                       
                      ),
@@ -676,11 +680,11 @@ class MiniMockExamState extends State<MiniMockExam> {
                           };
                         },
                         icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 0, 0, 0), size:iconSize.clamp(16, 24)),
-                        label: SizedBox(),
+                        label: MediaQuery.of(context).size.width < 600 ? SizedBox() : Text('Review', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 16)),
                         style: ElevatedButton.styleFrom(
                           backgroundColor:Color.fromARGB(255, 222, 221, 222),
                           padding:EdgeInsets.all(paddingValue),
-                          minimumSize: Size(buttonWidth, buttonWidth * 0.5),
+                          minimumSize: Size(buttonWidth, buttonWidth * 0.6),
                        ),
                        iconAlignment: IconAlignment.end,
                       ),
