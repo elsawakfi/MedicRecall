@@ -166,10 +166,18 @@ Widget build(BuildContext context) {
             maxWidth: maxScreenWidth > maxPreferredWidth ? maxScreenWidth : maxPreferredWidth,
           ),
           padding: EdgeInsets.all(16),
+            child: SingleChildScrollView(
+          // child: Expanded( //Wrapping in a scrollable widget
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Spacer(),
+             children: [
+      // ExpansionPanelList(
+        //child: SingleChildScrollView(
+          // child: Column(
+          //   children: [
+            //  ExpansionPanelList(
+          //  mainAxisAlignment: MainAxisAlignment.center,
+          //  children: [
+           //   Spacer(),
             ExpansionPanelList(
               elevation: 1,
               dividerColor: Colors.transparent,
@@ -199,7 +207,7 @@ Widget build(BuildContext context) {
                           children: [
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(5, (index) => Padding(
+                              children: List.generate(3, (index) => Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                                 child: SizedBox(
                                   width: 100, // Set the desired width
@@ -219,22 +227,22 @@ Widget build(BuildContext context) {
                                 ),
                               )),
                             ),
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(5, (index) => Padding(
+                              children: List.generate(3, (index) => Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                                 child: SizedBox(
                                   width: 100, // Set the desired width
                                   height: 50, // Set the desired height
                                   child: ElevatedButton.icon(
                                     onPressed: () {
-                                      _returnToMiniMock(context, index+5);
+                                      _returnToMiniMock(context, index+3);
                                     },
-                                    icon: Visibility( visible: widget.flaggedQuestions[index+5],
+                                    icon: Visibility( visible: widget.flaggedQuestions[index+3],
                                       child: Icon(Icons.flag, color: Colors.black),),
                                     label: Text(
-                                      '${index + 6}',
+                                      '${index + 4}',
                                       style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
                                       fontSize: 20),
                                     ),
@@ -242,7 +250,30 @@ Widget build(BuildContext context) {
                                 ),
                               )),
                             ),
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(3, (index) => Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                child: SizedBox(
+                                  width: 100, // Set the desired width
+                                  height: 50, // Set the desired height
+                                  child: ElevatedButton.icon(
+                                    onPressed: () {
+                                      _returnToMiniMock(context, index+6);
+                                    },
+                                    icon: Visibility( visible: widget.flaggedQuestions[index+6],
+                                      child: Icon(Icons.flag, color: Colors.black),),
+                                    label: Text(
+                                      '${index + 7}',
+                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
+                                      fontSize: 20),
+                                    ),
+                                  ),
+                                ),
+                              )),
+                            ),
+                            const SizedBox(height: 10),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: List.generate(3, (index) => Padding(
@@ -288,7 +319,7 @@ Widget build(BuildContext context) {
                           children: [
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(5, (index) => Padding(
+                              children: List.generate(3, (index) => Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                                 child: SizedBox(
                                   width: 100, // Set the desired width
@@ -308,10 +339,34 @@ Widget build(BuildContext context) {
                                 ),
                               )),
                             ),
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(5, (index) => Padding(
+                              children: List.generate(3, (index) => Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                child: SizedBox(
+                                  width: 100, // Set the desired width
+                                  height: 50, // Set the desired height
+                                  child: ElevatedButton.icon(
+                                    onPressed: () {
+                                      _returnToMiniMock(context, index+16);
+                                    },
+          
+                                    icon: Visibility( visible: widget.flaggedQuestions[index+17],
+                                      child: Icon(Icons.flag, color: Colors.black),),
+                                    label: Text(
+                                      '${index + 17}',
+                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
+                                      fontSize: 20),
+                                    ),
+                                  ),
+                                ),
+                              )),
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(3, (index) => Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                                 child: SizedBox(
                                   width: 100, // Set the desired width
@@ -320,8 +375,7 @@ Widget build(BuildContext context) {
                                     onPressed: () {
                                       _returnToMiniMock(context, index+19);
                                     },
-          
-                                    icon: Visibility( visible: widget.flaggedQuestions[index+19],
+                                    icon: Visibility( visible: widget.flaggedQuestions[index+20],
                                       child: Icon(Icons.flag, color: Colors.black),),
                                     label: Text(
                                       '${index + 20}',
@@ -332,22 +386,22 @@ Widget build(BuildContext context) {
                                 ),
                               )),
                             ),
-                            SizedBox(height: 10),
+                            const SizedBox(height: 10),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(1, (index) => Padding(
+                              children: List.generate(2, (index) => Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                                 child: SizedBox(
                                   width: 100, // Set the desired width
                                   height: 50, // Set the desired height
                                   child: ElevatedButton.icon(
                                     onPressed: () {
-                                      _returnToMiniMock(context, index+24);
+                                      _returnToMiniMock(context, index+22);
                                     },
-                                    icon: Visibility( visible: widget.flaggedQuestions[index+24],
+                                    icon: Visibility( visible: widget.flaggedQuestions[index+23],
                                       child: Icon(Icons.flag, color: Colors.black),),
                                     label: Text(
-                                      '${index + 25}',
+                                      '${index + 23}',
                                       style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
                                       fontSize: 20),
                                     ),
@@ -355,6 +409,29 @@ Widget build(BuildContext context) {
                                 ),
                               )),
                             ),
+                            // SizedBox(height: 10),
+                            // Row(
+                            //   mainAxisAlignment: MainAxisAlignment.center,
+                            //   children: List.generate(2, (index) => Padding(
+                            //     padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                            //     child: SizedBox(
+                            //       width: 100, // Set the desired width
+                            //       height: 50, // Set the desired height
+                            //       child: ElevatedButton.icon(
+                            //         onPressed: () {
+                            //           _returnToMiniMock(context, index+24);
+                            //         },
+                            //         icon: Visibility( visible: widget.flaggedQuestions[index+24],
+                            //           child: Icon(Icons.flag, color: Colors.black),),
+                            //         label: Text(
+                            //           '${index + 24}',
+                            //           style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
+                            //           fontSize: 20),
+                            //         ),
+                            //       ),
+                            //     ),
+                            //   )),
+                            // ),
                           ],
                         ),
                       ),
@@ -362,7 +439,8 @@ Widget build(BuildContext context) {
                     ),
                   ],
                 ),
-              Spacer(),
+                const SizedBox(height: 20),
+              // Spacer(),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
@@ -386,7 +464,7 @@ Widget build(BuildContext context) {
                         ),
                       ],
                     ),
-                                       child: TextButton.icon(
+                      child: TextButton.icon(
                       onPressed: () {
                         Navigator.pop(context);
                       },
@@ -394,7 +472,6 @@ Widget build(BuildContext context) {
                         label: const SizedBox(),
                         style: ElevatedButton.styleFrom(
                           backgroundColor:Color.fromARGB(255, 222, 221, 222),
-                          
                           padding: EdgeInsets.all(8.0),
                           minimumSize: Size(20, 20),
                       ),
@@ -417,15 +494,17 @@ Widget build(BuildContext context) {
                             foregroundColor: Colors.white, // Text/Icon color
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(50), // Rounded corners
-                      )
-                         )
-                      )
-                      
+                      ),
+                    ),
                   ),
-                ],
-              )
-            ],
-        )));
+                ),
+              ],
+            )
+          ],
+        ),
+      ),
+      ),
+    );
     })));
   }
 }
