@@ -379,6 +379,11 @@ class MiniMockExamState extends State<MiniMockExam> {
                       ),
                     ])
                 )),
+
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                    children: [
                 // Display the current question text
                 Text(
                   questions[currentQuestion]['question'],
@@ -388,53 +393,7 @@ class MiniMockExamState extends State<MiniMockExam> {
 
                 // If the question is a ranking question, display a reorderable list of options
                 if (questions[currentQuestion]['type'] == "ranking") ...[
-                  (constraints.maxWidth < 600)
-                    // MOBILE VERSION
-                    ? Expanded(
-                      child: ReorderableListView(
-                          buildDefaultDragHandles: false,
-                          proxyDecorator: (Widget child, int index, Animation<double> animation) {
-                            return Material(
-                              color: Colors.transparent,
-                              child: child,
-                            );
-                          },
-                          onReorder: (oldIndex, newIndex) {
-                            setState(() {
-
-                              if (newIndex > oldIndex) newIndex--; // Adjust the list based on movement of item
-                              // Update position of option in answer list
-                              final ranking = rankingAnswers[currentQuestion].removeAt(oldIndex);
-                              rankingAnswers[currentQuestion].insert(newIndex, ranking);
-                              // Update position of option text in question list
-                              final option = questions[currentQuestion]['options'].removeAt(oldIndex);
-                                  questions[currentQuestion]['options'].insert(newIndex, option);
-                            });
-                          },
-                          children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
-                            int optionIndex = entry.key;
-                            String option = entry.value;
-                            String optionLetter = rankingAnswers[currentQuestion][optionIndex];
-                            return ReorderableDragStartListener(
-                              key: ValueKey(optionLetter),
-                              index: optionIndex,
-                              child: Card(
-                                elevation: 3,
-                                color:Color.fromARGB(255, 222, 221, 222),
-                                child: ListTile(
-                                  title: Text('${optionIndex+1}:  $optionLetter. $option',
-                                    style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
-                                  ),
-                                  trailing: Icon(Icons.drag_handle, color: Color.fromARGB(255, 0, 0, 0), size: 30),
-                                )
-                              ),
-                            );
-                          }).toList(),
-                      ))
-
-                    //DESKTOP VERSION
-                    : Expanded(
-                      child: Row(
+                    Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -476,6 +435,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                                       return (optionNotEmpty)
                                       ? Draggable<String>(
                                           data: 'internal:$optionIndex:$optionLetter',
+                                          key: ValueKey(optionLetter),
                                           feedback: SizedBox(
                                               width: (maxPreferredWidth/2) - 16,
                                               height: 85,
@@ -488,8 +448,11 @@ class MiniMockExamState extends State<MiniMockExam> {
                                   );
                               }).toList())
                             ),
+
+                            // DESKTOP VERSION ONLY:
+                            (constraints.maxWidth > 600)
                             // Preloaded Options
-                            Expanded(
+                            ? Expanded(
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -518,6 +481,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                                       return (optionNotEmpty)
                                           ? Draggable<String>(
                                           data: 'external:$optionIndex:$optionLetter',
+                                          key: ValueKey(optionLetter),
                                           feedback: SizedBox(
                                               width: (maxPreferredWidth/2) - 16,
                                               height: 85,
@@ -529,9 +493,10 @@ class MiniMockExamState extends State<MiniMockExam> {
                                     },
                                   );
                               }).toList())
-                            ),
+                            )
+                            : SizedBox(),
                           ],
-                        )),
+                        ),
                 ]
                 // If the question is a multiple choice question, display checkboxes
                 else if(questions[currentQuestion]['type'] == "multiple choice") ...[
@@ -573,7 +538,8 @@ class MiniMockExamState extends State<MiniMockExam> {
                           )
                       )
                   )
-                ],
+                ]
+                ]))),
                 // Buttons to change questions
                 SizedBox(height: 20),
                 Center(
