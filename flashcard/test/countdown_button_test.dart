@@ -35,5 +35,9 @@ void main (){
     await tester.pump();
 
     expect(button.stopShowing, false);
+
+    button.getFirstStudyDay();
+
+    
   });
 }

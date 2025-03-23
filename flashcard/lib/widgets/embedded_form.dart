@@ -1,5 +1,7 @@
 import 'package:universal_html/html.dart';
-import 'dart:ui' as ui;
+//import 'dart:ui' as ui;
+// import 'dart:html';
+import 'dart:io' if (dart.library.html) 'dart:ui' as ui;
 
 import 'package:flutter/cupertino.dart';
 

@@ -4,7 +4,7 @@ import 'package:flashcard_x/screens/fullmock_landing.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
-import 'package:universal_html/html.dart';
+
 import 'package:url_launcher/url_launcher.dart' as launcher;
 import '../widgets/countdown_button.dart';
 import 'dashboard_screen.dart';
