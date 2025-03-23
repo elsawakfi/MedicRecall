@@ -82,6 +82,7 @@ class MyTheme {
       titleSmall: TextStyle(color: Colors.blueGrey[400], fontFamily: 'Akshar'),
       labelLarge: const TextStyle(fontFamily: 'Akshar'),
     ),
+    disabledColor: Colors.red,
   );
 
   //*************   D  A  R  K     T  H  E  M  E   **************//
@@ -151,5 +152,6 @@ class MyTheme {
       titleSmall: TextStyle(color: Colors.grey[400], fontFamily: 'Akshar'),
       labelLarge: const TextStyle(fontFamily: 'Akshar'),
     ),
+    disabledColor: Colors.grey[400],
   );
 }

@@ -18,7 +18,6 @@ var questionTypes = {"rating": 0, "multiple choice": 1, "ranking": 2};
 // send as an MSI object to ms_single.
 // this generates the page of the question, answer, etc.
 
-
 //firebase data:
 MSInfo generateMSInfo(int questionIndex, int index) {
   final foundQuestion = allQuestions[questionIndex];
@@ -62,10 +61,13 @@ Future<void> msiTypeList(String msType) async {
   if (allQuestions.isEmpty) {
     for (var doc in typeSnapshot.docs) {
       var question = doc.data() as Map<String, dynamic>;
-      var fullNum = question["question"].toString(); //fullNum gets the question field in the Map of the question, which looks like "QX/114 - official"
+      var fullNum = question["question"]
+          .toString(); //fullNum gets the question field in the Map of the question, which looks like "QX/114 - official"
 
-      question["question"] =
-          fullNum.toString().substring(1, fullNum.indexOf('/', 1)); //returns a string from the start of fullNum until it finds a '/'
+      question["question"] = fullNum.toString().substring(
+          1,
+          fullNum.indexOf('/',
+              1)); //returns a string from the start of fullNum until it finds a '/'
       question["id"] = doc.reference.id;
       allQuestions.add(question);
     }
@@ -117,44 +119,44 @@ class _MSIState extends State<MSI> {
   Widget build(BuildContext context) {
     final builder = typeQuestions.isNotEmpty
         ? GridView.builder(
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 10,
-        crossAxisSpacing: 8.0,
-        mainAxisSpacing: 8.0,
-      ),
-      itemCount: typeQuestions.length,
-      itemBuilder: (BuildContext context, int index) {
-        return GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => MSSingle(
-                  msiSingle: generateMSInfo(typeQuestions[index], index),
-                  allQuestions: allQuestions,
-                  typeQuestions: typeQuestions,
-                  currentIndex: index,
-                ),
-              ),
-            );
-          },
-          child: Card(
-            key: ValueKey("Question ${index + 1}"),
-            child: Container(
-              decoration: const BoxDecoration(
-                // border: Border.all(color: Colors.black),
-              ),
-              child: Center(
-                child: Text(
-                  "Q${index + 1}",
-                  style: const TextStyle(fontSize: 18),
-                ),
-              ),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 10,
+              crossAxisSpacing: 8.0,
+              mainAxisSpacing: 8.0,
             ),
-          ),
-        );
-      },
-    )
+            itemCount: typeQuestions.length,
+            itemBuilder: (BuildContext context, int index) {
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => MSSingle(
+                        msiSingle: generateMSInfo(typeQuestions[index], index),
+                        allQuestions: allQuestions,
+                        typeQuestions: typeQuestions,
+                        currentIndex: index,
+                      ),
+                    ),
+                  );
+                },
+                child: Card(
+                  key: ValueKey("Question ${index + 1}"),
+                  child: Container(
+                    decoration: const BoxDecoration(
+                        // border: Border.all(color: Colors.black),
+                        ),
+                    child: Center(
+                      child: Text(
+                        "Q${index + 1}",
+                        style: const TextStyle(fontSize: 18),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          )
         : const Center(child: CircularProgressIndicator());
 
     return Scaffold(
@@ -166,17 +168,25 @@ class _MSIState extends State<MSI> {
               children: [
                 Positioned(
                   top: 2.3,
-                  child: Image.asset(
-                    'assets/newlogo.png',
-                    fit: BoxFit.cover,
-                    height: 34,
+                  child: ColorFiltered(
+                    colorFilter: ColorFilter.mode(
+                      Theme.of(context).appBarTheme.iconTheme?.color ??
+                          Colors.white,
+                      BlendMode.srcIn,
+                    ),
+                    child: Image.asset(
+                      'assets/newlogo.png',
+                      fit: BoxFit.cover,
+                      height: MediaQuery.of(context).size.width < 600 ? 28 : 34,
+                    ),
                   ),
                 ),
                 Container(
                   margin: const EdgeInsets.only(left: 32),
                   padding: const EdgeInsets.all(8.0),
-                  child: Text(widget.qtype[0].toUpperCase() + widget.qtype.substring(1)),
-                  ),
+                  child: Text(widget.qtype[0].toUpperCase() +
+                      widget.qtype.substring(1)),
+                ),
               ],
             ),
           ),
