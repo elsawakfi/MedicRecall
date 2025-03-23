@@ -409,29 +409,29 @@ Widget build(BuildContext context) {
                                 ),
                               )),
                             ),
-                            // SizedBox(height: 10),
-                            // Row(
-                            //   mainAxisAlignment: MainAxisAlignment.center,
-                            //   children: List.generate(2, (index) => Padding(
-                            //     padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                            //     child: SizedBox(
-                            //       width: 100, // Set the desired width
-                            //       height: 50, // Set the desired height
-                            //       child: ElevatedButton.icon(
-                            //         onPressed: () {
-                            //           _returnToMiniMock(context, index+24);
-                            //         },
-                            //         icon: Visibility( visible: widget.flaggedQuestions[index+24],
-                            //           child: Icon(Icons.flag, color: Colors.black),),
-                            //         label: Text(
-                            //           '${index + 24}',
-                            //           style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
-                            //           fontSize: 20),
-                            //         ),
-                            //       ),
-                            //     ),
-                            //   )),
-                            // ),
+                            SizedBox(height: 10),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(1, (index) => Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                child: SizedBox(
+                                  width: 100, // Set the desired width
+                                  height: 50, // Set the desired height
+                                  child: ElevatedButton.icon(
+                                    onPressed: () {
+                                      _returnToMiniMock(context, index+24);
+                                    },
+                                    icon: Visibility( visible: widget.flaggedQuestions[index+24],
+                                      child: Icon(Icons.flag, color: Colors.black),),
+                                    label: Text(
+                                      '${index + 25}',
+                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
+                                      fontSize: 20),
+                                    ),
+                                  ),
+                                ),
+                              )),
+                            ),
                           ],
                         ),
                       ),
