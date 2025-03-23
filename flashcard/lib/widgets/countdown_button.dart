@@ -98,8 +98,14 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       builder: (context) {
         // Get screen width to determine layout
         final screenWidth = MediaQuery.of(context).size.width;
-        // Use horizontal layout when width >= 375px AND there are exactly 2 buttons
-        final useHorizontalLayout = screenWidth >= 375 && actions.length == 2;
+        
+        // Calculate if we have enough space for horizontal layout
+        // For 2 buttons, we need at least ~75px per button + spacing
+        final hasEnoughSpaceForHorizontal = actions.length == 2 && 
+            screenWidth >= 375;
+        
+        // Determine button layout based on available width and number of buttons
+        final useHorizontalLayout = hasEnoughSpaceForHorizontal;
         
         return AlertDialog(
           backgroundColor: const Color(0xFFE6EDF2),
@@ -152,15 +158,29 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
           // Use responsive layout for action buttons based on screen width and number of buttons
           actions: useHorizontalLayout
               ? [
-                  // Explicitly create a Row with our 2 buttons
+                  // For horizontal layout, use Row with flexible buttons
                   Container(
                     width: double.infinity,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        actions[0],
-                        const SizedBox(width: 12),
-                        actions[1],
+                        Flexible(
+                          child: Container(
+                            constraints: BoxConstraints(
+                              maxWidth: screenWidth * 0.35,
+                            ),
+                            child: actions[0],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Container(
+                            constraints: BoxConstraints(
+                              maxWidth: screenWidth * 0.35,
+                            ),
+                            child: actions[1],
+                          ),
+                        ),
                       ],
                     ),
                   )
@@ -177,7 +197,12 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                   ]
                 ],
           actionsAlignment: useHorizontalLayout ? MainAxisAlignment.end : MainAxisAlignment.center,
-          actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          actionsPadding: const EdgeInsets.all(16),
+          // Make dialog slightly narrower on small screens to ensure buttons fit
+          insetPadding: EdgeInsets.symmetric(
+            horizontal: screenWidth < 400 ? 20 : 40,
+            vertical: 24,
+          ),
         );
       }
     );
@@ -607,8 +632,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
           builder: (BuildContext context, StateSetter setState) {
             // Check if the screen is small
             final screenWidth = MediaQuery.of(context).size.width;
-            // Use horizontal layout if screen width >= 375px AND we have exactly 2 buttons
-            final useHorizontalLayout = screenWidth >= 375 && 2 == 2; // Hard-coded 2 since we know there are 2 buttons
+            // Use horizontal layout if screen width >= 400px AND we have exactly 2 buttons
+            final useHorizontalLayout = screenWidth >= 400 && 2 == 2; // Hard-coded 2 since we know there are 2 buttons
             
             return _buildAlertDialog(
               title: 'How many times would you like to practice each selected resource?',
@@ -747,8 +772,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                   style: TextButton.styleFrom(
                     foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 12),
-                    minimumSize: const Size(120, 45),
+                        horizontal: 16, vertical: 12),
+                    minimumSize: const Size(100, 45),
                   ),
                   child: const Text(
                     'Previous',
@@ -802,8 +827,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     foregroundColor: Colors.white,
                     backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 12),
-                    minimumSize: const Size(120, 45),
+                        horizontal: 16, vertical: 12),
+                    minimumSize: const Size(100, 45),
                   ),
                   child: const Text(
                     'Submit',
@@ -915,10 +940,10 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            // Get screen width to check against 375px threshold
+            // Get screen width to check against 400px threshold
             final screenWidth = MediaQuery.of(context).size.width;
-            // Use horizontal layout if screen width >= 375px AND we have exactly 2 buttons
-            final useHorizontalLayout = screenWidth >= 375 && 2 == 2; // Hard-coded 2 since we know there are 2 buttons
+            // Use horizontal layout if screen width >= 400px AND we have exactly 2 buttons
+            final useHorizontalLayout = screenWidth >= 400 && 2 == 2; // Hard-coded 2 since we know there are 2 buttons
             
             return AlertDialog(
               backgroundColor: const Color(0xFFE6EDF2),
