@@ -501,9 +501,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                 // If the question is a multiple choice question, display checkboxes
                 else if(questions[currentQuestion]['type'] == "multiple choice") ...[
                   //Line below takes the result of the map() and spreads its widgets into the children of Column
-                  Expanded(
-                      child: SingleChildScrollView(
-                          child: Column(
+                  Column(
                               children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
                                 int optionIndex = entry.key;
                                 String option = entry.value;
@@ -536,8 +534,6 @@ class MiniMockExamState extends State<MiniMockExam> {
                                 );
                               }).toList()
                           )
-                      )
-                  )
                 ]
                 ]))),
                 // Buttons to change questions

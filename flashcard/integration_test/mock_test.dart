@@ -107,7 +107,9 @@ void main() {
 
 
             List<ValueKey<String>> expectedOrder = [ValueKey('A'), ValueKey('B'), ValueKey('C'), ValueKey('D'), ValueKey('E')];
-            var listTiles = tester.widgetList<ReorderableDragStartListener>(find.byType(ReorderableDragStartListener));
+            var listTiles = tester.widgetList<Draggable<String>>(
+              find.byWidgetPredicate((widget) => widget is Draggable<String>),
+            );
 
             // Verify the number of items matches
             expect(listTiles.length, expectedOrder.length);
@@ -122,13 +124,15 @@ void main() {
             Offset optionPosition = tester.getCenter(find.byKey(ValueKey('A')));
             Offset targetPosition = tester.getBottomLeft(find.byKey(ValueKey('B')));
             // Calculate the required distance for the drag function (requires offset of a tile's height)
-            double yOffset = targetPosition.dy - (optionPosition.dy - optionSize.height);
+            double yOffset = targetPosition.dy - optionPosition.dy;
             // Simulate dragging option 1 from its position to the position of option 2
             await tester.dragFrom(optionPosition, Offset(0, yOffset));
             await tester.pumpAndSettle();
 
             expectedOrder = [ValueKey('B'), ValueKey('A'), ValueKey('C'), ValueKey('D'), ValueKey('E')];
-            listTiles = tester.widgetList<ReorderableDragStartListener>(find.byType(ReorderableDragStartListener));
+            listTiles = tester.widgetList<Draggable<String>>(
+              find.byWidgetPredicate((widget) => widget is Draggable<String>),
+            );
 
             // Verify the number of items matches
             expect(listTiles.length, expectedOrder.length);
