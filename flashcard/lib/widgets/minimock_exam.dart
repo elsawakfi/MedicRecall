@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/fullmock_review.dart';
 import 'package:flashcard_x/screens/minimock_scoring.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
+import 'package:flashcard_x/widgets/ranking_card_ui.dart';
 import 'package:flutter/material.dart';
 import '../screens/minimock_review.dart';
 import '../utils/timer.dart';
@@ -25,9 +26,13 @@ class MiniMockExamState extends State<MiniMockExam> {
   late User user;
   int currentQuestion = 0;
   int remainingSeconds = 2700; // Temp fix for late initialisation error
+
   List<List<bool>> multiChoiceAnswers = []; // For each question store selected options as a list of booleans
-  List<List<String>> rankingAnswers = [];
+  List<List<String>> rankingAnswers = []; // Desktop left set -> Also used for mobile
+  List<List<String>> rankingOptions = []; // Desktop right set
+  bool rankingMerged = false; // Have the ranking options been merged? -> Occurs on screen sizes < 600 -> Prevents unnecessary computation
   List<Map<String, dynamic>> questions = []; // Store question data with the question number as key e.g Q14
+
   List<bool> flaggedQuestions = [];
   final options = 'ABCDEFGH';
 
@@ -103,7 +108,14 @@ class MiniMockExamState extends State<MiniMockExam> {
             String modifiedQuestion = doc['question'].replaceFirst('Rank', '\nRank');
             doc['question'] = modifiedQuestion; // Add a newline between the question (could store a newline in the firebase itself but this allows for easier customisation)
             // Add a list of ordered letter 'A', 'B', ... based on quesiton index
-            rankingAnswers.add(List<String>.generate(doc['options'].length, (index) => String.fromCharCode(65 + index)));
+            if (MediaQuery.of(context).size.width < 600){
+              rankingOptions.add(List<String>.generate(doc['options'].length, (index) => ''));
+              rankingAnswers.add(List<String>.generate(doc['options'].length, (index) => String.fromCharCode(65 + index)));
+              rankingMerged = true;
+            }else{
+              rankingOptions.add(List<String>.generate(doc['options'].length, (index) => String.fromCharCode(65 + index)));
+              rankingAnswers.add(List<String>.generate(doc['options'].length, (index) => ''));
+            }
             break;
           case 'multiple choice':
             String modifiedQuestion = doc['question'].replaceFirst('Choose', '\nChoose');
@@ -153,9 +165,10 @@ class MiniMockExamState extends State<MiniMockExam> {
 
   void examEnd(){
     _timerController.stopTimer();
-    List<List<String>> multiChoiceFormatted = booleanToString(multiChoiceAnswers);
     List<List<String>> finalAnswerList = [];
-    finalAnswerList.addAll(rankingAnswers);
+    // finalAnswerList = mergeRankedLists(rankingAnswers, rankingOptions);
+    finalAnswerList = rankingAnswers;
+    List<List<String>> multiChoiceFormatted = booleanToString(multiChoiceAnswers);
     finalAnswerList.addAll(multiChoiceFormatted);
     updateExamResults(finalAnswerList);
     Navigator.of(context).pushReplacement(
@@ -166,6 +179,29 @@ class MiniMockExamState extends State<MiniMockExam> {
         ),
       ),
     );
+  }
+
+  List<List<String>> mergeRankedLists(List<List<String>> answers, options){
+    List<List<String>> combinedList = [];
+    for (int i = 0; i < answers.length; i++) {
+      combinedList.add([]);
+      for (int j = 0; j < answers[i].length; j++) {
+        if (answers[i][j].isNotEmpty) {
+          combinedList[i].add(answers[i][j]); // Keep the non-empty element from the left list
+        } else if (options[i][j].isNotEmpty) {
+          combinedList[i].add(options[i][j]); // Fill with the non-empty element from the right list
+        }
+        options[i][j] = '';
+      }
+    }
+    return combinedList;
+  }
+
+  void screenSizeCheck(){
+    if (MediaQuery.of(context).size.width < 600 && !rankingMerged){
+      rankingAnswers = mergeRankedLists(rankingAnswers, rankingOptions);
+      rankingMerged = true;
+    }
   }
 
   @override
@@ -217,7 +253,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                   height: 40.31,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
-                    color:  (remainingSeconds <= 600)
+                    color: (remainingSeconds <= 600)
                     ? Colors.red.shade400
                     : const Color.fromARGB(255, 222, 221, 222),
                     boxShadow: [
@@ -242,15 +278,13 @@ class MiniMockExamState extends State<MiniMockExam> {
                 )
               ],
           ),
-          body: questions.isEmpty
+          body: questions.isEmpty || rankingAnswers.isEmpty
               ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
               : LayoutBuilder( builder: (context, constraints) {
                 double maxScreenWidth = constraints.maxWidth * 0.5;
-                double maxPreferredWidth = 960; // 1920/2
-
-
-                return
-                Center(
+                double maxPreferredWidth = (maxScreenWidth > 960) ? maxScreenWidth : 960;
+                screenSizeCheck();
+                return Center(
                   child: Container(
                     decoration: BoxDecoration(
                         boxShadow: [
@@ -264,7 +298,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                       color:   Color.fromARGB(255, 255, 255, 255),
                     ),
                   constraints: BoxConstraints(
-                    maxWidth: maxScreenWidth > maxPreferredWidth ? maxScreenWidth : maxPreferredWidth,
+                    maxWidth: maxPreferredWidth,
                   ),
                   padding: EdgeInsets.all(16),
                   child: Column(
@@ -276,12 +310,6 @@ class MiniMockExamState extends State<MiniMockExam> {
                           child: Row(
                           children: [
                             Align(alignment: Alignment.centerLeft,
-
-
-                    // child: (
-
-                    // Wrap(
-                    // children: [
                       child: Container(
                         margin: const EdgeInsets.only(bottom: 10),
                         width: 160,
@@ -351,66 +379,129 @@ class MiniMockExamState extends State<MiniMockExam> {
                       ),
                     ])
                 )),
+
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                    children: [
                 // Display the current question text
-                  Text(
+                Text(
                   questions[currentQuestion]['question'],
                   style: TextStyle(fontSize: 20, color: Colors.black),
-
                 ),
                 const SizedBox(height: 20),
 
                 // If the question is a ranking question, display a reorderable list of options
                 if (questions[currentQuestion]['type'] == "ranking") ...[
-                        // Reorderable Options Column
-                        Expanded(
-                          child: ReorderableListView(
-                            buildDefaultDragHandles: false,
-                            proxyDecorator: (Widget child, int index, Animation<double> animation) {
-                              return Material(
-                                color: Colors.transparent,
-                                child: child,
-                              );
-                            },
-                            onReorder: (oldIndex, newIndex) {
-                              setState(() {
+                    Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Answer slots
+                            Expanded(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: rankingAnswers[currentQuestion].asMap().entries.map<Widget>((entry) {
+                                  int optionIndex = entry.key; // List index
+                                  String optionLetter = entry.value;
+                                  bool optionNotEmpty = rankingAnswers[currentQuestion][optionIndex].isNotEmpty;
+                                  String text = (optionNotEmpty) ? '$optionLetter. ${questions[currentQuestion]['options'][optionLetter.codeUnitAt(0) - 65]}'
+                                                              : '${optionIndex+1}:';
+                                  return DragTarget<String>(
+                                    onAcceptWithDetails: (data) => ({
+                                        setState(() {
+                                          int sourceIndex = int.parse(data.data.split(':')[1]);
+                                          if (data.data.startsWith('internal')) {
+                                            // Swap data
+                                            String temp = rankingAnswers[currentQuestion][optionIndex];
+                                            rankingAnswers[currentQuestion][optionIndex] = rankingAnswers[currentQuestion][sourceIndex];
+                                            rankingAnswers[currentQuestion][sourceIndex] = temp;
+                                          } else if (data.data.startsWith('external')) {
+                                            if(optionNotEmpty){
+                                              // Return current data to its original option card and accept new data
+                                              rankingOptions[currentQuestion][optionLetter.codeUnitAt(0) - 65] = rankingAnswers[currentQuestion][optionIndex];
+                                              rankingAnswers[currentQuestion][optionIndex] = rankingOptions[currentQuestion][sourceIndex];
+                                              rankingOptions[currentQuestion][sourceIndex] = '';
+                                            }else {
+                                              // Accept new data and remove the external option
+                                              rankingAnswers[currentQuestion][optionIndex] = rankingOptions[currentQuestion][sourceIndex];
+                                              rankingOptions[currentQuestion][sourceIndex] = '';
+                                            }
+                                          }
+                                        })
+                                    }),
+                                    builder: (context, candidateData, rejectedData) {
+                                      return (optionNotEmpty)
+                                      ? Draggable<String>(
+                                          data: 'internal:$optionIndex:$optionLetter',
+                                          key: ValueKey(optionLetter),
+                                          feedback: SizedBox(
+                                              width: (maxPreferredWidth/2) - 16,
+                                              height: 85,
+                                              child: OptionCard(text: text)),
+                                          childWhenDragging: OptionCard(text: '${optionIndex+1}:'),
+                                          child: OptionCard(text: '${optionIndex+1}: $text')
+                                      )
+                                      : OptionCard(text: text);
+                                    },
+                                  );
+                              }).toList())
+                            ),
 
-                                if (newIndex > oldIndex) newIndex--; // Adjust the list based on movement of item
-                                // Update position of option in answer list
-                                final ranking = rankingAnswers[currentQuestion].removeAt(oldIndex);
-                                rankingAnswers[currentQuestion].insert(newIndex, ranking);
-                                // Update position of option text in question list
-                                final option = questions[currentQuestion]['options'].removeAt(oldIndex);
-                                    questions[currentQuestion]['options'].insert(newIndex, option);
-                              });
-                            },
-                            children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
-                              int optionIndex = entry.key;
-                              String option = entry.value;
-                              String optionLetter = rankingAnswers[currentQuestion][optionIndex];
-                              return ReorderableDragStartListener(
-                                key: ValueKey(optionLetter),
-                                index: optionIndex,
-                                child: Card(
-                                  elevation: 3,
-                                  color:Color.fromARGB(255, 222, 221, 222),
-                                  child: ListTile(
-                                    title: Text('${optionIndex+1}:  $optionLetter. $option',
-                                      style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 20),
-                                    ),
-                                    trailing: Icon(Icons.drag_handle, color: Color.fromARGB(255, 0, 0, 0), size: 30),
-                                  )
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        )
+                            // DESKTOP VERSION ONLY:
+                            (constraints.maxWidth > 600)
+                            // Preloaded Options
+                            ? Expanded(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: rankingOptions[currentQuestion].asMap().entries.map<Widget>((entry) {
+                                  int optionIndex = entry.key;
+                                  String optionLetter = rankingOptions[currentQuestion][optionIndex];
+                                  bool optionNotEmpty = rankingOptions[currentQuestion][optionIndex].isNotEmpty;
+                                  String text = (optionNotEmpty) ? '$optionLetter. ${questions[currentQuestion]['options'][optionLetter.codeUnitAt(0) - 65]}'
+                                                              : '';
+                                  // If the option hasn't already been ranked, load it, otherwise don't reload it
+                                  return DragTarget<String>(
+                                    onAcceptWithDetails: (data) => ({
+                                      setState(() {
+                                        List<String> parts = data.data.split(':').toList();
+                                        int sourceIndex = int.parse(parts[1]);
+                                        String sourceLetter = parts[2];
+                                        if (data.data.startsWith('internal')) {
+                                          // Reset answer card and return its data to its original option card
+                                          rankingOptions[currentQuestion][sourceLetter.codeUnitAt(0) - 65] = rankingAnswers[currentQuestion][sourceIndex];
+                                          rankingAnswers[currentQuestion][sourceIndex] = '';
+                                          rankingMerged = false;
+                                        }
+                                      })
+                                    }),
+                                    builder: (context, candidateData, rejectedData) {
+                                      return (optionNotEmpty)
+                                          ? Draggable<String>(
+                                          data: 'external:$optionIndex:$optionLetter',
+                                          key: ValueKey(optionLetter),
+                                          feedback: SizedBox(
+                                              width: (maxPreferredWidth/2) - 16,
+                                              height: 85,
+                                              child: OptionCard(text: text)),
+                                          childWhenDragging: OptionCard(text: ''),
+                                          child: OptionCard(text: text)
+                                      )
+                                          : OptionCard(text: text);
+                                    },
+                                  );
+                              }).toList())
+                            )
+                            : SizedBox(),
+                          ],
+                        ),
                 ]
                 // If the question is a multiple choice question, display checkboxes
                 else if(questions[currentQuestion]['type'] == "multiple choice") ...[
                   //Line below takes the result of the map() and spreads its widgets into the children of Column
-                  Expanded(
-                      child: SingleChildScrollView(
-                          child: Column(
+                  Column(
                               children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
                                 int optionIndex = entry.key;
                                 String option = entry.value;
@@ -443,9 +534,8 @@ class MiniMockExamState extends State<MiniMockExam> {
                                 );
                               }).toList()
                           )
-                      )
-                  )
-                ],
+                ]
+                ]))),
                 // Buttons to change questions
                 SizedBox(height: 20),
                 Center(

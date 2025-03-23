@@ -48,7 +48,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
     await getQuestions(); // Fetch the questions on initialisation
     await getUser();
     await fetchUserAnswers(); //Fetch the user's answers from the database
-    _reorderAnswers();
+    // _reorderAnswers();
   }
 
  Future<void> getUser() async {
@@ -117,11 +117,13 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
         // Assign each option a letter
         // Generates a list where each option is paired with their associated letter
         // These letters are then compared with the index of the correct arrangement allowing them to be reordered correctly
+        // (Essentially pairs each letter in correct_answers, which is just a list of letters, to their respective option for later visualisation)
         List<MapEntry<String, String>> tempExamOptions = List.generate(
             options.length, (index) => MapEntry(String.fromCharCode(65 + index), options[index]));
         tempExamOptions.sort((a, b) => examLetters.indexOf(a.key).compareTo(examLetters.indexOf(b.key)));
         examOptions.add(tempExamOptions);
 
+        // (Essentially pairs each letter in userAnswers, which is just a list of letters, to their respective option for later visualisation)
         List<MapEntry<String, String>> tempUserOptions = List.generate(
             options.length, (index) => MapEntry(String.fromCharCode(65 + index), options[index]));
         tempUserOptions.sort((a, b) => userLetters.indexOf(a.key).compareTo(userLetters.indexOf(b.key)));
@@ -213,7 +215,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
             ),
           ),
         ),
-      body: examOptions.isEmpty || userOptions.isEmpty
+      body: userAnswers.isEmpty
         ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
         : LayoutBuilder( builder: (context, constraints) {
         double maxScreenWidth = constraints.maxWidth * 0.5;
@@ -303,6 +305,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                     child: Column( children: [
                       Row(
                       mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // USER ANSWERS
                         Expanded(
@@ -311,11 +314,12 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text('  Given Answer:', style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,fontSize: 18)),
-                              ...userOptions[currentQuestion].asMap().entries.map<Widget>((entry) {
+                              ...userAnswers[(currentQuestion+1).toString()].asMap().entries.map<Widget>((entry) {
                                 int optionIndex = entry.key;
-                                MapEntry<String, String> currentEntry = entry.value;
-                                String optionLetter = currentEntry.key;
-                                String optionText = currentEntry.value;
+                                String optionLetter = entry.value;
+                                // Get the correct option based on the letter (e.g. B = 1 => is option 2 in the options array)
+                                String optionText = (optionLetter != '') ? '$optionLetter. ${questions[currentQuestion]['options'][optionLetter.codeUnitAt(0) - 65]}'
+                                                                         : '';
                                 return Card(
                                   color: (questions[currentQuestion]['correct_answers'][optionIndex] == optionLetter)
                                       ? Colors.green
@@ -323,7 +327,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                     child: SizedBox(
                                     width: double.infinity, // Define the width
                                     child: ListTile(
-                                      title: Text('$optionLetter. $optionText', style: TextStyle(color: Colors.white,fontSize: 18))
+                                      title: Text(optionText, style: TextStyle(color: Colors.white,fontSize: 18))
                                     ))
                                 );
                               })
@@ -336,15 +340,14 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text('  Correct Answer:', style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,fontSize: 18)),
-                            ...examOptions[currentQuestion].asMap().entries.map<Widget>((entry) {
-                              MapEntry<String, String> currentEntry = entry.value;
-                              String optionLetter = currentEntry.key;
-                              String optionText = currentEntry.value;
+                            ...questions[currentQuestion]['correct_answers'].asMap().entries.map<Widget>((entry) {
+                              String optionLetter = entry.value;
+                              String optionText = '$optionLetter. ${questions[currentQuestion]['options'][optionLetter.codeUnitAt(0) - 65]}';
                               return Card(
                                 child: SizedBox(
                                 width: double.infinity,
                                 child: ListTile(
-                                  title: Text('$optionLetter. $optionText',
+                                  title: Text(optionText,
                                       style: TextStyle(color: Colors.blueGrey, fontSize: 18)),
                                 ))
                               );
