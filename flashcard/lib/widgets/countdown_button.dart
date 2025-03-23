@@ -579,7 +579,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                 QuerySnapshot u = await _userCollectionRef
                     .where("userID", isEqualTo: user?.uid)
                     .get();
-                // Update Firestore with selected resources
+
                 var id = u.docs.last.id;
                 await _userCollectionRef.doc(id).update({
                   'selectedResources': selectedResources,
@@ -629,11 +629,10 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       context: context,
       builder: (BuildContext context) {
         return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            // Check if the screen is small
+          builder: (BuildContext context, setState) {
+            // Get screen width for responsive layout
             final screenWidth = MediaQuery.of(context).size.width;
-            // Use horizontal layout if screen width >= 400px AND we have exactly 2 buttons
-            final useHorizontalLayout = screenWidth >= 400 && 2 == 2; // Hard-coded 2 since we know there are 2 buttons
+            final canShowButtonsHorizontally = screenWidth > 375;
             
             return _buildAlertDialog(
               title: 'How many times would you like to practice each selected resource?',
@@ -863,7 +862,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       context: context,
       builder: (BuildContext context) {
         return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (BuildContext context, setState) {
             // Get screen width for responsive layout
             final screenWidth = MediaQuery.of(context).size.width;
             final canShowButtonsHorizontally = screenWidth > 375;
@@ -873,13 +872,41 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(0),
               ),
-              title: Text(
-                'Select Days to Exclude from Study',
-                style: const TextStyle(
-                  color: Color.fromRGBO(21, 58, 103, 1),
-                  fontSize: 21,
-                  fontWeight: FontWeight.w500,
-                ),
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Select Days to Exclude from Study',
+                    style: const TextStyle(
+                      color: Color.fromRGBO(21, 58, 103, 1),
+                      fontSize: 21,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  // Show scroll indicator only on mobile screens
+                  if (screenWidth <= 450) ...[
+                    const SizedBox(height: 5),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Icon(
+                          Icons.swipe_vertical,
+                          size: 16,
+                          color: Color.fromRGBO(21, 58, 103, 0.6),
+                        ),
+                        SizedBox(width: 5),
+                        Text(
+                          'Scroll for more options',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Color.fromRGBO(21, 58, 103, 0.6),
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
               ),
               content: SizedBox(
                 width: screenWidth < 450 ? screenWidth * 0.8 : 300,
@@ -966,52 +993,23 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       context: context,
       builder: (BuildContext context) {
         return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
+          builder: (BuildContext context, setState) {
             // Get screen width to check against 400px threshold
             final screenWidth = MediaQuery.of(context).size.width;
-            // Use horizontal layout if screen width >= 400px AND we have exactly 2 buttons
-            final useHorizontalLayout = screenWidth >= 400 && 2 == 2; // Hard-coded 2 since we know there are 2 buttons
+            final canShowButtonsHorizontally = screenWidth > 375;
             
             return AlertDialog(
               backgroundColor: const Color(0xFFE6EDF2),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(5.0),
               ),
-              title: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Schedule Complete!',
-                    style: TextStyle(
-                      color: Color.fromRGBO(21, 58, 103, 1),
-                      fontSize: 21,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  if (screenWidth <= 450) ...[
-                    const SizedBox(height: 5),
-                    // Scroll indicator at the top
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Icon(
-                          Icons.swipe_vertical,
-                          size: 16,
-                          color: Color.fromRGBO(21, 58, 103, 0.6),
-                        ),
-                        SizedBox(width: 5),
-                        Text(
-                          'Scroll for more options',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Color.fromRGBO(21, 58, 103, 0.6),
-                            fontStyle: FontStyle.italic,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ],
+              title: Text(
+                'Schedule Complete!',
+                style: const TextStyle(
+                  color: Color.fromRGBO(21, 58, 103, 1),
+                  fontSize: 21,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
               content: const Text(
                 'Your study schedule has been successfully generated.\n'
@@ -1021,7 +1019,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                   color: Color.fromRGBO(21, 58, 103, 1),
                 ),
               ),
-              actions: useHorizontalLayout
+              actions: canShowButtonsHorizontally
                   ? [
                       // For larger screens, show buttons in a row
                       TextButton(
