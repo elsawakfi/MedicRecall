@@ -389,7 +389,7 @@ Widget build(BuildContext context) {
                             const SizedBox(height: 10),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(2, (index) => Padding(
+                              children: List.generate(3, (index) => Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                                 child: SizedBox(
                                   width: 100, // Set the desired width
@@ -398,7 +398,7 @@ Widget build(BuildContext context) {
                                     onPressed: () {
                                       _returnToMiniMock(context, index+22);
                                     },
-                                    icon: Visibility( visible: widget.flaggedQuestions[index+23],
+                                    icon: Visibility( visible: widget.flaggedQuestions[index+22],
                                       child: Icon(Icons.flag, color: Colors.black),),
                                     label: Text(
                                       '${index + 23}',
@@ -409,8 +409,8 @@ Widget build(BuildContext context) {
                                 ),
                               )),
                             ),
-                            SizedBox(height: 10),
-                            Row(
+                            //SizedBox(height: 10),
+                            /**Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: List.generate(1, (index) => Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -431,7 +431,7 @@ Widget build(BuildContext context) {
                                   ),
                                 ),
                               )),
-                            ),
+                            ),**/
                           ],
                         ),
                       ),
