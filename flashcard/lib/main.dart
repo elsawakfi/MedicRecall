@@ -38,7 +38,7 @@ Future<void> main() async {
       runApp(
         ChangeNotifierProvider<ThemeProvider>(
             create: (context) => ThemeProvider(
-                isDarkMode ? MyTheme.lightTheme : MyTheme.darkTheme),
+                isDarkMode ? MyTheme.darkTheme : MyTheme.lightTheme),
             child: const Flashcard()),
       );
     });
