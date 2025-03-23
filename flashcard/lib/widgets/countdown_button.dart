@@ -667,6 +667,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                           scrollDirection: Axis.horizontal,
                           child: Row(
                             children: repetitionOptions.map((repetition) {
+                              bool isSelected = officialMSRARepetitions == repetition;
                               return Padding(
                                 padding: const EdgeInsets.only(right: 10),
                                 child: ElevatedButton(
@@ -676,8 +677,12 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                                     });
                                   },
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.white,
-                                    foregroundColor: Colors.black,
+                                    backgroundColor: isSelected
+                                        ? const Color.fromRGBO(73, 148, 236, 1)
+                                        : Colors.white,
+                                    foregroundColor: isSelected
+                                        ? Colors.white
+                                        : const Color.fromRGBO(21, 58, 103, 1),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(10),
                                     ),
@@ -685,34 +690,31 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                                     fixedSize: const Size(60, 60),
                                     padding: EdgeInsets.zero,
                                   ),
-                                  child: Stack(
-                                    alignment: Alignment.center,
-                                    children: [
-                                      Text(
-                                        repetition.toString(),
-                                        style: const TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 18,
-                                        ),
-                                      ),
-                                      if (officialMSRARepetitions == repetition)
-                                        Container(
-                                          width: 60,
-                                          height: 60,
-                                          decoration: BoxDecoration(
-                                            color: const Color.fromRGBO(73, 148, 236, 1),
-                                            borderRadius: BorderRadius.circular(10),
-                                          ),
-                                          child: const Center(
-                                            child: Icon(
-                                              Icons.check,
-                                              color: Colors.white,
-                                              size: 24,
+                                  child: isSelected
+                                      ? Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Icon(Icons.check, size: 20, color: Colors.white),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              repetition.toString(),
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.w500,
+                                              ),
                                             ),
+                                          ],
+                                        )
+                                      : Text(
+                                          repetition.toString(),
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w500,
+                                            color: Color.fromRGBO(21, 58, 103, 1),
                                           ),
                                         ),
-                                    ],
-                                  ),
                                 ),
                               );
                             }).toList(),
@@ -738,6 +740,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                           scrollDirection: Axis.horizontal,
                           child: Row(
                             children: repetitionOptions.map((repetition) {
+                              bool isSelected = fullSizedMockRepetitions == repetition;
                               return Padding(
                                 padding: const EdgeInsets.only(right: 10),
                                 child: ElevatedButton(
@@ -747,8 +750,12 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                                     });
                                   },
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.white,
-                                    foregroundColor: Colors.black,
+                                    backgroundColor: isSelected
+                                        ? const Color.fromRGBO(73, 148, 236, 1)
+                                        : Colors.white,
+                                    foregroundColor: isSelected
+                                        ? Colors.white
+                                        : const Color.fromRGBO(21, 58, 103, 1),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(10),
                                     ),
@@ -756,34 +763,31 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                                     fixedSize: const Size(60, 60),
                                     padding: EdgeInsets.zero,
                                   ),
-                                  child: Stack(
-                                    alignment: Alignment.center,
-                                    children: [
-                                      Text(
-                                        repetition.toString(),
-                                        style: const TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 18,
-                                        ),
-                                      ),
-                                      if (fullSizedMockRepetitions == repetition)
-                                        Container(
-                                          width: 60,
-                                          height: 60,
-                                          decoration: BoxDecoration(
-                                            color: const Color.fromRGBO(73, 148, 236, 1),
-                                            borderRadius: BorderRadius.circular(10),
-                                          ),
-                                          child: const Center(
-                                            child: Icon(
-                                              Icons.check,
-                                              color: Colors.white,
-                                              size: 24,
+                                  child: isSelected
+                                      ? Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Icon(Icons.check, size: 20, color: Colors.white),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              repetition.toString(),
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.w500,
+                                              ),
                                             ),
+                                          ],
+                                        )
+                                      : Text(
+                                          repetition.toString(),
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.w500,
+                                            color: Color.fromRGBO(21, 58, 103, 1),
                                           ),
                                         ),
-                                    ],
-                                  ),
                                 ),
                               );
                             }).toList(),
