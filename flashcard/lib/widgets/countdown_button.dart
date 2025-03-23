@@ -1032,7 +1032,6 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
           builder: (BuildContext context, setState) {
             // Get screen width to check against 400px threshold
             final screenWidth = MediaQuery.of(context).size.width;
-            final canShowButtonsHorizontally = screenWidth > 375;
             
             return AlertDialog(
               backgroundColor: const Color(0xFFE6EDF2),
@@ -1055,219 +1054,108 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                   color: Color.fromRGBO(21, 58, 103, 1),
                 ),
               ),
-              actions: canShowButtonsHorizontally
-                  ? [
-                      // For larger screens, show buttons in a row
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        style: TextButton.styleFrom(
-                          foregroundColor: const Color.fromARGB(255, 160, 160, 160),
-                          backgroundColor: Colors.transparent,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 12),
-                          minimumSize: const Size(120, 45),
-                        ),
-                        child: const Text(
-                          'Ok',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      TextButton(
-                        onPressed: () async {
-                          // Show loading indicator while processing
-                          showDialog(
-                            context: context,
-                            barrierDismissible: false,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                backgroundColor: Colors.white,
-                                content: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    CircularProgressIndicator(
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        const Color.fromRGBO(51, 178, 73, 1),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    const Text(
-                                      'Generating your schedule...',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: Color.fromRGBO(21, 58, 103, 1),
-                                      ),
-                                    ),
-                                  ],
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  style: TextButton.styleFrom(
+                    foregroundColor: const Color.fromARGB(255, 160, 160, 160),
+                    backgroundColor: Colors.transparent,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
+                    minimumSize: const Size(120, 45),
+                  ),
+                  child: const Text(
+                    'Ok',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    // Show loading indicator while processing
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          backgroundColor: Colors.white,
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  const Color.fromRGBO(51, 178, 73, 1),
                                 ),
-                              );
-                            },
-                          );
-
-                          try {
-                            // Generate and save study sessions before navigating to calendar
-                            final studySessionManager = StudySessionManager();
-                            final events =
-                                await studySessionManager.generateStudySessions(user!);
-                            await studySessionManager.saveStudySessionsToDB(
-                                user!, events);
-
-                            // Close the loading dialog
-                            Navigator.of(context).pop();
-                            // Close the current dialog
-                            Navigator.of(context).pop();
-
-                            // Navigate to Calendar screen to see the new schedule
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => Calendar(),
                               ),
-                            );
-                          } catch (e) {
-                            // Close the loading dialog
-                            Navigator.of(context).pop();
-                            // Show error dialog
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: const Text('Error'),
-                                  content: Text(
-                                      'Failed to generate schedule: ${e.toString()}'),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.of(context).pop(),
-                                      child: const Text('OK'),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          }
-                        },
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
-                          minimumSize: const Size(120, 45),
-                        ),
-                        child: const Text(
-                          'View Schedule',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                      ),
-                    ]
-                  : [
-                      // For small screens, show buttons in a column
-                      SizedBox(
-                        width: double.infinity,
-                        child: TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          style: TextButton.styleFrom(
-                            foregroundColor: const Color.fromARGB(255, 160, 160, 160),
-                            backgroundColor: Colors.transparent,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 24, vertical: 12),
-                            minimumSize: const Size(double.infinity, 45),
-                          ),
-                          child: const Text(
-                            'Ok',
-                            style: TextStyle(fontSize: 16),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      SizedBox(
-                        width: double.infinity,
-                        child: TextButton(
-                          onPressed: () async {
-                            // Show loading indicator while processing
-                            showDialog(
-                              context: context,
-                              barrierDismissible: false,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  backgroundColor: Colors.white,
-                                  content: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      CircularProgressIndicator(
-                                        valueColor: AlwaysStoppedAnimation<Color>(
-                                          const Color.fromRGBO(51, 178, 73, 1),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 16),
-                                      const Text(
-                                        'Generating your schedule...',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color: Color.fromRGBO(21, 58, 103, 1),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            );
-
-                            try {
-                              // Generate and save study sessions before navigating to calendar
-                              final studySessionManager = StudySessionManager();
-                              final events =
-                                  await studySessionManager.generateStudySessions(user!);
-                              await studySessionManager.saveStudySessionsToDB(
-                                  user!, events);
-
-                              // Close the loading dialog
-                              Navigator.of(context).pop();
-                              // Close the current dialog
-                              Navigator.of(context).pop();
-
-                              // Navigate to Calendar screen to see the new schedule
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => Calendar(),
+                              const SizedBox(height: 16),
+                              const Text(
+                                'Generating your schedule...',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Color.fromRGBO(21, 58, 103, 1),
                                 ),
-                              );
-                            } catch (e) {
-                              // Close the loading dialog
-                              Navigator.of(context).pop();
-                              // Show error dialog
-                              showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: const Text('Error'),
-                                    content: Text(
-                                        'Failed to generate schedule: ${e.toString()}'),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () => Navigator.of(context).pop(),
-                                        child: const Text('OK'),
-                                      ),
-                                    ],
-                                  );
-                                },
-                              );
-                            }
-                          },
-                          style: TextButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
-                            minimumSize: const Size(double.infinity, 45),
+                              ),
+                            ],
                           ),
-                          child: const Text(
-                            'View Schedule',
-                            style: TextStyle(fontSize: 16),
-                          ),
+                        );
+                      },
+                    );
+
+                    try {
+                      // Generate and save study sessions before navigating to calendar
+                      final studySessionManager = StudySessionManager();
+                      final events =
+                          await studySessionManager.generateStudySessions(user!);
+                      await studySessionManager.saveStudySessionsToDB(
+                          user!, events);
+
+                      // Close the loading dialog
+                      Navigator.of(context).pop();
+                      // Close the current dialog
+                      Navigator.of(context).pop();
+
+                      // Navigate to Calendar screen to see the new schedule
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Calendar(),
                         ),
-                      ),
-                    ],
+                      );
+                    } catch (e) {
+                      // Close the loading dialog
+                      Navigator.of(context).pop();
+                      // Show error dialog
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('Error'),
+                            content: Text(
+                                'Failed to generate schedule: ${e.toString()}'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                child: const Text('OK'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    }
+                  },
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
+                    minimumSize: const Size(120, 45),
+                  ),
+                  child: const Text(
+                    'View Schedule',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ),
+              ],
+              actionsAlignment: screenWidth > 375 ? MainAxisAlignment.spaceEvenly : MainAxisAlignment.center,
               actionsPadding: const EdgeInsets.all(16),
             );
           },
