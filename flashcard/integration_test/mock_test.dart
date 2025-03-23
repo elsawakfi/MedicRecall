@@ -61,13 +61,30 @@ void main() {
         await tester.pumpAndSettle();
       });
 
-    testWidgets("Test Ranking UI",
+    testWidgets("Test Mobile Ranking UI",
             (WidgetTester tester) async {
+
+            // Set the screen size
+            final mobileSize = Size(580, 860);
+            tester.view.physicalSize = mobileSize;
+            tester.view.devicePixelRatio = 1.0;
+            addTearDown(tester.view.resetPhysicalSize);
+
             await tester.pump(const Duration(seconds: 1));
             tester.printToConsole('Testing exam date feature');
             await loginTest(tester);
             await tester.pumpAndSettle();
 
+            tester.printToConsole('scroll');
+
+            // Scrollable field is required as other flutter finds too many scrollables and throws a bad state error
+            await tester.scrollUntilVisible(
+              find.text('Mini-Mocks'),
+              100.0,
+              scrollable: find.byType(Scrollable).last
+            );
+            await tester.pumpAndSettle();
+            tester.printToConsole('scrolling');
             expect(find.text('Mini-Mocks'), findsOneWidget);
             await tester.tap(find.text('Mini-Mocks'));
             await tester.pumpAndSettle();
@@ -77,6 +94,12 @@ void main() {
             await tester.tap(find.text('Mini-Mock 1'));
             await tester.pumpAndSettle();
 
+            await tester.scrollUntilVisible(
+              find.text('Begin Exam'),
+              100.0,
+              scrollable: find.byType(Scrollable).last
+            );
+            await tester.pumpAndSettle();
             expect(find.text('Begin Exam'), findsOneWidget);
             await tester.tap(find.text('Begin Exam'));
             await tester.pumpAndSettle();
