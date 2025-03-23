@@ -123,7 +123,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              if (showScrollIndicator) ...[
+              if (showScrollIndicator && screenWidth <= 450) ...[
                 const SizedBox(height: 5),
                 // Scroll indicator at the top
                 Row(
@@ -864,13 +864,33 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            return _buildAlertDialog(
-              title: 'Select Days to Exclude from Study',
-              content: Column(
-                children: selectedDays.keys.map((day) {
-                  return _buildCheckbox(selectedDays[day]!, day,
-                      showInfo: false); // Hide info icon
-                }).toList(),
+            // Get screen width for responsive layout
+            final screenWidth = MediaQuery.of(context).size.width;
+            final canShowButtonsHorizontally = screenWidth > 375;
+            
+            return AlertDialog(
+              backgroundColor: const Color(0xFFE6EDF2),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(0),
+              ),
+              title: Text(
+                'Select Days to Exclude from Study',
+                style: const TextStyle(
+                  color: Color.fromRGBO(21, 58, 103, 1),
+                  fontSize: 21,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              content: SizedBox(
+                width: screenWidth < 450 ? screenWidth * 0.8 : 300,
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: selectedDays.keys.map((day) {
+                      return _buildCheckbox(selectedDays[day]!, day,
+                          showInfo: false); // Hide info icon
+                    }).toList(),
+                  ),
+                ),
               ),
               actions: [
                 // Previous button
@@ -926,7 +946,14 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                   ),
                 ),
               ],
-              showScrollIndicator: true, // Show scroll indicator
+              actionsAlignment: canShowButtonsHorizontally
+                  ? MainAxisAlignment.end
+                  : MainAxisAlignment.center,
+              actionsPadding: const EdgeInsets.all(16),
+              insetPadding: EdgeInsets.symmetric(
+                horizontal: screenWidth < 400 ? 20 : 40,
+                vertical: 24,
+              ),
             );
           },
         );
@@ -950,13 +977,41 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(5.0),
               ),
-              title: const Text(
-                'Schedule Complete!',
-                style: TextStyle(
-                  color: Color.fromRGBO(21, 58, 103, 1),
-                  fontSize: 21,
-                  fontWeight: FontWeight.w500,
-                ),
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Schedule Complete!',
+                    style: TextStyle(
+                      color: Color.fromRGBO(21, 58, 103, 1),
+                      fontSize: 21,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  if (screenWidth <= 450) ...[
+                    const SizedBox(height: 5),
+                    // Scroll indicator at the top
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Icon(
+                          Icons.swipe_vertical,
+                          size: 16,
+                          color: Color.fromRGBO(21, 58, 103, 0.6),
+                        ),
+                        SizedBox(width: 5),
+                        Text(
+                          'Scroll for more options',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Color.fromRGBO(21, 58, 103, 0.6),
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
               ),
               content: const Text(
                 'Your study schedule has been successfully generated.\n'
