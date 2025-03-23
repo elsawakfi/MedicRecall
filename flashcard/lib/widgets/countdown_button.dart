@@ -676,26 +676,42 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                                     });
                                   },
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor:
-                                        officialMSRARepetitions == repetition
-                                            ? Colors.green
-                                            : Colors.white,
+                                    backgroundColor: Colors.white,
+                                    foregroundColor: Colors.black,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(10),
                                     ),
-                                    minimumSize: const Size(44, 44),
-                                    fixedSize: const Size(44, 44),
+                                    minimumSize: const Size(60, 60),
+                                    fixedSize: const Size(60, 60),
                                     padding: EdgeInsets.zero,
                                   ),
-                                  child: Text(
-                                    repetition.toString(),
-                                    style: TextStyle(
-                                      color:
-                                          officialMSRARepetitions == repetition
-                                              ? Colors.white
-                                              : Colors.black,
-                                      fontSize: 18,
-                                    ),
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      Text(
+                                        repetition.toString(),
+                                        style: const TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 18,
+                                        ),
+                                      ),
+                                      if (officialMSRARepetitions == repetition)
+                                        Container(
+                                          width: 60,
+                                          height: 60,
+                                          decoration: BoxDecoration(
+                                            color: const Color.fromRGBO(73, 148, 236, 1),
+                                            borderRadius: BorderRadius.circular(10),
+                                          ),
+                                          child: const Center(
+                                            child: Icon(
+                                              Icons.check,
+                                              color: Colors.white,
+                                              size: 24,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
                                   ),
                                 ),
                               );
@@ -731,26 +747,42 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                                     });
                                   },
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor:
-                                        fullSizedMockRepetitions == repetition
-                                            ? Colors.green
-                                            : Colors.white,
+                                    backgroundColor: Colors.white,
+                                    foregroundColor: Colors.black,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(10),
                                     ),
-                                    minimumSize: const Size(44, 44),
-                                    fixedSize: const Size(44, 44),
+                                    minimumSize: const Size(60, 60),
+                                    fixedSize: const Size(60, 60),
                                     padding: EdgeInsets.zero,
                                   ),
-                                  child: Text(
-                                    repetition.toString(),
-                                    style: TextStyle(
-                                      color:
-                                          fullSizedMockRepetitions == repetition
-                                              ? Colors.white
-                                              : Colors.black,
-                                      fontSize: 18,
-                                    ),
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      Text(
+                                        repetition.toString(),
+                                        style: const TextStyle(
+                                          color: Colors.black,
+                                          fontSize: 18,
+                                        ),
+                                      ),
+                                      if (fullSizedMockRepetitions == repetition)
+                                        Container(
+                                          width: 60,
+                                          height: 60,
+                                          decoration: BoxDecoration(
+                                            color: const Color.fromRGBO(73, 148, 236, 1),
+                                            borderRadius: BorderRadius.circular(10),
+                                          ),
+                                          child: const Center(
+                                            child: Icon(
+                                              Icons.check,
+                                              color: Colors.white,
+                                              size: 24,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
                                   ),
                                 ),
                               );
