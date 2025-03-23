@@ -98,7 +98,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       builder: (context) {
         // Get screen width to determine layout
         final screenWidth = MediaQuery.of(context).size.width;
-        final isSmallScreen = screenWidth < 450; // Threshold for small devices
+        // Use horizontal layout when width >= 375px AND there are exactly 2 buttons
+        final useHorizontalLayout = screenWidth >= 375 && actions.length == 2;
         
         return AlertDialog(
           backgroundColor: const Color(0xFFE6EDF2),
@@ -143,43 +144,39 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
           ),
           // Adjust content width based on screen size
           content: SizedBox(
-            width: isSmallScreen ? screenWidth * 0.8 : 300,
+            width: screenWidth < 450 ? screenWidth * 0.8 : 300,
             child: SingleChildScrollView(
               child: content,
             ),
           ),
-          // Use responsive layout for action buttons
-          actions: [
-            if (isSmallScreen)
-              // Vertical layout for small screens
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisSize: MainAxisSize.min,
-                children: [
+          // Use responsive layout for action buttons based on screen width and number of buttons
+          actions: useHorizontalLayout
+              ? [
+                  // Explicitly create a Row with our 2 buttons
+                  Container(
+                    width: double.infinity,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        actions[0],
+                        const SizedBox(width: 12),
+                        actions[1],
+                      ],
+                    ),
+                  )
+                ]
+              : [
+                  // For vertical layout, wrap each button in its own container
                   for (int i = 0; i < actions.length; i++) ...[
-                    SizedBox(
+                    Container(
                       width: double.infinity,
                       child: actions[i],
                     ),
                     if (i < actions.length - 1) 
-                      const SizedBox(height: 8), // Vertical spacing between buttons
-                  ],
+                      const SizedBox(height: 8),
+                  ]
                 ],
-              )
-            else
-              // Horizontal layout for larger screens
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  for (int i = 0; i < actions.length; i++) ...[
-                    actions[i],
-                    if (i < actions.length - 1) 
-                      const SizedBox(width: 12), // Add spacing between buttons
-                  ],
-                ],
-              ),
-          ],
-          actionsAlignment: MainAxisAlignment.end,
+          actionsAlignment: useHorizontalLayout ? MainAxisAlignment.end : MainAxisAlignment.center,
           actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         );
       }
@@ -520,7 +517,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                _showExclusionDialog(context);
+                _showExamDateDialog(context);
               },
               style: TextButton.styleFrom(
                 foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
@@ -609,7 +606,9 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             // Check if the screen is small
-            bool isSmallScreen = MediaQuery.of(context).size.width < 600;
+            final screenWidth = MediaQuery.of(context).size.width;
+            // Use horizontal layout if screen width >= 375px AND we have exactly 2 buttons
+            final useHorizontalLayout = screenWidth >= 375 && 2 == 2; // Hard-coded 2 since we know there are 2 buttons
             
             return _buildAlertDialog(
               title: 'How many times would you like to practice each selected resource?',
@@ -636,39 +635,48 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                           style: TextStyle(
                             color: Color.fromRGBO(21, 58, 103, 1),
                             fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                         const SizedBox(height: 10),
-                        Wrap(
-                          spacing: 10, // Horizontal spacing
-                          runSpacing: 10, // Vertical spacing for wrapping
-                          children: repetitionOptions.map((int value) {
-                            return ChoiceChip(
-                              label: Text(
-                                '$value',
-                                style: TextStyle(
-                                  color: officialMSRARepetitions == value
-                                      ? Colors.white
-                                      : const Color.fromRGBO(21, 58, 103, 1),
-                                  fontWeight: FontWeight.w500,
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: repetitionOptions.map((repetition) {
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 10),
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      officialMSRARepetitions = repetition;
+                                    });
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor:
+                                        officialMSRARepetitions == repetition
+                                            ? Colors.green
+                                            : Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    minimumSize: const Size(44, 44),
+                                    fixedSize: const Size(44, 44),
+                                    padding: EdgeInsets.zero,
+                                  ),
+                                  child: Text(
+                                    repetition.toString(),
+                                    style: TextStyle(
+                                      color:
+                                          officialMSRARepetitions == repetition
+                                              ? Colors.white
+                                              : Colors.black,
+                                      fontSize: 18,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                              selected: officialMSRARepetitions == value,
-                              onSelected: (bool selected) {
-                                if (mounted) {
-                                  setState(() {
-                                    officialMSRARepetitions =
-                                        selected ? value : null;
-                                  });
-                                }
-                              },
-                              selectedColor:
-                                  const Color.fromRGBO(73, 148, 236, 1),
-                              backgroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                            );
-                          }).toList(),
+                              );
+                            }).toList(),
+                          ),
                         ),
                         const SizedBox(height: 20),
                       ],
@@ -682,202 +690,127 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                           style: TextStyle(
                             color: Color.fromRGBO(21, 58, 103, 1),
                             fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                         const SizedBox(height: 10),
-                        Wrap(
-                          spacing: 10, // Horizontal spacing
-                          runSpacing: 10, // Vertical spacing for wrapping
-                          children: repetitionOptions.map((int value) {
-                            return ChoiceChip(
-                              label: Text(
-                                '$value',
-                                style: TextStyle(
-                                  color: fullSizedMockRepetitions == value
-                                      ? Colors.white
-                                      : const Color.fromRGBO(21, 58, 103, 1),
-                                  fontWeight: FontWeight.w500,
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: repetitionOptions.map((repetition) {
+                              return Padding(
+                                padding: const EdgeInsets.only(right: 10),
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      fullSizedMockRepetitions = repetition;
+                                    });
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor:
+                                        fullSizedMockRepetitions == repetition
+                                            ? Colors.green
+                                            : Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    minimumSize: const Size(44, 44),
+                                    fixedSize: const Size(44, 44),
+                                    padding: EdgeInsets.zero,
+                                  ),
+                                  child: Text(
+                                    repetition.toString(),
+                                    style: TextStyle(
+                                      color:
+                                          fullSizedMockRepetitions == repetition
+                                              ? Colors.white
+                                              : Colors.black,
+                                      fontSize: 18,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                              selected: fullSizedMockRepetitions == value,
-                              onSelected: (bool selected) {
-                                if (mounted) {
-                                  setState(() {
-                                    fullSizedMockRepetitions =
-                                        selected ? value : null;
-                                  });
-                                }
-                              },
-                              selectedColor:
-                                  const Color.fromRGBO(73, 148, 236, 1),
-                              backgroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                            );
-                          }).toList(),
+                              );
+                            }).toList(),
+                          ),
                         ),
-                        const SizedBox(height: 20),
                       ],
                     ),
                 ],
               ),
-              actions: isSmallScreen
-                  ? [
-                      // For small screens, show buttons in a column
-                      SizedBox(
-                        width: double.infinity,
-                        child: TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            _showOptionsDialog(context);
-                          },
-                          style: TextButton.styleFrom(
-                            foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 24, vertical: 12),
-                            minimumSize: const Size(double.infinity, 45),
-                          ),
-                          child: const Text(
-                            'Previous',
-                            style: TextStyle(fontSize: 16),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      SizedBox(
-                        width: double.infinity,
-                        child: TextButton(
-                          key: const ValueKey('submitButton2'),
-                          onPressed: () async {
-                            // Validate that all selected resources have a repetition count
-                            bool isValid = true;
-                            if (selectedResources
-                                    .contains('Official MSRA Practice Paper') &&
-                                officialMSRARepetitions == null) {
-                              isValid = false;
-                            }
-                            if (selectedResources
-                                    .contains('Full-sized Mock Exam') &&
-                                fullSizedMockRepetitions == null) {
-                              isValid = false;
-                            }
+              actions: [
+                // Previous button
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _showOptionsDialog(context);
+                  },
+                  style: TextButton.styleFrom(
+                    foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
+                    minimumSize: const Size(120, 45),
+                  ),
+                  child: const Text(
+                    'Previous',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ),
+                // Submit button
+                TextButton(
+                  onPressed: () async {
+                    // Validate that all selected resources have a repetition count
+                    bool isValid = true;
+                    if (selectedResources
+                            .contains('Official MSRA Practice Paper') &&
+                        officialMSRARepetitions == null) {
+                      isValid = false;
+                    }
+                    if (selectedResources
+                            .contains('Full-sized Mock Exam') &&
+                        fullSizedMockRepetitions == null) {
+                      isValid = false;
+                    }
 
-                            if (isValid) {
-                              // Save repetition counts to the database
-                              QuerySnapshot u = await _userCollectionRef
-                                  .where("userID", isEqualTo: user?.uid)
-                                  .get();
+                    if (isValid) {
+                      // Save repetition counts to the database
+                      QuerySnapshot u = await _userCollectionRef
+                          .where("userID", isEqualTo: user?.uid)
+                          .get();
 
-                              var id = u.docs.last.id;
-                              await _userCollectionRef.doc(id).update({
-                                'officialMSRARepetitions': officialMSRARepetitions,
-                                'fullSizedMockRepetitions':
-                                    fullSizedMockRepetitions,
-                              });
+                      var id = u.docs.last.id;
+                      await _userCollectionRef.doc(id).update({
+                        'officialMSRARepetitions': officialMSRARepetitions,
+                        'fullSizedMockRepetitions':
+                            fullSizedMockRepetitions,
+                      });
 
-                              if (context.mounted) {
-                                Navigator.of(context).pop();
-                                _scheduleCompleteDialog(context);
-                              }
-                            } else {
-                              // Show a message if validation fails
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                      'Please select repetition counts for all resources'),
-                                ),
-                              );
-                            }
-                          },
-                          style: TextButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 24, vertical: 12),
-                            minimumSize: const Size(double.infinity, 45),
-                          ),
-                          child: const Text(
-                            'Submit',
-                            style: TextStyle(fontSize: 16),
-                          ),
+                      if (context.mounted) {
+                        Navigator.of(context).pop();
+                        _scheduleCompleteDialog(context);
+                      }
+                    } else {
+                      // Show a message if validation fails
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                              'Please select repetition counts for all resources'),
                         ),
-                      ),
-                    ]
-                  : [
-                      // For larger screens, show buttons in a row
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          _showOptionsDialog(context);
-                        },
-                        style: TextButton.styleFrom(
-                          foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 12),
-                          minimumSize: const Size(120, 45),
-                        ),
-                        child: const Text(
-                          'Previous',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      TextButton(
-                        key: const ValueKey('submitButton2'),
-                        onPressed: () async {
-                          // Validate that all selected resources have a repetition count
-                          bool isValid = true;
-                          if (selectedResources
-                                  .contains('Official MSRA Practice Paper') &&
-                              officialMSRARepetitions == null) {
-                            isValid = false;
-                          }
-                          if (selectedResources
-                                  .contains('Full-sized Mock Exam') &&
-                              fullSizedMockRepetitions == null) {
-                            isValid = false;
-                          }
-
-                          if (isValid) {
-                            // Save repetition counts to the database
-                            QuerySnapshot u = await _userCollectionRef
-                                .where("userID", isEqualTo: user?.uid)
-                                .get();
-
-                            var id = u.docs.last.id;
-                            await _userCollectionRef.doc(id).update({
-                              'officialMSRARepetitions': officialMSRARepetitions,
-                              'fullSizedMockRepetitions':
-                                  fullSizedMockRepetitions,
-                            });
-
-                            if (context.mounted) {
-                              Navigator.of(context).pop();
-                              _scheduleCompleteDialog(context);
-                            }
-                          } else {
-                            // Show a message if validation fails
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                    'Please select repetition counts for all resources'),
-                              ),
-                            );
-                          }
-                        },
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 12),
-                          minimumSize: const Size(120, 45),
-                        ),
-                        child: const Text(
-                          'Submit',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                      ),
-                    ],
+                      );
+                    }
+                  },
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
+                    minimumSize: const Size(120, 45),
+                  ),
+                  child: const Text(
+                    'Submit',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ),
+              ],
               showScrollIndicator: true, // Show scroll indicator for repetition dialog
             );
           },
@@ -906,9 +839,6 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            // Check if the screen is small
-            bool isSmallScreen = MediaQuery.of(context).size.width < 600;
-            
             return _buildAlertDialog(
               title: 'Select Days to Exclude from Study',
               content: Column(
@@ -917,118 +847,61 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                       showInfo: false); // Hide info icon
                 }).toList(),
               ),
-              actions: isSmallScreen
-                  ? [
-                      // For small screens, show buttons in a column
-                      SizedBox(
-                        width: double.infinity,
-                        child: TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            _showExamDateDialog(context);
-                          },
-                          style: TextButton.styleFrom(
-                            foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 24, vertical: 12),
-                            minimumSize: const Size(double.infinity, 45),
-                          ),
-                          child: const Text(
-                            'Previous',
-                            style: TextStyle(fontSize: 16),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      SizedBox(
-                        width: double.infinity,
-                        child: TextButton(
-                          onPressed: () async {
-                            List<String> excludedDays = selectedDays.entries
-                                .where((entry) => entry.value.value)
-                                .map((entry) => entry.key)
-                                .toList();
+              actions: [
+                // Previous button
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _showExamDateDialog(context);
+                  },
+                  style: TextButton.styleFrom(
+                    foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
+                    minimumSize: const Size(120, 45),
+                  ),
+                  child: const Text(
+                    'Previous',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ),
+                // Next button
+                TextButton(
+                  onPressed: () async {
+                    List<String> excludedDays = selectedDays.entries
+                        .where((entry) => entry.value.value)
+                        .map((entry) => entry.key)
+                        .toList();
 
-                            // Save excluded days to Firestore or local storage
-                            QuerySnapshot u = await _userCollectionRef
-                                .where("userID", isEqualTo: user?.uid)
-                                .get();
+                    // Save excluded days to the database
+                    QuerySnapshot u = await _userCollectionRef
+                        .where("userID", isEqualTo: user?.uid)
+                        .get();
 
-                            var id = u.docs.last.id;
-                            await _userCollectionRef.doc(id).update({
-                              'excludedDays': excludedDays,
-                            });
+                    var id = u.docs.last.id;
+                    await _userCollectionRef.doc(id).update({
+                      'excludedDays': excludedDays,
+                    });
 
-                            if (context.mounted) {
-                              Navigator.of(context).pop();
-                              _showOptionsDialog(context);
-                            }
-                          },
-                          style: TextButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
-                            minimumSize: const Size(double.infinity, 45),
-                          ),
-                          child: const Text(
-                            'Next',
-                            style: TextStyle(fontSize: 16),
-                          ),
-                        ),
-                      ),
-                    ]
-                  : [
-                      // For larger screens, show buttons in a row
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          _showExamDateDialog(context);
-                        },
-                        style: TextButton.styleFrom(
-                          foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 12),
-                          minimumSize: const Size(120, 45),
-                        ),
-                        child: const Text(
-                          'Previous',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      TextButton(
-                        onPressed: () async {
-                          List<String> excludedDays = selectedDays.entries
-                              .where((entry) => entry.value.value)
-                              .map((entry) => entry.key)
-                              .toList();
-
-                          // Save excluded days to Firestore or local storage
-                          QuerySnapshot u = await _userCollectionRef
-                              .where("userID", isEqualTo: user?.uid)
-                              .get();
-
-                          var id = u.docs.last.id;
-                          await _userCollectionRef.doc(id).update({
-                            'excludedDays': excludedDays,
-                          });
-
-                          if (context.mounted) {
-                            Navigator.of(context).pop();
-                            _showOptionsDialog(context);
-                          }
-                        },
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
-                          minimumSize: const Size(120, 45),
-                        ),
-                        child: const Text(
-                          'Next',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                      ),
-                    ],
-              showScrollIndicator: true, // Show scroll indicator for excluded days dialog
+                    if (context.mounted) {
+                      Navigator.of(context).pop();
+                      _showOptionsDialog(context);
+                    }
+                  },
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
+                    minimumSize: const Size(120, 45),
+                  ),
+                  child: const Text(
+                    'Next',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ),
+              ],
+              showScrollIndicator: true, // Show scroll indicator
             );
           },
         );
@@ -1042,8 +915,10 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
-            // Check if the screen is small
-            bool isSmallScreen = MediaQuery.of(context).size.width < 600;
+            // Get screen width to check against 375px threshold
+            final screenWidth = MediaQuery.of(context).size.width;
+            // Use horizontal layout if screen width >= 375px AND we have exactly 2 buttons
+            final useHorizontalLayout = screenWidth >= 375 && 2 == 2; // Hard-coded 2 since we know there are 2 buttons
             
             return AlertDialog(
               backgroundColor: const Color(0xFFE6EDF2),
@@ -1066,8 +941,111 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                   color: Color.fromRGBO(21, 58, 103, 1),
                 ),
               ),
-              actions: isSmallScreen
+              actions: useHorizontalLayout
                   ? [
+                      // For larger screens, show buttons in a row
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        style: TextButton.styleFrom(
+                          foregroundColor: const Color.fromARGB(255, 160, 160, 160),
+                          backgroundColor: Colors.transparent,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
+                          minimumSize: const Size(120, 45),
+                        ),
+                        child: const Text(
+                          'Ok',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      TextButton(
+                        onPressed: () async {
+                          // Show loading indicator while processing
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                backgroundColor: Colors.white,
+                                content: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    CircularProgressIndicator(
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        const Color.fromRGBO(51, 178, 73, 1),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 16),
+                                    const Text(
+                                      'Generating your schedule...',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Color.fromRGBO(21, 58, 103, 1),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          );
+
+                          try {
+                            // Generate and save study sessions before navigating to calendar
+                            final studySessionManager = StudySessionManager();
+                            final events =
+                                await studySessionManager.generateStudySessions(user!);
+                            await studySessionManager.saveStudySessionsToDB(
+                                user!, events);
+
+                            // Close the loading dialog
+                            Navigator.of(context).pop();
+                            // Close the current dialog
+                            Navigator.of(context).pop();
+
+                            // Navigate to Calendar screen to see the new schedule
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => Calendar(),
+                              ),
+                            );
+                          } catch (e) {
+                            // Close the loading dialog
+                            Navigator.of(context).pop();
+                            // Show error dialog
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text('Error'),
+                                  content: Text(
+                                      'Failed to generate schedule: ${e.toString()}'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.of(context).pop(),
+                                      child: const Text('OK'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          }
+                        },
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.white,
+                          backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
+                          minimumSize: const Size(120, 45),
+                        ),
+                        child: const Text(
+                          'View Schedule',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
+                    ]
+                  : [
                       // For small screens, show buttons in a column
                       SizedBox(
                         width: double.infinity,
@@ -1175,109 +1153,6 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                           ),
                         ),
                       ),
-                    ]
-                  : [
-                      // For larger screens, show buttons in a row
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        style: TextButton.styleFrom(
-                          foregroundColor: const Color.fromARGB(255, 160, 160, 160),
-                          backgroundColor: Colors.transparent,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 24, vertical: 12),
-                          minimumSize: const Size(120, 45),
-                        ),
-                        child: const Text(
-                          'Ok',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      TextButton(
-                        onPressed: () async {
-                          // Show loading indicator while processing
-                          showDialog(
-                            context: context,
-                            barrierDismissible: false,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                backgroundColor: Colors.white,
-                                content: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    CircularProgressIndicator(
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        const Color.fromRGBO(51, 178, 73, 1),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    const Text(
-                                      'Generating your schedule...',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: Color.fromRGBO(21, 58, 103, 1),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          );
-
-                          try {
-                            // Generate and save study sessions before navigating to calendar
-                            final studySessionManager = StudySessionManager();
-                            final events =
-                                await studySessionManager.generateStudySessions(user!);
-                            await studySessionManager.saveStudySessionsToDB(
-                                user!, events);
-
-                            // Close the loading dialog
-                            Navigator.of(context).pop();
-                            // Close the current dialog
-                            Navigator.of(context).pop();
-
-                            // Navigate to Calendar screen to see the new schedule
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => Calendar(),
-                              ),
-                            );
-                          } catch (e) {
-                            // Close the loading dialog
-                            Navigator.of(context).pop();
-                            // Show error dialog
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: const Text('Error'),
-                                  content: Text(
-                                      'Failed to generate schedule: ${e.toString()}'),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.of(context).pop(),
-                                      child: const Text('OK'),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          }
-                        },
-                        style: TextButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
-                          minimumSize: const Size(120, 45),
-                        ),
-                        child: const Text(
-                          'View Schedule',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                      ),
                     ],
               actionsPadding: const EdgeInsets.all(16),
             );
@@ -1359,64 +1234,64 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                         // Animated effects - only shown on hover (desktop) not on tap (mobile)
                         if (value > 0 && Theme.of(context).platform != TargetPlatform.android && 
                             Theme.of(context).platform != TargetPlatform.iOS) ...[
-                            // Position the wave effects in fixed positions with absolute positioning
-                            Positioned.fill(
-                              child: Center(
-                                child: Transform.scale(
-                                  scale: 1.0 + (value * 0.8),
-                                  child: Container(
-                                    width: 32,
-                                    height: 32,
-                                    decoration: BoxDecoration(
-                                      color: Colors.transparent,
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: primaryColor.withOpacity(0.45 * value),
-                                        width: 2.5,
-                                      ),
+                          // Position the wave effects in fixed positions with absolute positioning
+                          Positioned.fill(
+                            child: Center(
+                              child: Transform.scale(
+                                scale: 1.0 + (value * 0.8),
+                                child: Container(
+                                  width: 32,
+                                  height: 32,
+                                  decoration: BoxDecoration(
+                                    color: Colors.transparent,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: primaryColor.withOpacity(0.45 * value),
+                                      width: 2.5,
                                     ),
                                   ),
                                 ),
                               ),
                             ),
-                            Positioned.fill(
-                              child: Center(
-                                child: Transform.scale(
-                                  scale: 1.0 + (value * 0.5),
-                                  child: Container(
-                                    width: 28,
-                                    height: 28,
-                                    decoration: BoxDecoration(
-                                      color: Colors.transparent,
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: primaryColor.withOpacity(0.55 * value),
-                                        width: 2.5,
-                                      ),
+                          ),
+                          Positioned.fill(
+                            child: Center(
+                              child: Transform.scale(
+                                scale: 1.0 + (value * 0.5),
+                                child: Container(
+                                  width: 28,
+                                  height: 28,
+                                  decoration: BoxDecoration(
+                                    color: Colors.transparent,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: primaryColor.withOpacity(0.55 * value),
+                                      width: 2.5,
                                     ),
                                   ),
                                 ),
                               ),
                             ),
-                            Positioned.fill(
-                              child: Center(
-                                child: Transform.scale(
-                                  scale: 1.0 + (value * 0.2),
-                                  child: Container(
-                                    width: 24,
-                                    height: 24,
-                                    decoration: BoxDecoration(
-                                      color: Colors.transparent,
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: primaryColor.withOpacity(0.65 * value),
-                                        width: 2.5,
-                                      ),
+                          ),
+                          Positioned.fill(
+                            child: Center(
+                              child: Transform.scale(
+                                scale: 1.0 + (value * 0.2),
+                                child: Container(
+                                  width: 24,
+                                  height: 24,
+                                  decoration: BoxDecoration(
+                                    color: Colors.transparent,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: primaryColor.withOpacity(0.65 * value),
+                                      width: 2.5,
                                     ),
                                   ),
                                 ),
                               ),
                             ),
+                          ),
                         ],
                         
                         // Base icon (always shown)
