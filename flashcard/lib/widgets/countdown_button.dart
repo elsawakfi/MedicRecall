@@ -644,8 +644,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
             final canShowButtonsHorizontally = screenWidth > 375;
 
             return _buildAlertDialog(
-              title:
-                  'How many times would you like to repeat each resource?',
+              title: 'How many times would you like to repeat each resource?',
               content: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -999,27 +998,16 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, setState) {
-            // Get screen width to check against 400px threshold
             final screenWidth = MediaQuery.of(context).size.width;
+            final isSmallScreen = screenWidth < 600;
 
-            return AlertDialog(
-              backgroundColor: const Color(0xFFE6EDF2),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(5.0),
-              ),
-              title: Text(
-                'Schedule Complete!',
-                style: const TextStyle(
-                  color: Color.fromRGBO(21, 58, 103, 1),
-                  fontSize: 21,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              content: const Text(
+            return _buildAlertDialog(
+              title: 'Schedule Complete!',
+              content: Text(
                 'Your study schedule has been successfully generated.',
                 style: TextStyle(
-                  fontSize: 16,
-                  color: Color.fromRGBO(21, 58, 103, 1),
+                  fontSize: isSmallScreen ? 14 : 16,
+                  color: const Color.fromRGBO(21, 58, 103, 1),
                 ),
               ),
               actions: [
@@ -1030,13 +1018,15 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                   style: TextButton.styleFrom(
                     foregroundColor: const Color.fromARGB(255, 160, 160, 160),
                     backgroundColor: Colors.transparent,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 12),
-                    minimumSize: const Size(120, 45),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isSmallScreen ? 12 : 24,
+                      vertical: isSmallScreen ? 8 : 12,
+                    ),
+                    minimumSize: Size(120, 45),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Ok',
-                    style: TextStyle(fontSize: 16),
+                    style: TextStyle(fontSize: isSmallScreen ? 14 : 16),
                   ),
                 ),
                 TextButton(
@@ -1115,16 +1105,18 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                   style: TextButton.styleFrom(
                     foregroundColor: Colors.white,
                     backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
-                    minimumSize: const Size(120, 45),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isSmallScreen ? 12 : 24,
+                      vertical: isSmallScreen ? 8 : 12,
+                    ),
+                    minimumSize: Size(120, 45),
                   ),
-                  child: const Text(
+                  child: Text(
                     'View Schedule',
-                    style: TextStyle(fontSize: 16),
+                    style: TextStyle(fontSize: isSmallScreen ? 14 : 16),
                   ),
                 ),
               ],
-              actionsAlignment: MainAxisAlignment.center,
-              actionsPadding: const EdgeInsets.all(16),
             );
           },
         );
