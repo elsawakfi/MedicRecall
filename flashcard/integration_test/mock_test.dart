@@ -62,13 +62,30 @@ void main() {
         await tester.pumpAndSettle();
       });
 
-    testWidgets("Test Ranking UI",
+    testWidgets("Test Mobile Ranking UI",
             (WidgetTester tester) async {
+
+            // Set the screen size
+            final mobileSize = Size(580, 860);
+            tester.view.physicalSize = mobileSize;
+            tester.view.devicePixelRatio = 1.0;
+            addTearDown(tester.view.resetPhysicalSize);
+
             await tester.pump(const Duration(seconds: 1));
             tester.printToConsole('Testing exam date feature');
             await loginTest(tester);
             await tester.pumpAndSettle();
 
+            tester.printToConsole('scroll');
+
+            // Scrollable field is required as other flutter finds too many scrollables and throws a bad state error
+            await tester.scrollUntilVisible(
+              find.text('Mini-Mocks'),
+              100.0,
+              scrollable: find.byType(Scrollable).last
+            );
+            await tester.pumpAndSettle();
+            tester.printToConsole('scrolling');
             expect(find.text('Mini-Mocks'), findsOneWidget);
             await tester.tap(find.text('Mini-Mocks'));
             await tester.pumpAndSettle();
@@ -78,6 +95,12 @@ void main() {
             await tester.tap(find.text('Mini-Mock 1'));
             await tester.pumpAndSettle();
 
+            await tester.scrollUntilVisible(
+              find.text('Begin Exam'),
+              100.0,
+              scrollable: find.byType(Scrollable).last
+            );
+            await tester.pumpAndSettle();
             expect(find.text('Begin Exam'), findsOneWidget);
             await tester.tap(find.text('Begin Exam'));
             await tester.pumpAndSettle();
@@ -85,7 +108,9 @@ void main() {
 
 
             List<ValueKey<String>> expectedOrder = [ValueKey('A'), ValueKey('B'), ValueKey('C'), ValueKey('D'), ValueKey('E')];
-            var listTiles = tester.widgetList<ReorderableDragStartListener>(find.byType(ReorderableDragStartListener));
+            var listTiles = tester.widgetList<Draggable<String>>(
+              find.byWidgetPredicate((widget) => widget is Draggable<String>),
+            );
 
             // Verify the number of items matches
             expect(listTiles.length, expectedOrder.length);
@@ -100,13 +125,15 @@ void main() {
             Offset optionPosition = tester.getCenter(find.byKey(ValueKey('A')));
             Offset targetPosition = tester.getBottomLeft(find.byKey(ValueKey('B')));
             // Calculate the required distance for the drag function (requires offset of a tile's height)
-            double yOffset = targetPosition.dy - (optionPosition.dy - optionSize.height);
+            double yOffset = targetPosition.dy - optionPosition.dy;
             // Simulate dragging option 1 from its position to the position of option 2
             await tester.dragFrom(optionPosition, Offset(0, yOffset));
             await tester.pumpAndSettle();
 
             expectedOrder = [ValueKey('B'), ValueKey('A'), ValueKey('C'), ValueKey('D'), ValueKey('E')];
-            listTiles = tester.widgetList<ReorderableDragStartListener>(find.byType(ReorderableDragStartListener));
+            listTiles = tester.widgetList<Draggable<String>>(
+              find.byWidgetPredicate((widget) => widget is Draggable<String>),
+            );
 
             // Verify the number of items matches
             expect(listTiles.length, expectedOrder.length);

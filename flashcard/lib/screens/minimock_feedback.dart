@@ -49,7 +49,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
     await getQuestions(); // Fetch the questions on initialisation
     await getUser();
     await fetchUserAnswers(); //Fetch the user's answers from the database
-    _reorderAnswers();
+    // _reorderAnswers();
   }
 
   Future<void> getUser() async {
@@ -57,9 +57,11 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
     if (auth.currentUser == null) {
       var tmp = await auth.authStateChanges().first;
       if (tmp == null) {
-        nav.push(MaterialPageRoute(
-          builder: (context) => const SignInScreen(),
-        ));
+        nav.push(
+            MaterialPageRoute(
+              builder: (context) => const SignInScreen(),
+            )
+        );
       } else {
         user = tmp;
       }
@@ -119,38 +121,34 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
         // Assign each option a letter
         // Generates a list where each option is paired with their associated letter
         // These letters are then compared with the index of the correct arrangement allowing them to be reordered correctly
+        // (Essentially pairs each letter in correct_answers, which is just a list of letters, to their respective option for later visualisation)
         List<MapEntry<String, String>> tempExamOptions = List.generate(
-            options.length,
-            (index) =>
-                MapEntry(String.fromCharCode(65 + index), options[index]));
+            options.length, (index) => MapEntry(String.fromCharCode(65 + index), options[index]));
         tempExamOptions.sort((a, b) => examLetters.indexOf(a.key).compareTo(examLetters.indexOf(b.key)));
         examOptions.add(tempExamOptions);
 
+        // (Essentially pairs each letter in userAnswers, which is just a list of letters, to their respective option for later visualisation)
         List<MapEntry<String, String>> tempUserOptions = List.generate(
-            options.length,
-            (index) => MapEntry(String.fromCharCode(65 + index), options[index]));
-        tempUserOptions.sort((a, b) =>
-            userLetters.indexOf(a.key).compareTo(userLetters.indexOf(b.key)));
+            options.length, (index) => MapEntry(String.fromCharCode(65 + index), options[index]));
+        tempUserOptions.sort((a, b) => userLetters.indexOf(a.key).compareTo(userLetters.indexOf(b.key)));
         userOptions.add(tempUserOptions);
       }
     }
   }
 
   Future<Map<String, dynamic>> queryUserAnswerData() async {
-    QuerySnapshot snapshot = await FirebaseFirestore.instance
-        .collection('users')
-        .where('userID', isEqualTo: user.uid)
-        .get();
-    var id = snapshot.docs.last.id;
-    DocumentSnapshot<Map<String, dynamic>> userAnswers = await FirebaseFirestore
-        .instance
-        .collection('users')
-        .doc(id)
-        .collection('examAnswers')
-        .doc(widget.answerDirectory)
-        .get();
-    Map<String, dynamic> userAnswerMap = userAnswers.get('answers');
-    return userAnswerMap;
+       QuerySnapshot snapshot = await FirebaseFirestore.instance
+           .collection('users')
+           .where('userID', isEqualTo: user.uid)
+           .get();
+       var id = snapshot.docs.last.id;
+       DocumentSnapshot<
+           Map<String, dynamic>> userAnswers = await FirebaseFirestore.instance
+           .collection('users')
+           .doc(id).collection('examAnswers')
+           .doc(widget.answerDirectory).get();
+       Map<String, dynamic> userAnswerMap = userAnswers.get('answers');
+       return userAnswerMap;
   }
 
   Future<void> fetchUserAnswers() async {
@@ -205,9 +203,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                   Container(
                     margin: const EdgeInsets.only(left: 32),
                     padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      'Feedback',
-                    ),
+                    child: Text('Feedback'),
                   ),
                 ],
               )
@@ -223,11 +219,11 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
             ),
           ),
         ),
-        body: examOptions.isEmpty || userOptions.isEmpty
-            ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
-            : LayoutBuilder(builder: (context, constraints) {
-                double maxScreenWidth = constraints.maxWidth * 0.5;
-                double maxPreferredWidth = 960; // 1920/2
+      body: userAnswers.isEmpty
+        ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
+        : LayoutBuilder( builder: (context, constraints) {
+        double maxScreenWidth = constraints.maxWidth * 0.5;
+        double maxPreferredWidth = 960; // 1920/2
 
                 return Align(
                   alignment: Alignment.center,
@@ -241,7 +237,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Row(children: [
+                        Row( children: [
                           Container(
                             margin: const EdgeInsets.only(bottom: 10),
                             width: 160,
@@ -323,25 +319,25 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                      Text('  Given Answer:',
+                                        Text('  Given Answer:',
                                           style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 18)),
-                                      ...userOptions[currentQuestion].asMap().entries.map<Widget>((entry) {
-                                        int optionIndex = entry.key;
-                                        MapEntry<String, String>currentEntry = entry.value;
-                                        String optionLetter = currentEntry.key;
-                                        String optionText = currentEntry.value;
-                                        return Card(
-                                          color: (questions[currentQuestion]['correct_answers'][optionIndex] == optionLetter)
-                                              ? Colors.green
-                                              : Colors.red.shade400,
-                                          child: SizedBox(
-                                            width: double.infinity, // Define the width
-                                            child: ListTile(
-                                                title: Text('$optionLetter. $optionText',
-                                                    style: TextStyle(color: Colors.white, fontSize: 18))
-                                            )
-                                          ));
-                                      })
+                                        ...userAnswers[(currentQuestion+1).toString()].asMap().entries.map<Widget>((entry) {
+                                          int optionIndex = entry.key;
+                                          String optionLetter = entry.value;
+                                          // Get the correct option based on the letter (e.g. B = 1 => is option 2 in the options array)
+                                          String optionText = (optionLetter != '') ? '$optionLetter. ${questions[currentQuestion]['options'][optionLetter.codeUnitAt(0) - 65]}'
+                                              : '';
+                                          return Card(
+                                              color: (questions[currentQuestion]['correct_answers'][optionIndex] == optionLetter)
+                                                  ? Colors.green
+                                                  : Colors.red.shade400,
+                                              child: SizedBox(
+                                                  width: double.infinity, // Define the width
+                                                  child: ListTile(
+                                                      title: Text(optionText, style: TextStyle(color: Colors.white,fontSize: 18))
+                                                  ))
+                                          );
+                                        })
                                     ])
                                   ),
                                   // CORRECT ANSWERS
@@ -350,21 +346,20 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                      Text('  Correct Answer:',
+                                        Text('  Correct Answer:',
                                           style: TextStyle(
                                               color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 18)),
-                                      ...examOptions[currentQuestion].asMap().entries.map<Widget>((entry) {
-                                        MapEntry<String, String>currentEntry = entry.value;
-                                        String optionLetter = currentEntry.key;
-                                        String optionText = currentEntry.value;
-                                        return Card(
-                                          child: SizedBox(
-                                            width: double.infinity,
-                                            child: ListTile(
-                                              title: Text('$optionLetter. $optionText',
-                                                  style: TextStyle(color: Colors.blueGrey, fontSize: 18)),
+                                        ...questions[currentQuestion]['correct_answers'].asMap().entries.map<Widget>((entry) {
+                                          String optionLetter = entry.value;
+                                          String optionText = '$optionLetter. ${questions[currentQuestion]['options'][optionLetter.codeUnitAt(0) - 65]}';
+                                          return Card(
+                                              child: SizedBox(
+                                                  width: double.infinity,
+                                                  child: ListTile(
+                                                    title: Text(optionText,
+                                                        style: TextStyle(color: Colors.blueGrey, fontSize: 18)),
                                             )));
-                                      })
+                                        })
                                     ]))
                                 ])
                             ])
@@ -376,15 +371,13 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                 children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
                               int optionIndex = entry.key;
                               String option = entry.value;
-                              String optionLetter =
-                                  String.fromCharCode(optionIndex + 65);
+                              String optionLetter = String.fromCharCode(optionIndex + 65);
                               return ListTile(
                                 title: Text('$optionLetter. $option',
                                     style: TextStyle(fontSize: 18, color: Theme.of(context).textTheme.bodyMedium?.color)),
                                 enabled: false,
                                 dense: true,
-                                visualDensity:
-                                    VisualDensity(vertical: -4),
+                                visualDensity: VisualDensity(vertical: -4),
                               );
                             }).toList()),
                             SizedBox(height: 10),
