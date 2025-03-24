@@ -221,6 +221,7 @@ class MiniMockExamState extends State<MiniMockExam> {
     return PopScope(
         canPop: true,
         child: Scaffold(
+          backgroundColor: Colors.white,
           key: ValueKey(widget.title),
           drawer: const DrawMain(),
           appBar: AppBar(
@@ -681,8 +682,13 @@ class MiniMockExamState extends State<MiniMockExam> {
                             }
                           };
                         },
-                        label: Text('Review Page', style: TextStyle(color:  Color.fromARGB(255, 0, 0, 0), fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 17))),
-                        icon: Icon(Icons.search, color:  Color.fromARGB(255, 0, 0, 0), size: min(MediaQuery.of(context).size.width * 0.45, 17)),
+                        label: Text('Review Page', style: TextStyle(color:  Color.fromARGB(255, 0, 0, 0), fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 15.5) ,
+                        )),
+                        icon: Icon(Icons.search, color:  Color.fromARGB(255, 0, 0, 0), size: AdaptiveTextSize().getadaptiveTextSize(context, 25)
+                        ),
+                      
+                        
+                        
                     )),
                     const Spacer(),
                     if (currentQuestion > 0) //Prevents button being shown if no previous questions available

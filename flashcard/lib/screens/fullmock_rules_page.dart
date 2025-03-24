@@ -23,6 +23,7 @@ class FullMockRulesState extends State<FullMockRules> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       drawer: const DrawMain(),
         appBar: AppBar(
           // backgroundColor: Colors.blue,
@@ -71,7 +72,7 @@ class FullMockRulesState extends State<FullMockRules> {
           Center(
             child: Text(
               'MedicRecall Full Mock 1 Exam Instructions: \n',
-              style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 27), fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 27), fontWeight: FontWeight.bold, color: Colors.black),
             ),
           ),
           //const SizedBox(height: 5),
@@ -83,7 +84,7 @@ class FullMockRulesState extends State<FullMockRules> {
               'encounter, and you will be asked questions about dealing with them. When answering questions, '
               'please consider yourself to be an FY2 Doctor unless stated otherwise and answer based on what you '
               'should do in each scenario.\n',
-              style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 18)),
+              style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 18), color: Colors.black),
               textAlign: TextAlign.center,
             ),
           )),
@@ -95,7 +96,7 @@ class FullMockRulesState extends State<FullMockRules> {
               child: 
             Text(
               'The paper is divided into two parts: ',
-              style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 23), fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 23), fontWeight: FontWeight.bold, color: Colors.black),
               textAlign: TextAlign.center,
             ),
           )),
@@ -110,11 +111,11 @@ class FullMockRulesState extends State<FullMockRules> {
            Text.rich( 
               TextSpan(
                 text: 'Part 1: Ranking Questions (Q1-29).',
-                style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 18), decoration:TextDecoration.underline,),
+                style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 18), decoration:TextDecoration.underline, color: Colors.black),
                 children: <TextSpan>[
                   TextSpan(text:' In this part you are presented with scenarios followed by a number of possible options. For each scenario select the 3 options which together are the most '  
                     'appropriate to the least appropriate given the circumstances described. \n',
-                    style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 18),decoration:TextDecoration.none)),
+                    style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 18),decoration:TextDecoration.none, color: Colors.black)),
                 ],),
             ),
           )),
@@ -126,11 +127,11 @@ class FullMockRulesState extends State<FullMockRules> {
            Text.rich( 
               TextSpan(
                 text: 'Part 2: Multiple Choice Questions (Q30-50).',
-                style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 18), decoration:TextDecoration.underline,),
+                style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 18), decoration:TextDecoration.underline,color: Colors.black),
                 children: <TextSpan>[
                   TextSpan(text:' In this part you are presented with scenarios followed by a number of possible options. For each scenario select the 3 options which together are the most '
               'appropriate responses to the situation given the circumstances described. \n',
-                    style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 18),decoration:TextDecoration.none)),
+                    style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 18),decoration:TextDecoration.none, color: Colors.black)),
                 ],),
             ),
           )),
@@ -142,7 +143,7 @@ class FullMockRulesState extends State<FullMockRules> {
           Text(
               'The paper contains 50 questions in total. You have 95 minutes to complete the exam. This is to '
               'simulate the amount of time you will have to complete the exam on the day. \n',
-              style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 18)),
+              style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 18), color: Colors.black),
             ),
           )),
            Center(
@@ -163,7 +164,7 @@ class FullMockRulesState extends State<FullMockRules> {
                         borderRadius: BorderRadius.circular(5),
                       ),
                       backgroundColor: Colors.green
-                    ), child: Text('Begin Exam', style: TextStyle(color:Colors.white, fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 20))),
+                    ), child: Text('Begin Exam', style: TextStyle(color:Colors.black, fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 20))),
                   )
                 )
            )
