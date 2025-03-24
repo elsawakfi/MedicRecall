@@ -717,7 +717,8 @@ class CalendarStateO extends State<Calendar> {
     selectedEvents.clear(); // Clear local events
 
     try {
-      QuerySnapshot u = await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+      QuerySnapshot u =
+          await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
       if (u.docs.isEmpty) {
         print("No user document found");
         return;
@@ -746,9 +747,8 @@ class CalendarStateO extends State<Calendar> {
       }
 
       selectedEvents[testDay]?.remove(Event(
-        title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
-        getTestDay();
-       
+          title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
+      getTestDay();
 
       if (data.containsKey("excludedDays") || data["excludedDays"] != null) {
         updates["excludedDays"] = [];
@@ -759,7 +759,6 @@ class CalendarStateO extends State<Calendar> {
         await _userCollectionRef.doc(id).update(updates);
       }
 
-
       // Reset local state
       setState(() {
         testDay = null;
@@ -767,95 +766,93 @@ class CalendarStateO extends State<Calendar> {
         revisionDays = [];
         loading = false;
       });
-       // Show confirmation popup
+      // Show confirmation popup
       showDialog(
-                                          context: context,
-                                          builder: (context) => AlertDialog(
-                                            backgroundColor:
-                                                const Color(0xFFE6EDF2),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(0),
-                                            ),
-                                            title: const Text(
-                                              "All Events Deleted",
-                                              style: TextStyle(
-                                                color: Color.fromRGBO(
-                                                    21, 58, 103, 1),
-                                                fontSize: 21,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                            content: const Text(
-                                              "Go to the homepage to schedule your study schedule.",
-                                              style: TextStyle(
-                                                color: Color.fromRGBO(
-                                                    21, 58, 103, 1),
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w400,
-                                              ),
-                                            ),
-                                            actions: [
-                                              TextButton(
-                                                onPressed: () =>
-                                                    Navigator.pop(context),
-                                                style: TextButton.styleFrom(
-                                                  padding: EdgeInsets.symmetric(
-                                                      horizontal: 24,
-                                                      vertical: 12),
-                                                  minimumSize: Size(120, 45),
-                                                ),
-                                                child: Text(
-                                                  'OK',
-                                                  style:
-                                                      TextStyle(fontSize: 16),
-                                                ),
-                                              ),
-                                              TextButton(
-                                                onPressed: () {
-                                                  Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            Landing()),
-                                                  );
-                                                },
-                                                style: TextButton.styleFrom(
-                                                  foregroundColor: Colors.white,
-                                                  backgroundColor: Colors.blue,
-                                                  padding: EdgeInsets.symmetric(
-                                                      horizontal: 24,
-                                                      vertical: 12),
-                                                  minimumSize: Size(120, 45),
-                                                ),
-                                                child: Text(
-                                                  'Go to Homepage',
-                                                  style:
-                                                      TextStyle(fontSize: 16),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        );
+        context: context,
+        builder: (context) => LayoutBuilder(
+          builder: (context, constraints) {
+            bool isSmallScreen = constraints.maxWidth < 600;
+            return AlertDialog(
+              backgroundColor: const Color(0xFFE6EDF2),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(0),
+              ),
+              title: Text(
+                "All Events Deleted",
+                style: TextStyle(
+                  color: Color.fromRGBO(21, 58, 103, 1),
+                  fontSize: isSmallScreen ? 18 : 21,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              content: Text(
+                "Go to the homepage to schedule your study schedule.",
+                style: TextStyle(
+                  color: Color.fromRGBO(21, 58, 103, 1),
+                  fontSize: isSmallScreen ? 14 : 16,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: isSmallScreen ? 16 : 24,
+                        vertical: isSmallScreen ? 8 : 12),
+                    minimumSize: Size(
+                        isSmallScreen ? 100 : 120, isSmallScreen ? 40 : 45),
+                  ),
+                  child: Text(
+                    'OK',
+                    style: TextStyle(fontSize: isSmallScreen ? 14 : 16),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => Landing()),
+                    );
+                  },
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.blue,
+                    padding: EdgeInsets.symmetric(
+                        horizontal: isSmallScreen ? 16 : 24,
+                        vertical: isSmallScreen ? 8 : 12),
+                    minimumSize: Size(
+                        isSmallScreen ? 100 : 120, isSmallScreen ? 40 : 45),
+                  ),
+                  child: Text(
+                    'Go to Homepage',
+                    style: TextStyle(fontSize: isSmallScreen ? 14 : 16),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      );
     } catch (e) {
       print("Error clearing events: $e");
       setState(() {
         loading = false;
       });
     }
-    
   }
 
   Future<void> initializeUserAndTestDay() async {
     await getUser();
     await getTestDay();
     await _loadExcludedDays();
-   // Only proceed with test day handling if a test day exists
+    // Only proceed with test day handling if a test day exists
     if (testDay != null && !testDayBool) {
       await getEventsFromDB(); // Then load events from database
 
       // First add Test Day event if not already present
-      DateTime normalizedTestDay = DateTime(testDay!.year, testDay!.month, testDay!.day);
+      DateTime normalizedTestDay =
+          DateTime(testDay!.year, testDay!.month, testDay!.day);
       if (!selectedEvents.containsKey(normalizedTestDay)) {
         selectedEvents[normalizedTestDay] = [];
       }
@@ -863,21 +860,21 @@ class CalendarStateO extends State<Calendar> {
       // Check if the Test Day event already exists
       bool testDayEventExists = false;
       if (selectedEvents[normalizedTestDay] != null) {
-        testDayEventExists = selectedEvents[normalizedTestDay]!.any((event) => event.title == "Test Day");
+        testDayEventExists = selectedEvents[normalizedTestDay]!
+            .any((event) => event.title == "Test Day");
       }
 
       if (!testDayEventExists) {
-        selectedEvents[normalizedTestDay]!.add(
-          Event(title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94))
-        );
+        selectedEvents[normalizedTestDay]!.add(Event(
+            title: "Test Day", color: const Color.fromARGB(255, 255, 89, 94)));
       }
 
       // Check for study sessions by examining event titles
       bool hasStudySessions = false;
       for (var events in selectedEvents.values) {
         for (var event in events) {
-          if (event.title.contains("Mini Mock") || 
-              event.title.contains("Full-sized Mock") || 
+          if (event.title.contains("Mini Mock") ||
+              event.title.contains("Full-sized Mock") ||
               event.title.contains("Official MSRA Paper") ||
               event.title.contains("Flashcard")) {
             hasStudySessions = true;
@@ -1951,10 +1948,6 @@ class CalendarStateO extends State<Calendar> {
                                         testDay = null;
                                         testDayBool = true;
                                         await deleteAllEvents();
-                                        
-
-                                       
-                                        
                                       },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.redAccent,
@@ -2080,7 +2073,7 @@ class CalendarStateO extends State<Calendar> {
       DateTime date, String eventTitle, User user) async {
     date = DateTime(date.year, date.month, date.day);
 
-     if (!selectedEvents.containsKey(date)) {
+    if (!selectedEvents.containsKey(date)) {
       print("No events found for date: ${date.toString().split(' ')[0]}");
       return;
     }
@@ -2342,9 +2335,8 @@ class CalendarStateO extends State<Calendar> {
   // Load excluded days from Firebase
   Future<void> _loadExcludedDays() async {
     try {
-      QuerySnapshot querySnapshot = await _userCollectionRef
-          .where("userID", isEqualTo: user.uid)
-          .get();
+      QuerySnapshot querySnapshot =
+          await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
 
       if (querySnapshot.docs.isNotEmpty) {
         var userDoc = querySnapshot.docs.first.data() as Map<String, dynamic>;
