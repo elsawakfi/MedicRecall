@@ -99,13 +99,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
         // Get screen width to determine layout
         final screenWidth = MediaQuery.of(context).size.width;
         
-        // Calculate if we have enough space for horizontal layout
-        // For 2 buttons, we need at least ~75px per button + spacing
-        final hasEnoughSpaceForHorizontal = actions.length == 2 && 
-            screenWidth >= 375;
-        
-        // Determine button layout based on available width and number of buttons
-        final useHorizontalLayout = hasEnoughSpaceForHorizontal;
+        // Determine button layout based on available width and number of actions
+        final useHorizontalLayout = screenWidth >= 375;
         
         return AlertDialog(
           backgroundColor: const Color(0xFFE6EDF2),
@@ -155,48 +150,43 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               child: content,
             ),
           ),
-          // Use responsive layout for action buttons based on screen width and number of buttons
-          actions: useHorizontalLayout
-              ? [
-                  // For horizontal layout, use Row with flexible buttons
-                  Container(
-                    width: double.infinity,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Flexible(
-                          child: Container(
-                            constraints: BoxConstraints(
-                              maxWidth: screenWidth * 0.35,
-                            ),
-                            child: actions[0],
+          // Responsive layout for action buttons
+          actions: [
+            if (useHorizontalLayout)
+              // Horizontal layout for larger screens
+              Container(
+                width: double.infinity,
+                child: Row(
+                  mainAxisAlignment: actions.length <= 2 ? MainAxisAlignment.end : MainAxisAlignment.center,
+                  children: [
+                    for (int i = 0; i < actions.length; i++) ...[
+                      Flexible(
+                        child: Container(
+                          constraints: BoxConstraints(
+                            maxWidth: actions.length <= 2 
+                                ? screenWidth * 0.35 
+                                : screenWidth * 0.28,
                           ),
+                          child: actions[i],
                         ),
+                      ),
+                      if (i < actions.length - 1) 
                         const SizedBox(width: 8),
-                        Flexible(
-                          child: Container(
-                            constraints: BoxConstraints(
-                              maxWidth: screenWidth * 0.35,
-                            ),
-                            child: actions[1],
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                ]
-              : [
-                  // For vertical layout, wrap each button in its own container
-                  for (int i = 0; i < actions.length; i++) ...[
-                    Container(
-                      width: double.infinity,
-                      child: actions[i],
-                    ),
-                    if (i < actions.length - 1) 
-                      const SizedBox(height: 8),
-                  ]
-                ],
-          actionsAlignment: useHorizontalLayout ? MainAxisAlignment.end : MainAxisAlignment.center,
+                    ],
+                  ],
+                ),
+              )
+            else
+              // Vertical layout for smaller screens
+              for (int i = 0; i < actions.length; i++) ...[
+                Container(
+                  width: double.infinity,
+                  child: actions[i],
+                ),
+                if (i < actions.length - 1) 
+                  const SizedBox(height: 8),
+              ],
+          ],
           actionsPadding: const EdgeInsets.all(16),
           // Make dialog slightly narrower on small screens to ensure buttons fit
           insetPadding: EdgeInsets.symmetric(
@@ -317,69 +307,127 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return _buildAlertDialog(
-          title: 'Do you want to start your revision plan today?',
-          content: SizedBox(
-              child: buttonPressed
-                  ? Text('')
+        // Get screen width to determine button layout
+        final screenWidth = MediaQuery.of(context).size.width;
+        final useHorizontalLayout = screenWidth >= 375;
+        
+        // Create responsive button layouts
+        Widget noButton = TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          style: TextButton.styleFrom(
+            foregroundColor: const Color.fromRGBO(243, 90, 90, 1),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            minimumSize: const Size(120, 45),
+          ),
+          child: const Text(
+            'No',
+            style: TextStyle(fontSize: 16),
+          ),
+        );
+        
+        Widget yesButton = TextButton(
+          key: const ValueKey('yesButton'),
+          onPressed: () {
+            Navigator.of(context).pop();
+            _setFirstStudyDay();
+            _showExamDateDialog(context);
+          },
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.white,
+            backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            minimumSize: const Size(120, 45),
+          ),
+          child: const Text(
+            'Yes',
+            style: TextStyle(fontSize: 16),
+          ),
+        );
+        
+        Widget dontShowButton = TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+            setStopShowing(user!, true);
+          },
+          style: TextButton.styleFrom(
+            foregroundColor: const Color.fromARGB(255, 160, 160, 160),
+            backgroundColor: Colors.transparent,
+          ),
+          child: const Text(
+            'Don\'t Show Again',
+            style: TextStyle(fontSize: 16),
+          ),
+        );
+        
+        // Create responsive action layout based on screen width
+        Widget actionsWidget;
+        if (useHorizontalLayout) {
+          // Horizontal layout for screens >= 375px
+          actionsWidget = Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Flexible(flex: 1, child: noButton),
+              SizedBox(width: 8),
+              Flexible(flex: 1, child: yesButton),
+              SizedBox(width: 8),
+              Flexible(flex: 1, child: dontShowButton),
+            ],
+          );
+        } else {
+          // Vertical layout for smaller screens
+          actionsWidget = Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              noButton,
+              SizedBox(height: 8),
+              yesButton,
+              SizedBox(height: 8),
+              dontShowButton,
+            ],
+          );
+        }
+        
+        return AlertDialog(
+          backgroundColor: const Color(0xFFE6EDF2),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(0),
+          ),
+          title: Text(
+            'Do you want to start your revision plan today?',
+            style: const TextStyle(
+              color: Color.fromRGBO(21, 58, 103, 1),
+              fontSize: 21,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          content: Container(
+            width: screenWidth < 450 ? screenWidth * 0.8 : 300,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                buttonPressed
+                  ? SizedBox()
                   : Text(
                       'If you want to stop seeing this pop up please press the "Don\'t Show Again" below to pause pop up during your session',
                       style: TextStyle(
-                          fontSize: 16,
-                          color: Color.fromRGBO(21, 58, 103, 1)))),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              style: TextButton.styleFrom(
-                foregroundColor: const Color.fromRGBO(243, 90, 90, 1),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              ),
-              child: const Text(
-                'No',
-                style: TextStyle(fontSize: 16),
-              ),
+                        fontSize: 16,
+                        color: Color.fromRGBO(21, 58, 103, 1)
+                      )
+                    ),
+                SizedBox(height: 16),
+                // Add our custom actionsWidget here
+                actionsWidget,
+              ],
             ),
-            TextButton(
-              key: const ValueKey('yesButton'),
-              onPressed: () {
-                Navigator.of(context).pop();
-                _setFirstStudyDay(); // Ensure this function is defined
-                _showExamDateDialog(context); // Ensure this function is defined
-              },
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                minimumSize:
-                    const Size(120, 45), // Sets minimum width and height
-              ),
-              child: const Text(
-                'Yes',
-                style: TextStyle(fontSize: 16),
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                setStopShowing(user!, true);
-                //need to save the date here and then add another condition that checks later on
-              },
-              style: TextButton.styleFrom(
-                foregroundColor: const Color.fromARGB(255, 160, 160, 160),
-                backgroundColor: Colors.transparent,
-                //padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                //minimumSize: const Size(120, 45), // Sets minimum width and height
-              ),
-              child: const Text(
-                'Don\'t Show Again',
-                style: TextStyle(fontSize: 16),
-              ),
-            ),
-          ],
+          ),
+          insetPadding: EdgeInsets.symmetric(
+            horizontal: screenWidth < 400 ? 20 : 40,
+            vertical: 24,
+          ),
         );
       },
     );
