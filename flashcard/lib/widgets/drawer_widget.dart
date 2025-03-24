@@ -116,9 +116,9 @@ class DrawMain extends StatelessWidget {
               );
             }),
          ListTile(
-            key: const ValueKey('Full-Sized Mocks'),
+            key: const ValueKey('Full-Sized Mock Exam'),
             leading: const Icon(Icons.assignment_outlined),
-            title: const Text('Full-Sized Mocks'),
+            title: const Text('Full-Sized Mock Exam'),
 
             onTap: () {
               Navigator.push(
