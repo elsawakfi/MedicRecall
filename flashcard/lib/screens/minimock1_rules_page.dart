@@ -23,6 +23,7 @@ class MiniMock1RulesState extends State<MiniMock1Rules> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+     backgroundColor: Colors.white,
       drawer: const DrawMain(),
         appBar: AppBar(
           // backgroundColor: Colors.blue,
@@ -61,75 +62,6 @@ class MiniMock1RulesState extends State<MiniMock1Rules> {
                 ),
                 
                 ),
-        /**body:
-        Padding(padding: 
-        const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: const Text(
-                'MedicRecall Mini-Mock 1 Exam Instructions: \n',
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-              )
-            ),
-            const SizedBox(height: 10),
-            Container( 
-              margin: const EdgeInsets.only(left: 5, right: 5),
-              width: 300,
-              child: Text(
-              'In this test, you will be presented with typical scenarios that Foundation Year Two (FY2) Doctors '
-              'encounter , and you will be asked questions about dealing with them. When answering questions, '
-              'please consider yourself to be a FY2 Doctor unless stated otherwise and answer based on what you '
-              'should do in each scenario.\n',
-              style: TextStyle(fontSize: 21),
-              textAlign: TextAlign.center,
-            ),),
-            const Text(
-              'The paper is divided into two parts: ',
-              style: TextStyle(fontSize: 23, fontWeight: FontWeight.bold),
-            ),
-
-            Text.rich( 
-              TextSpan(
-                text: 'Part 1: Rating Questions (Q1-13).',
-                style: TextStyle(fontSize: 21, decoration:TextDecoration.underline,),
-                children: <TextSpan>[
-                  TextSpan(text:' In this part you are presented with scenarios followed by a number of possible options. For each scenario you are required to rank each option in order from the most '
-                    'appropriate to the least appropriate given the circumstances described in the scenario. \n',
-                    style: TextStyle(fontSize: 21,decoration:TextDecoration.none)),
-                ],),
-            ),
-            Text.rich( 
-              TextSpan(
-                text: 'Part 1: Ranking Questions (Q14-25).',
-                style: TextStyle(fontSize: 21, decoration:TextDecoration.underline,),
-                children: <TextSpan>[
-                  TextSpan(text:' In this part you are presented with scenarios followed by a number of possible options. For each scenario select the 3 options which together are the most '
-              'appropriate responses to the situation given the circumstances described. \n',
-                    style: TextStyle(fontSize: 21,decoration:TextDecoration.none)),
-                ],),
-            ),
-          
-            const Text(
-              'The paper contains 25 questions in total. You have 45 minutes to complete the exam. This is to '
-              'simulate the amount of time you will have to complete the exam on the day. \n',
-              style: TextStyle(fontSize: 21),
-            ),
-              Center(
-                child: ElevatedButton.icon(
-                  onPressed: (){
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const MiniMockExam1(),
-                      ),
-                    );
-                  },
-                  // icon: Icon(Icons.arrow_forward, color: Colors.white),
-                  label: Text('Begin', style: TextStyle(color: Colors.white, fontSize: 18)),
-                ))
-          ])
-        )**/
        body: SafeArea(
   child: SingleChildScrollView(
     child: Padding(
@@ -140,7 +72,7 @@ class MiniMock1RulesState extends State<MiniMock1Rules> {
           Center(
             child:  Text(
               'MedicRecall Mini-Mock 1 Exam Instructions: \n',
-              style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 27), fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 27), fontWeight: FontWeight.bold, color: Colors.black),
             ),
           ),
           //const SizedBox(height: 10),
@@ -152,7 +84,7 @@ class MiniMock1RulesState extends State<MiniMock1Rules> {
               'encounter, and you will be asked questions about dealing with them. When answering questions, '
               'please consider yourself to be an FY2 Doctor unless stated otherwise and answer based on what you '
               'should do in each scenario.\n',
-              style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 18)),
+              style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 18), color: Colors.black),
               textAlign: TextAlign.center,
             ),
           )),
@@ -163,7 +95,7 @@ class MiniMock1RulesState extends State<MiniMock1Rules> {
               child: 
             Text(
               'The paper is divided into two parts: ',
-              style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 23), fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 23), fontWeight: FontWeight.bold, color: Colors.black),
               textAlign: TextAlign.center,
             ),
           )),
@@ -178,11 +110,11 @@ class MiniMock1RulesState extends State<MiniMock1Rules> {
            Text.rich( 
               TextSpan(
                 text: 'Part 1: Ranking Questions (Q1-13).',
-                style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 18), decoration:TextDecoration.underline,),
+                style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 18), decoration:TextDecoration.underline, color: Colors.black),
                 children: <TextSpan>[
                   TextSpan(text:' In this part you are presented with scenarios followed by a number of possible options. For each scenario you are required to rank each option in order from the most '
                     'appropriate to the least appropriate given the circumstances described in the scenario. \n',
-                    style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 18),decoration:TextDecoration.none)),
+                    style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 18),decoration:TextDecoration.none, color: Colors.black)),
                 ],),
             ),
           )),
@@ -194,11 +126,11 @@ class MiniMock1RulesState extends State<MiniMock1Rules> {
            Text.rich( 
               TextSpan(
                 text: 'Part 2: Rating Questions (Q14-25).',
-                style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 18), decoration:TextDecoration.underline,),
+                style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 18), decoration:TextDecoration.underline, color: Colors.black),
                 children: <TextSpan>[
                   TextSpan(text:' In this part you are presented with scenarios followed by a number of possible options. For each scenario select the 3 options which together are the most '
               'appropriate responses to the situation given the circumstances described. \n',
-                    style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 18),decoration:TextDecoration.none)),
+                    style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 18),decoration:TextDecoration.none, color: Colors.black)),
                 ],),
             ),
           )),
@@ -210,7 +142,7 @@ class MiniMock1RulesState extends State<MiniMock1Rules> {
           Text(
               'The paper contains 25 questions in total. You have 45 minutes to complete the exam. This is to '
               'simulate the amount of time you will have to complete the exam on the day. \n',
-              style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 18)),
+              style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 18), color: Colors.black),
             ),
           )),
           SizedBox(
@@ -233,7 +165,7 @@ class MiniMock1RulesState extends State<MiniMock1Rules> {
                         borderRadius: BorderRadius.circular(5),
                       ),
                       backgroundColor: Colors.green
-                    ), child: Text('Begin Exam', style: TextStyle(color:Colors.white, fontSize:AdaptiveTextSize().getadaptiveTextSize(context, 20))),
+                    ), child: Text('Begin Exam', style: TextStyle(color:Colors.white, fontSize:AdaptiveTextSize().getadaptiveTextSize(context, 20),)),
                   )
                 )
            )
