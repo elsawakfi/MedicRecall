@@ -1430,7 +1430,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     buildCount++;
     return LayoutBuilder(
       builder: (context, constraints) {
-        bool isSmallScreen = constraints.maxWidth < 450;
+        bool isSmallScreen = constraints.maxWidth < 600;
 
         return Container(
           margin: const EdgeInsets.only(bottom: 55, right: 0),
