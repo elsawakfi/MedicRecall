@@ -639,22 +639,116 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (BuildContext context, setState) {
-            // Get screen width for responsive layout
             final screenWidth = MediaQuery.of(context).size.width;
-            final canShowButtonsHorizontally = screenWidth > 375;
+            final isSmallScreen = screenWidth < 600;
+
+            Widget buildChoiceChips(List<int> options,
+                bool isSelected(int value), Function(int) onSelected) {
+              if (isSmallScreen) {
+                // For mobile, split into two rows
+                return Column(
+                  children: [
+                    // First row (1-3)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: options
+                          .take(3)
+                          .map((value) => Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 4),
+                                child: ChoiceChip(
+                                  label: Text(value.toString()),
+                                  selected: isSelected(value),
+                                  onSelected: (_) => onSelected(value),
+                                  selectedColor:
+                                      const Color.fromRGBO(73, 148, 236, 1),
+                                  backgroundColor: Colors.white,
+                                  labelStyle: TextStyle(
+                                    color: isSelected(value)
+                                        ? Colors.white
+                                        : const Color.fromRGBO(21, 58, 103, 1),
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 12),
+                                ),
+                              ))
+                          .toList(),
+                    ),
+                    const SizedBox(height: 8),
+                    // Second row (4-6)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: options
+                          .skip(3)
+                          .map((value) => Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 4),
+                                child: ChoiceChip(
+                                  label: Text(value.toString()),
+                                  selected: isSelected(value),
+                                  onSelected: (_) => onSelected(value),
+                                  selectedColor:
+                                      const Color.fromRGBO(73, 148, 236, 1),
+                                  backgroundColor: Colors.white,
+                                  labelStyle: TextStyle(
+                                    color: isSelected(value)
+                                        ? Colors.white
+                                        : const Color.fromRGBO(21, 58, 103, 1),
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 12),
+                                ),
+                              ))
+                          .toList(),
+                    ),
+                  ],
+                );
+              } else {
+                // For desktop, single row
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: options
+                      .map((value) => Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: ChoiceChip(
+                              label: Text(value.toString()),
+                              selected: isSelected(value),
+                              onSelected: (_) => onSelected(value),
+                              selectedColor:
+                                  const Color.fromRGBO(73, 148, 236, 1),
+                              backgroundColor: Colors.white,
+                              labelStyle: TextStyle(
+                                color: isSelected(value)
+                                    ? Colors.white
+                                    : const Color.fromRGBO(21, 58, 103, 1),
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 12),
+                            ),
+                          ))
+                      .toList(),
+                );
+              }
+            }
 
             return _buildAlertDialog(
               title: 'How many times would you like to repeat each resource?',
               content: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'We recommend completing the official MSRA practice paper at least three times and the full-sized mock at least twice.\n'
                     'Your chosen number of repetitions will apply to each resource individually.',
                     style: TextStyle(
-                      color: Color.fromRGBO(21, 58, 103, 1),
-                      fontSize: 16,
-                      fontWeight: FontWeight.w400, // Regular font weight
+                      color: const Color.fromRGBO(21, 58, 103, 1),
+                      fontSize: isSmallScreen ? 14 : 16,
+                      fontWeight: FontWeight.w400,
                     ),
                   ),
                   const SizedBox(height: 15),
@@ -663,75 +757,20 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Official MSRA Practice Paper',
                           style: TextStyle(
-                            color: Color.fromRGBO(21, 58, 103, 1),
-                            fontSize: 18,
+                            color: const Color.fromRGBO(21, 58, 103, 1),
+                            fontSize: isSmallScreen ? 16 : 18,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
                         const SizedBox(height: 10),
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            children: repetitionOptions.map((repetition) {
-                              bool isSelected =
-                                  officialMSRARepetitions == repetition;
-                              return Padding(
-                                padding: const EdgeInsets.only(right: 10),
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      officialMSRARepetitions = repetition;
-                                    });
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: isSelected
-                                        ? const Color.fromRGBO(73, 148, 236, 1)
-                                        : Colors.white,
-                                    foregroundColor: isSelected
-                                        ? Colors.white
-                                        : const Color.fromRGBO(21, 58, 103, 1),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    minimumSize: const Size(60, 60),
-                                    fixedSize: const Size(60, 60),
-                                    padding: EdgeInsets.zero,
-                                  ),
-                                  child: isSelected
-                                      ? Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            const Icon(Icons.check,
-                                                size: 20, color: Colors.white),
-                                            const SizedBox(width: 4),
-                                            Text(
-                                              repetition.toString(),
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ],
-                                        )
-                                      : Text(
-                                          repetition.toString(),
-                                          style: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w500,
-                                            color:
-                                                Color.fromRGBO(21, 58, 103, 1),
-                                          ),
-                                        ),
-                                ),
-                              );
-                            }).toList(),
-                          ),
+                        buildChoiceChips(
+                          repetitionOptions,
+                          (value) => officialMSRARepetitions == value,
+                          (value) =>
+                              setState(() => officialMSRARepetitions = value),
                         ),
                         const SizedBox(height: 20),
                       ],
@@ -740,82 +779,26 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Full-sized Mock Exam',
                           style: TextStyle(
-                            color: Color.fromRGBO(21, 58, 103, 1),
-                            fontSize: 18,
+                            color: const Color.fromRGBO(21, 58, 103, 1),
+                            fontSize: isSmallScreen ? 16 : 18,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
                         const SizedBox(height: 10),
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            children: repetitionOptions.map((repetition) {
-                              bool isSelected =
-                                  fullSizedMockRepetitions == repetition;
-                              return Padding(
-                                padding: const EdgeInsets.only(right: 10),
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      fullSizedMockRepetitions = repetition;
-                                    });
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: isSelected
-                                        ? const Color.fromRGBO(73, 148, 236, 1)
-                                        : Colors.white,
-                                    foregroundColor: isSelected
-                                        ? Colors.white
-                                        : const Color.fromRGBO(21, 58, 103, 1),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    minimumSize: const Size(60, 60),
-                                    fixedSize: const Size(60, 60),
-                                    padding: EdgeInsets.zero,
-                                  ),
-                                  child: isSelected
-                                      ? Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            const Icon(Icons.check,
-                                                size: 20, color: Colors.white),
-                                            const SizedBox(width: 4),
-                                            Text(
-                                              repetition.toString(),
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ],
-                                        )
-                                      : Text(
-                                          repetition.toString(),
-                                          style: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.w500,
-                                            color:
-                                                Color.fromRGBO(21, 58, 103, 1),
-                                          ),
-                                        ),
-                                ),
-                              );
-                            }).toList(),
-                          ),
+                        buildChoiceChips(
+                          repetitionOptions,
+                          (value) => fullSizedMockRepetitions == value,
+                          (value) =>
+                              setState(() => fullSizedMockRepetitions = value),
                         ),
                       ],
                     ),
                 ],
               ),
               actions: [
-                // Previous button
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
@@ -823,19 +806,19 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                   },
                   style: TextButton.styleFrom(
                     foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
-                    minimumSize: const Size(100, 45),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isSmallScreen ? 12 : 24,
+                      vertical: isSmallScreen ? 8 : 12,
+                    ),
+                    minimumSize: Size(120, 45),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Previous',
-                    style: TextStyle(fontSize: 16),
+                    style: TextStyle(fontSize: isSmallScreen ? 14 : 16),
                   ),
                 ),
-                // Submit button
                 TextButton(
                   onPressed: () async {
-                    // Validate that all selected resources have a repetition count
                     bool isValid = true;
                     if (selectedResources
                             .contains('Official MSRA Practice Paper') &&
@@ -848,7 +831,6 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     }
 
                     if (isValid) {
-                      // Save repetition counts to the database
                       QuerySnapshot u = await _userCollectionRef
                           .where("userID", isEqualTo: user?.uid)
                           .get();
@@ -864,7 +846,6 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                         _scheduleCompleteDialog(context);
                       }
                     } else {
-                      // Show a message if validation fails
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text(
@@ -876,13 +857,15 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                   style: TextButton.styleFrom(
                     foregroundColor: Colors.white,
                     backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
-                    minimumSize: const Size(100, 45),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isSmallScreen ? 12 : 24,
+                      vertical: isSmallScreen ? 8 : 12,
+                    ),
+                    minimumSize: Size(120, 45),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Next',
-                    style: TextStyle(fontSize: 16),
+                    style: TextStyle(fontSize: isSmallScreen ? 14 : 16),
                   ),
                 ),
               ],
@@ -1053,6 +1036,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                                   fontSize: 16,
                                   color: Color.fromRGBO(21, 58, 103, 1),
                                 ),
+                                textAlign: TextAlign.center,
                               ),
                             ],
                           ),
