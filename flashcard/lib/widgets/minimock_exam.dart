@@ -221,7 +221,6 @@ class MiniMockExamState extends State<MiniMockExam> {
     return PopScope(
         canPop: true,
         child: Scaffold(
-          backgroundColor: Colors.white,
           key: ValueKey(widget.title),
           drawer: const DrawMain(),
           appBar: AppBar(
