@@ -36,6 +36,26 @@ class FullMockReviewState extends State<FullMockReview> {
   String _displayTime = '';
   late int remainingSeconds;
 
+  Widget _buildMultipleChoiceButton(int questionNumber) {
+    bool isFlagged = widget.flaggedQuestions.length > widget.rankingLength + questionNumber &&
+                     widget.flaggedQuestions[widget.rankingLength + questionNumber] == true;
+    return ElevatedButton(
+      onPressed: () => _returnToFullMock(context, widget.rankingLength + questionNumber),
+      child: Text(
+        '${widget.rankingLength + questionNumber + 1}',
+        style: TextStyle(
+          color: Theme.of(context).textTheme.bodyMedium?.color,
+          fontSize: 20,
+        ),
+      ),
+      style: ElevatedButton.styleFrom(
+        padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+        minimumSize: Size(100, 30),
+        alignment: Alignment.center,
+      ),
+    );
+  }
+
  Widget _buildQuestionButton(int questionNumber) {
   bool isFlagged = widget.flaggedQuestions.length > questionNumber 
                    && widget.flaggedQuestions[questionNumber] == true;
@@ -234,7 +254,7 @@ Widget build(BuildContext context) {
                           widget.rankingLength,
                           (index) => Padding(
                             padding: const EdgeInsets.all(4.0),
-                            child: _buildQuestionButton(index),
+                            child: _buildQuestionButton(index), // Build button for multiple-choice questions
                             ),
                           ),
                         ),
@@ -255,35 +275,41 @@ Widget build(BuildContext context) {
                          spacing: 6.0,
                          runSpacing: 10.0,
                       children: List.generate(
-                        widget.multiChoiceLength,
-                        (index) => Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          //  child: _buildQuestionButton(index),
-                          child: ElevatedButton.icon(
-                            onPressed: () => _returnToFullMock(context, widget.rankingLength + index),
-                            icon: Visibility(
-                              visible: (widget.flaggedQuestions.length > widget.rankingLength + index) 
-                                      ? widget.flaggedQuestions[widget.rankingLength + index] 
-                                      : false,
-                              child: const Icon(Icons.flag, color: Colors.black),
-                              
-                            ),
-                            label: Text('${widget.rankingLength + index + 1}',
-                            style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
-                            fontSize: 20,),
+                          widget.multiChoiceLength,
+                          (index) => Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: _buildMultipleChoiceButton(index), // Use the new method
                           ),
-                           style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24), // Increase the padding for a larger button
-                              minimumSize: Size(100, 30), // Make the button larger with a minimum size (width, height)
-                            alignment: Alignment.center,
-                            ),
-  
-                          ),
-                          
                         ),
-                      ),
-                    ),
-                  ))],
+                        // widget.multiChoiceLength,
+                        // (index) => Padding(
+                        //   padding: const EdgeInsets.all(4.0),
+                        //   //  child: _buildQuestionButton(index),
+                        //   child: ElevatedButton.icon(
+                        //     onPressed: () => _returnToFullMock(context, widget.rankingLength + index),
+                        //     icon: Visibility(
+                        //       visible: (widget.flaggedQuestions.length > widget.rankingLength + index) 
+                        //               ? widget.flaggedQuestions[widget.rankingLength + index] 
+                        //               : false,
+                        //       child: const Icon(Icons.flag, color: Colors.black),
+                              
+                        //     ),
+                        //     label: Text('${widget.rankingLength + index + 1}',
+                        //     style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
+                        //     fontSize: 20,),
+                        //   ),
+                          //  style: ElevatedButton.styleFrom(
+                          //     padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24), // Increase the padding for a larger button
+                          //     minimumSize: Size(100, 30), // Make the button larger with a minimum size (width, height)
+                          //   alignment: Alignment.center,
+                          //   ),
+  
+                          // ),
+                          
+                    //     ),
+                    //   ),
+                    // ),
+                  )))],
                 ),
               ],
             ),
