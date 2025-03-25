@@ -39,20 +39,19 @@ class FullMockReviewState extends State<FullMockReview> {
  Widget _buildQuestionButton(int questionNumber) {
   bool isFlagged = widget.flaggedQuestions.length > questionNumber 
                    && widget.flaggedQuestions[questionNumber] == true;
-  return ElevatedButton.icon(
+  return ElevatedButton(
     onPressed: () => _returnToFullMock(context, questionNumber),
-    icon: isFlagged 
-      ? const Icon(Icons.flag, color: Colors.black) 
-      : const SizedBox.shrink(),
-    label: Text('${questionNumber + 1}',
-    style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
-    fontSize: 20,),
-  ),
-  
+    child: Text(
+      '${questionNumber + 1}',
+      style: TextStyle(
+        color: Theme.of(context).textTheme.bodyMedium?.color,
+        fontSize: 20,
+      ),
+    ),
    style: ElevatedButton.styleFrom(
       padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24), // Increase the padding for a larger button
       minimumSize: Size(100, 30), // Make the button larger with a minimum size (width, height)
-    alignment: Alignment.center,
+      alignment: Alignment.center,
    ) );
 }
   
