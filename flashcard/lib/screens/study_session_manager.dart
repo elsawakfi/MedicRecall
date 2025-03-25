@@ -212,7 +212,7 @@ class StudySessionManager {
             firstStudyDay, normalizedTestDay, daysUntilTest, generatedEvents);
       }
 
-      // Schedule Official MSRA papers
+      // Schedule Official papers
       if (selectedResources.contains('Official MSRA Practice Paper')) {
         final repetitions =
             (userData['officialMSRARepetitions'] as num?)?.toInt() ?? 1;
@@ -350,7 +350,7 @@ class StudySessionManager {
     }
   }
 
-  /// Schedule official papers
+  /// Schedule official paper events
   Future<void> _scheduleOfficialPapers(
       DateTime today,
       DateTime testDay,
@@ -394,7 +394,9 @@ class StudySessionManager {
           generatedEvents[officialPaperDate] == null &&
           !await _isExcludedDay(officialPaperDate, userId)) {
         generatedEvents[officialPaperDate] = [
-          Event(title: "Official MSRA Paper ${i + 1}", color: kOfficialPaperColor)
+          Event(
+              title: "Official MSRA Practice Paper ${i + 1}",
+              color: kOfficialPaperColor)
         ];
         lastPaperDate = officialPaperDate;
       }

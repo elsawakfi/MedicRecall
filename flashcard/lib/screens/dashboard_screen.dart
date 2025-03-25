@@ -12,7 +12,7 @@ import 'package:flashcard_x/screens/feed_screen.dart';
 import 'package:flashcard_x/widgets/countdown_button.dart';
 import '../utils/page_transition.dart';
 import 'package:intl/intl.dart';
-
+import 'package:flashcard_x/widgets/app_bar.dart';
 
 class HomePage extends StatefulWidget {
   static String id = 'home';
@@ -151,41 +151,10 @@ class HomePageState extends State<HomePage> {
     return Scaffold(
       key: _key,
       drawer: const DrawMain(),
-      appBar: AppBar(
-        title: Align(
-          alignment: const Alignment(-0.05,0),
-          child: Stack(
-            children: [
-              Positioned(
-                top: 2.3,
-                child: Image.asset(
-                  'assets/newlogo.png',
-                  fit: BoxFit.cover,
-                  height: 34,
-                ),
-              ),
-              Container(
-                margin: const EdgeInsets.only(left: 32),
-                padding: const EdgeInsets.all(8.0),
-                child: const Text('Flashcard Tutor',
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        centerTitle: true,
-        elevation: 0,
-        leading: GestureDetector(
-          key: const ValueKey('Navbar'),
-          onTap: () => _key.currentState!.openDrawer(),
-          child: const Icon(
-            Icons.menu, // add custom icons also
-            // color: Colors.black,
-          ),
-        ),
+      appBar: CustomAppBar(
+        title: 'Flashcard Tutor',
+        mobileTitle: 'Flashcard Tutor',
       ),
-
       body: Center (
         child: loading 
         ? CircularProgressIndicator()

@@ -34,7 +34,6 @@ class MiniMockScoringState extends State<MiniMockScoring> {
 
   List<Map<String, dynamic>> questions = [];
   Map<String, dynamic> userAnswers = {};
-  late final int totalQuestions;
 
   List<int> answerScores = [];
   int totalScore = 0;
@@ -80,7 +79,8 @@ class MiniMockScoringState extends State<MiniMockScoring> {
 
 
   Future<List<Map<String, dynamic>>> queryQuestionData() async {
-    QuerySnapshot snapshot = await FirebaseFirestore.instance.collection(widget.questionDirectory).orderBy('questionNumber').get(); //questions are not properly stored in order on firestore so order via a field instead
+    QuerySnapshot snapshot = await FirebaseFirestore.instance.collection(widget.questionDirectory)
+        .orderBy('questionNumber').get(); //questions are not properly stored in order on firestore so order via a field instead
     return snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
   }
 
@@ -90,7 +90,6 @@ class MiniMockScoringState extends State<MiniMockScoring> {
       setState(() {
         // Extract the necessary data from the fetchedQuestions and turn it into the same format as userAnswers
         questions = fetchedQuestions;
-        totalQuestions = questions.length;
       });
     } catch (error) {
       if (kDebugMode) {
@@ -154,7 +153,8 @@ Future<void> fetchAverageScore() async {
           // It then subtracts the absolute value of the difference from 4 to get the correct score for that index based on the mark scheme
           // To check for errors just make a list of each score and print it
           for(int i = 0; i < userAnswer.length; i++){
-            userScore += (4 - (questions[questionIndex]['correct_answers'][i].codeUnitAt(0) - userAnswer[i].codeUnitAt(0)).abs()).toInt();
+            (userAnswer[i] != '') ? userScore += (4 - (questions[questionIndex]['correct_answers'][i].codeUnitAt(0) - userAnswer[i].codeUnitAt(0)).abs()).toInt()
+                                  : userScore += 0;
           }
           answerScores[questionIndex] = userScore;
           break;
