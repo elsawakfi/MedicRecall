@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher_string.dart';
+import 'package:flashcard_x/widgets/app_bar.dart';
 
 
 
@@ -15,40 +16,9 @@ class Resources extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         drawer: const DrawMain(),
-        appBar: AppBar(
-          // backgroundColor: Colors.blue,
-            elevation: 0,
-            title: Align(
-              alignment: const Alignment(-0.05,0),
-              child: Stack(
-                children: [
-                  Positioned(
-                    top: 2.3,
-                    child: Image.asset(
-                      'assets/newlogo.png',
-                      fit: BoxFit.cover,
-                      height: 34,
-                    ),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.only(left: 32),
-                    padding: const EdgeInsets.all(8.0),
-                    child:  Text('Resources',style: TextStyle(
-                      color: Theme.of(context).textTheme.titleMedium?.color ?? Colors.black)
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            centerTitle: true,
-            leading: Builder(
-                builder: (context) => GestureDetector(
-                  onTap: () => Scaffold.of(context).openDrawer(),
-                  child: const Icon(
-                    Icons.menu,
-                  ),
-                ))),
+        appBar: CustomAppBar(
+          title: 'Resources',
+        ),
         body: SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(16),
