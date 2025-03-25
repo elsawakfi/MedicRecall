@@ -718,8 +718,7 @@ class CalendarStateO extends State<Calendar> {
     selectedEvents.clear(); // Clear local events
 
     try {
-      QuerySnapshot u =
-          await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+      QuerySnapshot u = await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
       if (u.docs.isEmpty) {
         print("No user document found");
         return;
@@ -770,58 +769,69 @@ class CalendarStateO extends State<Calendar> {
       // Show confirmation popup
       showDialog(
         context: context,
-        builder: (context) => AlertDialog(
-          backgroundColor: const Color(0xFFE6EDF2),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(0),
-          ),
-          title: const Text(
-            "All Events Deleted",
-            style: TextStyle(
-              color: Color.fromRGBO(21, 58, 103, 1),
-              fontSize: 21,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          content: const Text(
-            "Go to the homepage to schedule your study schedule.",
-            style: TextStyle(
-              color: Color.fromRGBO(21, 58, 103, 1),
-              fontSize: 16,
-              fontWeight: FontWeight.w400,
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              style: TextButton.styleFrom(
-                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                minimumSize: Size(120, 45),
+        builder: (context) => LayoutBuilder(
+          builder: (context, constraints) {
+            bool isSmallScreen = constraints.maxWidth < 600;
+            return AlertDialog(
+              backgroundColor: const Color(0xFFE6EDF2),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(0),
               ),
-              child: Text(
-                'OK',
-                style: TextStyle(fontSize: 16),
+              title: Text(
+                "All Events Deleted",
+                style: TextStyle(
+                  color: Color.fromRGBO(21, 58, 103, 1),
+                  fontSize: isSmallScreen ? 18 : 21,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => Landing()),
-                );
-              },
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: Colors.blue,
-                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                minimumSize: Size(120, 45),
+              content: Text(
+                "Go to the homepage to schedule your study schedule.",
+                style: TextStyle(
+                  color: Color.fromRGBO(21, 58, 103, 1),
+                  fontSize: isSmallScreen ? 14 : 16,
+                  fontWeight: FontWeight.w400,
+                ),
               ),
-              child: Text(
-                'Go to Homepage',
-                style: TextStyle(fontSize: 16),
-              ),
-            ),
-          ],
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: isSmallScreen ? 16 : 24,
+                        vertical: isSmallScreen ? 8 : 12),
+                    minimumSize: Size(
+                        isSmallScreen ? 100 : 120, isSmallScreen ? 40 : 45),
+                  ),
+                  child: Text(
+                    'OK',
+                    style: TextStyle(fontSize: isSmallScreen ? 14 : 16),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => Landing()),
+                    );
+                  },
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.blue,
+                    padding: EdgeInsets.symmetric(
+                        horizontal: isSmallScreen ? 16 : 24,
+                        vertical: isSmallScreen ? 8 : 12),
+                    minimumSize: Size(
+                        isSmallScreen ? 100 : 120, isSmallScreen ? 40 : 45),
+                  ),
+                  child: Text(
+                    'Go to Homepage',
+                    style: TextStyle(fontSize: isSmallScreen ? 14 : 16),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       );
     } catch (e) {
