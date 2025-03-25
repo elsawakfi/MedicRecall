@@ -146,6 +146,43 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
           ),
         ),
         actions: actions,
+        // actions: [
+        //     if (useHorizontalLayout)
+        //       // Horizontal layout for larger screens
+        //       Container(
+        //         width: double.infinity,
+        //         child: Row(
+        //           mainAxisAlignment: actions.length <= 2 ? MainAxisAlignment.end : MainAxisAlignment.center,
+        //           children: [
+        //             for (int i = 0; i < actions.length; i++) ...[
+        //               Flexible(
+        //                 child: Container(
+        //                   constraints: BoxConstraints(
+        //                     maxWidth: actions.length <= 2 
+        //                         ? screenWidth * 0.35 
+        //                         : screenWidth * 0.28,
+        //                   ),
+        //                   child: actions[i],
+        //                 ),
+        //               ),
+        //               if (i < actions.length - 1) 
+        //                 const SizedBox(width: 8),
+        //             ],
+        //           ],
+        //         ),
+        //       )
+        //     else
+        //       // Vertical layout for smaller screens
+        //       for (int i = 0; i < actions.length; i++) ...[
+        //         Container(
+        //           width: double.infinity,
+        //           child: actions[i],
+        //         ),
+        //         if (i < actions.length - 1) 
+        //           const SizedBox(height: 8),
+        //       ],
+        //   ],
+        // actionsPadding: const EdgeInsets.all(16),
         insetPadding: EdgeInsets.symmetric(
           horizontal: screenWidth < 450 ? 20 : 40,
           vertical: 24,
