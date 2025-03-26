@@ -24,7 +24,6 @@ class MiniMock2RulesState extends State<MiniMock2Rules> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: const DrawMain(),
-       backgroundColor: Colors.white,
         appBar: AppBar(
           // backgroundColor: Colors.blue,
             elevation: 0,
@@ -62,16 +61,38 @@ class MiniMock2RulesState extends State<MiniMock2Rules> {
                 ),
                 
                 ),
-       body: SafeArea(
-  child: SingleChildScrollView(
-    child: Padding(
-      padding: const EdgeInsets.all(16.0),
+       body:  LayoutBuilder(builder: (context, constraints) { 
+        double maxScreenWidth = constraints.maxWidth * 0.5;
+        double maxPreferredWidth = (maxScreenWidth > 960) ? maxScreenWidth : 960; 
+        return Center(
+  child: Container( 
+     decoration: BoxDecoration(
+                        boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              spreadRadius: 5,
+                              blurRadius: 5,
+                              offset: const Offset(0, 3), // changes position of shadow
+                          ),
+                        ],
+                      color:   Color.fromARGB(255, 255, 255, 255),
+                    ),
+                  constraints: BoxConstraints(
+                    maxWidth: maxPreferredWidth,
+                    minHeight: constraints.maxHeight
+                  ),
+                   padding: EdgeInsets.symmetric(
+          horizontal: constraints.maxWidth > 600 ? 16 : 8,  // Adaptive padding
+          vertical: 16,
+        ),
+
+    child:  SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Center(
             child:  Text(
-              'MedicRecall Mini-Mock 2 Exam Instructions:\n',
+              'MedicRecall Mini-Mock 1 Exam Instructions: \n',
               style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 27), fontWeight: FontWeight.bold, color: Colors.black),
             ),
           ),
@@ -94,7 +115,7 @@ class MiniMock2RulesState extends State<MiniMock2Rules> {
               width: 800,
               child: 
             Text(
-              'The paper is divided into two parts:',
+              'The paper is divided into two parts: ',
               style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 23), fontWeight: FontWeight.bold, color: Colors.black),
               textAlign: TextAlign.center,
             ),
@@ -165,16 +186,16 @@ class MiniMock2RulesState extends State<MiniMock2Rules> {
                         borderRadius: BorderRadius.circular(5),
                       ),
                       backgroundColor: Colors.green
-                    ),
-                    child: Text('Begin Exam', style: TextStyle(color:Colors.black, fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 20)))
-                )))
-          
+                    ), child: Text('Begin Exam', style: TextStyle(color:Colors.black, fontSize:AdaptiveTextSize().getadaptiveTextSize(context, 20),)),
+                  )
+                )
+           )
         ],
       ),
     ),
   ),
-));
-
-  }
+       );
+}));
+ }
 }
 
