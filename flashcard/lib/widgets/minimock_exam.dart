@@ -702,7 +702,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor:Color.fromARGB(255, 222, 221, 222),
                           padding: EdgeInsets.all(paddingValue),
-                          minimumSize: Size(buttonWidth, buttonWidth * 0.6),
+                          minimumSize: Size(buttonWidth * 1.5, buttonWidth * 0.7),
                         ),
                       ),
                     const SizedBox(width: 8),
@@ -718,7 +718,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Color.fromARGB(255, 217, 216, 217),
                           padding:EdgeInsets.all(paddingValue),
-                          minimumSize: Size(buttonWidth, buttonWidth * 0.6),
+                          minimumSize: Size(buttonWidth * 1.5, buttonWidth * 0.7),
                         ),
                         iconAlignment: IconAlignment.end,
                       ),
