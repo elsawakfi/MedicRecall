@@ -120,11 +120,15 @@ Widget build(BuildContext context) {
                 height: 34,
               ),
             ),
-            Container(
+            MediaQuery.of(context).size.width < 600 ? Container(
               margin: const EdgeInsets.only(left: 32),
               padding: const EdgeInsets.all(8.0),
               child: const Text('Review'),
-            ),
+            ) : Container(
+              margin: const EdgeInsets.only(left: 32),
+              padding: const EdgeInsets.all(8.0),
+              child: const Text('Review Page'),
+            ) ,
           ],
         ),
       ]),
