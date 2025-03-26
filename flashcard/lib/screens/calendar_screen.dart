@@ -84,6 +84,7 @@ class CalendarStateO extends State<Calendar> {
       DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
   final TextEditingController _eventController = TextEditingController();
   bool testDayBool = false;
+  String? _isHovered;
 
   //The CalendarFormat variable format allows the user to change their view of the calendar, into weekly, biweekly and monthly.
   // for some reason, events need to have their time as being midnight to be shown on the calendar. So need to set the today constant to be midnight today.
@@ -718,7 +719,8 @@ class CalendarStateO extends State<Calendar> {
     selectedEvents.clear(); // Clear local events
 
     try {
-      QuerySnapshot u = await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+      QuerySnapshot u =
+          await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
       if (u.docs.isEmpty) {
         print("No user document found");
         return;
@@ -1725,7 +1727,8 @@ class CalendarStateO extends State<Calendar> {
                                               color: Colors.grey[500],
                                               decoration:
                                                   TextDecoration.lineThrough,
-                                              decorationColor: Theme.of(context).disabledColor,
+                                              decorationColor: Theme.of(context)
+                                                  .disabledColor,
                                               decorationThickness: 3,
                                               fontSize: 16,
                                             ),
@@ -1824,14 +1827,23 @@ class CalendarStateO extends State<Calendar> {
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 16.0, vertical: 8.0),
                                       child: ListTile(
-                                        title: Text(
-                                          event.title,
-                                          style: TextStyle(
-                                            color: Theme.of(context)
-                                                .textTheme
-                                                .bodyMedium
-                                                ?.color,
-                                            fontWeight: FontWeight.w500,
+                                        title: GestureDetector(
+                                          onTap: () => _navigateToEventDetails(event),
+                                          child: MouseRegion(
+                                            onEnter: (_) => setState(() =>
+                                                _isHovered = event.title), // Store the hovered event ID
+                                            onExit: (_) => setState(
+                                                () => _isHovered = null),
+                                            child: Text(
+                                              event.title,
+                                              style: TextStyle(
+                                                color: Theme.of(context).textTheme.bodyMedium?.color,
+                                                fontWeight: FontWeight.w500,
+                                                decoration: _isHovered == event.title
+                                                    ? TextDecoration.underline
+                                                    : TextDecoration.none,
+                                              ),
+                                            ),
                                           ),
                                         ),
                                         leading: Container(
