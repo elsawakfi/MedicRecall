@@ -97,6 +97,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     return Builder(builder: (context) {
       // Get screen width to determine layout
       final screenWidth = MediaQuery.of(context).size.width;
+      final isSmallScreen = screenWidth < 600;
 
       return AlertDialog(
         backgroundColor: const Color(0xFFE6EDF2),
@@ -110,7 +111,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               title,
               style: TextStyle(
                 color: const Color.fromRGBO(21, 58, 103, 1),
-                fontSize: screenWidth < 600 ? 18 : 21,
+                fontSize: isSmallScreen ? 18 : 21,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -119,19 +120,13 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               // Scroll indicator at the top
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  Icon(
-                    Icons.swipe_vertical,
-                    size: 16,
-                    color: Color.fromRGBO(21, 58, 103, 0.6),
-                  ),
-                  SizedBox(width: 5),
-                  Text(
-                    'Scroll for more options',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Color.fromRGBO(21, 58, 103, 0.6),
-                      fontStyle: FontStyle.italic,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: const Color.fromRGBO(21, 58, 103, 1),
+                      borderRadius: BorderRadius.circular(2),
                     ),
                   ),
                 ],
@@ -139,50 +134,11 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
             ],
           ],
         ),
-        content: SizedBox(
-          width: screenWidth < 450 ? screenWidth * 0.8 : 300,
-          child: SingleChildScrollView(
-            child: content,
-          ),
+        content: Container(
+          width: screenWidth < 450 ? screenWidth * 0.8 : 400,
+          child: content,
         ),
         actions: actions,
-        // actions: [
-        //     if (useHorizontalLayout)
-        //       // Horizontal layout for larger screens
-        //       Container(
-        //         width: double.infinity,
-        //         child: Row(
-        //           mainAxisAlignment: actions.length <= 2 ? MainAxisAlignment.end : MainAxisAlignment.center,
-        //           children: [
-        //             for (int i = 0; i < actions.length; i++) ...[
-        //               Flexible(
-        //                 child: Container(
-        //                   constraints: BoxConstraints(
-        //                     maxWidth: actions.length <= 2 
-        //                         ? screenWidth * 0.35 
-        //                         : screenWidth * 0.28,
-        //                   ),
-        //                   child: actions[i],
-        //                 ),
-        //               ),
-        //               if (i < actions.length - 1) 
-        //                 const SizedBox(width: 8),
-        //             ],
-        //           ],
-        //         ),
-        //       )
-        //     else
-        //       // Vertical layout for smaller screens
-        //       for (int i = 0; i < actions.length; i++) ...[
-        //         Container(
-        //           width: double.infinity,
-        //           child: actions[i],
-        //         ),
-        //         if (i < actions.length - 1) 
-        //           const SizedBox(height: 8),
-        //       ],
-        //   ],
-        // actionsPadding: const EdgeInsets.all(16),
         insetPadding: EdgeInsets.symmetric(
           horizontal: screenWidth < 450 ? 20 : 40,
           vertical: 24,
@@ -366,46 +322,33 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               ),
             );
 
-            return AlertDialog(
-              backgroundColor: const Color(0xFFE6EDF2),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(0),
+            return _buildAlertDialog(
+              title: 'Do you want to start your revision plan today?',
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Flexible(flex: 1, child: yesButton),
+                      SizedBox(width: isSmallScreen ? 3 : 4),
+                      Flexible(flex: 1, child: noButton),
+                      SizedBox(width: isSmallScreen ? 3 : 4),
+                      Flexible(flex: 2, child: dontShowButton),
+                    ],
+                  ),
+                  SizedBox(height: isSmallScreen ? 12 : 16),
+                  buttonPressed
+                      ? SizedBox()
+                      : Text(
+                          'If you want to stop seeing this pop up, press the "Don\'t Show Again" button',
+                          style: TextStyle(
+                              fontSize: isSmallScreen ? 14 : 16,
+                              color: const Color.fromRGBO(21, 58, 103, 1))),
+                ],
               ),
-              title: Text(
-                'Do you want to start your revision plan today?',
-                style: TextStyle(
-                  color: const Color.fromRGBO(21, 58, 103, 1),
-                  fontSize: isSmallScreen ? 18 : 21,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              content: Container(
-                width: 300,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Flexible(flex: 1, child: yesButton),
-                        SizedBox(width: isSmallScreen ? 3 : 4),
-                        Flexible(flex: 1, child: noButton),
-                        SizedBox(width: isSmallScreen ? 3 : 4),
-                        Flexible(flex: 2, child: dontShowButton),
-                      ],
-                    ),
-                    SizedBox(height: isSmallScreen ? 12 : 16),
-                    buttonPressed
-                        ? SizedBox()
-                        : Text(
-                            'If you want to stop seeing this pop up, press the "Don\'t Show Again" button',
-                            style: TextStyle(
-                                fontSize: isSmallScreen ? 12 : 14,
-                                color: const Color.fromRGBO(21, 58, 103, 1))),
-                  ],
-                ),
-              ),
+              actions: [],
             );
           },
         );
@@ -419,73 +362,83 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return _buildAlertDialog(
-          title: 'When is your exam date?',
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                onPressed: () async {
-                  final DateTime? picked = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime.now(),
-                    lastDate: DateTime.now().add(const Duration(days: 365)),
-                    locale: const Locale('en', 'GB'),
-                  );
-                  if (picked != null) {
-                    if (mounted) {
-                      setState(() {
-                        _examDate = picked;
-                        updateTestDay(picked); // Update parent state
-                        testDayBool = false;
-                      });
-                    }
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            bool isSmallScreen = constraints.maxWidth < 600;
 
-                    if (context.mounted) {
-                      Navigator.of(context).pop();
-                      _showExclusionDialog(context); // Proceed to next dialog
-                    }
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.white, // Text color
-                  backgroundColor: const Color.fromRGBO(
-                      51, 178, 73, 1), // Same color as 'Yes' button
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  minimumSize: const Size(120, 45),
-                ),
-                child: const Text(
-                  'Select Exam Date',
-                  style: TextStyle(fontSize: 16),
-                ),
+            return _buildAlertDialog(
+              title: 'When is your exam date?',
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    onPressed: () async {
+                      final DateTime? picked = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime.now(),
+                        lastDate: DateTime.now().add(const Duration(days: 365)),
+                        locale: const Locale('en', 'GB'),
+                        confirmText: 'Set Exam Date',
+                      );
+                      if (picked != null) {
+                        if (mounted) {
+                          setState(() {
+                            _examDate = picked;
+                            updateTestDay(picked); // Update parent state
+                            testDayBool = false;
+                          });
+                        }
+
+                        if (context.mounted) {
+                          Navigator.of(context).pop();
+                          _showExclusionDialog(
+                              context); // Proceed to next dialog
+                        }
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isSmallScreen ? 12 : 24,
+                        vertical: isSmallScreen ? 8 : 12,
+                      ),
+                      minimumSize: Size(120, isSmallScreen ? 40 : 45),
+                    ),
+                    child: Text(
+                      'Select Exam Date',
+                      style: TextStyle(fontSize: isSmallScreen ? 14 : 16),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    _examDate != null
+                        ? 'Selected Date: ${DateFormat('dd MMM, yyyy').format(_examDate!)}'
+                        : 'No Date Selected',
+                    style: TextStyle(
+                      color: _examDate != null
+                          ? Colors.black
+                          : const Color.fromRGBO(21, 58, 103, 1),
+                      fontSize: isSmallScreen ? 14 : 16,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    '• If you have not booked your exam date yet, you can enter an approximate date during the exam period window and edit it later. \n'
+                    '• For August starts, the exam window is usually between the 4th and 16th of January, and for February starts, this is the 2nd to 12th of September.',
+                    style: TextStyle(
+                      fontSize: isSmallScreen ? 12 : 14,
+                      color: const Color.fromRGBO(21, 58, 103, 1),
+                    ),
+                    textAlign: TextAlign.left,
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
-              Text(
-                _examDate != null
-                    ? 'Selected Date: ${DateFormat('dd MMM, yyyy').format(_examDate!)}' // UK Format
-                    : 'No Date Selected',
-                style: TextStyle(
-                  color: _examDate != null
-                      ? Colors.black
-                      : const Color.fromRGBO(21, 58, 103, 1),
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                '• If you have not booked your exam date yet, you can enter an approximate date during the exam period window and edit it later. \n'
-                '• For August starts, the exam window is usually between the 4th and 16th of January, and for February starts, this is the 2nd to 12th of September.',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Color.fromRGBO(21, 58, 103, 1),
-                ),
-                textAlign: TextAlign.left,
-              ),
-            ],
-          ),
-          actions: [],
+              actions: [],
+            );
+          },
         );
       },
     );
@@ -585,7 +538,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
-                    _showExamDateDialog(context);
+                    _showExclusionDialog(context);
                   },
                   style: TextButton.styleFrom(
                     foregroundColor: const Color.fromRGBO(73, 148, 236, 1),
@@ -776,64 +729,69 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
 
             return _buildAlertDialog(
               title: 'How many times would you like to repeat each resource?',
-              content: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'We recommend completing the official MSRA practice paper at least three times and the full-sized mock at least twice.\n'
-                    'Your chosen number of repetitions will apply to each resource individually.',
-                    style: TextStyle(
-                      color: const Color.fromRGBO(21, 58, 103, 1),
-                      fontSize: isSmallScreen ? 14 : 16,
-                      fontWeight: FontWeight.w400,
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'We recommend completing the official MSRA practice paper at least three times and the full-sized mock at least twice.\n'
+                      'Your chosen number of repetitions will apply to each resource individually.',
+                      style: TextStyle(
+                        color: const Color.fromRGBO(21, 58, 103, 1),
+                        fontSize: isSmallScreen ? 14 : 16,
+                        fontWeight: FontWeight.w400,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 15),
-                  if (selectedResources
-                      .contains('Official MSRA Practice Paper'))
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Official MSRA Practice Paper',
-                          style: TextStyle(
-                            color: const Color.fromRGBO(21, 58, 103, 1),
-                            fontSize: isSmallScreen ? 16 : 18,
-                            fontWeight: FontWeight.w500,
+                    const SizedBox(height: 15),
+                    if (selectedResources
+                        .contains('Official MSRA Practice Paper'))
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Official MSRA Practice Paper',
+                            style: TextStyle(
+                              color: const Color.fromRGBO(21, 58, 103, 1),
+                              fontSize: isSmallScreen ? 16 : 18,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 10),
-                        buildChoiceChips(
-                          repetitionOptions,
-                          (value) => officialMSRARepetitions == value,
-                          (value) =>
-                              setState(() => officialMSRARepetitions = value),
-                        ),
-                        const SizedBox(height: 20),
-                      ],
-                    ),
-                  if (selectedResources.contains('Full-sized Mock Exam'))
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Full-sized Mock Exam',
-                          style: TextStyle(
-                            color: const Color.fromRGBO(21, 58, 103, 1),
-                            fontSize: isSmallScreen ? 16 : 18,
-                            fontWeight: FontWeight.w500,
+                          const SizedBox(height: 10),
+                          buildChoiceChips(
+                            repetitionOptions,
+                            (value) => officialMSRARepetitions == value,
+                            (value) =>
+                                setState(() => officialMSRARepetitions = value),
                           ),
-                        ),
-                        const SizedBox(height: 10),
-                        buildChoiceChips(
-                          repetitionOptions,
-                          (value) => fullSizedMockRepetitions == value,
-                          (value) =>
-                              setState(() => fullSizedMockRepetitions = value),
-                        ),
-                      ],
-                    ),
-                ],
+                          const SizedBox(height: 20),
+                        ],
+                      ),
+                    if (selectedResources.contains('Full-sized Mock Exam'))
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Full-sized Mock Exam',
+                            style: TextStyle(
+                              color: const Color.fromRGBO(21, 58, 103, 1),
+                              fontSize: isSmallScreen ? 16 : 18,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          buildChoiceChips(
+                            repetitionOptions,
+                            (value) => fullSizedMockRepetitions == value,
+                            (value) => setState(
+                                () => fullSizedMockRepetitions = value),
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
               ),
               actions: [
                 TextButton(
@@ -847,7 +805,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                       horizontal: isSmallScreen ? 12 : 24,
                       vertical: isSmallScreen ? 8 : 12,
                     ),
-                    minimumSize: Size(120, 45),
+                    minimumSize: Size(120, isSmallScreen ? 40 : 45),
                   ),
                   child: Text(
                     'Previous',
@@ -898,7 +856,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                       horizontal: isSmallScreen ? 12 : 24,
                       vertical: isSmallScreen ? 8 : 12,
                     ),
-                    minimumSize: Size(120, 45),
+                    minimumSize: Size(120, isSmallScreen ? 40 : 45),
                   ),
                   child: Text(
                     'Next',
@@ -1056,8 +1014,8 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                       context: context,
                       barrierDismissible: false,
                       builder: (BuildContext context) {
-                        return AlertDialog(
-                          backgroundColor: Colors.white,
+                        return _buildAlertDialog(
+                          title: '',
                           content: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -1067,16 +1025,17 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                                 ),
                               ),
                               const SizedBox(height: 16),
-                              const Text(
+                              Text(
                                 'Generating your personalised revision schedule...',
                                 style: TextStyle(
-                                  fontSize: 16,
-                                  color: Color.fromRGBO(21, 58, 103, 1),
+                                  fontSize: isSmallScreen ? 14 : 16,
+                                  color: const Color.fromRGBO(21, 58, 103, 1),
                                 ),
                                 textAlign: TextAlign.center,
                               ),
                             ],
                           ),
+                          actions: [],
                         );
                       },
                     );
