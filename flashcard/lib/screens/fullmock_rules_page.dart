@@ -20,10 +20,10 @@ class AdaptiveTextSize {
     }
 
 class FullMockRulesState extends State<FullMockRules> {
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       drawer: const DrawMain(),
         appBar: AppBar(
           // backgroundColor: Colors.blue,
@@ -61,12 +61,34 @@ class FullMockRulesState extends State<FullMockRules> {
                 ),
                 
                 ),
-       body: SafeArea(
-  child: SingleChildScrollView(
-    child: 
-    Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
+      body: LayoutBuilder(builder: (context, constraints){
+        double maxScreenWidth = constraints.maxWidth * 0.5;
+        double maxPreferredWidth = (maxScreenWidth > 960) ? maxScreenWidth : 960; 
+        return
+         Center(       
+      child: Container(
+       decoration: BoxDecoration(
+                        boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              spreadRadius: 5,
+                              blurRadius: 5,
+                              offset: const Offset(0, 3), // changes position of shadow
+                          ),
+                        ],
+                      color:   Color.fromARGB(255, 255, 255, 255),
+                    ),
+                  constraints: BoxConstraints(
+                    maxWidth: maxPreferredWidth,
+                    minHeight: constraints.maxHeight
+                  ),
+                   padding: EdgeInsets.symmetric(
+          horizontal: constraints.maxWidth > 600 ? 16 : 8,  // Adaptive padding
+          vertical: 16,
+        ),
+                  
+      child:  SingleChildScrollView(
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Center(
@@ -171,8 +193,8 @@ class FullMockRulesState extends State<FullMockRules> {
         ],
       ),
     )),
-  ),
-);
+  );
+}));
 
   }
 }

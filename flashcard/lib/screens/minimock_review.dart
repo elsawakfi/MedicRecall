@@ -95,7 +95,7 @@ Widget build(BuildContext context) {
                 height: 34,
               ),
             ),
-             Container(
+            Container(
               margin: const EdgeInsets.only(left: 32),
               padding: const EdgeInsets.all(8.0),
               child: const Text(
