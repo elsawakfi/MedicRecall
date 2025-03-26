@@ -58,7 +58,7 @@ void main() {
         // Complete the exam
         await tester.tap(find.text('Review Page'));
         await tester.pumpAndSettle();
-        await tester.tap(find.text('Complete Exam'));
+        await tester.tap(find.text('Complete'));
         await tester.pumpAndSettle();
       });
 
@@ -104,7 +104,7 @@ void main() {
             expect(find.text('Begin Exam'), findsOneWidget);
             await tester.tap(find.text('Begin Exam'));
             await tester.pumpAndSettle();
-            expect(find.text('Question 1/25'), findsOneWidget);
+            expect(find.text('1/25'), findsOneWidget);
 
 
             List<ValueKey<String>> expectedOrder = [ValueKey('A'), ValueKey('B'), ValueKey('C'), ValueKey('D'), ValueKey('E')];
