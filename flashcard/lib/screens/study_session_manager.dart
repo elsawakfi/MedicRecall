@@ -445,9 +445,9 @@ class StudySessionManager {
 
       // Helper function to get review interval based on study duration
       int getReviewInterval(int daysUntilTest) {
-        if (daysUntilTest >= 60) return 3;
-        if (daysUntilTest >= 30) return 2;
-        return 1;
+        if (daysUntilTest >= 60) return 2;  // 2 days between reviews
+        if (daysUntilTest > 30) return 1;   // 1 day between reviews
+        return 0;  // No separation between flashcards
       }
 
       // Schedule seen flashcards
