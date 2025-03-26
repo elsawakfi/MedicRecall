@@ -621,7 +621,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                     ),
                     const SizedBox(width: 16),
                     Container(
-                        width: MediaQuery.of(context).size.width < 600 ? 135 : 160,
+                        width: MediaQuery.of(context).size.width < 600 ? 107 : 160,
                         height: MediaQuery.of(context).size.width < 600 ? 40 : 45,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
@@ -681,9 +681,9 @@ class MiniMockExamState extends State<MiniMockExam> {
                             }
                           };
                         },
-                        label: MediaQuery.of(context).size.width < 600 ? Text('Review', style: TextStyle(color:  Color.fromARGB(255, 0, 0, 0), fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 13))) : Text('Review Page', style: TextStyle(color:  Color.fromARGB(255, 0, 0, 0), fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 15.5) ,
+                        label: MediaQuery.of(context).size.width < 600 ? Text('Review', style: TextStyle(color:  Color.fromARGB(255, 0, 0, 0), fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 17))) : Text('Review Page', style: TextStyle(color:  Color.fromARGB(255, 0, 0, 0), fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 15.5) ,
                         )),
-                        icon: Icon(Icons.search, color:  Color.fromARGB(255, 0, 0, 0), size: AdaptiveTextSize().getadaptiveTextSize(context, 25)
+                        icon: Icon(Icons.search, color:  Color.fromARGB(255, 0, 0, 0), size:  AdaptiveTextSize().getadaptiveTextSize(context, 25)
                         ),
                       
                         
