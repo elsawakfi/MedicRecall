@@ -28,11 +28,13 @@ void main(){
 
   // DateTime today = DateTime.now();
   late Widget addEvent; 
+  late Widget editEvent; 
   late String newTitle = "Cutsom Event";
-  DateTime selectedDay = DateTime(2020, 1, 1);
+  late String editedTitle = "Edited Event";
+  DateTime selectedDay = DateTime.now();
+  DateTime editedDay = DateTime(selectedDay.year,selectedDay.month,selectedDay.day+3,0,0,0,0);
   
-  final TextEditingController _eventController = TextEditingController();
-   Color _getEventColor(String title) {
+  Color _getEventColor(String title) {
     List<String> flashcards = [
       "Team working",
       "Effective communication",
@@ -54,47 +56,212 @@ void main(){
 
     return Color.fromARGB(200, 0, 0, 100);
   }
+  setUp((){
+    selectedEvents = {};
+    updatedEvents = [];
+    newTitle = newTitle;
+    selectedDay = selectedDay;
+  
+  final TextEditingController _eventController = TextEditingController();
+   
    Future<void> addSingleEvent(
       DateTime date, String eventTitle) async {
-    date = DateTime(date.year, date.month, date.day);
-
+     
     //The delete single event function updates the UI in real time so I just copied the structure of that function
     Event newEvent =
         Event(title: eventTitle, color: _getEventColor(eventTitle));
 
    
-    selectedEvents[date] = [];
+    selectedEvents[DateTime(date.year, date.month, date.day,0,0,0,0)] = [];
     
-    selectedEvents[date]?.add(newEvent);
+    selectedEvents[DateTime(date.year, date.month, date.day,0,0,0,0)]?.add(newEvent);
    
 
     updatedEvents =
-        selectedEvents[date]?.map((e) => e.title).toList() ?? [];
+        selectedEvents[DateTime(date.year, date.month, date.day,0,0,0,0)]?.map((e) => e.title).toList() ?? [];
 
   }
 
   Future<void> deleteSingleEvent(
-      DateTime date, String eventTitle,) async {
-
-    date = DateTime(date.year, date.month, date.day);
-
+      DateTime date, String eventTitle) async {
      if (!selectedEvents.containsKey(date)) {
       print("No events found for date: ${date.toString().split(' ')[0]}");
       return;
     }
-
-    selectedEvents[date]?.removeWhere((event) => event.title == eventTitle);
-
+    selectedEvents[date]!.removeLast();
+    //selectedEvents[date]!.removeWhere((event) => event.title == eventTitle);
+    // selectedEvents[date]!.remove();
     if (selectedEvents[date]?.isEmpty ?? false) {
       selectedEvents.remove(date);
     }
   }
+  
+  Future<void> updateOneEvent(
+      Event oldEvent, String newTitle_, DateTime newDate) async {
+    DateTime normalizedOldDate =
+        DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
+    DateTime normalizedNewDate =
+        DateTime(newDate.year, newDate.month, newDate.day);
+    await deleteSingleEvent(normalizedOldDate, oldEvent.title);
+    await addSingleEvent(normalizedNewDate, newTitle_);
+    selectedDay = normalizedNewDate;
+  }
+  editEvent = MaterialApp(
+    home: StatefulBuilder(builder:(context,setState){
+      return AlertDialog(backgroundColor: const Color(0xFFE6EDF2),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(0),
+        ),
+        title: const Text(
+          "Edit Event",
+          style: TextStyle(
+            color: Color.fromRGBO(21, 58, 103, 1),
+            fontSize: 21,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Editable Event Title
+            TextFormField(
+              controller: _eventController,
+              style: const TextStyle(
+                color: Color.fromRGBO(21, 58, 103, 1),
+                fontSize: 16,
+              ),
+              decoration: const InputDecoration(
+                labelText: "Event Title",
+                labelStyle: TextStyle(
+                  color: Color.fromRGBO(21, 58, 103, 1),
+                  fontSize: 16,
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
 
-  setUp((){
-    selectedEvents = {};
-    updatedEvents = [];
-    //DateTime testDay = DateTime.now().add(const Duration(days: 50));
-    //addSingleEvent(testDay,"Test Day");
+            // Row with "Date:" label and button displaying the selected date
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                const Text(
+                  "Date:",
+                  style: TextStyle(
+                    color: Color.fromRGBO(21, 58, 103, 1),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                StatefulBuilder(
+                  builder: (context, setDialogState) => ElevatedButton(
+                    onPressed: () async {
+                      // final DateTime? pickedDate = await showDatePicker(
+                      //   context: context,
+                      //   initialDate: selectedDay,
+                      //   firstDate: DateTime(2000),
+                      //   lastDate: DateTime(2100),
+                      //   locale: const Locale('en', 'GB'),
+                      // );
+                      // if (pickedDate != null && pickedDate != selectedDay) {
+                      //   setDialogState(() {
+                      //     editedDay = pickedDate;
+                      //   });
+                      // }
+                    },
+                    key: const ValueKey("Date Picker"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromRGBO(21, 58, 103, 1),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    child: Text(
+                      '$editedDay',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(
+              foregroundColor: const Color.fromRGBO(243, 90, 90, 1),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              minimumSize: const Size(120, 45),
+            ),
+            child: const Text("Cancel", style: TextStyle(fontSize: 16)),
+          ),
+          TextButton(
+            onPressed: () async {
+              // if (_eventController.text.isNotEmpty) {
+                // Show loading indicator while saving
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      backgroundColor: Colors.white,
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              const Color.fromRGBO(51, 178, 73, 1),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'Updating event...',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Color.fromRGBO(21, 58, 103, 1),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+
+               
+                
+                Event toEdit = selectedEvents[selectedDay]!.first;
+                    // For other events, use updateOneEvent
+                await updateOneEvent(
+                        toEdit, editedTitle, editedDay);
+                  
+
+                  // Close the loading dialog
+                  Navigator.of(context).pop();
+                  // Close the event edit dialog
+                  Navigator.of(context).pop();
+
+                  // Update the state
+                  
+                
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white,
+              backgroundColor: const Color.fromRGBO(21, 58, 103, 1),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              minimumSize: const Size(120, 45),
+              
+            ),
+            key: const ValueKey("Save"),
+            child: const Text("Save", style: TextStyle(fontSize: 16)),
+          ),
+        ],
+      );}));
+
     addEvent = MaterialApp(
       home: StatefulBuilder(builder: (context, setState){
         return AlertDialog(
@@ -150,11 +317,9 @@ void main(){
                 await addSingleEvent(
                       selectedDay, newTitle);
                   // Close the loading dialog
+              
                   Navigator.of(context).pop();
                   // Close the add event dialog
-                  
-                 
-              
             },
             style: TextButton.styleFrom(
               foregroundColor: Colors.white,
@@ -167,39 +332,165 @@ void main(){
               style: TextStyle(fontSize: 16),
             ),
           ),
+          TextButton(
+            key: const ValueKey("Delete"),
+            onPressed: () async {
+                showDialog(
+                  context: context,
+                  barrierDismissible: false,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      backgroundColor: Colors.white,
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              const Color.fromRGBO(51, 178, 73, 1),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'Deleting event...',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Color.fromRGBO(21, 58, 103, 1),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+
+                
+                await deleteSingleEvent(
+                      selectedDay, newTitle);
+                  // Close the loading dialog
+              
+                  Navigator.of(context).pop();
+                  // Close the add event dialog
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white,
+              backgroundColor: Colors.blue,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              minimumSize: const Size(120, 45), // Sets minimum width and height
+            ),
+            child: const Text(
+              "Delete Event",
+              style: TextStyle(fontSize: 16),
+            ),
+          ),
         ],
       );
    
-  }));  
+  })); 
+ 
   });
 
-  testWidgets("Adding an event",(WidgetTester tester)async{
-    selectedDay = DateTime.now();
+  testWidgets("Adding an event to today's date",(WidgetTester tester)async{
+    DateTime today = DateTime.now();
+    selectedDay = DateTime(today.year,today.month,today.day,0,0,0,0);
     await tester.pumpWidget(addEvent);
     await tester.pumpAndSettle();
-
     final addFinder = find.byKey(const ValueKey("Add"));
     await tester.tap(addFinder);
     await tester.pumpAndSettle();
-
-    //expect(find.text("Adding event..."),findsOneWidget);
-
-    print(selectedEvents);
-    print(updatedEvents);
+    expect(selectedEvents.toString().contains(newTitle),true);
+    expect(selectedEvents.toString().contains("$selectedDay"),true);
+    expect(selectedEvents[selectedDay]?.isNotEmpty,true);
     expect(updatedEvents.length == 1,true);
     expect(updatedEvents.contains(newTitle),true);
-    Event newEvent = Event(title: newTitle, color: _getEventColor(newTitle));
-    print(" From calendar : ${selectedEvents[selectedDay]}");
-    print("Newly defined event $newEvent");
-
-    Event event = (selectedEvents[selectedDay]?.isNotEmpty ?? false) 
-    ? selectedEvents[selectedDay]!.first 
-    : Event(title: "Wrong", color: _getEventColor(newTitle));; 
-    expect(event == (newEvent),true);
-
-
-
   });
+
+  testWidgets("Adding and then deleting an event returns an empty selectedEvents",(WidgetTester tester)async{
+        //Selected Day will still be the same after the previous test
+        //Adding an event manually so we can delete it 
+        await tester.pumpWidget(addEvent);
+        await tester.pumpAndSettle();
+        selectedEvents[selectedDay] = [];
+        selectedEvents[selectedDay]!.add(
+        Event(title: "Delete This", color: _getEventColor("Delete This")));
+
+        final deleteFinder = find.byKey(const ValueKey("Delete"));
+        expect(selectedEvents.isEmpty,false);
+        await tester.tap(deleteFinder);
+        await tester.pumpAndSettle();
+        
+        expect(selectedEvents.isEmpty,true);
+        expect(updatedEvents.isEmpty,true);
+    });
+
+  testWidgets("Editing one event from today to the future",(WidgetTester tester) async {
+        await tester.pumpWidget(editEvent);
+        await tester.pumpAndSettle();
+        selectedEvents[selectedDay] = [];
+        selectedEvents[selectedDay]!.add(
+        Event(title: "Edit This", color: _getEventColor("Edit This")));      
+        editedDay = DateTime(editedDay.year,editedDay.month,editedDay.day+3);
+        
+        final saveFinder = find.byKey(const ValueKey("Save"));
+        await tester.scrollUntilVisible(
+           find.text('Save'), 
+           200.0, 
+        );
+        expect(selectedEvents.isEmpty,false);
+        expect(selectedEvents[selectedDay] != null,true);
+        expect(selectedEvents.toString().contains("$editedDay"),false);
+        expect(selectedEvents.toString().contains("Edit This"),true);
+        await tester.tap(saveFinder);
+        await tester.pumpAndSettle();
+        expect(selectedEvents.toString().contains(editedTitle),true);
+        expect(selectedEvents.toString().contains("$editedDay"),true);
+        expect(selectedEvents.toString().contains("Edit This"),false);
+    });
+
+    testWidgets("Event colour stays the same after editing it",(WidgetTester tester) async{
+        //The test above simulated the user changing the name and date of an event, this one will test
+        //Only the user changing the date
+        await tester.pumpWidget(editEvent);
+        await tester.pumpAndSettle();
+        selectedEvents[selectedDay] = [];
+        selectedEvents[selectedDay]!.add(
+        Event(title: "Team working", color: _getEventColor("Team working"))); 
+        editedTitle = "Team working";
+        editedDay = editedDay.add(Duration(days: 5));
+        final saveFinder = find.byKey(const ValueKey("Save"));
+        await tester.scrollUntilVisible(
+           find.text('Save'), 
+           200.0, 
+        );  
+        Event before = selectedEvents[selectedDay]!.first;
+        await tester.tap(saveFinder);
+        await tester.pumpAndSettle();
+        Event after = selectedEvents[editedDay]!.first;     
+        expect(before.color == after.color,true);
+    });
+
+    testWidgets("Event colour changes after editing name as well as date",(WidgetTester tester) async{
+        //This is the same as the above test, except that we are changing from a flashcard event 
+        //To a custom event, as the name is being changes as well
+        await tester.pumpWidget(editEvent);
+        await tester.pumpAndSettle();
+        selectedEvents[selectedDay] = [];
+        selectedEvents[selectedDay]!.add(
+        Event(title: "Team working", color: _getEventColor("Team working"))); 
+        editedTitle = "Individual Disfunctioning";
+        editedDay = editedDay.add(Duration(days: 5));
+        final saveFinder = find.byKey(const ValueKey("Save"));
+        await tester.scrollUntilVisible(
+           find.text('Save'), 
+           200.0, 
+        );  
+        Event before = selectedEvents[selectedDay]!.first;
+        await tester.tap(saveFinder);
+        await tester.pumpAndSettle();
+        Event after = selectedEvents[editedDay]!.first;     
+        expect(before.color == after.color,false);
+        expect(after.color == Color.fromARGB(200, 0, 0, 100),true );
+    });
+
 
 
 
