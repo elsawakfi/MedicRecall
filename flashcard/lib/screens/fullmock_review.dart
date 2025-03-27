@@ -58,7 +58,7 @@ class FullMockReviewState extends State<FullMockReview> {
       ),
       style: ElevatedButton.styleFrom(
         padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-        minimumSize: Size(100, 30),
+        minimumSize: Size(90, 30),
         alignment: Alignment.center,
       ),
     );
@@ -78,7 +78,7 @@ class FullMockReviewState extends State<FullMockReview> {
     ),
    style: ElevatedButton.styleFrom(
       padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24), // Increase the padding for a larger button
-      minimumSize: Size(100, 30), // Make the button larger with a minimum size (width, height)
+      minimumSize: Size(90, 30), // Make the button larger with a minimum size (width, height)
       alignment: Alignment.center,
    ) );
 }
@@ -312,7 +312,7 @@ Widget build(BuildContext context) {
                         //   ),
                           //  style: ElevatedButton.styleFrom(
                           //     padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24), // Increase the padding for a larger button
-                          //     minimumSize: Size(100, 30), // Make the button larger with a minimum size (width, height)
+                          //     minimumSize: Size(90, 30), // Make the button larger with a minimum size (width, height)
                           //   alignment: Alignment.center,
                           //   ),
   

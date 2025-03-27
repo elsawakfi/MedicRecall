@@ -106,7 +106,7 @@ class FullMockLandingState extends State<FullMockLanding> {
                     color: Colors.black,
                   ),
                   label: const Text(
-                    'Full Mock 1',
+                    'Full Mock',
                     style: TextStyle(color: Colors.black, fontSize: 20),
                   ),
                 ),
