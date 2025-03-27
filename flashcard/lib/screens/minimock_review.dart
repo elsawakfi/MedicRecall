@@ -5,6 +5,15 @@ import 'package:flashcard_x/widgets/drawer_widget.dart';
 import '../utils/timer.dart';
 import '../widgets/minimock_help_button.dart';
 
+class AdaptiveTextSize {
+      const AdaptiveTextSize();
+
+      getadaptiveTextSize(BuildContext context, dynamic value) {
+    // 720 is medium screen height
+        return (value / 720) * MediaQuery.of(context).size.height;
+      }
+    }
+
 class MiniMockReview extends StatefulWidget {
   final int rankingLength;
   final int multiChoiceLength;
@@ -441,45 +450,39 @@ Widget build(BuildContext context) {
                 ),
                 const SizedBox(height: 20),
               // Spacer(),
+              LayoutBuilder(builder: (context, constraints){
+                return
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Align(
-                    alignment: Alignment.centerLeft,
-                    child: MiniMockHelpButton(),
-                  ),
+                  alignment: Alignment.centerLeft,
+                    child: SizedBox( 
+                      height: MediaQuery.of(context).size.width < 600 ? 40 : 50,
+                      width: MediaQuery.of(context).size.width < 600 ? 40 : 50,
+                      child: MiniMockHelpButton())),
                   const SizedBox(width: 16),
                   Container(
-                    width: 45,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      color: const Color.fromARGB(255, 235, 230, 239),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
-                          spreadRadius: 0,
-                          blurRadius: 6,
-                          offset: const Offset(0, 6), // changes position of shadow
-                        ),
-                      ],
-                    ),
-                      child: TextButton.icon(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                       icon: const Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0), size: 21),
-                        label: const SizedBox(),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:Color.fromARGB(255, 222, 221, 222),
-                          padding: EdgeInsets.all(8.0),
-                          minimumSize: Size(20, 20),
-                      ),
-                    )
+                    height: MediaQuery.of(context).size.width < 600 ? 40 : 50,
+                    width: MediaQuery.of(context).size.width < 600 ? 40 : 50,
+
+                    //final double buttonWidth = 56.0; // Define buttonWidth
+                   child: FloatingActionButton(
+      heroTag: UniqueKey(),
+      onPressed: (){
+      Navigator.pop(context);
+      },
+      clipBehavior: Clip.none,
+      backgroundColor: const Color.fromARGB(255, 222, 221, 222), 
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(13),
+      ),
+      child: Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0), size: AdaptiveTextSize().getadaptiveTextSize(context, 20)),
+      ),
                   ),
                   const Spacer(),
                   SizedBox(
-                  height: 30,
+                   height: MediaQuery.of(context).size.width < 600 ? 40 : 50,
                     width: 150,
                     child:
                       ElevatedButton.icon(
@@ -499,7 +502,7 @@ Widget build(BuildContext context) {
                   ),
                 ),
               ],
-            )
+            );})
           ],
         ),
       ),

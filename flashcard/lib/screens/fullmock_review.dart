@@ -237,7 +237,7 @@ Widget build(BuildContext context) {
                 Expanded(child: 
                 SingleChildScrollView(
                   child: Align(alignment: Alignment.center,
-                  child: Column(children: [
+                  child: 
                   ExpansionPanelList(
                     elevation: 1,
                     expandIconColor: Theme.of(context).textTheme.bodyMedium?.color,
@@ -323,8 +323,7 @@ Widget build(BuildContext context) {
                     // ),
                   )))],
                 ),
-              ],
-            ),
+              
           ),
         ),
       ),
