@@ -47,9 +47,10 @@ class FullMockReviewState extends State<FullMockReview> {
   Widget _buildMultipleChoiceButton(int questionNumber) {
     bool isFlagged = widget.flaggedQuestions.length > widget.rankingLength + questionNumber &&
                      widget.flaggedQuestions[widget.rankingLength + questionNumber] == true;
-    return ElevatedButton(
+    return ElevatedButton.icon(
       onPressed: () => _returnToFullMock(context, widget.rankingLength + questionNumber),
-      child: Text(
+      icon: isFlagged ? Icon(Icons.flag, color: const Color.fromARGB(255, 0, 0, 0)) : Container(),
+      label: Text(
         '${widget.rankingLength + questionNumber + 1}',
         style: TextStyle(
           color: Theme.of(context).textTheme.bodyMedium?.color,
@@ -57,7 +58,9 @@ class FullMockReviewState extends State<FullMockReview> {
         ),
       ),
       style: ElevatedButton.styleFrom(
-        padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+        padding: isFlagged
+          ? EdgeInsets.symmetric(vertical: 16, horizontal: 17) // Smaller padding for flagged questions
+          : EdgeInsets.symmetric(vertical: 16, horizontal: 24), // Larger padding for non-flagged questions
         minimumSize: Size(90, 30),
         alignment: Alignment.center,
       ),
@@ -67,9 +70,10 @@ class FullMockReviewState extends State<FullMockReview> {
  Widget _buildQuestionButton(int questionNumber) {
   bool isFlagged = widget.flaggedQuestions.length > questionNumber 
                    && widget.flaggedQuestions[questionNumber] == true;
-  return ElevatedButton(
+  return ElevatedButton.icon(
     onPressed: () => _returnToFullMock(context, questionNumber),
-    child: Text(
+    icon: isFlagged ? Icon(Icons.flag, color: const Color.fromARGB(255, 0, 0, 0)) : Container(),
+    label: Text(
       '${questionNumber + 1}',
       style: TextStyle(
         color: Theme.of(context).textTheme.bodyMedium?.color,
@@ -77,7 +81,9 @@ class FullMockReviewState extends State<FullMockReview> {
       ),
     ),
    style: ElevatedButton.styleFrom(
-      padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24), // Increase the padding for a larger button
+     padding: isFlagged
+       ? EdgeInsets.symmetric(vertical: 16, horizontal: 17) // Smaller padding for flagged questions
+          : EdgeInsets.symmetric(vertical: 16, horizontal: 24), // Larger padding for non-flagged questions
       minimumSize: Size(90, 30), // Make the button larger with a minimum size (width, height)
       alignment: Alignment.center,
    ) );
@@ -293,34 +299,7 @@ Widget build(BuildContext context) {
                             child: _buildMultipleChoiceButton(index), // Use the new method
                           ),
                         ),
-                        // widget.multiChoiceLength,
-                        // (index) => Padding(
-                        //   padding: const EdgeInsets.all(4.0),
-                        //   //  child: _buildQuestionButton(index),
-                        //   child: ElevatedButton.icon(
-                        //     onPressed: () => _returnToFullMock(context, widget.rankingLength + index),
-                        //     icon: Visibility(
-                        //       visible: (widget.flaggedQuestions.length > widget.rankingLength + index) 
-                        //               ? widget.flaggedQuestions[widget.rankingLength + index] 
-                        //               : false,
-                        //       child: const Icon(Icons.flag, color: Colors.black),
-                              
-                        //     ),
-                        //     label: Text('${widget.rankingLength + index + 1}',
-                        //     style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
-                        //     fontSize: 20,),
-                        //   ),
-                          //  style: ElevatedButton.styleFrom(
-                          //     padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24), // Increase the padding for a larger button
-                          //     minimumSize: Size(90, 30), // Make the button larger with a minimum size (width, height)
-                          //   alignment: Alignment.center,
-                          //   ),
-  
-                          // ),
-                          
-                    //     ),
-                    //   ),
-                    // ),
+                      
                   )))],
                 ),
               
@@ -335,25 +314,6 @@ Widget build(BuildContext context) {
                   Align(
                   alignment: Alignment.centerLeft,
                     child: SizedBox( 
-                      height: MediaQuery.of(context).size.width < 600 ? 40 : 50,
-                      width: MediaQuery.of(context).size.width < 600 ? 40 : 50,
-                      child: MiniMockHelpButton())),
-                  SizedBox(width: 10),
-                  Container(
-                    height: MediaQuery.of(context).size.width < 600 ? 40 : 50,
-                    width: MediaQuery.of(context).size.width < 600 ? 40 : 50,
-
-                    //final double buttonWidth = 56.0; // Define buttonWidth
-                   child: FloatingActionButton(
-      heroTag: UniqueKey(),
-      onPressed: (){
-      Navigator.pop(context);
-      },
-      clipBehavior: Clip.none,
-      backgroundColor: const Color.fromARGB(255, 222, 221, 222), 
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(13),
-      ),
       child: Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0), size: AdaptiveTextSize().getadaptiveTextSize(context, 20)),
       ),
                   ),
