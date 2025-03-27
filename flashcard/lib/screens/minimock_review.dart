@@ -210,7 +210,7 @@ Widget build(BuildContext context) {
                               children: List.generate(3, (index) => Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                                 child: SizedBox(
-                                  width: 100, // Set the desired width
+                                  width: 80, // Set the desired width
                                   height: 50, // Set the desired height
                                   child: ElevatedButton.icon(
                                     onPressed: () {
@@ -233,7 +233,7 @@ Widget build(BuildContext context) {
                               children: List.generate(3, (index) => Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                                 child: SizedBox(
-                                  width: 100, // Set the desired width
+                                  width: 80, // Set the desired width
                                   height: 50, // Set the desired height
                                   child: ElevatedButton.icon(
                                     onPressed: () {
@@ -256,7 +256,7 @@ Widget build(BuildContext context) {
                               children: List.generate(3, (index) => Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                                 child: SizedBox(
-                                  width: 100, // Set the desired width
+                                  width: 80, // Set the desired width
                                   height: 50, // Set the desired height
                                   child: ElevatedButton.icon(
                                     onPressed: () {
@@ -279,7 +279,7 @@ Widget build(BuildContext context) {
                               children: List.generate(3, (index) => Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                                 child: SizedBox(
-                                  width: 100, // Set the desired width
+                                  width: 80, // Set the desired width
                                   height: 50, // Set the desired height
                                   child: ElevatedButton.icon(
                                     onPressed: () {
@@ -322,7 +322,7 @@ Widget build(BuildContext context) {
                               children: List.generate(3, (index) => Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                                 child: SizedBox(
-                                  width: 100, // Set the desired width
+                                  width: 80, // Set the desired width
                                   height: 50, // Set the desired height
                                   child: ElevatedButton.icon(
                                     onPressed: () {
@@ -345,7 +345,7 @@ Widget build(BuildContext context) {
                               children: List.generate(3, (index) => Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                                 child: SizedBox(
-                                  width: 100, // Set the desired width
+                                  width: 80, // Set the desired width
                                   height: 50, // Set the desired height
                                   child: ElevatedButton.icon(
                                     onPressed: () {
@@ -369,7 +369,7 @@ Widget build(BuildContext context) {
                               children: List.generate(3, (index) => Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                                 child: SizedBox(
-                                  width: 100, // Set the desired width
+                                  width: 80, // Set the desired width
                                   height: 50, // Set the desired height
                                   child: ElevatedButton.icon(
                                     onPressed: () {
@@ -392,7 +392,7 @@ Widget build(BuildContext context) {
                               children: List.generate(3, (index) => Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                                 child: SizedBox(
-                                  width: 100, // Set the desired width
+                                  width: 80, // Set the desired width
                                   height: 50, // Set the desired height
                                   child: ElevatedButton.icon(
                                     onPressed: () {
@@ -415,7 +415,7 @@ Widget build(BuildContext context) {
                               children: List.generate(1, (index) => Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                                 child: SizedBox(
-                                  width: 100, // Set the desired width
+                                  width: 80, // Set the desired width
                                   height: 50, // Set the desired height
                                   child: ElevatedButton.icon(
                                     onPressed: () {
