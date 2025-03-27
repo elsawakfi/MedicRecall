@@ -171,14 +171,18 @@ Widget build(BuildContext context) {
           decoration: BoxDecoration(
             color: Colors.white,
           ),
-          constraints: BoxConstraints(
-            maxWidth: maxScreenWidth > maxPreferredWidth ? maxScreenWidth : maxPreferredWidth,
-          ),
+           constraints: BoxConstraints(
+          maxWidth: maxScreenWidth > maxPreferredWidth ? maxScreenWidth : maxPreferredWidth,
+          minHeight: constraints.maxHeight, // Ensure container takes full height
+        ),
           padding: EdgeInsets.all(16),
-            child: SingleChildScrollView(
+  
+            child: Column( children: [
+              Expanded(
           // child: Expanded( //Wrapping in a scrollable widget
-          child: Column(
-             children: [
+          child: SingleChildScrollView(
+              child: Align(alignment: Alignment.center,
+              child:
       // ExpansionPanelList(
         //child: SingleChildScrollView(
           // child: Column(
@@ -447,7 +451,7 @@ Widget build(BuildContext context) {
                       isExpanded: _isOpen[1],
                     ),
                   ],
-                ),
+                ),),),),
                 const SizedBox(height: 20),
               // Spacer(),
               LayoutBuilder(builder: (context, constraints){
@@ -497,17 +501,15 @@ Widget build(BuildContext context) {
                             foregroundColor: Colors.white, // Text/Icon color
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(50), // Rounded corners
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            );})
-          ],
-        ),
-      ),
-      ),
-    );
-    })));
-  }
-}
+                      )
+                         )
+                  ))
+              ]);}),
+              
+            ],
+            ),
+             
+            ),
+            );
+})));
+}}
