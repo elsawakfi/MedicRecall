@@ -567,8 +567,8 @@ class MiniMockExamState extends State<MiniMockExam> {
                     ),
                     const SizedBox(width: 16),
                     Container(
-                        width: MediaQuery.of(context).size.width < 600 ? 130 : 160,
-                        height: MediaQuery.of(context).size.width < 600 ? 40 : 45,
+                        width: MediaQuery.of(context).size.width < 600 ? 40 : 160,
+                        height: MediaQuery.of(context).size.width < 600 ? 40 : 50,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
                           color: const Color.fromARGB(255, 222, 221, 222),
@@ -627,10 +627,28 @@ class MiniMockExamState extends State<MiniMockExam> {
                             }
                           };
                         },
-                        label: MediaQuery.of(context).size.width < 600 ? Text('Review', style: TextStyle(color:  Color.fromARGB(255, 0, 0, 0), fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 17))) : Text('Review Page', style: TextStyle(color:  Color.fromARGB(255, 0, 0, 0), fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 15.5) ,
-                        )),
-                        icon: Icon(Icons.search, color:  Color.fromARGB(255, 0, 0, 0), size:  AdaptiveTextSize().getadaptiveTextSize(context, 19)
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero, // Remove default padding
+                          minimumSize: Size.zero,    // Remove minimum size constraints
                         ),
+                        label: MediaQuery.of(context).size.width < 600 ? const SizedBox.shrink()  :
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: Text('Review Page',
+              style: TextStyle(
+                color: const Color.fromARGB(255, 0, 0, 0),
+                fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 15.5),
+              ),
+            ),
+          ),
+        
+                        icon:Center(
+                          child: Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child:  Icon(Icons.search, color:  Color.fromARGB(255, 0, 0, 0), size:   MediaQuery.of(context).size.width < 600
+        ? 24// Larger icon for mobile
+        : AdaptiveTextSize().getadaptiveTextSize(context, 20),
+                        ))),
                       
                         
                         
