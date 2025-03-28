@@ -227,12 +227,11 @@ class MiniMockExamState extends State<MiniMockExam> {
               automaticallyImplyLeading: false,
               elevation: 0,
         title: LayoutBuilder(builder:  (context, constraints) { return
-         MediaQuery.of(context).size.width >= 600 ?
-         Align(
-            alignment: const Alignment(0.18,0),
-         //mainAxisAlignment: MainAxisAlignment.center,
-         //mainAxisSize: MainAxisSize.min,
-         child: Stack(
+         Row(
+           mainAxisSize: MainAxisSize.min,
+         children: [
+           (MediaQuery.of(context).size.width >= 600)
+            ? Stack(
             children: [
               Positioned(
                 top: 2.3,
@@ -246,14 +245,10 @@ class MiniMockExamState extends State<MiniMockExam> {
                 margin: const EdgeInsets.only(left: 32),
                 padding: const EdgeInsets.all(8.0),
                 child: Text(widget.title),
-              ),
-            ],
-          )
-          ):Align(
-            alignment: Alignment.center,
-            child: Text(widget.shortTitle)
-
-          );
+              )
+            ])
+            : Text(widget.shortTitle)
+         ]);
         }),
       centerTitle: true,
               leading: Builder(
@@ -285,28 +280,30 @@ class MiniMockExamState extends State<MiniMockExam> {
                     ],
                   ),
                   child: LayoutBuilder(builder: (context, constraints) {
-                    if (MediaQuery.of(context).size.width >= 600){
                     return Center(
-                      child: Text('Time Remaining: $_displayTime',
-                        style: TextStyle(
-                          color: (remainingSeconds <= 600)
-                              ? Colors.white
-                              : Color.fromARGB(255, 0, 0, 0),
-                          fontSize: 18.5,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ));
-                    } else {
-                      return Center(
-                      child: Text('$_displayTime',
-                        style: TextStyle(
-                          color: (remainingSeconds <= 600)
-                              ? Colors.white
-                              : Color.fromARGB(255, 0, 0, 0),
-                          fontSize: 18.5,
-                          fontWeight: FontWeight.w500,
-                        )));
-                  }
+                      child: (MediaQuery.of(context).size.width >= 600)
+                              ? Text('Time Remaining: $_displayTime',
+                                  style: TextStyle(
+                                    color: (remainingSeconds <= 600)
+                                      ? Colors.white
+                                      : Color.fromARGB(255, 0, 0, 0),
+                                  fontSize: 18.5,
+                                  fontWeight: FontWeight.w500,
+                                ))
+                              : Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.access_time_rounded, color: Colors.black),
+                                    SizedBox(width: 8),
+                                    Text(_displayTime,
+                                      style: TextStyle(
+                                      color: (remainingSeconds <= 600)
+                                        ? Colors.white
+                                        : Color.fromARGB(255, 0, 0, 0),
+                                      fontSize: 18.5,
+                                      fontWeight: FontWeight.w500,
+                                ))])
+                      );
                 }));
             })],
           ),
@@ -339,10 +336,9 @@ class MiniMockExamState extends State<MiniMockExam> {
                     children: [
                       Center(
                         child: SizedBox(
-                          //
                           child: Row(
                           children: [
-                            Align(alignment: Alignment.centerLeft,
+                      Align(alignment: Alignment.centerLeft,
                       child: Container(
                         margin: const EdgeInsets.only(bottom: 10),
                         width: MediaQuery.of(context).size.width < 600 ? 75 : 160,
@@ -360,16 +356,18 @@ class MiniMockExamState extends State<MiniMockExam> {
                           ],
                         ),
                         child:LayoutBuilder(builder: (context,constraints){
-                          if (MediaQuery.of(context).size.width >= 600)  {return TextButton.icon(
-                            label: Text(flaggedQuestions[currentQuestion]
-                            ? 'Flagged'
-                            : 'Flag for review',
-                              style: const TextStyle(
-                                color: Color.fromARGB(255, 0, 0, 0),
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
+                          return TextButton.icon(
+                            label: (MediaQuery.of(context).size.width >= 600)
+                              ? Text(flaggedQuestions[currentQuestion]
+                                  ? 'Flagged'
+                                  : 'Flag for review',
+                                    style: const TextStyle(
+                                      color: Color.fromARGB(255, 0, 0, 0),
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  )
+                              : Text(''),
                             onPressed: () {
                               setState((){
                                 flaggedQuestions[currentQuestion] = !flaggedQuestions[currentQuestion];
@@ -381,25 +379,8 @@ class MiniMockExamState extends State<MiniMockExam> {
                                   : Icons.flag_outlined,
                               color: Color.fromARGB(255, 0, 0, 0),
                             ),
-                        );
-                          }else {
-                            return IconButton(
-                            onPressed: () {
-                              setState((){
-                                flaggedQuestions[currentQuestion] = !flaggedQuestions[currentQuestion];
-                              });
-                            },
-                            icon: Icon(
-                              flaggedQuestions[currentQuestion]
-                                  ? Icons.flag
-                                  : Icons.flag_outlined,
-                              color: Color.fromARGB(255, 0, 0, 0),
-                            ),
-                        );
-                          }
-                        }),
-                      ),
-                      ),
+                          );})
+                      )),
                       Spacer(),
                       Container(
                           margin: const EdgeInsets.only(bottom: 10),
@@ -418,25 +399,22 @@ class MiniMockExamState extends State<MiniMockExam> {
                             ],
                           ),
                           child:LayoutBuilder(builder: (context,constraints) {
-                            if (MediaQuery.of(context).size.width >= 600){return Center(
-                            child: Text('Question ${currentQuestion+1}/${questions.length}',
-                              style: const TextStyle(
-                                color: Color.fromARGB(255, 0, 0, 0),
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          );
-                          }else {
                             return Center(
-                            child: Text('${currentQuestion+1}/${questions.length}',
-                              style: const TextStyle(
-                                color: Color.fromARGB(255, 0, 0, 0),
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ));
-                          }})
+                              child: (MediaQuery.of(context).size.width >= 600)
+                                ? Text('Question ${currentQuestion+1}/${questions.length}',
+                                    style: const TextStyle(
+                                      color: Color.fromARGB(255, 0, 0, 0),
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                    ))
+                                : Text('${currentQuestion+1}/${questions.length}',
+                                    style: const TextStyle(
+                                      color: Color.fromARGB(255, 0, 0, 0),
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                    ))
+                            );
+                          })
                       ),
                     ])
                 )),
