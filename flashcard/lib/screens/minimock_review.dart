@@ -124,20 +124,20 @@ Widget build(BuildContext context) {
         actions: [
         Container(
           margin: const EdgeInsets.only(right: 16),
-        width: MediaQuery.of(context).size.width < 600 ? 120 : 210,
-        height: 40.31,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          color: Color.fromARGB(255, 222, 221, 222),
-          boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                spreadRadius: 0,
-                blurRadius: 5,
-                offset: const Offset(0, 3), // changes position of shadow
-            ),
-          ],
-        ),
+          width: MediaQuery.of(context).size.width < 600 ? 100 : 210,
+          height: 40.31,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            color: Color.fromARGB(255, 222, 221, 222),
+            boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  spreadRadius: 0,
+                  blurRadius: 5,
+                  offset: const Offset(0, 3), // changes position of shadow
+              ),
+            ],
+          ),
         child: Center(
           child: (MediaQuery.of(context).size.width >= 600)
             ? Text('Time Remaining: $_displayTime',

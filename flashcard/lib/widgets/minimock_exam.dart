@@ -227,10 +227,9 @@ class MiniMockExamState extends State<MiniMockExam> {
               title: widget.title,
               mobileTitle: widget.shortTitle,
               actions: [
-                LayoutBuilder(builder: (context, constraints) {
-                return Container(
+                Container(
                   margin: const EdgeInsets.only(right: 16),
-                  width: MediaQuery.of(context).size.width < 600 ? 80 : 210,
+                  width: MediaQuery.of(context).size.width < 600 ? 100 : 210,
                   height: 40.31,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
@@ -246,8 +245,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                       ),
                     ],
                   ),
-                  child: LayoutBuilder(builder: (context, constraints) {
-                    return Center(
+                  child: Center(
                       child: (MediaQuery.of(context).size.width >= 600)
                               ? Text('Time Remaining: $_displayTime',
                                   style: TextStyle(
@@ -270,9 +268,8 @@ class MiniMockExamState extends State<MiniMockExam> {
                                       fontSize: 18.5,
                                       fontWeight: FontWeight.w500,
                                 ))])
-                      );
-                }));
-            })],
+                  )
+                )],
           ),
           body: questions.isEmpty || rankingAnswers.isEmpty
               ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
@@ -305,7 +302,8 @@ class MiniMockExamState extends State<MiniMockExam> {
                         child: SizedBox(
                           child: Row(
                           children: [
-                      Align(alignment: Alignment.centerLeft,
+                      Align(
+                        alignment: Alignment.centerLeft,
                       child: Container(
                         margin: const EdgeInsets.only(bottom: 10),
                         width: MediaQuery.of(context).size.width < 600 ? 75 : 160,
@@ -322,32 +320,36 @@ class MiniMockExamState extends State<MiniMockExam> {
                             ),
                           ],
                         ),
-                        child:LayoutBuilder(builder: (context,constraints){
-                          return TextButton.icon(
-                            label: (MediaQuery.of(context).size.width >= 600)
-                              ? Text(flaggedQuestions[currentQuestion]
-                                  ? 'Flagged'
-                                  : 'Flag for review',
-                                    style: const TextStyle(
-                                      color: Color.fromARGB(255, 0, 0, 0),
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  )
-                              : Text(''),
+                        child: TextButton(
                             onPressed: () {
                               setState((){
                                 flaggedQuestions[currentQuestion] = !flaggedQuestions[currentQuestion];
                               });
                             },
-                            icon: Icon(
-                              flaggedQuestions[currentQuestion]
+                            child: (MediaQuery.of(context).size.width < 600)
+                                ? Icon(flaggedQuestions[currentQuestion]
                                   ? Icons.flag
                                   : Icons.flag_outlined,
-                              color: Color.fromARGB(255, 0, 0, 0),
-                            ),
-                          );})
-                      )),
+                                  color: Color.fromARGB(255, 0, 0, 0))
+                                : Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(flaggedQuestions[currentQuestion]
+                                        ? Icons.flag
+                                        : Icons.flag_outlined,
+                                        color: Color.fromARGB(255, 0, 0, 0)),
+                                    SizedBox(width: 4),
+                                    Text(flaggedQuestions[currentQuestion]
+                                        ? 'Flagged'
+                                        : 'Flag for review',
+                                      style: const TextStyle(
+                                        color: Color.fromARGB(255, 0, 0, 0),
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ])
+                          ))),
                       Spacer(),
                       Container(
                           margin: const EdgeInsets.only(bottom: 10),
@@ -365,8 +367,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                               ),
                             ],
                           ),
-                          child:LayoutBuilder(builder: (context,constraints) {
-                            return Center(
+                          child: Center(
                               child: (MediaQuery.of(context).size.width >= 600)
                                 ? Text('Question ${currentQuestion+1}/${questions.length}',
                                     style: const TextStyle(
@@ -380,9 +381,8 @@ class MiniMockExamState extends State<MiniMockExam> {
                                       fontSize: 16,
                                       fontWeight: FontWeight.w500,
                                     ))
-                            );
-                          })
-                      ),
+                            )
+                      )
                     ])
                 )),
             // Display the current question text
@@ -670,42 +670,28 @@ class MiniMockExamState extends State<MiniMockExam> {
                      // Force the button height
                       child: ElevatedButton.icon(
                         onPressed: () async {
-                          if (widget.questionDirectory.contains('mini-mock')) {
-                            int? newIndex = await Navigator.push(
-                              context,
+                          int? newIndex = await Navigator.push(
+                            context,
                               MaterialPageRoute(
-                                builder: (context) => MiniMockReview(
+                                builder: (context) =>
+                                (widget.questionDirectory.contains('mini-mock'))
+                                    ? MiniMockReview(
                                   miniMockWidget: this,
                                   rankingLength: rankingAnswers.length,
                                   multiChoiceLength: multiChoiceAnswers.length,
                                   flaggedQuestions: flaggedQuestions,
                                   displayTime: _displayTime,
                                   remainingSeconds: remainingSeconds,
-                                ),
-                              ),
-                            );
-                            // statement bellow allows for faster page update
-                            // Must check for null in case user finishes exam and no value is returned
-                            if (newIndex != null && newIndex != currentQuestion){
-                              setState(() {
-                                currentQuestion = newIndex;
-                              });
-                            }
-                          } else if (widget.questionDirectory.contains('full-mock')) {
-                            // On pressed load new page and wait for a returned value
-                            int? newIndex = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => FullMockReview(
+                                )
+                                    : FullMockReview(
                                   fullMockWidget: this,
                                   rankingLength: rankingAnswers.length,
                                   multiChoiceLength: multiChoiceAnswers.length,
                                   flaggedQuestions: flaggedQuestions,
                                   displayTime: _displayTime,
                                   remainingSeconds: remainingSeconds,
-                                ),
-                              ),
-                            );
+                                )
+                              ));
                             // statement bellow allows for faster page update
                             // Must check for null in case user finishes exam and no value is returned
                             if (newIndex != null && newIndex != currentQuestion){
@@ -713,7 +699,6 @@ class MiniMockExamState extends State<MiniMockExam> {
                                 currentQuestion = newIndex;
                               });
                             }
-                          };
                         },
                         icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 0, 0, 0), size:iconSize.clamp(16, 24)),
                         label: MediaQuery.of(context).size.width < 600 ? SizedBox() : Text('Review', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 16)),

@@ -126,12 +126,12 @@ class MyTheme {
     colorScheme: ColorScheme.fromSwatch().copyWith(
       secondary: const Color.fromARGB(255, 255, 255, 255),
     ),
-    scaffoldBackgroundColor: const Color.fromARGB(255, 47, 106, 161),
+    scaffoldBackgroundColor: const Color.fromARGB(255, 47, 78, 110),
     drawerTheme: const DrawerThemeData(
-      backgroundColor: Color.fromARGB(255, 47, 106, 161),
+      backgroundColor: Color.fromARGB(255, 47, 78, 110),
     ),
     // using this for `Reset` button color
-    primaryColor: const Color.fromARGB(255, 47, 106, 161),
+    primaryColor: const Color.fromARGB(255, 47, 78, 110),
     // using this for `Reset` shadow1 color
     shadowColor: Colors.black,
     // using this for `Reset` shadow2 color
