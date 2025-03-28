@@ -125,6 +125,36 @@ class FullMockReviewState extends State<FullMockReview> {
     );
   }
 
+  void _showCompletionDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    barrierDismissible: false, // Prevent dismissing by tapping outside
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text("Complete Full-sized Mock?"),
+        content: const Text("Are you sure you want to submit your answers?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context); // Close the dialog
+              widget.fullMockWidget.examEnd(); // Proceed with completion
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text("Confirm"),
+          ),
+        ],
+      );
+    },
+  );
+}
+
   @override
 Widget build(BuildContext context) {
   return PopScope(
@@ -324,7 +354,7 @@ Widget build(BuildContext context) {
                     child:
                       ElevatedButton.icon(
                         onPressed: () {
-                          widget.fullMockWidget.examEnd();
+                          _showCompletionDialog(context);
                         },
                         icon: Icon(Icons.check_outlined, color: Theme.of(context).textTheme.bodyMedium?.color),
                         label: Text('Complete',  style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 16),
