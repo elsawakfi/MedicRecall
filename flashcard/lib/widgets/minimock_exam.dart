@@ -218,7 +218,6 @@ class MiniMockExamState extends State<MiniMockExam> {
 
   @override
   Widget build(BuildContext context) {
-    double deviceHeight = MediaQuery.of(context).size.height;
     return PopScope(
         canPop: true,
         child: Scaffold(
@@ -548,12 +547,11 @@ class MiniMockExamState extends State<MiniMockExam> {
                   final buttonWidth = constraints.maxWidth * 0.08; // 30% of container width
                   final paddingValue = constraints.maxWidth * 0.01;
 
-                  return
-                Center(
+                  return Center(
                     child:
                     SizedBox(
                         child:
-                Row(
+                  Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
@@ -581,19 +579,29 @@ class MiniMockExamState extends State<MiniMockExam> {
                             ),
                           ],
                         ),
-                        child: TextButton.icon(onPressed: () async{
-                          if (widget.questionDirectory.contains('mini-mock')) {
+                        child: TextButton(
+                          onPressed: () async{
                             int? newIndex = await Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => MiniMockReview(
-                                  miniMockWidget: this,
-                                  rankingLength: rankingAnswers.length,
-                                  multiChoiceLength: multiChoiceAnswers.length,
-                                  flaggedQuestions: flaggedQuestions,
-                                  displayTime: _displayTime,
-                                  remainingSeconds: remainingSeconds,
-                                ),
+                                builder: (context) =>
+                                (widget.questionDirectory.contains('mini-mock'))
+                                  ? MiniMockReview(
+                                      miniMockWidget: this,
+                                      rankingLength: rankingAnswers.length,
+                                      multiChoiceLength: multiChoiceAnswers.length,
+                                      flaggedQuestions: flaggedQuestions,
+                                      displayTime: _displayTime,
+                                      remainingSeconds: remainingSeconds,
+                                    )
+                                  : FullMockReview(
+                                      fullMockWidget: this,
+                                      rankingLength: rankingAnswers.length,
+                                      multiChoiceLength: multiChoiceAnswers.length,
+                                      flaggedQuestions: flaggedQuestions,
+                                      displayTime: _displayTime,
+                                      remainingSeconds: remainingSeconds,
+                                    )
                               ),
                             );
                             // statement bellow allows for faster page update
@@ -603,56 +611,27 @@ class MiniMockExamState extends State<MiniMockExam> {
                                 currentQuestion = newIndex;
                               });
                             }
-                          } else if (widget.questionDirectory.contains('full-mock')) {
-                            // On pressed load new page and wait for a returned value
-                            int? newIndex = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => FullMockReview(
-                                  fullMockWidget: this,
-                                  rankingLength: rankingAnswers.length,
-                                  multiChoiceLength: multiChoiceAnswers.length,
-                                  flaggedQuestions: flaggedQuestions,
-                                  displayTime: _displayTime,
-                                  remainingSeconds: remainingSeconds,
-                                ),
-                              ),
-                            );
-                            // statement bellow allows for faster page update
-                            // Must check for null in case user finishes exam and no value is returned
-                            if (newIndex != null && newIndex != currentQuestion){
-                              setState(() {
-                                currentQuestion = newIndex;
-                              });
-                            }
-                          };
-                        },
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.zero, // Remove default padding
-                          minimumSize: Size.zero,    // Remove minimum size constraints
-                        ),
-                        label: MediaQuery.of(context).size.width < 600 ? const SizedBox.shrink()  :
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: Text('Review Page',
-              style: TextStyle(
-                color: const Color.fromARGB(255, 0, 0, 0),
-                fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 15.5),
-              ),
-            ),
-          ),
-        
-                        icon:Center(
-                          child: Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child:  Icon(Icons.search, color:  Color.fromARGB(255, 0, 0, 0), size:   MediaQuery.of(context).size.width < 600
-        ? 24// Larger icon for mobile
-        : AdaptiveTextSize().getadaptiveTextSize(context, 20),
-                        ))),
-                      
-                        
-                        
-                    )),
+                          },
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.zero, // Remove default padding
+                            minimumSize: Size.zero,    // Remove minimum size constraints
+                          ),
+                          child: (MediaQuery.of(context).size.width < 600)
+                            ? Icon(Icons.search, color: Colors.black)
+                            : Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.search, color: Colors.black),
+                                  SizedBox(width: 4),
+                                  Text('Review Page',
+                                    style: TextStyle(
+                                      color: const Color.fromARGB(255, 0, 0, 0),
+                                      fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 15.5),
+                                    ),
+                                  ),
+                                ]
+                              )
+                        )),
                     const Spacer(),
                     if (currentQuestion > 0) //Prevents button being shown if no previous questions available
                       ElevatedButton.icon(
