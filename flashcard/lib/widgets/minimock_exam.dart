@@ -227,11 +227,12 @@ class MiniMockExamState extends State<MiniMockExam> {
               automaticallyImplyLeading: false,
               elevation: 0,
         title: LayoutBuilder(builder:  (context, constraints) { return
-         Row(
-           mainAxisSize: MainAxisSize.min,
-         children: [
-           (MediaQuery.of(context).size.width >= 600)
-            ? Stack(
+         MediaQuery.of(context).size.width >= 600 ?
+         Align(
+          alignment: Alignment(0.18,0),
+         //mainAxisAlignment: MainAxisAlignment.center,
+         //mainAxisSize: MainAxisSize.min,
+         child: Stack(
             children: [
               Positioned(
                 top: 2.3,
@@ -245,10 +246,14 @@ class MiniMockExamState extends State<MiniMockExam> {
                 margin: const EdgeInsets.only(left: 32),
                 padding: const EdgeInsets.all(8.0),
                 child: Text(widget.title),
-              )
-            ])
-            : Text(widget.shortTitle)
-         ]);
+              ),
+            ],
+          )
+          ):Align(
+            alignment: Alignment(0.2,0),
+            child: Text(widget.shortTitle)
+
+          );
         }),
       centerTitle: true,
               leading: Builder(
@@ -263,7 +268,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                 LayoutBuilder(builder: (context, constraints) {
                 return Container(
                   margin: const EdgeInsets.only(right: 16),
-                  width: MediaQuery.of(context).size.width < 600 ? 120 : 210,
+                  width: MediaQuery.of(context).size.width < 600 ? 80 : 210,
                   height: 40.31,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
@@ -599,7 +604,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                     ),
                     const SizedBox(width: 16),
                     Container(
-                        width: MediaQuery.of(context).size.width < 600 ? 107 : 160,
+                        width: MediaQuery.of(context).size.width < 600 ? 130 : 160,
                         height: MediaQuery.of(context).size.width < 600 ? 40 : 45,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
@@ -661,7 +666,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                         },
                         label: MediaQuery.of(context).size.width < 600 ? Text('Review', style: TextStyle(color:  Color.fromARGB(255, 0, 0, 0), fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 17))) : Text('Review Page', style: TextStyle(color:  Color.fromARGB(255, 0, 0, 0), fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 15.5) ,
                         )),
-                        icon: Icon(Icons.search, color:  Color.fromARGB(255, 0, 0, 0), size:  AdaptiveTextSize().getadaptiveTextSize(context, 25)
+                        icon: Icon(Icons.search, color:  Color.fromARGB(255, 0, 0, 0), size:  AdaptiveTextSize().getadaptiveTextSize(context, 19)
                         ),
                       
                         
@@ -755,7 +760,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor:Color.fromARGB(255, 222, 221, 222),
                           padding:EdgeInsets.all(paddingValue),
-                          minimumSize: Size(buttonWidth, buttonWidth * 0.6),
+                          minimumSize:  Size(buttonWidth * 1.5, buttonWidth * 0.7),
                        ),
                        iconAlignment: IconAlignment.end,
                       ),

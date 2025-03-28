@@ -72,7 +72,7 @@ class FullMockLandingState extends State<FullMockLanding> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: const DrawMain(),
-      appBar: CustomAppBar(title: "Full-Sized Mock Exam"),
+      appBar: CustomAppBar(title: "Full-Sized Mock Exam", mobileTitle: "Full Mock",),
       body: daysUntilTest == null
           ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
           : Container(
