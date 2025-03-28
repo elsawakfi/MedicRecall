@@ -186,7 +186,7 @@ class MiniMock2RulesState extends State<MiniMock2Rules> {
                         borderRadius: BorderRadius.circular(5),
                       ),
                       backgroundColor: Colors.green
-                    ), child: Text('Begin Exam', style: TextStyle(color:Colors.black, fontSize:AdaptiveTextSize().getadaptiveTextSize(context, 20),)),
+                    ), child: Text('Begin Exam', style: TextStyle(color:Colors.white, fontSize:AdaptiveTextSize().getadaptiveTextSize(context, 20),)),
                   )
                 )
            )

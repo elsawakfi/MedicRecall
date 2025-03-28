@@ -220,28 +220,30 @@ Widget build(BuildContext context) {
           ],
         ),
         child: Center(
-        child: LayoutBuilder(builder: (context, constraints) {
-          if (MediaQuery.of(context).size.width >= 600){
-            return Text(
-              'Time Remaining: $_displayTime',
+          child: (MediaQuery.of(context).size.width >= 600)
+              ? Text('Time Remaining: $_displayTime',
               style: TextStyle(
-                color: Color.fromARGB(255, 0, 0, 0),
+                color: (remainingSeconds <= 600)
+                    ? Colors.white
+                    : Color.fromARGB(255, 0, 0, 0),
                 fontSize: 18.5,
                 fontWeight: FontWeight.w500,
-              ));
-          } else {
-            return Center(
-              child: Text('$_displayTime',
-                style: TextStyle(
-                  color: (remainingSeconds <= 600)
-                      ? Colors.white
-                      : Color.fromARGB(255, 0, 0, 0),
-                  fontSize: 18.5,
-                  fontWeight: FontWeight.w500,
-                )));
-          }
-        })),)
-],
+              ))
+              : Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.access_time_rounded, color: Colors.black),
+                SizedBox(width: 8),
+                Text(_displayTime,
+                    style: TextStyle(
+                      color: (remainingSeconds <= 600)
+                          ? Colors.white
+                          : Color.fromARGB(255, 0, 0, 0),
+                      fontSize: 18.5,
+                      fontWeight: FontWeight.w500,
+                    ))])
+        ))
+      ],
     ),
     body: LayoutBuilder( builder: (context, constraints) {
       double maxScreenWidth = constraints.maxWidth * 0.5;
@@ -253,15 +255,14 @@ Widget build(BuildContext context) {
           decoration: 
           BoxDecoration(
             boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  spreadRadius: 5,
-                  blurRadius: 5,
-                  offset: const Offset(0, 3),
-                  )
-                  ],
-            color:   Color.fromARGB(255, 255, 255, 255),
-            ),
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                spreadRadius: 5,
+                blurRadius: 5,
+                offset: const Offset(0, 3),
+              )],
+              color:   Color.fromARGB(255, 255, 255, 255),
+          ),
           
           constraints: BoxConstraints(
             maxWidth: maxScreenWidth > maxPreferredWidth ? maxScreenWidth : maxPreferredWidth,
@@ -309,14 +310,14 @@ Widget build(BuildContext context) {
                       ),
                     ),
 
-                        ExpansionPanel(
-                          isExpanded: _isOpen[1],
-                          canTapOnHeader: true,
-                          backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-                          headerBuilder: (context, isOpen) => ListTile(
-                            title: Text(
-                              'Multiple Choice Questions (Question ${widget.rankingLength + 1} - $questionLength)'),
-                              ),
+                    ExpansionPanel(
+                      isExpanded: _isOpen[1],
+                      canTapOnHeader: true,
+                      backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+                      headerBuilder: (context, isOpen) => ListTile(
+                        title: Text(
+                          'Multiple Choice Questions (Question ${widget.rankingLength + 1} - $questionLength)'),
+                        ),
                     body: Center(
                       child: Wrap(
                          alignment: WrapAlignment.center,
@@ -330,49 +331,40 @@ Widget build(BuildContext context) {
                           ),
                         ),
                       
-                  )))],
-                ),
-              
-          ),
-        ),
-      ),
-      LayoutBuilder(builder: (context, constraints) {                
-            return Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween, // Changed from end
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Align(
-                  alignment: Alignment.centerLeft,
-                    child: SizedBox( 
-      child: Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0), size: AdaptiveTextSize().getadaptiveTextSize(context, 20)),
-      ),
-                  ),
-                  const Spacer(),
-                  SizedBox(
-                    height: MediaQuery.of(context).size.width < 600 ? 40 : 50,
-                    width: 150,
-                    child:
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          _showCompletionDialog(context);
-                        },
-                        icon: Icon(Icons.check_outlined, color: Theme.of(context).textTheme.bodyMedium?.color),
-                        label: Text('Complete',  style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 16),
+                  )))]
+                )))),
+              const SizedBox(height: 20),
+              LayoutBuilder(builder: (context, constraints) {
+                return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween, // Changed from end
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: SizedBox(
+                          child: Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0), size: AdaptiveTextSize().getadaptiveTextSize(context, 20)),
                         ),
-                         style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.green, // Green button color
-      foregroundColor: Colors.white, // Text/Icon color
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(50), // Rounded corners
-      )
-                         )
-                  ))
-              ]);}),
-              
-            ],
-            ),
-             
-            ),
-            ),
-      );})));
+                      ),
+                      const Spacer(),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.width < 600 ? 40 : 50,
+                        width: 150,
+                        child:
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              _showCompletionDialog(context);
+                            },
+                            icon: Icon(Icons.check_outlined, color: Theme.of(context).textTheme.bodyMedium?.color),
+                            label: Text('Complete',  style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 16)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green, // Green button color
+                              foregroundColor: Colors.white, // Text/Icon color
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(50), // Rounded corners
+                          ))))
+                      ]);
+              })
+              ]))
+        ));
+    })));
 }}

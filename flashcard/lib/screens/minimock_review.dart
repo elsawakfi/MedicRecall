@@ -169,28 +169,30 @@ Widget build(BuildContext context) {
           ],
         ),
         child: Center(
-          child: LayoutBuilder(builder: (context, constraints) {
-          if (MediaQuery.of(context).size.width >= 600){
-          return Text(
-            'Time Remaining: $_displayTime',
-            style: TextStyle(
-              color: Color.fromARGB(255, 0, 0, 0),
-              fontSize: 18.5,
-              fontWeight: FontWeight.w500,
-             ));
-          } else {
-            return Center(
-              child: Text('$_displayTime',
+          child: (MediaQuery.of(context).size.width >= 600)
+            ? Text('Time Remaining: $_displayTime',
                 style: TextStyle(
                   color: (remainingSeconds <= 600)
                       ? Colors.white
                       : Color.fromARGB(255, 0, 0, 0),
                   fontSize: 18.5,
                   fontWeight: FontWeight.w500,
-                )));
-          }
-        })),)
-],
+              ))
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.access_time_rounded, color: Colors.black),
+                  SizedBox(width: 8),
+                  Text(_displayTime,
+                      style: TextStyle(
+                        color: (remainingSeconds <= 600)
+                            ? Colors.white
+                            : Color.fromARGB(255, 0, 0, 0),
+                        fontSize: 18.5,
+                        fontWeight: FontWeight.w500,
+              ))])
+        ))
+      ],
    ),
     body: LayoutBuilder( builder: (context, constraints) {
       double maxScreenWidth = constraints.maxWidth * 0.5;
@@ -481,12 +483,10 @@ Widget build(BuildContext context) {
                       isExpanded: _isOpen[1],
                     ),
                   ],
-                ),),),),
-                const SizedBox(height: 20),
-              // Spacer(),
+                )))),
+              const SizedBox(height: 20),
               LayoutBuilder(builder: (context, constraints){
-                return
-              Row(
+                return Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Align(
@@ -496,24 +496,24 @@ Widget build(BuildContext context) {
                       width: MediaQuery.of(context).size.width < 600 ? 40 : 50,
                       child: MiniMockHelpButton())),
                   const SizedBox(width: 16),
-                  Container(
+                  SizedBox(
                     height: MediaQuery.of(context).size.width < 600 ? 40 : 50,
                     width: MediaQuery.of(context).size.width < 600 ? 40 : 50,
 
                     //final double buttonWidth = 56.0; // Define buttonWidth
-                   child: FloatingActionButton(
-      heroTag: UniqueKey(),
-      onPressed: (){
-      Navigator.pop(context);
-      },
-      clipBehavior: Clip.none,
-      backgroundColor: const Color.fromARGB(255, 222, 221, 222), 
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(13),
-      ),
-      child: Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0), size: AdaptiveTextSize().getadaptiveTextSize(context, 20)),
-      ),
-                  ),
+                     child: FloatingActionButton(
+                        heroTag: UniqueKey(),
+                        onPressed: (){
+                        Navigator.pop(context);
+                        },
+                        clipBehavior: Clip.none,
+                        backgroundColor: const Color.fromARGB(255, 222, 221, 222),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(13),
+                        ),
+                        child: Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0), size: AdaptiveTextSize().getadaptiveTextSize(context, 20)),
+                      ),
+                    ),
                   const Spacer(),
                   SizedBox(
                    height: MediaQuery.of(context).size.width < 600 ? 40 : 50,
@@ -531,15 +531,9 @@ Widget build(BuildContext context) {
                             foregroundColor: Colors.white, // Text/Icon color
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(50), // Rounded corners
-                      )
-                         )
-                  ))
-              ]);}),
-              
-            ],
-            ),
-             
-            ),
-            );
+                      ))))
+              ]);
+              })]),
+            ));
 })));
 }}
