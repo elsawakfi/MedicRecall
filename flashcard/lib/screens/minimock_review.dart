@@ -3,6 +3,7 @@ import 'package:flashcard_x/widgets/drawer_widget.dart';
 // import 'package:flashcard_x/screens/minimock_exams.dart';
 
 import '../utils/timer.dart';
+import '../widgets/app_bar.dart';
 import '../widgets/minimock_help_button.dart';
 
 class AdaptiveTextSize {
@@ -115,43 +116,12 @@ Widget build(BuildContext context) {
       _returnToMiniMock(context, questionLength-1);
     }
   },
-    child:Scaffold(
+  child:Scaffold(
     drawer: const DrawMain(),
-    appBar: AppBar(
-      automaticallyImplyLeading: false,
-      elevation: 0,
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Stack(
-          children: [
-            Positioned(
-              top: 2.3,
-              child: Image.asset(
-                'assets/newlogo.png',
-                fit: BoxFit.cover,
-                height: 34,
-              ),
-            ),
-            Container(
-              margin: const EdgeInsets.only(left: 32),
-              padding: const EdgeInsets.all(8.0),
-              child: const Text(
-                'Review',
-                style: TextStyle(fontSize: 22,),
-            ),
-          )],
-        ),
-      ]),
-      centerTitle: true,
-      leading: Builder(
-        builder: (context) => GestureDetector(
-          onTap: () => Scaffold.of(context).openDrawer(),
-          child: const Icon(Icons.menu),
-        ),
-      ),
-      actions: [
+    appBar: CustomAppBar(
+        title: 'Review Page',
+        mobileTitle: 'Review',
+        actions: [
         Container(
           margin: const EdgeInsets.only(right: 16),
         width: MediaQuery.of(context).size.width < 600 ? 120 : 210,
@@ -193,7 +163,7 @@ Widget build(BuildContext context) {
               ))])
         ))
       ],
-   ),
+    ),
     body: LayoutBuilder( builder: (context, constraints) {
       double maxScreenWidth = constraints.maxWidth * 0.5;
       double maxPreferredWidth = 960; // 1920/2

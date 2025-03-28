@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
+import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
@@ -184,41 +185,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
       canPop: true,
       child: Scaffold(
         drawer: const DrawMain(),
-        appBar: AppBar(
-          // backgroundColor: Colors.blue,
-          elevation: 0,
-          title: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Stack(
-                children: [
-                  Positioned(
-                    top: 2.3,
-                    child: Image.asset(
-                      'assets/newlogo.png',
-                      fit: BoxFit.cover,
-                      height: 34,
-                    ),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.only(left: 32),
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text('Feedback'),
-                  ),
-                ],
-              )
-            ],
-          ),
-          centerTitle: true,
-          leading: Builder(
-            builder: (context) => GestureDetector(
-              onTap: () => Scaffold.of(context).openDrawer(),
-              child: const Icon(
-                Icons.menu,
-              ),
-            ),
-          ),
-        ),
+        appBar: CustomAppBar(title: 'Feedback Page', mobileTitle: 'Feedback'),
       body: userAnswers.isEmpty
         ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
         : LayoutBuilder( builder: (context, constraints) {

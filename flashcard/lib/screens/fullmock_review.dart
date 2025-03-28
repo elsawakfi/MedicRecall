@@ -1,3 +1,4 @@
+import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/drawer_widget.dart';
 // import 'package:flashcard_x/screens/minimock_exams.dart';
@@ -166,83 +167,50 @@ Widget build(BuildContext context) {
     },
     child: Scaffold(
     drawer: const DrawMain(),
-    appBar: AppBar(
-      automaticallyImplyLeading: false,
-      elevation: 0,
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Stack(
-          children: [
-            Positioned(
-              top: 2.3,
-              child: Image.asset(
-                'assets/newlogo.png',
-                fit: BoxFit.cover,
-                height: 34,
-              ),
-            ),
-            MediaQuery.of(context).size.width < 600 ? Container(
-              margin: const EdgeInsets.only(left: 32),
-              padding: const EdgeInsets.all(8.0),
-              child: const Text('Review'),
-            ) : Container(
-              margin: const EdgeInsets.only(left: 32),
-              padding: const EdgeInsets.all(8.0),
-              child: const Text('Review Page'),
-            ) ,
-          ],
-        ),
-      ]),
-      centerTitle: true,
-      leading: Builder(
-        builder: (context) => GestureDetector(
-          onTap: () => Scaffold.of(context).openDrawer(),
-          child: const Icon(Icons.menu),
-        ),
-      ),
+    appBar: CustomAppBar(
+      title: 'Review Page',
+      mobileTitle: 'Review',
       actions: [
         Container(
           margin: const EdgeInsets.only(right: 16),
-        width: MediaQuery.of(context).size.width < 600 ? 120 : 210,
-        height: 40.31,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          color: Color.fromARGB(255, 222, 221, 222),
-          boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                spreadRadius: 0,
-                blurRadius: 5,
-                offset: const Offset(0, 3), // changes position of shadow
-            ),
-          ],
-        ),
-        child: Center(
-          child: (MediaQuery.of(context).size.width >= 600)
-              ? Text('Time Remaining: $_displayTime',
-              style: TextStyle(
-                color: (remainingSeconds <= 600)
-                    ? Colors.white
-                    : Color.fromARGB(255, 0, 0, 0),
-                fontSize: 18.5,
-                fontWeight: FontWeight.w500,
-              ))
-              : Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.access_time_rounded, color: Colors.black),
-                SizedBox(width: 8),
-                Text(_displayTime,
-                    style: TextStyle(
-                      color: (remainingSeconds <= 600)
-                          ? Colors.white
-                          : Color.fromARGB(255, 0, 0, 0),
-                      fontSize: 18.5,
-                      fontWeight: FontWeight.w500,
-                    ))])
-        ))
+          width: MediaQuery.of(context).size.width < 600 ? 120 : 210,
+          height: 40.31,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            color: Color.fromARGB(255, 222, 221, 222),
+            boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  spreadRadius: 0,
+                  blurRadius: 5,
+                  offset: const Offset(0, 3), // changes position of shadow
+              ),
+            ],
+          ),
+          child: Center(
+            child: (MediaQuery.of(context).size.width >= 600)
+                ? Text('Time Remaining: $_displayTime',
+                style: TextStyle(
+                  color: (remainingSeconds <= 600)
+                      ? Colors.white
+                      : Color.fromARGB(255, 0, 0, 0),
+                  fontSize: 18.5,
+                  fontWeight: FontWeight.w500,
+                ))
+                : Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.access_time_rounded, color: Colors.black),
+                  SizedBox(width: 8),
+                  Text(_displayTime,
+                      style: TextStyle(
+                        color: (remainingSeconds <= 600)
+                            ? Colors.white
+                            : Color.fromARGB(255, 0, 0, 0),
+                        fontSize: 18.5,
+                        fontWeight: FontWeight.w500,
+                      ))])
+          ))
       ],
     ),
     body: LayoutBuilder( builder: (context, constraints) {

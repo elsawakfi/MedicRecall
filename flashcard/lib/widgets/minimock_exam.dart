@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/fullmock_review.dart';
 import 'package:flashcard_x/screens/minimock_scoring.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
+import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flashcard_x/widgets/ranking_card_ui.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
@@ -223,47 +224,9 @@ class MiniMockExamState extends State<MiniMockExam> {
         child: Scaffold(
           key: ValueKey(widget.title),
           drawer: const DrawMain(),
-          appBar: AppBar(
-              automaticallyImplyLeading: false,
-              elevation: 0,
-        title: LayoutBuilder(builder:  (context, constraints) { return
-         MediaQuery.of(context).size.width >= 600 ?
-         Align(
-          alignment: Alignment(0.18,0),
-         //mainAxisAlignment: MainAxisAlignment.center,
-         //mainAxisSize: MainAxisSize.min,
-         child: Stack(
-            children: [
-              Positioned(
-                top: 2.3,
-                child: Image.asset(
-                  'assets/newlogo.png',
-                  fit: BoxFit.cover,
-                  height: 34,
-                ),
-              ),
-              Container(
-                margin: const EdgeInsets.only(left: 32),
-                padding: const EdgeInsets.all(8.0),
-                child: Text(widget.title),
-              ),
-            ],
-          )
-          ):Align(
-            alignment: Alignment(0.2,0),
-            child: Text(widget.shortTitle)
-
-          );
-        }),
-      centerTitle: true,
-              leading: Builder(
-                builder: (context) => GestureDetector(
-                  onTap: () => Scaffold.of(context).openDrawer(),
-                  child: const Icon(
-                    Icons.menu,
-                  ),
-                ),
-              ),
+          appBar: CustomAppBar(
+              title: widget.title,
+              mobileTitle: widget.shortTitle,
               actions: [
                 LayoutBuilder(builder: (context, constraints) {
                 return Container(
