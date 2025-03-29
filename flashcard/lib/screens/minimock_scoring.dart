@@ -213,6 +213,7 @@ Future<void> fetchAverageScore() async {
             : LayoutBuilder( builder: (context, constraints) {
             double maxScreenWidth = constraints.maxWidth * 0.5;
             double maxPreferredWidth = 960; // 1920/2
+            bool isDesktop = constraints.maxWidth > 600;
 
             return Center(
             child: Container(
@@ -221,17 +222,13 @@ Future<void> fetchAverageScore() async {
               ),
             padding: EdgeInsets.all(16),
             child: SingleChildScrollView(
-            child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // const Spacer(),
-              //SizedBox(width: 30),
-              Column(
+              child: isDesktop
+              ? Row( // Displaying horizontally on the desktop view
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Align(
-                    alignment: Alignment.center,
-                    child: ScoreIndicator(
+                  // Align(
+                  //   alignment: Alignment.center,
+                    ScoreIndicator(
                       title: 'Your Score: ',
                       totalScore: '$totalScore/$maxScore',
                       percentageScore: userPercentageScore,
@@ -240,11 +237,10 @@ Future<void> fetchAverageScore() async {
                       progressColor: Colors.red,
                       backgroundColor: Colors.green
                     ),
-                  ),
                   SizedBox(width: 50),
-                  Align(
-                    alignment: Alignment.center,
-                    child: ScoreIndicator(
+                  // Align(
+                  //   alignment: Alignment.center,
+                      ScoreIndicator(
                       title: 'Average Score: ',
                       totalScore: '$averageScore/$maxScore',
                       percentageScore: averagePercentageScore,
@@ -253,10 +249,37 @@ Future<void> fetchAverageScore() async {
                       progressColor: Colors.red,
                       backgroundColor:  Colors.green
                     ),
-                  ),
                 ],
-              ),
-            SizedBox(width: 30),
+              )
+              : Column( //Displaying vertically on the mobile UI
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                      ScoreIndicator(
+                      title: 'Your Score: ',
+                      totalScore: '$totalScore/$maxScore',
+                      percentageScore: userPercentageScore,
+                      radius: 90.0,
+                      lineWidth: 20.0,
+                      progressColor: Colors.red,
+                      backgroundColor: Colors.green
+                    ),
+                  
+                  SizedBox(height: 20),
+                  // Align(
+                  //   alignment: Alignment.center,
+                      ScoreIndicator(
+                      title: 'Average Score: ',
+                      totalScore: '$averageScore/$maxScore',
+                      percentageScore: averagePercentageScore,
+                      radius: 90.0,
+                      lineWidth:  20.0,
+                      progressColor: Colors.red,
+                      backgroundColor:  Colors.green,
+                    ),
+                
+              
+              
+       
               Align(
                 alignment: Alignment.topRight,
                 child: ElevatedButton.icon(
@@ -279,8 +302,8 @@ Future<void> fetchAverageScore() async {
                   ),
                 ),
               ),
-            ],
-          )
+                        ],)
+                        
         )  
       ));
     })));
