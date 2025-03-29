@@ -61,6 +61,7 @@ class FullMockRulesState extends State<FullMockRules> {
             child: Text(
               'MedicRecall Full Mock 1 Exam Instructions: \n',
               style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 27), fontWeight: FontWeight.bold, color: Colors.black),
+              textAlign: TextAlign.center,
             ),
           ),
           //const SizedBox(height: 5),
@@ -104,7 +105,8 @@ class FullMockRulesState extends State<FullMockRules> {
                   TextSpan(text:' In this part you are presented with scenarios followed by a number of possible options. For each scenario select the 3 options which together are the most '  
                     'appropriate to the least appropriate given the circumstances described. \n',
                     style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 18),decoration:TextDecoration.none, color: Colors.black)),
-                ],),
+                ]),
+             textAlign: TextAlign.center,
             ),
           )),
            Center(
@@ -120,7 +122,8 @@ class FullMockRulesState extends State<FullMockRules> {
                   TextSpan(text:' In this part you are presented with scenarios followed by a number of possible options. For each scenario select the 3 options which together are the most '
               'appropriate responses to the situation given the circumstances described. \n',
                     style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 18),decoration:TextDecoration.none, color: Colors.black)),
-                ],),
+                ]),
+             textAlign: TextAlign.center,
             ),
           )),
           Center(
@@ -132,6 +135,7 @@ class FullMockRulesState extends State<FullMockRules> {
               'The paper contains 50 questions in total. You have 95 minutes to complete the exam. This is to '
               'simulate the amount of time you will have to complete the exam on the day. \n',
               style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 18), color: Colors.black),
+            textAlign: TextAlign.center,
             ),
           )),
            Center(

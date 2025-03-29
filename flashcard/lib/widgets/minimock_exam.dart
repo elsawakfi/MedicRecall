@@ -659,7 +659,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                         icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 0, 0, 0), size: iconSize.clamp(16, 24)),
                         label: MediaQuery.of(context).size.width < 600 ? SizedBox() : Text('Next', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 16)) , //Empty SizedBox to ensure no text is displayed
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Color.fromARGB(255, 217, 216, 217),
+                          backgroundColor: Color.fromARGB(255, 222, 221, 222),
                           padding:EdgeInsets.all(paddingValue),
                           minimumSize: Size(buttonWidth * 1.5, buttonWidth * 0.7),
                         ),
