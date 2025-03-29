@@ -53,8 +53,8 @@ class MiniMockScoringState extends State<MiniMockScoring> {
   Future<void> initialise() async{
     await getQuestions(); // Fetch the questions on initialisation
     await getUser();
-    await fetchUserAnswers(); //Fetch the user's answers from the database
     await fetchAverageScore(); // Fetch the average score for the mock
+    await fetchUserAnswers(); //Fetch the user's answers from the database
     calculateScores();
   }
 
@@ -213,20 +213,23 @@ Future<void> fetchAverageScore() async {
             double maxPreferredWidth = 960; // 1920/2
             bool isDesktop = constraints.maxWidth > 600;
 
-           return Stack(
-                children: [
-                  Center(
-            child: Container(
+           return Align(
+              alignment: Alignment.center,
+              child: Container(
               
               constraints: BoxConstraints(
                 maxWidth: maxScreenWidth > maxPreferredWidth ? maxScreenWidth : maxPreferredWidth,
               ),
-            padding: EdgeInsets.all(16),
-            child: SingleChildScrollView(
+              padding: EdgeInsets.all(16),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                isDesktop
+                children: [
+                  Expanded(
+                    child: Center(
+                    child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [ isDesktop
               ? Row( // Displaying horizontally on the desktop view
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -251,7 +254,7 @@ Future<void> fetchAverageScore() async {
                       backgroundColor:  Colors.green
                     ),
                 ],
-            )
+              )
               : Column( //Displaying vertically on the mobile UI
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -279,13 +282,11 @@ Future<void> fetchAverageScore() async {
               ),
               ],
             ),
-          ),
-        ),
-        ),
-            Positioned(
-              bottom: 30,
-              right: 120,
-              child: ElevatedButton.icon(
+          ))),
+          Align(
+              alignment: Alignment.bottomRight,
+              child:
+              ElevatedButton.icon(
                   onPressed: () => {
                     Navigator.of(context).push(
                       MaterialPageRoute(
@@ -302,11 +303,9 @@ Future<void> fetchAverageScore() async {
                   label: Text('Feedback', style:TextStyle(fontSize: 16, color: Color.fromARGB(255, 98, 86, 139))),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color.fromARGB(255, 235, 230, 239),
-                       ),
-                    ),
                   ),
-                ],
-              );
+              )),
+              ])));
             }),
     );
   }
