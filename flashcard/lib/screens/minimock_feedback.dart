@@ -276,15 +276,15 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                           SizedBox(height: 10),
                           // If the question is a ranking question, display a reorderable list of options
                           if (questions[currentQuestion]['type'] == "ranking") ...[
-                            Column(children: [
+                            Column(
+                                children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   // USER ANSWERS
                                   Expanded(
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisSize: MainAxisSize.min,
                                       children: [
                                         Text('  Given Answer:',
                                           style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 18)),
@@ -311,7 +311,6 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                   Expanded(
                                     child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
-                                        mainAxisSize: MainAxisSize.min,
                                         children: [
                                         Text('  Correct Answer:',
                                           style: TextStyle(
