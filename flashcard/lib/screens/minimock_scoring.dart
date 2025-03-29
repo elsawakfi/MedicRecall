@@ -203,9 +203,7 @@ Future<void> fetchAverageScore() async {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-        canPop: false,
-        child: Scaffold(
+        return Scaffold(
         drawer: const DrawMain(),
         appBar: CustomAppBar(title: 'Scoring Page', mobileTitle: 'Scoring'),
         body: answerScores.isEmpty || (maxScore == 0)
@@ -215,42 +213,45 @@ Future<void> fetchAverageScore() async {
             double maxPreferredWidth = 960; // 1920/2
             bool isDesktop = constraints.maxWidth > 600;
 
-            return Center(
+           return Stack(
+                children: [
+                  Center(
             child: Container(
+              
               constraints: BoxConstraints(
                 maxWidth: maxScreenWidth > maxPreferredWidth ? maxScreenWidth : maxPreferredWidth,
               ),
             padding: EdgeInsets.all(16),
             child: SingleChildScrollView(
-              child: isDesktop
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                isDesktop
               ? Row( // Displaying horizontally on the desktop view
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Align(
-                  //   alignment: Alignment.center,
                     ScoreIndicator(
                       title: 'Your Score: ',
                       totalScore: '$totalScore/$maxScore',
                       percentageScore: userPercentageScore,
-                      radius: 90.0,
-                      lineWidth: 20.0,
+                      radius: 120,
+                      lineWidth: 25.0,
                       progressColor: Colors.red,
                       backgroundColor: Colors.green
                     ),
-                  SizedBox(width: 50),
-                  // Align(
-                  //   alignment: Alignment.center,
+                    
+                  SizedBox(width:100),
                       ScoreIndicator(
-                      title: 'Average Score: ',
+                      title: 'Global Average: ',
                       totalScore: '$averageScore/$maxScore',
                       percentageScore: averagePercentageScore,
-                      radius: 90.0,
-                      lineWidth:  20.0,
+                      radius: 120.0,
+                      lineWidth:  25.0,
                       progressColor: Colors.red,
                       backgroundColor:  Colors.green
                     ),
                 ],
-              )
+            )
               : Column( //Displaying vertically on the mobile UI
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -265,10 +266,8 @@ Future<void> fetchAverageScore() async {
                     ),
                   
                   SizedBox(height: 20),
-                  // Align(
-                  //   alignment: Alignment.center,
                       ScoreIndicator(
-                      title: 'Average Score: ',
+                      title: 'Global Average: ',
                       totalScore: '$averageScore/$maxScore',
                       percentageScore: averagePercentageScore,
                       radius: 90.0,
@@ -276,13 +275,17 @@ Future<void> fetchAverageScore() async {
                       progressColor: Colors.red,
                       backgroundColor:  Colors.green,
                     ),
-                
-              
-              
-       
-              Align(
-                alignment: Alignment.topRight,
-                child: ElevatedButton.icon(
+                ],
+              ),
+              ],
+            ),
+          ),
+        ),
+        ),
+            Positioned(
+              bottom: 30,
+              right: 120,
+              child: ElevatedButton.icon(
                   onPressed: () => {
                     Navigator.of(context).push(
                       MaterialPageRoute(
@@ -299,13 +302,12 @@ Future<void> fetchAverageScore() async {
                   label: Text('Feedback', style:TextStyle(fontSize: 16, color: Color.fromARGB(255, 98, 86, 139))),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color.fromARGB(255, 235, 230, 239),
+                       ),
+                    ),
                   ),
-                ),
-              ),
-                        ],)
-                        
-        )  
-      ));
-    })));
+                ],
+              );
+            }),
+    );
   }
 }
