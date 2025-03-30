@@ -31,12 +31,14 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
   Map<String, dynamic> userAnswers = {};
   List<List<MapEntry<String, String>>> examOptions = []; // Correct option associated to each letter of the correct answers
   List<List<MapEntry<String, String>>> userOptions = []; // Correct option associated to each letter of the user answers
+  final ScrollController _scrollController = ScrollController();
 
   final FirebaseAuth auth = FirebaseAuth.instance;
   late User user;
 
   @override
   void dispose() {
+    _scrollController.dispose(); // Dispose of the scroll controller
     super.dispose();
   }
 
@@ -267,6 +269,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                         ]),
                         Expanded(
                           child: SingleChildScrollView(
+                            controller: _scrollController,
                             child: Column(children: [
                           // Display the current question text
                           Text(
@@ -403,6 +406,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                     setState(() {
                                       currentQuestion--; // Move to previous question
                                     });
+                                    _scrollController.jumpTo(0); // Scroll to the top of the screen
                                   },
                                   icon: Icon(Icons.arrow_back,
                                       color: Color.fromARGB(255, 98, 86, 139)),
@@ -419,6 +423,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                     setState(() {
                                       currentQuestion++; // Move to next question
                                     });
+                                    _scrollController.jumpTo(0); // Scroll to the top of the screen
                                   },
                                   icon: Icon(Icons.arrow_forward,
                                       color: Color.fromARGB(255, 98, 86, 139)),
