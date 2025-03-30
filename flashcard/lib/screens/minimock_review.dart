@@ -45,6 +45,71 @@ class MiniMockReviewState extends State<MiniMockReview> {
   String _displayTime = '';
   late int remainingSeconds;
 
+  Widget _buildQuestionButton(int questionNumber) {
+  bool isFlagged = widget.flaggedQuestions.length > questionNumber 
+                   && widget.flaggedQuestions[questionNumber] == true;
+     return SizedBox(
+    width: 90,  // Ensure fixed width
+    height: 50, // Ensure fixed height
+    child: ElevatedButton(
+      onPressed: () => _returnToMiniMock(context, questionNumber),
+      style: ElevatedButton.styleFrom(
+        padding: EdgeInsets.all(8),  // Consistent padding
+        alignment: Alignment.center,
+      ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (isFlagged)
+          Icon(Icons.flag, color: Colors.black),
+        if (isFlagged)
+          SizedBox(width: 4),
+        Text(
+          '${questionNumber + 1}',
+          style: TextStyle(
+            color: Theme.of(context).textTheme.bodyMedium?.color,
+            fontSize: 20,
+          ),
+        ),
+      ],
+    ),
+    ),
+  );
+}
+
+  //Flagging Widget for the Multiple Choice Questions
+  Widget _buildMultipleChoiceButton(int questionNumber) {
+    bool isFlagged = widget.flaggedQuestions.length > widget.rankingLength + questionNumber &&
+                     widget.flaggedQuestions[widget.rankingLength + questionNumber] == true;
+    return ElevatedButton(
+      onPressed: () => _returnToMiniMock(context, widget.rankingLength + questionNumber),
+     style: ElevatedButton.styleFrom(
+      padding: isFlagged ? EdgeInsets.symmetric(vertical: 15, horizontal: 24) 
+                         : EdgeInsets.symmetric(vertical: 15, horizontal: 35),
+      minimumSize: Size(60, 60),
+      alignment: Alignment.center,
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (isFlagged)
+          Icon(Icons.flag, color: Colors.black),
+        if (isFlagged)
+          SizedBox(width: 4),
+        Text(
+          '${widget.rankingLength + questionNumber + 1}',
+          style: TextStyle(
+            color: Theme.of(context).textTheme.bodyMedium?.color,
+            fontSize: 20,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
   @override
   void initState(){
     super.initState();
@@ -171,288 +236,84 @@ Widget build(BuildContext context) {
       return Center(
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+             boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                spreadRadius: 5,
+                blurRadius: 5,
+                offset: const Offset(0, 3),
+              )],
+              color:   Color.fromARGB(255, 255, 255, 255),
           ),
            constraints: BoxConstraints(
           maxWidth: maxScreenWidth > maxPreferredWidth ? maxScreenWidth : maxPreferredWidth,
           minHeight: constraints.maxHeight, // Ensure container takes full height
         ),
           padding: EdgeInsets.all(16),
-  
-            child: Column( children: [
-              Expanded(
-          // child: Expanded( //Wrapping in a scrollable widget
-          child: SingleChildScrollView(
-              child: Align(alignment: Alignment.center,
-              child:
-      // ExpansionPanelList(
-        //child: SingleChildScrollView(
-          // child: Column(
-          //   children: [
-            //  ExpansionPanelList(
-          //  mainAxisAlignment: MainAxisAlignment.center,
-          //  children: [
-           //   Spacer(),
-            ExpansionPanelList(
-              elevation: 1,
-              dividerColor: Colors.transparent,
-              expandIconColor: Theme.of(context).textTheme.bodyMedium?.color,
-              expandedHeaderPadding: EdgeInsets.all(4.0),
-              expansionCallback: (i, isOpen) {
-                setState(() {
-                  _isOpen[i] = !_isOpen[i];
-                });
-              },
-                children: [
+           child: SizedBox(
+              height: constraints.maxHeight,
+              child: Column(children: [
+                Expanded(child: 
+                SingleChildScrollView(
+                  child: Align(alignment: Alignment.center,
+                  child: 
+                  ExpansionPanelList(
+                    elevation: 1,
+                    expandIconColor: Theme.of(context).textTheme.bodyMedium?.color,
+                    expandedHeaderPadding: EdgeInsets.all(4.0),
+                    expansionCallback: (i, isOpen) {
+                      setState(() {
+                        _isOpen[i] = !_isOpen[i];
+                      });
+                    },
+        
+                  children: [
+                    // Ranking Questions Panel
                     ExpansionPanel(
-                      canTapOnHeader: true,
-                      backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-                      headerBuilder: (context, isOpen) {
-                        return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text('Ranking Questions (Question 1 - ${widget.rankingLength})',
-                          style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500)),
-                        );
-                      },
-                      body: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(3, (index) => Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                child: SizedBox(
-                                  width: 80, // Set the desired width
-                                  height: 50, // Set the desired height
-                                  child: ElevatedButton.icon(
-                                    onPressed: () {
-                                      _returnToMiniMock(context, index);
-                                    },
-                                    icon: Visibility( visible: widget.flaggedQuestions[index],
-                                      child: Icon(Icons.flag, color: Colors.black),),
-                                    label: Text(
-                                      '${index + 1}',
-                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
-                                      fontSize: 20),
-                                    ),
-                                  ),
-                                ),
-                              )),
-                            ),
-                            const SizedBox(height: 10),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(3, (index) => Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                child: SizedBox(
-                                  width: 80, // Set the desired width
-                                  height: 50, // Set the desired height
-                                  child: ElevatedButton.icon(
-                                    onPressed: () {
-                                      _returnToMiniMock(context, index+3);
-                                    },
-                                    icon: Visibility( visible: widget.flaggedQuestions[index+3],
-                                      child: Icon(Icons.flag, color: Colors.black),),
-                                    label: Text(
-                                      '${index + 4}',
-                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
-                                      fontSize: 20),
-                                    ),
-                                  ),
-                                ),
-                              )),
-                            ),
-                            const SizedBox(height: 10),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(3, (index) => Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                child: SizedBox(
-                                  width: 80, // Set the desired width
-                                  height: 50, // Set the desired height
-                                  child: ElevatedButton.icon(
-                                    onPressed: () {
-                                      _returnToMiniMock(context, index+6);
-                                    },
-                                    icon: Visibility( visible: widget.flaggedQuestions[index+6],
-                                      child: Icon(Icons.flag, color: Colors.black),),
-                                    label: Text(
-                                      '${index + 7}',
-                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
-                                      fontSize: 20),
-                                    ),
-                                  ),
-                                ),
-                              )),
-                            ),
-                            const SizedBox(height: 10),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(3, (index) => Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                child: SizedBox(
-                                  width: 80, // Set the desired width
-                                  height: 50, // Set the desired height
-                                  child: ElevatedButton.icon(
-                                    onPressed: () {
-                                      _returnToMiniMock(context, index+10);
-                                    },
-                                    icon: Visibility( visible: widget.flaggedQuestions[index+10],
-                                      child: Icon(Icons.flag, color: Colors.black),),
-                                    label: Text(
-                                      '${index + 11}',
-                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
-                                      fontSize: 20),
-                                    ),
-                                  ),
-                                ),
-                              )),
-                            ),
-                          ],
-                        ),
-                      ),
                       isExpanded: _isOpen[0],
-                    ),
-                    ExpansionPanel(
                       canTapOnHeader: true,
                       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-                      headerBuilder: (context, isOpen) {
-                        return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text('Multiple Choice Questions (Question ${widget.rankingLength + 1} - $questionLength)',
-                          style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500)),
-                        );
-                      },
-                      body: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(3, (index) => Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                child: SizedBox(
-                                  width: 80, // Set the desired width
-                                  height: 50, // Set the desired height
-                                  child: ElevatedButton.icon(
-                                    onPressed: () {
-                                      _returnToMiniMock(context, index+13);
-                                    },
-                                    icon: Visibility( visible: widget.flaggedQuestions[index+13],
-                                      child: Icon(Icons.flag, color: Colors.black),),
-                                    label: Text(
-                                      '${index + 14}',
-                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
-                                      fontSize: 20),
-                                    ),
-                                  ),
-                                ),
-                              )),
+                      headerBuilder: (context, isOpen) => ListTile(
+                        title: Text('Ranking Questions (Question 1 - ${widget.rankingLength})'),
+                      ),
+                      body: Center(
+                      child: Wrap(
+                         alignment: WrapAlignment.center,
+                           spacing: 10.0, //Spacing between buttons
+                         runSpacing: 10.0, //Vertical spacing between rows
+                        children: List.generate(
+                          widget.rankingLength,
+                          (index) => Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: _buildQuestionButton(index), // Build button for multiple-choice questions
                             ),
-                            const SizedBox(height: 10),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(3, (index) => Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                child: SizedBox(
-                                  width: 80, // Set the desired width
-                                  height: 50, // Set the desired height
-                                  child: ElevatedButton.icon(
-                                    onPressed: () {
-                                      _returnToMiniMock(context, index+16);
-                                    },
-          
-                                    icon: Visibility( visible: widget.flaggedQuestions[index+17],
-                                      child: Icon(Icons.flag, color: Colors.black),),
-                                    label: Text(
-                                      '${index + 17}',
-                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
-                                      fontSize: 20),
-                                    ),
-                                  ),
-                                ),
-                              )),
-                            ),
-                            const SizedBox(height: 10),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(3, (index) => Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                child: SizedBox(
-                                  width: 80, // Set the desired width
-                                  height: 50, // Set the desired height
-                                  child: ElevatedButton.icon(
-                                    onPressed: () {
-                                      _returnToMiniMock(context, index+19);
-                                    },
-                                    icon: Visibility( visible: widget.flaggedQuestions[index+20],
-                                      child: Icon(Icons.flag, color: Colors.black),),
-                                    label: Text(
-                                      '${index + 20}',
-                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
-                                      fontSize: 20),
-                                    ),
-                                  ),
-                                ),
-                              )),
-                            ),
-                            const SizedBox(height: 10),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(3, (index) => Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                child: SizedBox(
-                                  width: 80, // Set the desired width
-                                  height: 50, // Set the desired height
-                                  child: ElevatedButton.icon(
-                                    onPressed: () {
-                                      _returnToMiniMock(context, index+22);
-                                    },
-                                    icon: Visibility( visible: widget.flaggedQuestions[index+22],
-                                      child: Icon(Icons.flag, color: Colors.black),),
-                                    label: Text(
-                                      '${index + 23}',
-                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
-                                      fontSize: 20),
-                                    ),
-                                  ),
-                                ),
-                              )),
-                            ),
-                            //SizedBox(height: 10),
-                            /**Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(1, (index) => Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                child: SizedBox(
-                                  width: 80, // Set the desired width
-                                  height: 50, // Set the desired height
-                                  child: ElevatedButton.icon(
-                                    onPressed: () {
-                                      _returnToMiniMock(context, index+24);
-                                    },
-                                    icon: Visibility( visible: widget.flaggedQuestions[index+24],
-                                      child: Icon(Icons.flag, color: Colors.black),),
-                                    label: Text(
-                                      '${index + 25}',
-                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
-                                      fontSize: 20),
-                                    ),
-                                  ),
-                                ),
-                              )),
-                            ),**/
-                          ],
+                          ),
                         ),
                       ),
-                      isExpanded: _isOpen[1],
                     ),
-                  ],
+                    // Multiple Choice Questions Panel
+                    ExpansionPanel(
+                      isExpanded: _isOpen[1],
+                      canTapOnHeader: true,
+                      backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+                      headerBuilder: (context, isOpen) => ListTile(
+                        title: Text(
+                          'Multiple Choice Questions (Question ${widget.rankingLength + 1} - $questionLength)'),
+                        ),
+                    body: Center(
+                      child: Wrap(
+                         alignment: WrapAlignment.center,
+                         spacing: 10.0,
+                         runSpacing: 10.0,
+                      children: List.generate(
+                          widget.multiChoiceLength,
+                          (index) => Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: _buildMultipleChoiceButton(index), // Use the new method
+                          ),
+                        ),
+                      
+                  )))]
                 )))),
               const SizedBox(height: 20),
               Row(
@@ -503,6 +364,6 @@ Widget build(BuildContext context) {
                       ))))
               ])
               ]),
-            ));
+            )));
 })));
 }}

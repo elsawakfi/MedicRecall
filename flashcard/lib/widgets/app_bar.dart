@@ -26,7 +26,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           Stack(
           children: [
             Positioned(
-              top: 2.3,
+              top: 4,
               child: ColorFiltered(
                 colorFilter: ColorFilter.mode(
                   theme.appBarTheme.iconTheme?.color ?? Colors.white,
@@ -40,7 +40,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
             ),
             Container(
-              margin: EdgeInsets.only(left: isSmallScreen ? 24 : 40),
+              margin: EdgeInsets.only(left: isSmallScreen ? 24 : 30),
               padding: const EdgeInsets.all(8.0),
               child: Text(
                 isSmallScreen ? (mobileTitle ?? title) : title,

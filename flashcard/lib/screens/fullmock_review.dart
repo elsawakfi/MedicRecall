@@ -49,15 +49,6 @@ class FullMockReviewState extends State<FullMockReview> {
    Widget _buildQuestionButton(int questionNumber) {
   bool isFlagged = widget.flaggedQuestions.length > questionNumber 
                    && widget.flaggedQuestions[questionNumber] == true;
-  // return ElevatedButton(
-  //   onPressed: () => _returnToFullMock(context, questionNumber),
-  //   style: ElevatedButton.styleFrom(
-  //     padding: isFlagged ? EdgeInsets.symmetric(vertical: 8, horizontal: 24)
-  //                        : EdgeInsets.symmetric(vertical: 8, horizontal: 30),
-  //     minimumSize: Size(60, 60),
-  //     alignment: Alignment.center,
-  
-    // ),
      return SizedBox(
     width: 90,  // Ensure fixed width
     height: 50, // Ensure fixed height
@@ -124,8 +115,6 @@ class FullMockReviewState extends State<FullMockReview> {
   void initState(){
     super.initState();
     questionLength = widget.rankingLength + widget.multiChoiceLength;
-    // _isOpen = List.generate(2, (index) => true);
-    _displayTime = widget.displayTime;
     remainingSeconds = widget.remainingSeconds;
     _timerController = TimerController(
       startTime: widget.remainingSeconds, //measured in seconds
@@ -244,7 +233,6 @@ Widget build(BuildContext context) {
       double maxScreenWidth = constraints.maxWidth * 0.5;
       double maxPreferredWidth = 960; // 1920/2
 
-
       return Center(
         child: Container(
           decoration: 
@@ -258,11 +246,11 @@ Widget build(BuildContext context) {
               )],
               color:   Color.fromARGB(255, 255, 255, 255),
           ),
-          
           constraints: BoxConstraints(
             maxWidth: maxScreenWidth > maxPreferredWidth ? maxScreenWidth : maxPreferredWidth,
           ),
           padding: EdgeInsets.all(16),
+
              child: SizedBox(
               height: constraints.maxHeight,
               child: Column(children: [
