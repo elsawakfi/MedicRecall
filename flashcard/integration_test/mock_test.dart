@@ -120,10 +120,9 @@ void main() {
                 expect(listTile.key, expectedOrder[i]);
             }
 
-            dynamic optionSize = tester.getSize(find.byKey(ValueKey('A')));
             // Move A to B: ['A','B','C','D','E'] -> ['B','A','C','D','E']
             Offset optionPosition = tester.getCenter(find.byKey(ValueKey('A')));
-            Offset targetPosition = tester.getBottomLeft(find.byKey(ValueKey('B')));
+            Offset targetPosition = tester.getCenter(find.byKey(ValueKey('B')));
             // Calculate the required distance for the drag function (requires offset of a tile's height)
             double yOffset = targetPosition.dy - optionPosition.dy;
             // Simulate dragging option 1 from its position to the position of option 2

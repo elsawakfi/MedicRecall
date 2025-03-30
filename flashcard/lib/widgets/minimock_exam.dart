@@ -230,7 +230,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                 Container(
                   margin: const EdgeInsets.only(right: 16),
                   width: MediaQuery.of(context).size.width < 600 ? 100 : 210,
-                  height: 40.31,
+                  height: 40,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
                     color: (remainingSeconds <= 600)
@@ -307,7 +307,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                       child: Container(
                         margin: const EdgeInsets.only(bottom: 16),
                         width: MediaQuery.of(context).size.width < 600 ? 75 : 160,
-                        height: 40.31,
+                        height: 40,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
                           color: const Color.fromARGB(255, 222, 221, 222),
@@ -354,7 +354,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                       Container(
                           margin: const EdgeInsets.only(bottom: 16),
                           width: MediaQuery.of(context).size.width < 600 ? 75 : 160,
-                          height: 40.31,
+                          height: 40,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(16),
                             color: const Color.fromARGB(255, 222, 221, 222),
@@ -568,7 +568,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                     const SizedBox(width: 16),
                     Container(
                         width: MediaQuery.of(context).size.width < 600 ? 50 : 160,
-                        height: MediaQuery.of(context).size.width < 600 ? 50 : 50,
+                        height: 50,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
                           color: const Color.fromARGB(255, 222, 221, 222),
@@ -636,43 +636,91 @@ class MiniMockExamState extends State<MiniMockExam> {
                         )),
                     const Spacer(),
                     if (currentQuestion > 0) //Prevents button being shown if no previous questions available
-                      ElevatedButton.icon(
+                      Container(
+                          width: MediaQuery.of(context).size.width < 600 ? 50 : 100,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            color: const Color.fromARGB(255, 222, 221, 222),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                spreadRadius: 0,
+                                blurRadius: 6,
+                                offset: const Offset(0, 6), // changes position of shadow
+                              ),
+                            ],
+                          ),
+                        child:TextButton(
                         onPressed: () {
                           setState(() {
                             currentQuestion--; // Move to previous question
                           });
                         },
-                        icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0), size:iconSize.clamp(16, 24)),
-                        label: MediaQuery.of(context).size.width < 600 ? SizedBox() : Text('Back', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 18)),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:Color.fromARGB(255, 222, 221, 222),
-                          padding:EdgeInsets.all(paddingValue.clamp(16,24)),
-                          minimumSize: Size(buttonWidth * 1.5, buttonWidth * 0.7),
-                        ),
                         iconAlignment: IconAlignment.start,
-                      ),
+                            child: (MediaQuery.of(context).size.width < 600)
+                                ? Icon(Icons.arrow_back, color: Colors.black)
+                                : Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.arrow_back, color: Colors.black),
+                                  SizedBox(width: 4),
+                                  Text('Back', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 18)),
+                                ]
+                            )
+                      )),
                     const SizedBox(width: 8),
                     if (currentQuestion < questions.length - 1)
-                      ElevatedButton.icon(
+                      Container(
+                          width: MediaQuery.of(context).size.width < 600 ? 50 : 100,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            color: const Color.fromARGB(255, 222, 221, 222),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                spreadRadius: 0,
+                                blurRadius: 6,
+                                offset: const Offset(0, 6), // changes position of shadow
+                              ),
+                            ],
+                          ),
+                        child: TextButton(
                         onPressed: () {
                           setState(() {
                             currentQuestion++; // Move to next question
                           });
                         },
-                        icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 0, 0, 0), size: iconSize.clamp(16, 24)),
-                        label: MediaQuery.of(context).size.width < 600 ? SizedBox() : Text('Next', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 18)) , //Empty SizedBox to ensure no text is displayed
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color.fromARGB(255, 222, 221, 222),
-                          padding:EdgeInsets.all(paddingValue.clamp(16,24)),
-                          minimumSize: Size(buttonWidth * 1.5, buttonWidth * 0.7),
-                        ),
-                        iconAlignment: IconAlignment.end,
-                      ),
+                        child: (MediaQuery.of(context).size.width < 600)
+                            ? Icon(Icons.arrow_forward, color: Colors.black)
+                            : Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text('Next', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 18)),
+                              SizedBox(width: 4),
+                              Icon(Icons.arrow_forward, color: Colors.black),
+                            ]
+                        )
+                      )),
                     if (currentQuestion == questions.length - 1)
-                    SizedBox(
-                     // Force the button height
-                      child: ElevatedButton.icon(
-                        onPressed: () async {
+                      Container(
+                        width: MediaQuery.of(context).size.width < 600 ? 50 : 120,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          color: const Color.fromARGB(255, 222, 221, 222),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              spreadRadius: 0,
+                              blurRadius: 6,
+                              offset: const Offset(0, 6), // changes position of shadow
+                            ),
+                          ],
+                        ),
+                        child: TextButton(
+                          onPressed: () async {
                           int? newIndex = await Navigator.push(
                             context,
                               MaterialPageRoute(
@@ -702,19 +750,20 @@ class MiniMockExamState extends State<MiniMockExam> {
                                 currentQuestion = newIndex;
                               });
                             }
-                        },
-                        icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 0, 0, 0), size:iconSize.clamp(16, 24)),
-                        label: MediaQuery.of(context).size.width < 600 ? SizedBox() : Text('Review', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 18)),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:Color.fromARGB(255, 222, 221, 222),
-                          padding:EdgeInsets.all(paddingValue.clamp(16,24)),
-                          minimumSize: Size(buttonWidth * 1.5, buttonWidth * 0.7),
+                          },
+                          child: (MediaQuery.of(context).size.width < 600)
+                            ? Icon(Icons.arrow_forward, color: Colors.black)
+                            : Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text('Review', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 18)),
+                                  SizedBox(width: 4),
+                                  Icon(Icons.arrow_forward, color: Colors.black),
+                                ]
+                            )
                         ),
-                        iconAlignment: IconAlignment.end,
                       ),
-                    ),
-                    ],
-                  )));
+                  ])));
                 }),
                 ]
               ),
