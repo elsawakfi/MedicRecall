@@ -49,14 +49,24 @@ class FullMockReviewState extends State<FullMockReview> {
    Widget _buildQuestionButton(int questionNumber) {
   bool isFlagged = widget.flaggedQuestions.length > questionNumber 
                    && widget.flaggedQuestions[questionNumber] == true;
-  return ElevatedButton(
-    onPressed: () => _returnToFullMock(context, questionNumber),
-    style: ElevatedButton.styleFrom(
-      padding: isFlagged ? EdgeInsets.symmetric(vertical: 15, horizontal: 24)
-                         : EdgeInsets.symmetric(vertical: 15, horizontal: 34),
-      minimumSize: Size(60, 60),
-      alignment: Alignment.center,
-    ),
+  // return ElevatedButton(
+  //   onPressed: () => _returnToFullMock(context, questionNumber),
+  //   style: ElevatedButton.styleFrom(
+  //     padding: isFlagged ? EdgeInsets.symmetric(vertical: 8, horizontal: 24)
+  //                        : EdgeInsets.symmetric(vertical: 8, horizontal: 30),
+  //     minimumSize: Size(60, 60),
+  //     alignment: Alignment.center,
+  
+    // ),
+     return SizedBox(
+    width: 90,  // Ensure fixed width
+    height: 50, // Ensure fixed height
+    child: ElevatedButton(
+      onPressed: () => _returnToFullMock(context, questionNumber),
+      style: ElevatedButton.styleFrom(
+        padding: EdgeInsets.all(8),  // Consistent padding
+        alignment: Alignment.center,
+      ),
     child: Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -74,6 +84,7 @@ class FullMockReviewState extends State<FullMockReview> {
         ),
       ],
     ),
+    ),
   );
 }
 
@@ -85,7 +96,7 @@ class FullMockReviewState extends State<FullMockReview> {
       onPressed: () => _returnToFullMock(context, widget.rankingLength + questionNumber),
      style: ElevatedButton.styleFrom(
       padding: isFlagged ? EdgeInsets.symmetric(vertical: 15, horizontal: 24) 
-                         : EdgeInsets.symmetric(vertical: 15, horizontal: 34 ),
+                         : EdgeInsets.symmetric(vertical: 15, horizontal: 35),
       minimumSize: Size(60, 60),
       alignment: Alignment.center,
     ),
@@ -279,10 +290,28 @@ Widget build(BuildContext context) {
                         title: Text('Ranking Questions (Question 1 - ${widget.rankingLength})'),
                       ),
                       body: Center(
+                      //   child: GridView.builder(
+                      //   shrinkWrap: true,
+                      //   physics: NeverScrollableScrollPhysics(),
+                      //   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      //     crossAxisCount: 8, // **Exactly 8 buttons per row**
+                      //     crossAxisSpacing: 6.0,
+                      //     mainAxisSpacing: 10.0,
+                      //     childAspectRatio: 1.2, // **Adjust to fit button size**
+                      //   ),
+                      //   itemCount: widget.rankingLength,
+                      //   itemBuilder: (context, index) {
+                      //     return Padding(
+                      //       padding: const EdgeInsets.all(4.0),
+                      //       child: _buildQuestionButton(index),
+                      //     );
+                      //   },
+                      // )
+
                       child: Wrap(
                          alignment: WrapAlignment.center,
-                           spacing: 6.0,
-                         runSpacing: 10.0,
+                           spacing: 10.0, //Spacing between buttons
+                         runSpacing: 10.0, //Vertical spacing between rows
                         children: List.generate(
                           widget.rankingLength,
                           (index) => Padding(
@@ -293,7 +322,7 @@ Widget build(BuildContext context) {
                         ),
                       ),
                     ),
-
+                    // Multiple Choice Questions Panel
                     ExpansionPanel(
                       isExpanded: _isOpen[1],
                       canTapOnHeader: true,
@@ -305,7 +334,7 @@ Widget build(BuildContext context) {
                     body: Center(
                       child: Wrap(
                          alignment: WrapAlignment.center,
-                         spacing: 6.0,
+                         spacing: 10.0,
                          runSpacing: 10.0,
                       children: List.generate(
                           widget.multiChoiceLength,
