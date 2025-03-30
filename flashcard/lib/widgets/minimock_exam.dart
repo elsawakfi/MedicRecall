@@ -441,10 +441,13 @@ class MiniMockExamState extends State<MiniMockExam> {
                                       ? Draggable<String>(
                                           data: 'internal:$optionIndex:$optionLetter',
                                           key: ValueKey(optionLetter),
-                                          feedback: SizedBox(
-                                              width: (maxPreferredWidth/2) - 16,
-                                              height: 85,
-                                              child: OptionCard(text: text)),
+                                          feedback: Container(
+                                              constraints: BoxConstraints(
+                                                // Nested if statement -> As user can  change the size of their screen we need to make sure we are using the correct values
+                                                maxWidth: (MediaQuery.of(context).size.width < 600) ? MediaQuery.of(context).size.width - 32 : (MediaQuery.of(context).size.width < maxPreferredWidth) ? (MediaQuery.of(context).size.width/2) - 16 : (maxPreferredWidth/2) - 16,
+                                                maxHeight: 170,
+                                              ),
+                                              child: OptionCard(text: text, overflow: false)),
                                           childWhenDragging: OptionCard(text: '${optionIndex+1}:'),
                                           child: OptionCard(text: '${optionIndex+1}: $text')
                                       )
@@ -484,17 +487,19 @@ class MiniMockExamState extends State<MiniMockExam> {
                                     }),
                                     builder: (context, candidateData, rejectedData) {
                                       return (optionNotEmpty)
-                                          ? Draggable<String>(
+                                        ? Draggable<String>(
                                           data: 'external:$optionIndex:$optionLetter',
                                           key: ValueKey(optionLetter),
-                                          feedback: SizedBox(
-                                              width: (maxPreferredWidth/2) - 16,
-                                              height: 85,
-                                              child: OptionCard(text: text)),
+                                          feedback: Container(
+                                              constraints: BoxConstraints(
+                                                maxWidth: (MediaQuery.of(context).size.width < maxPreferredWidth) ? (MediaQuery.of(context).size.width/2) - 16 : (maxPreferredWidth/2) - 16,
+                                                maxHeight: 170,
+                                              ),
+                                              child: OptionCard(text: text, overflow: false)),
                                           childWhenDragging: OptionCard(text: ''),
                                           child: OptionCard(text: text)
-                                      )
-                                          : OptionCard(text: text);
+                                        )
+                                        : OptionCard(text: text);
                                     },
                                   );
                               }).toList())
