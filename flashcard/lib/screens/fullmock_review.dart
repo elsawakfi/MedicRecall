@@ -48,25 +48,33 @@ class FullMockReviewState extends State<FullMockReview> {
   Widget _buildMultipleChoiceButton(int questionNumber) {
     bool isFlagged = widget.flaggedQuestions.length > widget.rankingLength + questionNumber &&
                      widget.flaggedQuestions[widget.rankingLength + questionNumber] == true;
-    return ElevatedButton.icon(
+    return ElevatedButton(
       onPressed: () => _returnToFullMock(context, widget.rankingLength + questionNumber),
-      icon: isFlagged ? Icon(Icons.flag, color: const Color.fromARGB(255, 0, 0, 0)) : Container(),
-      label: Text(
-        '${widget.rankingLength + questionNumber + 1}',
-        style: TextStyle(
-          color: Theme.of(context).textTheme.bodyMedium?.color,
-          fontSize: 20,
+     style: ElevatedButton.styleFrom(
+      padding: isFlagged ? EdgeInsets.symmetric(vertical: 15, horizontal: 24) 
+                         : EdgeInsets.symmetric(vertical: 15, horizontal: 34 ),
+       minimumSize: Size(60, 60),
+      alignment: Alignment.center,
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (isFlagged)
+          Icon(Icons.flag, color: Colors.black),
+        if (isFlagged)
+          SizedBox(width: 4),
+        Text(
+          '${widget.rankingLength + questionNumber + 1}',
+          style: TextStyle(
+            color: Theme.of(context).textTheme.bodyMedium?.color,
+            fontSize: 20,
+          ),
         ),
-      ),
-      style: ElevatedButton.styleFrom(
-        padding: isFlagged
-          ? EdgeInsets.symmetric(vertical: 16, horizontal: 17) // Smaller padding for flagged questions
-          : EdgeInsets.symmetric(vertical: 16, horizontal: 24), // Larger padding for non-flagged questions
-        minimumSize: Size(90, 30),
-        alignment: Alignment.center,
-      ),
-    );
-  }
+      ],
+    ),
+  );
+}
 
  Widget _buildQuestionButton(int questionNumber) {
   bool isFlagged = widget.flaggedQuestions.length > questionNumber 
