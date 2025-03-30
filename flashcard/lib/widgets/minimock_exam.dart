@@ -44,6 +44,7 @@ class MiniMockExamState extends State<MiniMockExam> {
   List<List<String>> rankingOptions = []; // Desktop right set
   bool rankingMerged = false; // Have the ranking options been merged? -> Occurs on screen sizes < 600 -> Prevents unnecessary computation
   List<Map<String, dynamic>> questions = []; // Store question data with the question number as key e.g Q14
+  final ScrollController _scrollController = ScrollController();
 
   List<bool> flaggedQuestions = [];
   final options = 'ABCDEFGH';
@@ -76,6 +77,7 @@ class MiniMockExamState extends State<MiniMockExam> {
   @override
   void dispose() {
     _timerController.stopTimer(); // REQUIRED! Makes sure timer doesn't continue when page is left
+     _scrollController.dispose(); // Dispose of the scroll controller
     super.dispose();
   }
 
@@ -388,6 +390,7 @@ class MiniMockExamState extends State<MiniMockExam> {
             // Display the current question text
                 Expanded(
                   child: SingleChildScrollView(
+                    controller: _scrollController,
                     child: Column(
                     children: [
                 // Display the current question text
@@ -661,6 +664,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                           setState(() {
                             currentQuestion--; // Move to previous question
                           });
+                           _scrollController.jumpTo(0); // Scroll to the top of the screen
                         },
                         iconAlignment: IconAlignment.start,
                             child: (MediaQuery.of(context).size.width < 600)
@@ -696,6 +700,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                           setState(() {
                             currentQuestion++; // Move to next question
                           });
+                           _scrollController.jumpTo(0); // Scroll to the top of the screen
                         },
                         child: (MediaQuery.of(context).size.width < 600)
                             ? Icon(Icons.arrow_forward, color: Colors.black)
