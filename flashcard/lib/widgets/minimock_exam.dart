@@ -305,7 +305,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                       Align(
                         alignment: Alignment.centerLeft,
                       child: Container(
-                        margin: const EdgeInsets.only(bottom: 10),
+                        margin: const EdgeInsets.only(bottom: 16),
                         width: MediaQuery.of(context).size.width < 600 ? 75 : 160,
                         height: 40.31,
                         decoration: BoxDecoration(
@@ -352,7 +352,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                           ))),
                       Spacer(),
                       Container(
-                          margin: const EdgeInsets.only(bottom: 10),
+                          margin: const EdgeInsets.only(bottom: 16),
                           width: MediaQuery.of(context).size.width < 600 ? 75 : 160,
                           height: 40.31,
                           decoration: BoxDecoration(
@@ -378,7 +378,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                                 : Text('${currentQuestion+1}/${questions.length}',
                                     style: const TextStyle(
                                       color: Color.fromARGB(255, 0, 0, 0),
-                                      fontSize: 16,
+                                      fontSize: 18,
                                       fontWeight: FontWeight.w500,
                                     ))
                             )
@@ -394,7 +394,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                   Text( questions[currentQuestion]['question'],
                   style: TextStyle(fontSize:AdaptiveTextSize().getadaptiveTextSize(context, 18), color: Colors.black),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
 
                 // If the question is a ranking question, display a reorderable list of options
                 if (questions[currentQuestion]['type'] == "ranking") ...[
@@ -538,10 +538,12 @@ class MiniMockExamState extends State<MiniMockExam> {
                             controlAffinity: ListTileControlAffinity.leading,
                           );
                         }).toList()
-                    )]]))
+                    )],
+                    SizedBox(height: 16), // Adds a small space at the very bottom for easier scrolling back to the top
+                  ]))
                 ),
                 // Buttons to change questions
-                SizedBox(height: 20),
+                SizedBox(height: 16),
                 LayoutBuilder(builder: (context, constraints) {
                   final iconSize = constraints.maxWidth * 0.1; // 8% of container width
                   final buttonWidth = constraints.maxWidth * 0.08; // 30% of container width
@@ -558,15 +560,15 @@ class MiniMockExamState extends State<MiniMockExam> {
                     Align(
                         alignment: Alignment.centerLeft,
                         child: SizedBox(
-                          height: MediaQuery.of(context).size.width < 600 ? 40 : 50,
-                          width: MediaQuery.of(context).size.width < 600 ? 40 : 50,
+                          height: 50,
+                          width: 50,
                           child:  MiniMockHelpButton()
                         ),
                     ),
                     const SizedBox(width: 16),
                     Container(
-                        width: MediaQuery.of(context).size.width < 600 ? 40 : 160,
-                        height: MediaQuery.of(context).size.width < 600 ? 40 : 50,
+                        width: MediaQuery.of(context).size.width < 600 ? 50 : 160,
+                        height: MediaQuery.of(context).size.width < 600 ? 50 : 50,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(16),
                           color: const Color.fromARGB(255, 222, 221, 222),
@@ -626,7 +628,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                                   Text('Review Page',
                                     style: TextStyle(
                                       color: const Color.fromARGB(255, 0, 0, 0),
-                                      fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 15.5),
+                                      fontSize: 18,
                                     ),
                                   ),
                                 ]
@@ -641,12 +643,13 @@ class MiniMockExamState extends State<MiniMockExam> {
                           });
                         },
                         icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0), size:iconSize.clamp(16, 24)),
-                        label: MediaQuery.of(context).size.width < 600 ? SizedBox() : Text('Back', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 16)),
+                        label: MediaQuery.of(context).size.width < 600 ? SizedBox() : Text('Back', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 18)),
                         style: ElevatedButton.styleFrom(
                           backgroundColor:Color.fromARGB(255, 222, 221, 222),
-                          padding: EdgeInsets.all(paddingValue),
+                          padding:EdgeInsets.all(paddingValue.clamp(16,24)),
                           minimumSize: Size(buttonWidth * 1.5, buttonWidth * 0.7),
                         ),
+                        iconAlignment: IconAlignment.start,
                       ),
                     const SizedBox(width: 8),
                     if (currentQuestion < questions.length - 1)
@@ -657,10 +660,10 @@ class MiniMockExamState extends State<MiniMockExam> {
                           });
                         },
                         icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 0, 0, 0), size: iconSize.clamp(16, 24)),
-                        label: MediaQuery.of(context).size.width < 600 ? SizedBox() : Text('Next', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 16)) , //Empty SizedBox to ensure no text is displayed
+                        label: MediaQuery.of(context).size.width < 600 ? SizedBox() : Text('Next', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 18)) , //Empty SizedBox to ensure no text is displayed
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Color.fromARGB(255, 222, 221, 222),
-                          padding:EdgeInsets.all(paddingValue),
+                          padding:EdgeInsets.all(paddingValue.clamp(16,24)),
                           minimumSize: Size(buttonWidth * 1.5, buttonWidth * 0.7),
                         ),
                         iconAlignment: IconAlignment.end,
@@ -701,13 +704,13 @@ class MiniMockExamState extends State<MiniMockExam> {
                             }
                         },
                         icon: Icon(Icons.arrow_forward, color: Color.fromARGB(255, 0, 0, 0), size:iconSize.clamp(16, 24)),
-                        label: MediaQuery.of(context).size.width < 600 ? SizedBox() : Text('Review', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 16)),
+                        label: MediaQuery.of(context).size.width < 600 ? SizedBox() : Text('Review', style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 18)),
                         style: ElevatedButton.styleFrom(
                           backgroundColor:Color.fromARGB(255, 222, 221, 222),
-                          padding:EdgeInsets.all(paddingValue),
-                          minimumSize:  Size(buttonWidth * 1.5, buttonWidth * 0.7),
-                       ),
-                       iconAlignment: IconAlignment.end,
+                          padding:EdgeInsets.all(paddingValue.clamp(16,24)),
+                          minimumSize: Size(buttonWidth * 1.5, buttonWidth * 0.7),
+                        ),
+                        iconAlignment: IconAlignment.end,
                       ),
                     ),
                     ],

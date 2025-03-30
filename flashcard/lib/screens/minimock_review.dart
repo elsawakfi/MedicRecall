@@ -455,20 +455,19 @@ Widget build(BuildContext context) {
                   ],
                 )))),
               const SizedBox(height: 20),
-              LayoutBuilder(builder: (context, constraints){
-                return Row(
+              Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Align(
                   alignment: Alignment.centerLeft,
                     child: SizedBox( 
-                      height: MediaQuery.of(context).size.width < 600 ? 40 : 50,
-                      width: MediaQuery.of(context).size.width < 600 ? 40 : 50,
+                      height: 50,
+                      width: 50,
                       child: MiniMockHelpButton())),
                   const SizedBox(width: 16),
                   SizedBox(
-                    height: MediaQuery.of(context).size.width < 600 ? 40 : 50,
-                    width: MediaQuery.of(context).size.width < 600 ? 40 : 50,
+                    height: 50,
+                    width: 50,
 
                     //final double buttonWidth = 56.0; // Define buttonWidth
                      child: FloatingActionButton(
@@ -481,7 +480,7 @@ Widget build(BuildContext context) {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(13),
                         ),
-                        child: Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0), size: AdaptiveTextSize().getadaptiveTextSize(context, 20)),
+                        child: Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0)),
                       ),
                     ),
                   const Spacer(),
@@ -502,8 +501,8 @@ Widget build(BuildContext context) {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(50), // Rounded corners
                       ))))
-              ]);
-              })]),
+              ])
+              ]),
             ));
 })));
 }}
