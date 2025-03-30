@@ -209,7 +209,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                         Row( children: [
                           Container(
                             margin: const EdgeInsets.only(bottom: 10),
-                            width: 160,
+                            width: MediaQuery.of(context).size.width < 600 ? 75 : 160,
                             height: 40.31,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(16),
@@ -226,15 +226,19 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                               ],
                             ),
                             child: Center(
-                              child: Text(
-                                'Question ${currentQuestion + 1}/${questions.length}',
-                                style: const TextStyle(
-                                  color:
-                                      Color.fromARGB(255, 98, 86, 139),
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
+                              child: (MediaQuery.of(context).size.width >= 600)
+                                  ? Text('Question ${currentQuestion+1}/${questions.length}',
+                                  style: const TextStyle(
+                                    color: Color.fromARGB(255, 98, 86, 139),
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w500,
+                                  ))
+                                  : Text('${currentQuestion+1}/${questions.length}',
+                                  style: const TextStyle(
+                                    color: Color.fromARGB(255, 98, 86, 139),
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w500,
+                                  ))
                             )),
                           Spacer(),
                           Container(
@@ -261,7 +265,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                 style: const TextStyle(
                                   color:
                                       Color.fromARGB(255, 98, 86, 139),
-                                  fontSize: 15,
+                                  fontSize: 18,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -389,78 +393,150 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               if (currentQuestion == 0) //Prevents button being shown if no previous questions available
-                                ElevatedButton.icon(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 98, 86, 139)),
-                                  label: Text('Scoring',
-                                      style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 98, 86, 139))),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Color.fromARGB(255, 235, 230, 239),
-                                  ),
-                                ),
+                                Container(
+                                    width: MediaQuery.of(context).size.width < 600 ? 50 : 120,
+                                    height: 40,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(16),
+                                      color: const Color.fromARGB(255, 235, 230, 239),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.2),
+                                          spreadRadius: 0,
+                                          blurRadius: 6,
+                                          offset: const Offset(0, 6), // changes position of shadow
+                                        ),
+                                      ],
+                                    ),
+                                    child: TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        child: (MediaQuery.of(context).size.width < 600)
+                                            ? Icon(Icons.arrow_back, color: Color.fromARGB(255, 98, 86, 139))
+                                            : Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(Icons.arrow_back, color: Color.fromARGB(255, 98, 86, 139)),
+                                              SizedBox(width: 4),
+                                              Text('Scoring', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 18)),
+                                            ]
+                                        )
+                                    )),
                               if (currentQuestion > 0) //Prevents button being shown if no previous questions available
-                                ElevatedButton.icon(
-                                  onPressed: () {
-                                    setState(() {
-                                      currentQuestion--; // Move to previous question
-                                    });
-                                    _scrollController.jumpTo(0); // Scroll to the top of the screen
-                                  },
-                                  icon: Icon(Icons.arrow_back,
-                                      color: Color.fromARGB(255, 98, 86, 139)),
-                                  label: Text('Previous',
-                                      style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 98, 86, 139))),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Color.fromARGB(255, 235, 230, 239),
+                                Container(
+                                  width: MediaQuery.of(context).size.width < 600 ? 50 : 100,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(16),
+                                    color: const Color.fromARGB(255, 235, 230, 239),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.2),
+                                        spreadRadius: 0,
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 6), // changes position of shadow
+                                      ),
+                                    ],
                                   ),
-                                ),
-                              const SizedBox(width: 16),
+                                  child: TextButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          currentQuestion--; // Move to next question
+                                        });
+                                        _scrollController.jumpTo(0); // Scroll to the top of the screen
+                                      },
+                                      child: (MediaQuery.of(context).size.width < 600)
+                                          ? Icon(Icons.arrow_back, color: Color.fromARGB(255, 98, 86, 139))
+                                          : Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(Icons.arrow_back, color: Color.fromARGB(255, 98, 86, 139)),
+                                            SizedBox(width: 4),
+                                            Text('Back', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 18)),
+                                          ]
+                                      )
+                                  )),
+                              const SizedBox(width: 8),
                               if (currentQuestion < questions.length - 1)
-                                ElevatedButton.icon(
-                                  onPressed: () {
-                                    setState(() {
-                                      currentQuestion++; // Move to next question
-                                    });
-                                    _scrollController.jumpTo(0); // Scroll to the top of the screen
-                                  },
-                                  icon: Icon(Icons.arrow_forward,
-                                      color: Color.fromARGB(255, 98, 86, 139)),
-                                  label: Text('Next',
-                                      style: TextStyle(fontSize: 16, color: Color.fromARGB(255, 98, 86, 139))),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Color.fromARGB(255, 235, 230, 239),
+                                Container(
+                                  width: MediaQuery.of(context).size.width < 600 ? 50 : 100,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(16),
+                                    color: const Color.fromARGB(255, 235, 230, 239),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.2),
+                                        spreadRadius: 0,
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 6), // changes position of shadow
+                                      ),
+                                    ],
                                   ),
-                                ),
+                                  child: TextButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          currentQuestion++; // Move to next question
+                                        });
+                                        _scrollController.jumpTo(0); // Scroll to the top of the screen
+                                      },
+                                      child: (MediaQuery.of(context).size.width < 600)
+                                          ? Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139))
+                                          : Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text('Next', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 18)),
+                                            SizedBox(width: 4),
+                                            Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139)),
+                                          ]
+                                      )
+                                )),
                               if (currentQuestion == questions.length - 1)
-                                ElevatedButton.icon(
-                                  onPressed: () {
-                                    if (widget.questionDirectory.contains("mini-mock")) {
-                                      Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              const MiniMockLanding(),
+                                Container(
+                                    width: MediaQuery.of(context).size.width < 600 ? 50 : 100,
+                                    height: 40,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(16),
+                                      color: const Color.fromARGB(255, 235, 230, 239),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.2),
+                                          spreadRadius: 0,
+                                          blurRadius: 6,
+                                          offset: const Offset(0, 6), // changes position of shadow
                                         ),
-                                      );
-                                    } else if (widget.questionDirectory.contains("full-mock")) {
-                                      Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              const FullMockLanding(),
-                                        ),
-                                      );
-                                    }
-                                  },
-                                  icon: Icon(Icons.arrow_forward,
-                                      color: Color.fromARGB(255, 98, 86, 139)),
-                                  label: Text('Menu',
-                                      style: TextStyle(fontSize: 16,
-                                          color: Color.fromARGB(255, 98, 86, 139))),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Color.fromARGB(255, 235, 230, 239),
-                                  ),
-                                ),
+                                      ],
+                                    ),
+                                    child: TextButton(
+                                        onPressed: () {
+                                          if (widget.questionDirectory.contains("mini-mock")) {
+                                            Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                const MiniMockLanding(),
+                                              ),
+                                            );
+                                          } else if (widget.questionDirectory.contains("full-mock")) {
+                                            Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                const FullMockLanding(),
+                                              ),
+                                            );
+                                          }
+                                        },
+                                        child: (MediaQuery.of(context).size.width < 600)
+                                            ? Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139))
+                                            : Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text('Menu', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 18)),
+                                              SizedBox(width: 4),
+                                              Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139)),
+                                            ]
+                                        )
+                                    )),
                             ],
                           )),
                       ],

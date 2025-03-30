@@ -286,25 +286,45 @@ Future<void> fetchAverageScore() async {
           Align(
               alignment: Alignment.bottomRight,
               child:
-              ElevatedButton.icon(
-                  onPressed: () => {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => MiniMockFeedBack(
-                            title: widget.title,
-                            questionDirectory: widget.questionDirectory,
-                            answerDirectory: widget.answerDirectory,
-                            answerScores: answerScores,
-                        ),
+              Container(
+                  width: MediaQuery.of(context).size.width < 600 ? 50 : 130,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    color: const Color.fromARGB(255, 235, 230, 239),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        spreadRadius: 0,
+                        blurRadius: 6,
+                        offset: const Offset(0, 6), // changes position of shadow
                       ),
-                    )
-                  },
-                  icon:Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139)),
-                  label: Text('Feedback', style:TextStyle(fontSize: 16, color: Color.fromARGB(255, 98, 86, 139))),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromARGB(255, 235, 230, 239),
+                    ],
                   ),
-              )),
+                  child: TextButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => MiniMockFeedBack(
+                              title: widget.title,
+                              questionDirectory: widget.questionDirectory,
+                              answerDirectory: widget.answerDirectory,
+                              answerScores: answerScores,
+                            ),
+                          ),
+                        );
+                      },
+                      child: (MediaQuery.of(context).size.width < 600)
+                          ? Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139))
+                          : Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('Feedback', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 18)),
+                            SizedBox(width: 4),
+                            Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139)),
+                          ]
+                      )
+                  ))),
               ])));
             }),
     );
