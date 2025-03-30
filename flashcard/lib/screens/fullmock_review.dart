@@ -45,6 +45,39 @@ class FullMockReviewState extends State<FullMockReview> {
   String _displayTime = '';
   late int remainingSeconds;
 
+//Flagging Widget for the Ranking Questions
+   Widget _buildQuestionButton(int questionNumber) {
+  bool isFlagged = widget.flaggedQuestions.length > questionNumber 
+                   && widget.flaggedQuestions[questionNumber] == true;
+  return ElevatedButton(
+    onPressed: () => _returnToFullMock(context, questionNumber),
+    style: ElevatedButton.styleFrom(
+      padding: isFlagged ? EdgeInsets.symmetric(vertical: 15, horizontal: 24)
+                         : EdgeInsets.symmetric(vertical: 15, horizontal: 34),
+      minimumSize: Size(60, 60),
+      alignment: Alignment.center,
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (isFlagged)
+          Icon(Icons.flag, color: Colors.black),
+        if (isFlagged)
+          SizedBox(width: 4),
+        Text(
+          '${questionNumber + 1}',
+          style: TextStyle(
+            color: Theme.of(context).textTheme.bodyMedium?.color,
+            fontSize: 20,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+  //Flagging Widget for the Multiple Choice Questions
   Widget _buildMultipleChoiceButton(int questionNumber) {
     bool isFlagged = widget.flaggedQuestions.length > widget.rankingLength + questionNumber &&
                      widget.flaggedQuestions[widget.rankingLength + questionNumber] == true;
@@ -53,7 +86,7 @@ class FullMockReviewState extends State<FullMockReview> {
      style: ElevatedButton.styleFrom(
       padding: isFlagged ? EdgeInsets.symmetric(vertical: 15, horizontal: 24) 
                          : EdgeInsets.symmetric(vertical: 15, horizontal: 34 ),
-       minimumSize: Size(60, 60),
+      minimumSize: Size(60, 60),
       alignment: Alignment.center,
     ),
     child: Row(
@@ -75,31 +108,6 @@ class FullMockReviewState extends State<FullMockReview> {
     ),
   );
 }
-
- Widget _buildQuestionButton(int questionNumber) {
-  bool isFlagged = widget.flaggedQuestions.length > questionNumber 
-                   && widget.flaggedQuestions[questionNumber] == true;
-  return ElevatedButton.icon(
-    onPressed: () => _returnToFullMock(context, questionNumber),
-    icon: isFlagged ? Icon(Icons.flag, color: const Color.fromARGB(255, 0, 0, 0)) : Container(),
-    label: Text(
-      '${questionNumber + 1}',
-      style: TextStyle(
-        color: Theme.of(context).textTheme.bodyMedium?.color,
-        fontSize: 20,
-      ),
-    ),
-   style: ElevatedButton.styleFrom(
-     padding: isFlagged
-       ? EdgeInsets.symmetric(vertical: 16, horizontal: 17) // Smaller padding for flagged questions
-          : EdgeInsets.symmetric(vertical: 16, horizontal: 24), // Larger padding for non-flagged questions
-      minimumSize: Size(90, 30), // Make the button larger with a minimum size (width, height)
-      alignment: Alignment.center,
-   ) );
-}
-  
-
-
 
   @override
   void initState(){
