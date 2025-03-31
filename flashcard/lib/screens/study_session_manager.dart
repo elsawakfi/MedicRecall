@@ -122,29 +122,102 @@ class StudySessionManager {
       DateTime testDay,
       DateTime today,
       Map<DateTime, List<Event>> generatedEvents,
-      String userId) async {
-    // Check if target date is valid
+      String userId,
+      {int requiredSpacing = 0}) async {
+    // First check if the target date is already available
     if (generatedEvents[targetDate] == null &&
         !await _isExcludedDay(targetDate, userId)) {
       return targetDate;
     }
 
-    // First try searching forward from the target date
+    // Try to find a date forward (preferred direction)
     DateTime nextDate = targetDate;
-    while (nextDate.isBefore(testDay)) {
+    int daysForward = 0;
+    while (nextDate.isBefore(testDay) && daysForward < maxDaysToMove) {
       nextDate = nextDate.add(const Duration(days: 1));
+      daysForward++;
+      
+      // Check if this date respects both availability and required spacing
       if (generatedEvents[nextDate] == null &&
           !await _isExcludedDay(nextDate, userId)) {
+        // If we need to maintain spacing, check adjacent days
+        if (requiredSpacing > 0) {
+          bool hasAdjacentEvent = false;
+          
+          // Check days before based on spacing
+          for (int i = 1; i <= requiredSpacing; i++) {
+            DateTime checkDate = nextDate.subtract(Duration(days: i));
+            if (generatedEvents[checkDate] != null) {
+              hasAdjacentEvent = true;
+              break;
+            }
+          }
+          
+          // Check days after based on spacing
+          if (!hasAdjacentEvent) {
+            for (int i = 1; i <= requiredSpacing; i++) {
+              DateTime checkDate = nextDate.add(Duration(days: i));
+              if (checkDate.isAfter(testDay)) break;
+              if (generatedEvents[checkDate] != null) {
+                hasAdjacentEvent = true;
+                break;
+              }
+            }
+          }
+          
+          if (!hasAdjacentEvent) {
+            return nextDate;
+          }
+          // Continue searching if this date doesn't meet spacing requirements
+          continue;
+        }
+        
         return nextDate;
       }
     }
 
-    // If no future date found, try searching backward
+    // If no future date found within maxDaysToMove, try searching backward
     DateTime prevDate = targetDate;
-    while (prevDate.isAfter(today)) {
+    int daysBackward = 0;
+    while (prevDate.isAfter(today) && daysBackward < maxDaysToMove) {
       prevDate = prevDate.subtract(const Duration(days: 1));
+      daysBackward++;
+      
+      // Check if this date respects both availability and required spacing
       if (generatedEvents[prevDate] == null &&
           !await _isExcludedDay(prevDate, userId)) {
+        // If we need to maintain spacing, check adjacent days
+        if (requiredSpacing > 0) {
+          bool hasAdjacentEvent = false;
+          
+          // Check days before based on spacing
+          for (int i = 1; i <= requiredSpacing; i++) {
+            DateTime checkDate = prevDate.subtract(Duration(days: i));
+            if (checkDate.isBefore(today)) break;
+            if (generatedEvents[checkDate] != null) {
+              hasAdjacentEvent = true;
+              break;
+            }
+          }
+          
+          // Check days after based on spacing
+          if (!hasAdjacentEvent) {
+            for (int i = 1; i <= requiredSpacing; i++) {
+              DateTime checkDate = prevDate.add(Duration(days: i));
+              if (generatedEvents[checkDate] != null) {
+                hasAdjacentEvent = true;
+                break;
+              }
+            }
+          }
+          
+          if (!hasAdjacentEvent) {
+            return prevDate;
+          }
+          // Continue searching if this date doesn't meet spacing requirements
+          continue;
+        }
+        
         return prevDate;
       }
     }
@@ -155,8 +228,16 @@ class StudySessionManager {
       return today;
     }
 
-    // If absolutely no valid date found, return null to indicate failure
-    return today; // The calling methods will check if this date is valid
+    // If absolutely no valid date found, return the original target date
+    // The calling methods will need to check if this date is actually usable
+    return targetDate;
+  }
+
+  /// Helper function to get review interval based on study duration
+  int getReviewInterval(int daysUntilTest) {
+    if (daysUntilTest >= 60) return 2;  // 2 days between reviews
+    if (daysUntilTest > 30) return 1;   // 1 day between reviews
+    return 0;  // No separation between flashcards
   }
 
   /// Generates study sessions based on user preferences and test date
@@ -167,7 +248,6 @@ class StudySessionManager {
       QuerySnapshot querySnapshot =
           await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
       var userId = querySnapshot.docs.last.id;
-      //var databaseFlashcards = await Algo().getFlashcards(user.uid);
       final data = querySnapshot.docs.last.data() as Map<String,
           dynamic>; // Turn snapshot into a data type that can be searched to see if testDay exists
       if (!data.containsKey('TestDay')) return generatedEvents;
@@ -222,7 +302,7 @@ class StudySessionManager {
 
       // Schedule Flashcards
       if (selectedResources.contains('Flashcards')) {
-        await _scheduleFlashcards(user.uid, firstStudyDay, normalizedTestDay,
+        await _scheduleFlashcards(user.uid, today, normalizedTestDay,
             daysUntilTest, generatedEvents);
       }
 
@@ -441,64 +521,76 @@ class StudySessionManager {
     try {
       final CollectionReference<Map<String, dynamic>> flashcards =
           FirebaseFirestore.instance.collection('flashcards');
-      List<String> unscheduledTopics = [];
 
-      // Helper function to get review interval based on study duration
-      int getReviewInterval(int daysUntilTest) {
-        if (daysUntilTest >= 60) return 2;  // 2 days between reviews
-        if (daysUntilTest > 30) return 1;   // 1 day between reviews
-        return 0;  // No separation between flashcards
+      // Get the required spacing between flashcard reviews based on study duration
+      int requiredSpacing = getReviewInterval(daysUntilTest);
+      if (kDebugMode) {
+        print('Flashcard scheduling with days until test: $daysUntilTest');
+        print('Required spacing between flashcards: $requiredSpacing days');
       }
-
-      // Schedule seen flashcards
+      
+      // First collect all topics that need to be scheduled
+      Set<String> allTopics = {};
+      
+      // Get seen flashcards
       final seenFlashcards = await Algo().getFlashcards(userId);
       for (final flashcard in seenFlashcards) {
-        if (!unscheduledTopics.contains(flashcard["topic"])) {
-          unscheduledTopics.add(flashcard["topic"]);
-
-          DateTime targetDate = DateTime(today.year, today.month,
-              today.day + getReviewInterval(daysUntilTest), 0, 0, 0, 0);
-          DateTime nextReviewDate = await findNearestFreeDate(
-              targetDate, 7, testDay, today, generatedEvents, userId);
-
-          // Only schedule if we found a valid date that's not today (fallback)
-          if (!nextReviewDate.isAfter(testDay) &&
-              nextReviewDate.isAfter(today) &&
-              generatedEvents[nextReviewDate] == null &&
-              !await _isExcludedDay(nextReviewDate, userId)) {
-            generatedEvents[nextReviewDate] = [
-              Event(
-                  title: "${flashcard["topic"]} Flashcards",
-                  color: kFlashcardColor)
-            ];
-          }
-        }
+        allTopics.add(flashcard["topic"]);
       }
-
-      // Schedule unseen flashcards
+      
+      // Get all available flashcards
       final QuerySnapshot<Map<String, dynamic>> flashcardDeck =
           await flashcards.get();
       for (final doc in flashcardDeck.docs) {
         final Map<String, dynamic> flashcard = doc.data();
-        if (!unscheduledTopics.contains(flashcard["topic"])) {
-          unscheduledTopics.add(flashcard["topic"]);
-
-          DateTime targetDate = DateTime(today.year, today.month,
-              today.day + getReviewInterval(daysUntilTest), 0, 0, 0, 0);
-          DateTime nextReviewDate = await findNearestFreeDate(
-              targetDate, 7, testDay, today, generatedEvents, userId);
-
-          // Only schedule if we found a valid date that's not today (fallback)
-          if (!nextReviewDate.isAfter(testDay) &&
-              nextReviewDate.isAfter(today) &&
-              generatedEvents[nextReviewDate] == null &&
-              !await _isExcludedDay(nextReviewDate, userId)) {
-            generatedEvents[nextReviewDate] = [
-              Event(
-                  title: "${flashcard["topic"]} Flashcards",
-                  color: kFlashcardColor)
+        allTopics.add(flashcard["topic"]);
+      }
+      
+      // Calculate how many study days we have available
+      int availableDays = testDay.difference(today).inDays;
+      if (availableDays <= 0) return;
+      
+      // Sort topics alphabetically to ensure consistent scheduling
+      List<String> sortedTopics = allTopics.toList()..sort();
+      
+      // Schedule flashcards with consistent spacing
+      DateTime currentTargetDate = today.add(const Duration(days: 1)); // Start one day after today
+      
+      for (final topic in sortedTopics) {
+        // Skip if we're too close to the test day
+        if (currentTargetDate.isAfter(testDay.subtract(const Duration(days: 1)))) {
+          break;
+        }
+        
+        // Find a suitable date that respects our spacing requirements
+        DateTime scheduledDate = await findNearestFreeDate(
+            currentTargetDate, 7, testDay, today, generatedEvents, userId,
+            requiredSpacing: requiredSpacing);
+        
+        // Only schedule if we found a valid date
+        if (!scheduledDate.isAfter(testDay.subtract(const Duration(days: 1))) &&
+            scheduledDate.isAfter(today) &&
+            !await _isExcludedDay(scheduledDate, userId)) {
+            
+          // Check if this date already has an event
+          if (generatedEvents[scheduledDate] == null) {
+            generatedEvents[scheduledDate] = [
+              Event(title: "$topic Flashcards", color: kFlashcardColor)
             ];
+            
+            // Move to the next date with proper spacing
+            currentTargetDate = scheduledDate.add(Duration(days: requiredSpacing + 1));
+            
+            if (kDebugMode) {
+              print('Scheduled $topic on ${scheduledDate.toIso8601String()}, next target: ${currentTargetDate.toIso8601String()}');
+            }
+          } else {
+            // This date already has another event, move to the next day
+            currentTargetDate = scheduledDate.add(const Duration(days: 1));
           }
+        } else {
+          // If we couldn't find a date, move on to the next day
+          currentTargetDate = currentTargetDate.add(const Duration(days: 1));
         }
       }
     } catch (e) {
