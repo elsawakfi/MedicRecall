@@ -84,6 +84,7 @@ class CalendarStateO extends State<Calendar> {
       DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
   final TextEditingController _eventController = TextEditingController();
   bool testDayBool = false;
+  String? _isHovered;
 
   //The CalendarFormat variable format allows the user to change their view of the calendar, into weekly, biweekly and monthly.
   // for some reason, events need to have their time as being midnight to be shown on the calendar. So need to set the today constant to be midnight today.
@@ -718,7 +719,8 @@ class CalendarStateO extends State<Calendar> {
     selectedEvents.clear(); // Clear local events
 
     try {
-      QuerySnapshot u = await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+      QuerySnapshot u =
+          await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
       if (u.docs.isEmpty) {
         print("No user document found");
         return;
@@ -1627,16 +1629,13 @@ class CalendarStateO extends State<Calendar> {
                                               format = _format;
                                             });
                                           },
-                                          startingDayOfWeek:
-                                              StartingDayOfWeek.monday,
+                                          startingDayOfWeek: StartingDayOfWeek.monday,
                                           daysOfWeekVisible: true,
                                           daysOfWeekHeight: 40.0,
                                           daysOfWeekStyle: DaysOfWeekStyle(
                                             // decoration:
                                             decoration: BoxDecoration(
-                                              color: Theme.of(context)
-                                                  .shadowColor
-                                                  .withOpacity(0.4),
+                                              color: Theme.of(context).shadowColor.withOpacity(0.4),
                                               border: Border(
                                                 bottom: BorderSide(
                                                   color: Colors.white
@@ -1649,19 +1648,13 @@ class CalendarStateO extends State<Calendar> {
                                             weekdayStyle: TextStyle(
                                               fontWeight: FontWeight.bold,
                                               fontSize: 17.0,
-                                              color: Theme.of(context)
-                                                  .textTheme
-                                                  .bodyMedium
-                                                  ?.color, // Changed to white for dark mode
+                                              color: Theme.of(context).textTheme.bodyMedium?.color, // Changed to white for dark mode
                                             ),
                                             // Style for weekend names
                                             weekendStyle: TextStyle(
                                               fontWeight: FontWeight.bold,
                                               fontSize: 17.0,
-                                              color: Theme.of(context)
-                                                  .textTheme
-                                                  .titleLarge
-                                                  ?.color,
+                                              color: Theme.of(context).textTheme.titleLarge?.color,
                                             ),
                                           ),
                                           onDaySelected: (DateTime selectDay,
@@ -1701,19 +1694,13 @@ class CalendarStateO extends State<Calendar> {
                                             // Make default days more visible on dark background
                                             defaultTextStyle: TextStyle(
                                               fontSize: 16,
-                                              color: Theme.of(context)
-                                                  .textTheme
-                                                  .bodyMedium
-                                                  ?.color,
+                                              color: Theme.of(context).textTheme.titleSmall?.color,
                                               fontWeight: FontWeight.w500,
                                             ),
                                             // Make weekend days match default days
                                             weekendTextStyle: TextStyle(
                                               fontSize: 16,
-                                              color: Theme.of(context)
-                                                  .textTheme
-                                                  .titleSmall
-                                                  ?.color,
+                                              color: Theme.of(context).textTheme.titleSmall?.color,
                                               fontWeight: FontWeight.w500,
                                             ),
                                             // Improve visibility of outside days
@@ -1725,7 +1712,8 @@ class CalendarStateO extends State<Calendar> {
                                               color: Colors.grey[500],
                                               decoration:
                                                   TextDecoration.lineThrough,
-                                              decorationColor: Theme.of(context).disabledColor,
+                                              decorationColor: Theme.of(context)
+                                                  .disabledColor,
                                               decorationThickness: 3,
                                               fontSize: 16,
                                             ),
@@ -1824,14 +1812,23 @@ class CalendarStateO extends State<Calendar> {
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 16.0, vertical: 8.0),
                                       child: ListTile(
-                                        title: Text(
-                                          event.title,
-                                          style: TextStyle(
-                                            color: Theme.of(context)
-                                                .textTheme
-                                                .bodyMedium
-                                                ?.color,
-                                            fontWeight: FontWeight.w500,
+                                        title: GestureDetector(
+                                          onTap: () =>
+                                              _navigateToEventDetails(event),
+                                          child: MouseRegion(
+                                            onEnter: (_) => setState(() =>
+                                                _isHovered = event.title),
+                                            onExit: (_) => setState(
+                                                () => _isHovered = null),
+                                            child: Text(event.title,
+                                              style: TextStyle(
+                                                color: Theme.of(context).textTheme.bodyMedium?.color,
+                                                fontWeight: FontWeight.w500,
+                                                decoration: _isHovered ==event.title
+                                                    ? TextDecoration.underline
+                                                    : TextDecoration.none,
+                                              ),
+                                            ),
                                           ),
                                         ),
                                         leading: Container(
@@ -1904,7 +1901,8 @@ class CalendarStateO extends State<Calendar> {
                           ),
                           // Buttons at the bottom of the right section
                           Padding(
-                            padding: const EdgeInsets.all(20),
+                            padding: const EdgeInsets.only(
+                                left: 20, right: 15, top: 20, bottom: 20),
                             child: LayoutBuilder(
                               builder: (context, constraints) {
                                 bool isSmallScreen = constraints.maxWidth < 600;
@@ -1926,7 +1924,8 @@ class CalendarStateO extends State<Calendar> {
                                                 borderRadius:
                                                     BorderRadius.circular(20)),
                                         padding: isSmallScreen
-                                            ? EdgeInsets.all(20)
+                                            ? EdgeInsets.only(
+                                                left: 20, right: 12, top: 20, bottom: 20)
                                             : EdgeInsets.symmetric(
                                                 horizontal: 24, vertical: 12),
                                       ),
@@ -1959,7 +1958,8 @@ class CalendarStateO extends State<Calendar> {
                                                 borderRadius:
                                                     BorderRadius.circular(20)),
                                         padding: isSmallScreen
-                                            ? EdgeInsets.all(20)
+                                            ? EdgeInsets.only(
+                                                left: 20, right: 12, top: 20, bottom: 20)
                                             : EdgeInsets.symmetric(
                                                 horizontal: 24, vertical: 12),
                                       ),
