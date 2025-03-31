@@ -41,11 +41,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset(
+                ColorFiltered(
+                  colorFilter: ColorFilter.mode(
+                    Theme.of(context).appBarTheme.iconTheme?.color ?? Colors.white,
+                    BlendMode.srcIn,
+                  ),
+                  child: Image.asset(
                   'assets/newlogo.png',
                   // this file doesn't exist and generates error
                   height: 130,
-                ),
+                )),
                 const SizedBox(height: 20),
                 const Text("Sign Up",
                     style:

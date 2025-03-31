@@ -74,9 +74,16 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
 
   //If the email has been verified you are directed to landing screen else you just stay on the page until you verify it.
   @override
-  Widget build(BuildContext context) => isEmailVerified
-      ? const Landing()
-      :  Scaffold(
+  Widget build(BuildContext context) {
+    if (isEmailVerified) {
+      // Schedule navigation for the next frame
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacementNamed(context, Landing.id);
+      });
+      // Return empty container while redirecting
+      return Container();
+    } else {
+      return Scaffold(
       appBar: AppBar(
         centerTitle: true,
       ),
@@ -197,5 +204,5 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
         ],
       ),
     );
-  }
+  }}}
 

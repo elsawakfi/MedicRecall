@@ -330,7 +330,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                                   width: double.infinity,
                                                   child: ListTile(
                                                     title: Text(optionText,
-                                                        style: TextStyle(color: Colors.blueGrey, fontSize: 18)),
+                                                        style: TextStyle(color: Color.fromRGBO(21, 58, 103, 1), fontSize: 18)),
                                             )));
                                         })
                                     ]))

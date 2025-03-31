@@ -205,9 +205,9 @@ class DrawMain extends StatelessWidget {
                 Icons.logout,
                 color: Colors.red,
               ),
-              title: const Text(
+              title: Text(
                 'Logout',
-                style: TextStyle(color: Colors.red),
+                style: TextStyle(color: Colors.red[400]),
               ),
               onTap: () {
                 Authentication.signOut(context: context);

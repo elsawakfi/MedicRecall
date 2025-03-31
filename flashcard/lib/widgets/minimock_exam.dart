@@ -8,6 +8,7 @@ import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flashcard_x/widgets/ranking_card_ui.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
+import '../screens/landing_screen.dart';
 import '../screens/minimock_landing.dart';
 import '../screens/minimock_review.dart';
 import '../utils/timer.dart';
@@ -194,8 +195,7 @@ class MiniMockExamState extends State<MiniMockExam> {
         answerDirectory: widget.answerDirectory
         ),
       ),
-      // Assumes only mini and full mocks available
-      (route) => false,
+      ModalRoute.withName(Landing.id),
 
     );
   }

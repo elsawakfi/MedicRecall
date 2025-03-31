@@ -5,6 +5,8 @@ import 'package:flashcard_x/utils/authentication.dart';
 import 'package:flashcard_x/utils/string_validation.dart';
 import 'package:flutter/material.dart';
 
+import '../screens/landing_screen.dart';
+
 class RegistrationForm extends StatefulWidget {
   final FocusNode nameFocusNode;
   final FocusNode emailFocusNode;
@@ -220,7 +222,10 @@ class _RegistrationFormState extends State<RegistrationForm> {
                             password: _password.text,
                           );
 
-                          if (user != null) {
+                          if (user != null && user.emailVerified) {
+                            // if a user object is filled
+                            Navigator.pushReplacementNamed(context, Landing.id); //push replace page with homepage instance, with id, which is a string
+                          }else if (user != null){
                             navigator.pushReplacementNamed(VerifyEmailScreen.id);
                           }
                         }
