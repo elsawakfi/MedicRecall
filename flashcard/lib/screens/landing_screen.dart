@@ -55,14 +55,12 @@ class LandingState extends State<Landing> {
   }
 
   Future<void> _setFirstStudyDay() async {
-    QuerySnapshot u =
-        await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
+    QuerySnapshot u = await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
     var id = u.docs.last.id;
 
     // Save the first study day only once when the revision plan starts
     await _userCollectionRef.doc(id).update({
-      "firstStudyDay":
-          DateTime.now(), // Save the current date as first study day
+      "firstStudyDay": DateTime.now(), // Save the current date as first study day
     });
 
     // Optionally, retrieve the first study day
@@ -72,7 +70,9 @@ class LandingState extends State<Landing> {
   Future<void> getUser() async {
     NavigatorState nav = Navigator.of(context);
     if (auth.currentUser == null) {
-      var tmp = await auth.authStateChanges().first;
+      var tmp = await auth
+          .authStateChanges()
+          .first;
       if (tmp == null) {
         nav.push(MaterialPageRoute(
           builder: (context) => const SignInScreen(),
@@ -130,8 +130,7 @@ class LandingState extends State<Landing> {
 
   Future<void> getFirstStudyDay() async {
     if (user != null) {
-      QuerySnapshot u =
-          await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
+      QuerySnapshot u = await _userCollectionRef.where("userID", isEqualTo: user?.uid).get();
 
       var userFromDb = u.docs.first;
       Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;

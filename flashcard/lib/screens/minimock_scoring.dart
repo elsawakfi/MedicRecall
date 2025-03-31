@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/minimock_feedback.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
+import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
@@ -52,8 +53,8 @@ class MiniMockScoringState extends State<MiniMockScoring> {
   Future<void> initialise() async{
     await getQuestions(); // Fetch the questions on initialisation
     await getUser();
-    await fetchUserAnswers(); //Fetch the user's answers from the database
     await fetchAverageScore(); // Fetch the average score for the mock
+    await fetchUserAnswers(); //Fetch the user's answers from the database
     calculateScores();
   }
 
@@ -202,117 +203,130 @@ Future<void> fetchAverageScore() async {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-        canPop: false,
-        child: Scaffold(
+        return Scaffold(
         drawer: const DrawMain(),
-        appBar: AppBar(
-          // backgroundColor: Colors.blue,
-          elevation: 0,
-          title:  Align(
-            alignment: const Alignment(-0.05,0),
-            child: Stack(
-              children: [
-                Positioned(
-                  top: 2.3,
-                  child: Image.asset(
-                    'assets/newlogo.png',
-                    fit: BoxFit.cover,
-                    height: 34,
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.only(left: 32),
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text('Scoring',
-                  ),
-                ),
-              ],
-            ),
-          ),
-          centerTitle: true,
-          leading: Builder(
-            builder: (context) => GestureDetector(
-              onTap: () => Scaffold.of(context).openDrawer(),
-              child: const Icon(
-                Icons.menu,
-              ),
-            ),
-          ),
-        ),
+        appBar: CustomAppBar(title: 'Scoring Page', mobileTitle: 'Scoring'),
         body: answerScores.isEmpty || (maxScore == 0)
             ? Center(child: CircularProgressIndicator(),) // If data is still being fetched, show loading circle
             : LayoutBuilder( builder: (context, constraints) {
             double maxScreenWidth = constraints.maxWidth * 0.5;
             double maxPreferredWidth = 960; // 1920/2
+            bool isDesktop = constraints.maxWidth > 600;
 
-            return Center(
-            child: Container(
+           return Align(
+              alignment: Alignment.center,
+              child: Container(
+              
               constraints: BoxConstraints(
                 maxWidth: maxScreenWidth > maxPreferredWidth ? maxScreenWidth : maxPreferredWidth,
               ),
-            padding: EdgeInsets.all(16),
-            child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Spacer(),
-              Row(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: Center(
+                    child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [ isDesktop
+              ? Row( // Displaying horizontally on the desktop view
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Align(
-                    alignment: Alignment.center,
-                    child: ScoreIndicator(
+                    ScoreIndicator(
                       title: 'Your Score: ',
                       totalScore: '$totalScore/$maxScore',
                       percentageScore: userPercentageScore,
-                      radius: 130.0,
-                      lineWidth: 30.0,
+                      radius: 120,
+                      lineWidth: 25.0,
                       progressColor: Colors.red,
                       backgroundColor: Colors.green
                     ),
-                  ),
-                  SizedBox(width: 60),
-                  Align(
-                    alignment: Alignment.center,
-                    child: ScoreIndicator(
-                      title: 'Average Score: ',
+                    
+                  SizedBox(width:100),
+                      ScoreIndicator(
+                      title: 'Global Average: ',
                       totalScore: '$averageScore/$maxScore',
                       percentageScore: averagePercentageScore,
-                      radius: 130.0,
-                      lineWidth:  30.0,
+                      radius: 120.0,
+                      lineWidth:  25.0,
                       progressColor: Colors.red,
                       backgroundColor:  Colors.green
                     ),
-                  ),
-                ]
+                ],
+              )
+              : Column( //Displaying vertically on the mobile UI
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                      ScoreIndicator(
+                      title: 'Your Score: ',
+                      totalScore: '$totalScore/$maxScore',
+                      percentageScore: userPercentageScore,
+                      radius: 90.0,
+                      lineWidth: 20.0,
+                      progressColor: Colors.red,
+                      backgroundColor: Colors.green
+                    ),
+                  
+                  SizedBox(height: 20),
+                      ScoreIndicator(
+                      title: 'Global Average: ',
+                      totalScore: '$averageScore/$maxScore',
+                      percentageScore: averagePercentageScore,
+                      radius: 90.0,
+                      lineWidth:  20.0,
+                      progressColor: Colors.red,
+                      backgroundColor:  Colors.green,
+                    ),
+                ],
               ),
-              const Spacer(),
-              Align(
-                alignment: Alignment.topRight,
-                child: ElevatedButton.icon(
-                  onPressed: () => {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => MiniMockFeedBack(
-                            title: widget.title,
-                            questionDirectory: widget.questionDirectory,
-                            answerDirectory: widget.answerDirectory,
-                            answerScores: answerScores,
-                        ),
+              ],
+            ),
+          ))),
+          Align(
+              alignment: Alignment.bottomRight,
+              child:
+              Container(
+                  width: MediaQuery.of(context).size.width < 600 ? 50 : 130,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    color: const Color.fromARGB(255, 235, 230, 239),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        spreadRadius: 0,
+                        blurRadius: 6,
+                        offset: const Offset(0, 6), // changes position of shadow
                       ),
-                    )
-                  },
-                  icon:Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139)),
-                  label: Text('Feedback', style:TextStyle(fontSize: 16, color: Color.fromARGB(255, 98, 86, 139))),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromARGB(255, 235, 230, 239),
+                    ],
                   ),
-                ),
-              ),
-            ],
-          )
-        )
-      );
-    })));
+                  child: TextButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => MiniMockFeedBack(
+                              title: widget.title,
+                              questionDirectory: widget.questionDirectory,
+                              answerDirectory: widget.answerDirectory,
+                              answerScores: answerScores,
+                            ),
+                          ),
+                        );
+                      },
+                      child: (MediaQuery.of(context).size.width < 600)
+                          ? Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139))
+                          : Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('Feedback', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 18)),
+                            SizedBox(width: 4),
+                            Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139)),
+                          ]
+                      )
+                  ))),
+              ])));
+            }),
+    );
   }
 }

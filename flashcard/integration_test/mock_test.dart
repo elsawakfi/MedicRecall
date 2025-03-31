@@ -29,11 +29,12 @@ void main() {
 
         // Check if navigation works
         expect(find.text('Question 1/25'), findsOneWidget);
-        expect(find.text('Next'), findsOneWidget);
-        await tester.tap(find.text('Next'));
+        expect(find.byIcon(Icons.arrow_forward), findsOneWidget);
+        await tester.tap(find.byIcon(Icons.arrow_forward));
         await tester.pumpAndSettle();
         expect(find.text('Question 2/25'), findsOneWidget);
-        await tester.tap(find.text('Previous'));
+        expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+        await tester.tap(find.byIcon(Icons.arrow_back));
         await tester.pumpAndSettle();
         expect(find.text('Question 1/25'), findsOneWidget);
 
@@ -57,7 +58,7 @@ void main() {
         // Complete the exam
         await tester.tap(find.text('Review Page'));
         await tester.pumpAndSettle();
-        await tester.tap(find.text('Complete Exam'));
+        await tester.tap(find.text('Complete'));
         await tester.pumpAndSettle();
       });
 
@@ -103,7 +104,7 @@ void main() {
             expect(find.text('Begin Exam'), findsOneWidget);
             await tester.tap(find.text('Begin Exam'));
             await tester.pumpAndSettle();
-            expect(find.text('Question 1/25'), findsOneWidget);
+            expect(find.text('1/25'), findsOneWidget);
 
 
             List<ValueKey<String>> expectedOrder = [ValueKey('A'), ValueKey('B'), ValueKey('C'), ValueKey('D'), ValueKey('E')];
@@ -119,10 +120,9 @@ void main() {
                 expect(listTile.key, expectedOrder[i]);
             }
 
-            dynamic optionSize = tester.getSize(find.byKey(ValueKey('A')));
             // Move A to B: ['A','B','C','D','E'] -> ['B','A','C','D','E']
             Offset optionPosition = tester.getCenter(find.byKey(ValueKey('A')));
-            Offset targetPosition = tester.getBottomLeft(find.byKey(ValueKey('B')));
+            Offset targetPosition = tester.getCenter(find.byKey(ValueKey('B')));
             // Calculate the required distance for the drag function (requires offset of a tile's height)
             double yOffset = targetPosition.dy - optionPosition.dy;
             // Simulate dragging option 1 from its position to the position of option 2

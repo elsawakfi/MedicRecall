@@ -115,10 +115,11 @@ class DrawMain extends StatelessWidget {
                 MoveRightRoute(page: const MiniMockLanding()),
               );
             }),
-        ListTile(
-            key: const ValueKey('Full Mocks'),
+         ListTile(
+            key: const ValueKey('Full-Sized Mock Exam'),
             leading: const Icon(Icons.assignment_outlined),
-            title: const Text('Full Mocks'),
+            title: const Text('Full-Sized Mock Exam'),
+
             onTap: () {
               Navigator.push(
                 context,

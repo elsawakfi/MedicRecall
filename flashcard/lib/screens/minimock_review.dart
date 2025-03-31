@@ -3,7 +3,17 @@ import 'package:flashcard_x/widgets/drawer_widget.dart';
 // import 'package:flashcard_x/screens/minimock_exams.dart';
 
 import '../utils/timer.dart';
+import '../widgets/app_bar.dart';
 import '../widgets/minimock_help_button.dart';
+
+class AdaptiveTextSize {
+      const AdaptiveTextSize();
+
+      getadaptiveTextSize(BuildContext context, dynamic value) {
+    // 720 is medium screen height
+        return (value / 720) * MediaQuery.of(context).size.height;
+      }
+    }
 
 class MiniMockReview extends StatefulWidget {
   final int rankingLength;
@@ -34,6 +44,71 @@ class MiniMockReviewState extends State<MiniMockReview> {
   late TimerController _timerController;
   String _displayTime = '';
   late int remainingSeconds;
+
+  Widget _buildQuestionButton(int questionNumber) {
+  bool isFlagged = widget.flaggedQuestions.length > questionNumber 
+                   && widget.flaggedQuestions[questionNumber] == true;
+     return SizedBox(
+    width: 90,  // Ensure fixed width
+    height: 50, // Ensure fixed height
+    child: ElevatedButton(
+      onPressed: () => _returnToMiniMock(context, questionNumber),
+      style: ElevatedButton.styleFrom(
+        padding: EdgeInsets.all(8),  // Consistent padding
+        alignment: Alignment.center,
+      ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (isFlagged)
+          Icon(Icons.flag, color: Colors.black),
+        if (isFlagged)
+          SizedBox(width: 4),
+        Text(
+          '${questionNumber + 1}',
+          style: TextStyle(
+            color: Theme.of(context).textTheme.bodyMedium?.color,
+            fontSize: 20,
+          ),
+        ),
+      ],
+    ),
+    ),
+  );
+}
+
+  //Flagging Widget for the Multiple Choice Questions
+  Widget _buildMultipleChoiceButton(int questionNumber) {
+    bool isFlagged = widget.flaggedQuestions.length > widget.rankingLength + questionNumber &&
+                     widget.flaggedQuestions[widget.rankingLength + questionNumber] == true;
+    return ElevatedButton(
+      onPressed: () => _returnToMiniMock(context, widget.rankingLength + questionNumber),
+     style: ElevatedButton.styleFrom(
+      padding: isFlagged ? EdgeInsets.symmetric(vertical: 15, horizontal: 24) 
+                         : EdgeInsets.symmetric(vertical: 15, horizontal: 35),
+      minimumSize: Size(60, 60),
+      alignment: Alignment.center,
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (isFlagged)
+          Icon(Icons.flag, color: Colors.black),
+        if (isFlagged)
+          SizedBox(width: 4),
+        Text(
+          '${widget.rankingLength + questionNumber + 1}',
+          style: TextStyle(
+            color: Theme.of(context).textTheme.bodyMedium?.color,
+            fontSize: 20,
+          ),
+        ),
+      ],
+    ),
+  );
+}
 
   @override
   void initState(){
@@ -67,6 +142,36 @@ class MiniMockReviewState extends State<MiniMockReview> {
     );
   }
 
+  void _showCompletionDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    barrierDismissible: false, // Prevent dismissing by tapping outside
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text("Complete Mini Mock?"),
+        content: const Text("Are you sure you want to submit your answers?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context); // Close the dialog
+              widget.miniMockWidget.examEnd(); // Proceed with completion
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text("Confirm"),
+          ),
+        ],
+      );
+    },
+  );
+}
+
   @override
 Widget build(BuildContext context) {
   return PopScope(
@@ -76,67 +181,52 @@ Widget build(BuildContext context) {
       _returnToMiniMock(context, questionLength-1);
     }
   },
-    child:Scaffold(
+  child:Scaffold(
     drawer: const DrawMain(),
-    appBar: AppBar(
-      automaticallyImplyLeading: false,
-      elevation: 0,
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Stack(
-          children: [
-            Positioned(
-              top: 2.3,
-              child: Image.asset(
-                'assets/newlogo.png',
-                fit: BoxFit.cover,
-                height: 34,
-              ),
-            ),
-            Container(
-              margin: const EdgeInsets.only(left: 32),
-              padding: const EdgeInsets.all(8.0),
-              child: const Text('Review Page'),
-            ),
-          ],
-        ),
-      ]),
-      centerTitle: true,
-      leading: Builder(
-        builder: (context) => GestureDetector(
-          onTap: () => Scaffold.of(context).openDrawer(),
-          child: const Icon(Icons.menu),
-        ),
-      ),
-      actions: [
+    appBar: CustomAppBar(
+        title: 'Review Page',
+        mobileTitle: 'Review',
+        actions: [
         Container(
           margin: const EdgeInsets.only(right: 16),
-        width: 210,
-        height: 40.31,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          color: Color.fromARGB(255, 222, 221, 222),
-          boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                spreadRadius: 0,
-                blurRadius: 5,
-                offset: const Offset(0, 3), // changes position of shadow
-            ),
-          ],
-        ),
-        child: Center(
-          child: Text(
-            'Time Remaining: $_displayTime',
-            style: TextStyle(
-              color: Color.fromARGB(255, 0, 0, 0),
-              fontSize: 18.5,
-              fontWeight: FontWeight.w500,
-            ),
+          width: MediaQuery.of(context).size.width < 600 ? 100 : 210,
+          height: 40.31,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            color: Color.fromARGB(255, 222, 221, 222),
+            boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  spreadRadius: 0,
+                  blurRadius: 5,
+                  offset: const Offset(0, 3), // changes position of shadow
+              ),
+            ],
           ),
-        )),
+        child: Center(
+          child: (MediaQuery.of(context).size.width >= 600)
+            ? Text('Time Remaining: $_displayTime',
+                style: TextStyle(
+                  color: (remainingSeconds <= 600)
+                      ? Colors.white
+                      : Color.fromARGB(255, 0, 0, 0),
+                  fontSize: 18.5,
+                  fontWeight: FontWeight.w500,
+              ))
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.access_time_rounded, color: Colors.black),
+                  SizedBox(width: 8),
+                  Text(_displayTime,
+                      style: TextStyle(
+                        color: (remainingSeconds <= 600)
+                            ? Colors.white
+                            : Color.fromARGB(255, 0, 0, 0),
+                        fontSize: 18.5,
+                        fontWeight: FontWeight.w500,
+              ))])
+        ))
       ],
     ),
     body: LayoutBuilder( builder: (context, constraints) {
@@ -146,269 +236,134 @@ Widget build(BuildContext context) {
       return Center(
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+             boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                spreadRadius: 5,
+                blurRadius: 5,
+                offset: const Offset(0, 3),
+              )],
+              color:   Color.fromARGB(255, 255, 255, 255),
           ),
-          constraints: BoxConstraints(
-            maxWidth: maxScreenWidth > maxPreferredWidth ? maxScreenWidth : maxPreferredWidth,
-          ),
+           constraints: BoxConstraints(
+          maxWidth: maxScreenWidth > maxPreferredWidth ? maxScreenWidth : maxPreferredWidth,
+          minHeight: constraints.maxHeight, // Ensure container takes full height
+        ),
           padding: EdgeInsets.all(16),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Spacer(),
-            ExpansionPanelList(
-              elevation: 1,
-              dividerColor: Colors.transparent,
-              expandIconColor: Theme.of(context).textTheme.bodyMedium?.color,
-              expandedHeaderPadding: EdgeInsets.all(4.0),
-              expansionCallback: (i, isOpen) {
-                setState(() {
-                  _isOpen[i] = !_isOpen[i];
-                });
-              },
-                children: [
+           child: SizedBox(
+              height: constraints.maxHeight,
+              child: Column(children: [
+                Expanded(child: 
+                SingleChildScrollView(
+                  child: Align(alignment: Alignment.center,
+                  child: 
+                  ExpansionPanelList(
+                    elevation: 1,
+                    expandIconColor: Theme.of(context).textTheme.bodyMedium?.color,
+                    expandedHeaderPadding: EdgeInsets.all(4.0),
+                    expansionCallback: (i, isOpen) {
+                      setState(() {
+                        _isOpen[i] = !_isOpen[i];
+                      });
+                    },
+        
+                  children: [
+                    // Ranking Questions Panel
                     ExpansionPanel(
-                      canTapOnHeader: true,
-                      backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-                      headerBuilder: (context, isOpen) {
-                        return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text('Ranking Questions (Question 1 - ${widget.rankingLength})',
-                          style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500)),
-                        );
-                      },
-                      body: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(5, (index) => Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                child: SizedBox(
-                                  width: 100, // Set the desired width
-                                  height: 50, // Set the desired height
-                                  child: ElevatedButton.icon(
-                                    onPressed: () {
-                                      _returnToMiniMock(context, index);
-                                    },
-                                    icon: Visibility( visible: widget.flaggedQuestions[index],
-                                      child: Icon(Icons.flag, color: Colors.black),),
-                                    label: Text(
-                                      '${index + 1}',
-                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
-                                      fontSize: 20),
-                                    ),
-                                  ),
-                                ),
-                              )),
-                            ),
-                            SizedBox(height: 10),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(5, (index) => Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                child: SizedBox(
-                                  width: 100, // Set the desired width
-                                  height: 50, // Set the desired height
-                                  child: ElevatedButton.icon(
-                                    onPressed: () {
-                                      _returnToMiniMock(context, index+5);
-                                    },
-                                    icon: Visibility( visible: widget.flaggedQuestions[index+5],
-                                      child: Icon(Icons.flag, color: Colors.black),),
-                                    label: Text(
-                                      '${index + 6}',
-                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
-                                      fontSize: 20),
-                                    ),
-                                  ),
-                                ),
-                              )),
-                            ),
-                            SizedBox(height: 10),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(3, (index) => Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                child: SizedBox(
-                                  width: 100, // Set the desired width
-                                  height: 50, // Set the desired height
-                                  child: ElevatedButton.icon(
-                                    onPressed: () {
-                                      _returnToMiniMock(context, index+10);
-                                    },
-                                    icon: Visibility( visible: widget.flaggedQuestions[index+10],
-                                      child: Icon(Icons.flag, color: Colors.black),),
-                                    label: Text(
-                                      '${index + 11}',
-                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
-                                      fontSize: 20),
-                                    ),
-                                  ),
-                                ),
-                              )),
-                            ),
-                          ],
-                        ),
-                      ),
                       isExpanded: _isOpen[0],
-                    ),
-                    ExpansionPanel(
                       canTapOnHeader: true,
                       backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-                      headerBuilder: (context, isOpen) {
-                        return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text('Multiple Choice Questions (Question ${widget.rankingLength + 1} - $questionLength)',
-                          style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500)),
-                        );
-                      },
-                      body: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(5, (index) => Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                child: SizedBox(
-                                  width: 100, // Set the desired width
-                                  height: 50, // Set the desired height
-                                  child: ElevatedButton.icon(
-                                    onPressed: () {
-                                      _returnToMiniMock(context, index+13);
-                                    },
-                                    icon: Visibility( visible: widget.flaggedQuestions[index+13],
-                                      child: Icon(Icons.flag, color: Colors.black),),
-                                    label: Text(
-                                      '${index + 14}',
-                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
-                                      fontSize: 20),
-                                    ),
-                                  ),
-                                ),
-                              )),
+                      headerBuilder: (context, isOpen) => ListTile(
+                        title: Text('Ranking Questions (Question 1 - ${widget.rankingLength})'),
+                      ),
+                      body: Center(
+                      child: Wrap(
+                         alignment: WrapAlignment.center,
+                           spacing: 10.0, //Spacing between buttons
+                         runSpacing: 10.0, //Vertical spacing between rows
+                        children: List.generate(
+                          widget.rankingLength,
+                          (index) => Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: _buildQuestionButton(index), // Build button for multiple-choice questions
                             ),
-                            SizedBox(height: 10),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(5, (index) => Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                child: SizedBox(
-                                  width: 100, // Set the desired width
-                                  height: 50, // Set the desired height
-                                  child: ElevatedButton.icon(
-                                    onPressed: () {
-                                      _returnToMiniMock(context, index+19);
-                                    },
-          
-                                    icon: Visibility( visible: widget.flaggedQuestions[index+19],
-                                      child: Icon(Icons.flag, color: Colors.black),),
-                                    label: Text(
-                                      '${index + 20}',
-                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
-                                      fontSize: 20),
-                                    ),
-                                  ),
-                                ),
-                              )),
-                            ),
-                            SizedBox(height: 10),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: List.generate(1, (index) => Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                child: SizedBox(
-                                  width: 100, // Set the desired width
-                                  height: 50, // Set the desired height
-                                  child: ElevatedButton.icon(
-                                    onPressed: () {
-                                      _returnToMiniMock(context, index+24);
-                                    },
-                                    icon: Visibility( visible: widget.flaggedQuestions[index+24],
-                                      child: Icon(Icons.flag, color: Colors.black),),
-                                    label: Text(
-                                      '${index + 25}',
-                                      style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
-                                      fontSize: 20),
-                                    ),
-                                  ),
-                                ),
-                              )),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
-                      isExpanded: _isOpen[1],
                     ),
-                  ],
-                ),
-              Spacer(),
+                    // Multiple Choice Questions Panel
+                    ExpansionPanel(
+                      isExpanded: _isOpen[1],
+                      canTapOnHeader: true,
+                      backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+                      headerBuilder: (context, isOpen) => ListTile(
+                        title: Text(
+                          'Multiple Choice Questions (Question ${widget.rankingLength + 1} - $questionLength)'),
+                        ),
+                    body: Center(
+                      child: Wrap(
+                         alignment: WrapAlignment.center,
+                         spacing: 10.0,
+                         runSpacing: 10.0,
+                      children: List.generate(
+                          widget.multiChoiceLength,
+                          (index) => Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: _buildMultipleChoiceButton(index), // Use the new method
+                          ),
+                        ),
+                      
+                  )))]
+                )))),
+              const SizedBox(height: 20),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Align(
-                    alignment: Alignment.centerLeft,
-                    child: MiniMockHelpButton(),
-                  ),
+                  alignment: Alignment.centerLeft,
+                    child: SizedBox( 
+                      height: 50,
+                      width: 50,
+                      child: MiniMockHelpButton())),
                   const SizedBox(width: 16),
-                  Container(
-                    width: 160,
-                    height: 45,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      color: const Color.fromARGB(255, 235, 230, 239),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
-                          spreadRadius: 0,
-                          blurRadius: 6,
-                          offset: const Offset(0, 6), // changes position of shadow
-                        ),
-                      ],
-                    ),
-                    child: TextButton.icon(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0)),
-                      label: Text('Back',  style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 16)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 222, 221, 222),
-                      ),
-                    )
-                  ),
-                  const Spacer(),
                   SizedBox(
                     height: 50,
-                    width: 200,
+                    width: 50,
+
+                    //final double buttonWidth = 56.0; // Define buttonWidth
+                     child: FloatingActionButton(
+                        heroTag: UniqueKey(),
+                        onPressed: (){
+                        Navigator.pop(context);
+                        },
+                        clipBehavior: Clip.none,
+                        backgroundColor: const Color.fromARGB(255, 222, 221, 222),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(13),
+                        ),
+                        child: Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0)),
+                      ),
+                    ),
+                  const Spacer(),
+                  SizedBox(
+                   height: MediaQuery.of(context).size.width < 600 ? 40 : 50,
+                    width: 150,
                     child:
                       ElevatedButton.icon(
                         onPressed: () {
-                          widget.miniMockWidget.examEnd();
+                          _showCompletionDialog(context);
                         },
                         icon: Icon(Icons.check_outlined, color: Theme.of(context).textTheme.bodyMedium?.color),
-                        label: Text('Complete Exam',  style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 16)
+                        label: Text('Complete',  style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 16)
                         ),
-                         style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.green, // Green button color
-      foregroundColor: Colors.white, // Text/Icon color
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(50), // Rounded corners
-                      )
-                         )
-                      )
-                      
-                  ),
-                ],
-              )
-            ],
-        )));
-    })));
-  }
-}
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green, // Green button color
+                            foregroundColor: Colors.white, // Text/Icon color
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(50), // Rounded corners
+                      ))))
+              ])
+              ]),
+            )));
+})));
+}}

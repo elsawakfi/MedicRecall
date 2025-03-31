@@ -1,9 +1,19 @@
+import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/drawer_widget.dart';
 // import 'package:flashcard_x/screens/minimock_exams.dart';
 
 import '../utils/timer.dart';
 import '../widgets/minimock_help_button.dart';
+
+class AdaptiveTextSize {
+      const AdaptiveTextSize();
+
+      getadaptiveTextSize(BuildContext context, dynamic value) {
+    // 720 is medium screen height
+        return (value / 720) * MediaQuery.of(context).size.height;
+      }
+    }
 
 class FullMockReview extends StatefulWidget {
   final int rankingLength;
@@ -35,35 +45,76 @@ class FullMockReviewState extends State<FullMockReview> {
   String _displayTime = '';
   late int remainingSeconds;
 
- Widget _buildQuestionButton(int questionNumber) {
+//Flagging Widget for the Ranking Questions
+   Widget _buildQuestionButton(int questionNumber) {
   bool isFlagged = widget.flaggedQuestions.length > questionNumber 
                    && widget.flaggedQuestions[questionNumber] == true;
-  return ElevatedButton.icon(
-    onPressed: () => _returnToFullMock(context, questionNumber),
-    icon: isFlagged 
-      ? const Icon(Icons.flag, color: Colors.black) 
-      : const SizedBox.shrink(),
-    label: Text('${questionNumber + 1}',
-    style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
-    fontSize: 20,),
-  ),
-  
-   style: ElevatedButton.styleFrom(
-      padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24), // Increase the padding for a larger button
-      minimumSize: Size(100, 30), // Make the button larger with a minimum size (width, height)
-    alignment: Alignment.center,
-   ) );
+     return SizedBox(
+    width: 90,  // Ensure fixed width
+    height: 50, // Ensure fixed height
+    child: ElevatedButton(
+      onPressed: () => _returnToFullMock(context, questionNumber),
+      style: ElevatedButton.styleFrom(
+        padding: EdgeInsets.all(8),  // Consistent padding
+        alignment: Alignment.center,
+      ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (isFlagged)
+          Icon(Icons.flag, color: Colors.black),
+        if (isFlagged)
+          SizedBox(width: 4),
+        Text(
+          '${questionNumber + 1}',
+          style: TextStyle(
+            color: Theme.of(context).textTheme.bodyMedium?.color,
+            fontSize: 20,
+          ),
+        ),
+      ],
+    ),
+    ),
+  );
 }
-  
 
-
+  //Flagging Widget for the Multiple Choice Questions
+  Widget _buildMultipleChoiceButton(int questionNumber) {
+    bool isFlagged = widget.flaggedQuestions.length > widget.rankingLength + questionNumber &&
+                     widget.flaggedQuestions[widget.rankingLength + questionNumber] == true;
+    return ElevatedButton(
+      onPressed: () => _returnToFullMock(context, widget.rankingLength + questionNumber),
+     style: ElevatedButton.styleFrom(
+      padding: isFlagged ? EdgeInsets.symmetric(vertical: 15, horizontal: 24) 
+                         : EdgeInsets.symmetric(vertical: 15, horizontal: 35),
+      minimumSize: Size(60, 60),
+      alignment: Alignment.center,
+    ),
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (isFlagged)
+          Icon(Icons.flag, color: Colors.black),
+        if (isFlagged)
+          SizedBox(width: 4),
+        Text(
+          '${widget.rankingLength + questionNumber + 1}',
+          style: TextStyle(
+            color: Theme.of(context).textTheme.bodyMedium?.color,
+            fontSize: 20,
+          ),
+        ),
+      ],
+    ),
+  );
+}
 
   @override
   void initState(){
     super.initState();
     questionLength = widget.rankingLength + widget.multiChoiceLength;
-    // _isOpen = List.generate(2, (index) => true);
-    _displayTime = widget.displayTime;
     remainingSeconds = widget.remainingSeconds;
     _timerController = TimerController(
       startTime: widget.remainingSeconds, //measured in seconds
@@ -91,6 +142,36 @@ class FullMockReviewState extends State<FullMockReview> {
     );
   }
 
+  void _showCompletionDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    barrierDismissible: false, // Prevent dismissing by tapping outside
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text("Complete Full-sized Mock?"),
+        content: const Text("Are you sure you want to submit your answers?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context); // Close the dialog
+              widget.fullMockWidget.examEnd(); // Proceed with completion
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text("Confirm"),
+          ),
+        ],
+      );
+    },
+  );
+}
+
   @override
 Widget build(BuildContext context) {
   return PopScope(
@@ -102,99 +183,81 @@ Widget build(BuildContext context) {
     },
     child: Scaffold(
     drawer: const DrawMain(),
-    appBar: AppBar(
-      automaticallyImplyLeading: false,
-      elevation: 0,
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Stack(
-          children: [
-            Positioned(
-              top: 2.3,
-              child: Image.asset(
-                'assets/newlogo.png',
-                fit: BoxFit.cover,
-                height: 34,
-              ),
-            ),
-            Container(
-              margin: const EdgeInsets.only(left: 32),
-              padding: const EdgeInsets.all(8.0),
-              child: const Text('Review'),
-            ),
-          ],
-        ),
-      ]),
-      centerTitle: true,
-      leading: Builder(
-        builder: (context) => GestureDetector(
-          onTap: () => Scaffold.of(context).openDrawer(),
-          child: const Icon(Icons.menu),
-        ),
-      ),
+    appBar: CustomAppBar(
+      title: 'Review Page',
+      mobileTitle: 'Review',
       actions: [
         Container(
           margin: const EdgeInsets.only(right: 16),
-        width: 210,
-        height: 40.31,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          color: Color.fromARGB(255, 222, 221, 222),
-          boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                spreadRadius: 0,
-                blurRadius: 5,
-                offset: const Offset(0, 3), // changes position of shadow
-            ),
-          ],
-        ),
-        child: Center(
-          child: Text(
-            'Time Remaining: $_displayTime',
-            style: TextStyle(
-              color: Color.fromARGB(255, 0, 0, 0),
-              fontSize: 18.5,
-              fontWeight: FontWeight.w500,
-             
-            ),
+          width: MediaQuery.of(context).size.width < 600 ? 120 : 210,
+          height: 40.31,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            color: Color.fromARGB(255, 222, 221, 222),
+            boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  spreadRadius: 0,
+                  blurRadius: 5,
+                  offset: const Offset(0, 3), // changes position of shadow
+              ),
+            ],
           ),
-        )),
+          child: Center(
+            child: (MediaQuery.of(context).size.width >= 600)
+                ? Text('Time Remaining: $_displayTime',
+                style: TextStyle(
+                  color: (remainingSeconds <= 600)
+                      ? Colors.white
+                      : Color.fromARGB(255, 0, 0, 0),
+                  fontSize: 18.5,
+                  fontWeight: FontWeight.w500,
+                ))
+                : Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.access_time_rounded, color: Colors.black),
+                  SizedBox(width: 8),
+                  Text(_displayTime,
+                      style: TextStyle(
+                        color: (remainingSeconds <= 600)
+                            ? Colors.white
+                            : Color.fromARGB(255, 0, 0, 0),
+                        fontSize: 18.5,
+                        fontWeight: FontWeight.w500,
+                      ))])
+          ))
       ],
     ),
     body: LayoutBuilder( builder: (context, constraints) {
       double maxScreenWidth = constraints.maxWidth * 0.5;
       double maxPreferredWidth = 960; // 1920/2
 
-
       return Center(
         child: Container(
           decoration: 
           BoxDecoration(
             boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
-                  spreadRadius: 5,
-                  blurRadius: 5,
-                  offset: const Offset(0, 3),
-                  )
-                  ],
-            color:   Color.fromARGB(255, 255, 255, 255),
-            ),
-          
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                spreadRadius: 5,
+                blurRadius: 5,
+                offset: const Offset(0, 3),
+              )],
+              color:   Color.fromARGB(255, 255, 255, 255),
+          ),
           constraints: BoxConstraints(
             maxWidth: maxScreenWidth > maxPreferredWidth ? maxScreenWidth : maxPreferredWidth,
           ),
           padding: EdgeInsets.all(16),
+
              child: SizedBox(
               height: constraints.maxHeight,
               child: Column(children: [
                 Expanded(child: 
                 SingleChildScrollView(
                   child: Align(alignment: Alignment.center,
-                  child: Column(children: [
+                  child: 
                   ExpansionPanelList(
                     elevation: 1,
                     expandIconColor: Theme.of(context).textTheme.bodyMedium?.color,
@@ -215,130 +278,111 @@ Widget build(BuildContext context) {
                         title: Text('Ranking Questions (Question 1 - ${widget.rankingLength})'),
                       ),
                       body: Center(
+                      //   child: GridView.builder(
+                      //   shrinkWrap: true,
+                      //   physics: NeverScrollableScrollPhysics(),
+                      //   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      //     crossAxisCount: 8, // **Exactly 8 buttons per row**
+                      //     crossAxisSpacing: 6.0,
+                      //     mainAxisSpacing: 10.0,
+                      //     childAspectRatio: 1.2, // **Adjust to fit button size**
+                      //   ),
+                      //   itemCount: widget.rankingLength,
+                      //   itemBuilder: (context, index) {
+                      //     return Padding(
+                      //       padding: const EdgeInsets.all(4.0),
+                      //       child: _buildQuestionButton(index),
+                      //     );
+                      //   },
+                      // )
+
                       child: Wrap(
                          alignment: WrapAlignment.center,
-                           spacing: 6.0,
-                         runSpacing: 10.0,
+                           spacing: 10.0, //Spacing between buttons
+                         runSpacing: 10.0, //Vertical spacing between rows
                         children: List.generate(
                           widget.rankingLength,
                           (index) => Padding(
                             padding: const EdgeInsets.all(4.0),
-                            child: _buildQuestionButton(index),
+                            child: _buildQuestionButton(index), // Build button for multiple-choice questions
                             ),
                           ),
                         ),
                       ),
                     ),
-
-                        ExpansionPanel(
-                          isExpanded: _isOpen[1],
-                          canTapOnHeader: true,
-                          backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-                          headerBuilder: (context, isOpen) => ListTile(
-                            title: Text(
-                              'Multiple Choice Questions (Question ${widget.rankingLength + 1} - $questionLength)'),
-                              ),
+                    // Multiple Choice Questions Panel
+                    ExpansionPanel(
+                      isExpanded: _isOpen[1],
+                      canTapOnHeader: true,
+                      backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+                      headerBuilder: (context, isOpen) => ListTile(
+                        title: Text(
+                          'Multiple Choice Questions (Question ${widget.rankingLength + 1} - $questionLength)'),
+                        ),
                     body: Center(
                       child: Wrap(
                          alignment: WrapAlignment.center,
-                         spacing: 6.0,
+                         spacing: 10.0,
                          runSpacing: 10.0,
                       children: List.generate(
-                        widget.multiChoiceLength,
-                        (index) => Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          //  child: _buildQuestionButton(index),
-                          child: ElevatedButton.icon(
-                            onPressed: () => _returnToFullMock(context, widget.rankingLength + index),
-                            icon: Visibility(
-                              visible: (widget.flaggedQuestions.length > widget.rankingLength + index) 
-                                      ? widget.flaggedQuestions[widget.rankingLength + index] 
-                                      : false,
-                              child: const Icon(Icons.flag, color: Colors.black),
-                              
-                            ),
-                            label: Text('${widget.rankingLength + index + 1}',
-                            style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color,
-                            fontSize: 20,),
+                          widget.multiChoiceLength,
+                          (index) => Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: _buildMultipleChoiceButton(index), // Use the new method
                           ),
-                           style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.symmetric(vertical: 16, horizontal: 24), // Increase the padding for a larger button
-                              minimumSize: Size(100, 30), // Make the button larger with a minimum size (width, height)
-                            alignment: Alignment.center,
-                            ),
-  
-                          ),
-                          
                         ),
-                      ),
-                    ),
-                  ))],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
                       
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  // Align(
-                  //   alignment: Alignment.centerLeft,
-                    const MiniMockHelpButton(),
-                  const SizedBox(width: 16),
-                  Container(
-                    width: 160,
-                    height: 45,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      color: const Color.fromARGB(255, 235, 230, 239),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
-                          spreadRadius: 0,
-                          blurRadius: 6,
-                          offset: const Offset(0, 6), // changes position of shadow
+                  )))]
+                )))),
+              const SizedBox(height: 20),
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween, // Changed from end
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Align(
+                          alignment: Alignment.centerLeft,
+                          child: SizedBox(
+                              height: 50,
+                              width: 50,
+                              child: MiniMockHelpButton())),
+                      const SizedBox(width: 16),
+                      SizedBox(
+                        height: 50,
+                        width: 50,
+
+                        //final double buttonWidth = 56.0; // Define buttonWidth
+                        child: FloatingActionButton(
+                          heroTag: UniqueKey(),
+                          onPressed: (){
+                            Navigator.pop(context);
+                          },
+                          clipBehavior: Clip.none,
+                          backgroundColor: const Color.fromARGB(255, 222, 221, 222),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(13),
+                          ),
+                          child: Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0)),
                         ),
-                      ],
-                    ),
-                    child: TextButton.icon(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      icon: Icon(Icons.arrow_back, color: Color.fromARGB(255, 0, 0, 0)),
-                      label: Text('Back',  style: TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 16)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color.fromARGB(255, 222, 221, 222),
                       ),
-                    ),
-                  ),
-                  const Spacer(),
-                  SizedBox(
-                    height: 50,
-                    width: 200,
-                    child:
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          widget.fullMockWidget.examEnd();
-                        },
-                        icon: Icon(Icons.check_outlined, color: Theme.of(context).textTheme.bodyMedium?.color),
-                        label: Text('Complete Exam',  style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 16),
-                        ),
-                         style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.green, // Green button color
-      foregroundColor: Colors.white, // Text/Icon color
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(50), // Rounded corners
-                      )
-                         )
-                      )
-                  ),
-                  
-            ],
-            ),
-            ],
-            ),
-            ),
-      ),);
-})));}}
+                      const Spacer(),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.width < 600 ? 40 : 50,
+                        width: 150,
+                        child:
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              _showCompletionDialog(context);
+                            },
+                            icon: Icon(Icons.check_outlined, color: Theme.of(context).textTheme.bodyMedium?.color),
+                            label: Text('Complete',  style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 16)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green, // Green button color
+                              foregroundColor: Colors.white, // Text/Icon color
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(50), // Rounded corners
+                          ))))
+                      ])
+              ]))
+        ));
+    })));
+}}

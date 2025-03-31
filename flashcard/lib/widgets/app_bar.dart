@@ -4,11 +4,13 @@ import 'package:flashcard_x/widgets/design_main.dart';
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title; // Variable for the title text
   final String? mobileTitle; // Optional mobile title
+  final List<Widget> actions;
 
   const CustomAppBar({
     super.key,
     required this.title,
     this.mobileTitle, // Add optional mobile title parameter
+    this.actions = const [],
   });
 
   @override
@@ -18,14 +20,13 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
     return AppBar(
       elevation: 0,
-      title: Align(
-        alignment: isSmallScreen
-            ? const Alignment(-0.4, 0)
-            : const Alignment(-0.06, 0),
-        child: Stack(
+      title: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Stack(
           children: [
             Positioned(
-              top: 2.3,
+              top: 4,
               child: ColorFiltered(
                 colorFilter: ColorFilter.mode(
                   theme.appBarTheme.iconTheme?.color ?? Colors.white,
@@ -39,7 +40,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
             ),
             Container(
-              margin: EdgeInsets.only(left: isSmallScreen ? 24 : 40),
+              margin: EdgeInsets.only(left: isSmallScreen ? 24 : 30),
               padding: const EdgeInsets.all(8.0),
               child: Text(
                 isSmallScreen ? (mobileTitle ?? title) : title,
@@ -51,7 +52,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             ),
           ],
         ),
-      ),
+      ]),
       centerTitle: true,
       leading: Builder(
         builder: (context) => GestureDetector(
@@ -59,6 +60,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           child: const Icon(Icons.menu),
         ),
       ),
+      actions: actions,
     );
   }
 

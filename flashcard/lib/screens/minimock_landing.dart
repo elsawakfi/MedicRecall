@@ -128,7 +128,7 @@ class MiniMockLandingState extends State<MiniMockLanding> {
             children: [
               const Spacer(),
               SizedBox(
-                height: 50,
+                height: 55,
                 width: 960, // Set a fixed width for the button
                 child: ElevatedButton.icon(
                   onPressed: examSet! ? () {
@@ -157,7 +157,7 @@ class MiniMockLandingState extends State<MiniMockLanding> {
               ),
               const SizedBox(height: 50),
               SizedBox(
-                height: 50,
+                height: 55,
                 width: 960, // Set a fixed width for the button
                 child: ElevatedButton.icon(
                   onPressed: halfway! ? () {

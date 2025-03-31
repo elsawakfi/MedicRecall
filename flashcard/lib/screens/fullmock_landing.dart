@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../widgets/countdown_button.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
+import 'package:flashcard_x/widgets/countdown_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/drawer_widget.dart';
 import 'fullmock_rules_page.dart';
@@ -71,7 +72,7 @@ class FullMockLandingState extends State<FullMockLanding> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: const DrawMain(),
-      appBar: CustomAppBar(title: "Full Mocks"),
+      appBar: CustomAppBar(title: "Full-Sized Mock Exam", mobileTitle: "Full Mock",),
       body: daysUntilTest == null
           ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
           : Container(
@@ -82,7 +83,7 @@ class FullMockLandingState extends State<FullMockLanding> {
             children: [
               SizedBox(height: 10),
               SizedBox(
-                height: 50,
+                height: 55,
                 width: 960, // Set a fixed width for the button
                 child: ElevatedButton.icon(
                   onPressed: daysUntilTest! > -1
@@ -105,7 +106,7 @@ class FullMockLandingState extends State<FullMockLanding> {
                     color: Colors.black,
                   ),
                   label: const Text(
-                    'Full Mock 1',
+                    'Full Mock',
                     style: TextStyle(color: Colors.black, fontSize: 20),
                   ),
                 ),
