@@ -8,7 +8,6 @@ import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flashcard_x/widgets/ranking_card_ui.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
-import '../screens/landing_screen.dart';
 import '../screens/minimock_landing.dart';
 import '../screens/minimock_review.dart';
 import '../utils/timer.dart';
@@ -188,15 +187,13 @@ class MiniMockExamState extends State<MiniMockExam> {
     List<List<String>> multiChoiceFormatted = booleanToString(multiChoiceAnswers);
     finalAnswerList.addAll(multiChoiceFormatted);
     updateExamResults(finalAnswerList);
-    Navigator.of(context).pushAndRemoveUntil(
+    Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => MiniMockScoring(title: widget.title,
         questionDirectory: widget.questionDirectory,
         answerDirectory: widget.answerDirectory
         ),
       ),
-      ModalRoute.withName(Landing.id),
-
     );
   }
 

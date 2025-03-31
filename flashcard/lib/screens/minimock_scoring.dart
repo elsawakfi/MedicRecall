@@ -12,6 +12,7 @@ import 'package:flashcard_x/widgets/circular_percentage_indicator.dart';
 import 'package:http/http.dart' as http;
 
 import '../widgets/drawer_widget.dart';
+import 'landing_screen.dart';
 
 
 class MiniMockScoring extends StatefulWidget {
@@ -203,7 +204,18 @@ Future<void> fetchAverageScore() async {
 
   @override
   Widget build(BuildContext context) {
-        return Scaffold(
+    return  PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result){
+        if (!didPop){
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => Landing()
+            ),
+          );
+        }
+      },
+      child: Scaffold(
         drawer: const DrawMain(),
         appBar: CustomAppBar(title: 'Scoring Page', mobileTitle: 'Scoring'),
         body: answerScores.isEmpty || (maxScore == 0)
@@ -327,6 +339,6 @@ Future<void> fetchAverageScore() async {
                   ))),
               ])));
             }),
-    );
+      ));
   }
 }

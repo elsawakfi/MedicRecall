@@ -59,8 +59,8 @@ class Flashcard extends StatelessWidget {
           theme: themeProvider.getTheme(),
           debugShowCheckedModeBanner: false,
           // Remove the debug banner
-          home: _home(),
-          // initialRoute: _home(),
+          // home: _home(),
+          initialRoute: _home(),
           routes: {
             VerifyEmailScreen.id: (context) => const VerifyEmailScreen(),
             SignInScreen.id: (context) => const SignInScreen(),
@@ -71,10 +71,10 @@ class Flashcard extends StatelessWidget {
     });
   }
 
-  Widget _home() {
+  String _home() {
     final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return SignInScreen();
-    if (!user.emailVerified) return VerifyEmailScreen();
-    return Landing();
+    if (user == null) return SignInScreen.id;
+    if (!user.emailVerified) return VerifyEmailScreen.id;
+    return Landing.id;
   }
 }
