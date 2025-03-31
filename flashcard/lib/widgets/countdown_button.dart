@@ -886,6 +886,10 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
       for (var day in daysOfTheWeek) day: ValueNotifier<bool>(false),
     };
 
+     // Track selection count
+    ValueNotifier<int> selectedCount = ValueNotifier<int>(0);
+    const int maxSelectedDays = 3; // Your desired limit
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -899,10 +903,17 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                   'Would you like to have any days of the week off studying?',
               content: Column(
                 mainAxisSize: MainAxisSize.min,
-                children: selectedDays.keys.map((day) {
-                  return _buildCheckbox(selectedDays[day]!, day,
-                      showInfo: false); // Hide info icon
+                children: [
+                  ...selectedDays.keys.map((day) {
+                  return _buildCheckbox(
+                    selectedDays[day]!,
+                    day,
+                    showInfo: false,
+                    selectedCountNotifier: selectedCount,
+                    maxSelections: maxSelectedDays,
+                  );
                 }).toList(),
+                ],
               ),
               actions: [
                 // Previous button
@@ -925,41 +936,46 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                   ),
                 ),
                 // Next button
-                TextButton(
-                  onPressed: () async {
-                    List<String> excludedDays = selectedDays.entries
-                        .where((entry) => entry.value.value)
-                        .map((entry) => entry.key)
-                        .toList();
+                ValueListenableBuilder<int>(
+                  valueListenable: selectedCount, // track selection count
+                  builder: (context, count, child) {
+                    return TextButton(
+                      onPressed: () async {
+                        List<String> excludedDays = selectedDays.entries
+                            .where((entry) => entry.value.value)
+                            .map((entry) => entry.key)
+                            .toList();
 
-                    // Save excluded days to the database
-                    QuerySnapshot u = await _userCollectionRef
-                        .where("userID", isEqualTo: user?.uid)
-                        .get();
+                        // Save excluded days to the database
+                        QuerySnapshot u = await _userCollectionRef
+                            .where("userID", isEqualTo: user?.uid)
+                            .get();
 
-                    var id = u.docs.last.id;
-                    await _userCollectionRef.doc(id).update({
-                      'excludedDays': excludedDays,
-                    });
+                        var id = u.docs.last.id;
+                        await _userCollectionRef.doc(id).update({
+                          'excludedDays': excludedDays,
+                        });
 
-                    if (context.mounted) {
-                      Navigator.of(context).pop();
-                      _showOptionsDialog(context);
-                    }
+                        if (context.mounted) {
+                          Navigator.of(context).pop();
+                          _showOptionsDialog(context);
+                        }
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isSmallScreen ? 12 : 24,
+                          vertical: isSmallScreen ? 8 : 12,
+                        ),
+                        minimumSize: Size(120, 45),
+                      ),
+                      child: Text(
+                        'Next',
+                        style: TextStyle(fontSize: isSmallScreen ? 14 : 16),
+                      ),
+                    );
                   },
-                  style: TextButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: const Color.fromRGBO(51, 178, 73, 1),
-                    padding: EdgeInsets.symmetric(
-                      horizontal: isSmallScreen ? 12 : 24,
-                      vertical: isSmallScreen ? 8 : 12,
-                    ),
-                    minimumSize: Size(120, 45),
-                  ),
-                  child: Text(
-                    'Next',
-                    style: TextStyle(fontSize: isSmallScreen ? 14 : 16),
-                  ),
                 ),
               ],
               showScrollIndicator: screenWidth <= 375,
@@ -1307,7 +1323,16 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
   }
 
   Widget _buildCheckbox(ValueNotifier<bool> notifier, String text,
-      {String? description, bool showInfo = true}) {
+    {String? description, bool showInfo = true,
+    // New optional parameters for selection limits
+    ValueNotifier<int>? selectedCountNotifier,
+    int? maxSelections}) {
+      // Determine if checkbox should be enabled
+      final isEnabled = maxSelections == null || 
+                        selectedCountNotifier == null ||
+                        notifier.value || 
+                        (selectedCountNotifier.value < maxSelections);
+
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       padding: const EdgeInsets.all(12.0),
@@ -1334,9 +1359,19 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     child: Checkbox(
                       key: ValueKey(text),
                       value: value,
-                      onChanged: (bool? newValue) {
-                        notifier.value = newValue ?? false;
-                      },
+                      onChanged: isEnabled 
+                      ? (bool? newValue) {
+                          if (newValue != null) {
+                            // Update selection count if needed
+                            if (selectedCountNotifier != null) {
+                              selectedCountNotifier.value = 
+                                selectedCountNotifier.value + 
+                                (newValue ? 1 : -1);
+                            }
+                            notifier.value = newValue;
+                          }
+                        }
+                      : null,
                       activeColor: const Color.fromRGBO(51, 178, 73, 1),
                     ),
                   );
@@ -1365,8 +1400,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                       ),
                     ),
                     if (showInfo && description != null)
-                      _buildInfoIcon(
-                          text, description), // Show only if required
+                      _buildInfoIcon(text, description), // Show only if required
                   ],
                 ),
               ),
