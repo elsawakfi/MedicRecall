@@ -495,6 +495,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                         'by the same people who write the questions for the MSRA, making it a very valuable resource.\n\n'
                         'You will be prompted to specify your preferred number of practice attempts upon selection.',
                     showInfo: true,
+                    context: context,
                   ),
                   _buildCheckbox(
                     checkbox2,
@@ -505,6 +506,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                         'have been carefully created to align with official rationales and GMC guidelines.\n\n'
                         'You will be prompted to specify your preferred number of practice attempts upon selection.',
                     showInfo: true,
+                    context: context,
                   ),
                   _buildCheckbox(
                     checkbox3,
@@ -513,6 +515,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                         'We have two mini-mocks available on the platform, which each contain 25 reliable questions. '
                         'They have been created to help track your progress, fine-tune exam timings and increase your exposure to different professional scenarios.',
                     showInfo: true,
+                    context: context,
                   ),
                   _buildCheckbox(
                     checkbox4,
@@ -521,6 +524,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                         'Our pre-made flashcard decks contain high-yield principles derived from GMC guidelines and official rationales. '
                         'This resource uses our unique, evidence-based algorithms to help you harness the power of spaced repetition and active recall!',
                     showInfo: true,
+                    context: context,
                   ),
                   _buildCheckbox(
                     checkbox5,
@@ -531,6 +535,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                         '(not a format of questions that appears in the MSRA). '
                         'Nevertheless, increasing your exposure to questions and rationales created by the UKFPO is helpful when preparing for the Professional Dilemmas Paper.',
                     showInfo: true,
+                    context: context,
                   ),
                 ],
               ),
@@ -873,22 +878,17 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
 
   void _showExclusionDialog(BuildContext context) {
     List<String> daysOfTheWeek = [
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-      "Sunday"
+      "Monday", "Tuesday", "Wednesday", "Thursday", 
+      "Friday", "Saturday", "Sunday"
     ];
 
-    Map<String, ValueNotifier<bool>> selectedDays = {
+    final selectedDays = {
       for (var day in daysOfTheWeek) day: ValueNotifier<bool>(false),
     };
 
-     // Track selection count
-    ValueNotifier<int> selectedCount = ValueNotifier<int>(0);
-    const int maxSelectedDays = 3; // Your desired limit
+    // Track selection count - must be final to maintain state
+    final selectedCount = ValueNotifier<int>(0);
+    const int maxSelectedDays = 3;
 
     showDialog(
       context: context,
@@ -899,24 +899,40 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
             final isSmallScreen = screenWidth < 600;
 
             return _buildAlertDialog(
-              title:
-                  'Would you like to have any days of the week off studying?',
+              title: 'Would you like to have any days of the week off studying?',
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  ...selectedDays.keys.map((day) {
-                  return _buildCheckbox(
-                    selectedDays[day]!,
-                    day,
-                    showInfo: false,
-                    selectedCountNotifier: selectedCount,
-                    maxSelections: maxSelectedDays,
-                  );
-                }).toList(),
+                  ValueListenableBuilder<int>(
+                    valueListenable: selectedCount,
+                    builder: (context, count, child) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12.0),
+                        child: Text(
+                          'Select up to $maxSelectedDays days (${maxSelectedDays - count} remaining)',
+                          style: TextStyle(
+                            color: count >= maxSelectedDays 
+                              ? Colors.red 
+                              : const Color.fromRGBO(21, 58, 103, 1),
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  ...daysOfTheWeek.map((day) {
+                    return _buildCheckbox(
+                      selectedDays[day]!,
+                      day,
+                      showInfo: false,
+                      selectedCountNotifier: selectedCount,
+                      maxSelections: maxSelectedDays,
+                      context: context, // Pass the context
+                    );
+                  }).toList(),
                 ],
               ),
               actions: [
-                // Previous button
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
@@ -935,7 +951,6 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     style: TextStyle(fontSize: isSmallScreen ? 14 : 16),
                   ),
                 ),
-                // Next button
                 ValueListenableBuilder<int>(
                   valueListenable: selectedCount, // track selection count
                   builder: (context, count, child) {
@@ -1322,92 +1337,122 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     );
   }
 
-  Widget _buildCheckbox(ValueNotifier<bool> notifier, String text,
+  Widget _buildCheckbox(ValueNotifier<bool> notifier, String text, 
     {String? description, bool showInfo = true,
-    // New optional parameters for selection limits
     ValueNotifier<int>? selectedCountNotifier,
-    int? maxSelections}) {
-      // Determine if checkbox should be enabled
-      final isEnabled = maxSelections == null || 
+    int? maxSelections,
+    required BuildContext context,}) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: notifier,
+      builder: (context, isSelected, _) {
+        // Determine if checkbox should be enabled
+        final isEnabled = maxSelections == null || 
                         selectedCountNotifier == null ||
-                        notifier.value || 
+                        isSelected || 
                         (selectedCountNotifier.value < maxSelections);
 
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      padding: const EdgeInsets.all(12.0),
-      child: Row(
-        children: [
-          Container(
-            margin: const EdgeInsets.only(right: 16.0),
-            child: Theme(
-              data: ThemeData(
-                unselectedWidgetColor: const Color.fromRGBO(21, 58, 103, 1),
-                checkboxTheme: CheckboxThemeData(
-                  side: const BorderSide(
-                      color: Color.fromRGBO(21, 58, 103, 1), width: 2),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(4.0),
+        return Container(
+          margin: const EdgeInsets.symmetric(vertical: 8.0),
+          padding: const EdgeInsets.all(12.0),
+          child: Row(
+            children: [
+              Container(
+                margin: const EdgeInsets.only(right: 16.0),
+                child: Theme(
+                  data: ThemeData(
+                    unselectedWidgetColor: const Color.fromRGBO(21, 58, 103, 1),
+                    checkboxTheme: CheckboxThemeData(
+                      side: const BorderSide(
+                        color: Color.fromRGBO(21, 58, 103, 1), 
+                        width: 2),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4.0),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              child: ValueListenableBuilder<bool>(
-                valueListenable: notifier,
-                builder: (context, value, child) {
-                  return Transform.scale(
-                    scale: 1.2,
-                    child: Checkbox(
-                      key: ValueKey(text),
-                      value: value,
-                      onChanged: isEnabled 
+                  child: Checkbox(
+                    key: ValueKey(text),
+                    value: isSelected,
+                    onChanged: isEnabled 
                       ? (bool? newValue) {
                           if (newValue != null) {
-                            // Update selection count if needed
                             if (selectedCountNotifier != null) {
-                              selectedCountNotifier.value = 
-                                selectedCountNotifier.value + 
-                                (newValue ? 1 : -1);
+                              if (newValue && selectedCountNotifier.value >= maxSelections!) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Maximum $maxSelections selections allowed'),
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                );
+                                return;
+                              }
+                              selectedCountNotifier.value += newValue ? 1 : -1;
                             }
                             notifier.value = newValue;
                           }
                         }
                       : null,
-                      activeColor: const Color.fromRGBO(51, 178, 73, 1),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-          Expanded(
-            child: MouseRegion(
-              cursor: SystemMouseCursors.click,
-              child: GestureDetector(
-                onTap: () {
-                  notifier.value = !notifier.value;
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        text,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Color.fromRGBO(21, 58, 103, 1),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    if (showInfo && description != null)
-                      _buildInfoIcon(text, description), // Show only if required
-                  ],
+                    activeColor: const Color.fromRGBO(51, 178, 73, 1),
+                  ),
                 ),
               ),
-            ),
+              Expanded(
+                child: MouseRegion(
+                  cursor: isEnabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
+                  child: GestureDetector(
+                    onTap: () {
+                      if (!isEnabled) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Maximum $maxSelections selections allowed'),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                        return;
+                      }
+                      
+                      final newValue = !isSelected;
+                      if (selectedCountNotifier != null) {
+                        if (newValue && selectedCountNotifier.value >= maxSelections!) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Maximum $maxSelections selections allowed'),
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                          return;
+                        }
+                        selectedCountNotifier.value += newValue ? 1 : -1;
+                      }
+                      notifier.value = newValue;
+                    },
+                    child: Opacity(
+                      opacity: isEnabled ? 1.0 : 0.6,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              text,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Color.fromRGBO(21, 58, 103, 1),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          if (showInfo && description != null)
+                            _buildInfoIcon(text, description),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
