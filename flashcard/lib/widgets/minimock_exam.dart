@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flashcard_x/screens/fullmock_landing.dart';
 import 'package:flashcard_x/screens/fullmock_review.dart';
 import 'package:flashcard_x/screens/minimock_scoring.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
@@ -7,6 +8,7 @@ import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flashcard_x/widgets/ranking_card_ui.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
+import '../screens/minimock_landing.dart';
 import '../screens/minimock_review.dart';
 import '../utils/timer.dart';
 import 'drawer_widget.dart';
@@ -185,13 +187,16 @@ class MiniMockExamState extends State<MiniMockExam> {
     List<List<String>> multiChoiceFormatted = booleanToString(multiChoiceAnswers);
     finalAnswerList.addAll(multiChoiceFormatted);
     updateExamResults(finalAnswerList);
-    Navigator.of(context).pushReplacement(
+    Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(
         builder: (context) => MiniMockScoring(title: widget.title,
         questionDirectory: widget.questionDirectory,
         answerDirectory: widget.answerDirectory
         ),
       ),
+      // Assumes only mini and full mocks available
+      (route) => false,
+
     );
   }
 
@@ -553,10 +558,6 @@ class MiniMockExamState extends State<MiniMockExam> {
                 // Buttons to change questions
                 SizedBox(height: 16),
                 LayoutBuilder(builder: (context, constraints) {
-                  final iconSize = constraints.maxWidth * 0.1; // 8% of container width
-                  final buttonWidth = constraints.maxWidth * 0.08; // 30% of container width
-                  final paddingValue = constraints.maxWidth * 0.01;
-
                   return Center(
                     child:
                     SizedBox(

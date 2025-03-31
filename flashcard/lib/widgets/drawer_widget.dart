@@ -22,16 +22,12 @@ class DrawMain extends StatelessWidget {
     return Drawer(
         child: Column(
       children: [
-        const SizedBox(width: 100, height: 32),
+        const SizedBox(width: 100, height: 16),
         MouseRegion(
             cursor: SystemMouseCursors.click,
             child: GestureDetector(
                 child:
                     Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  const Text(
-                    "MedicRecall",
-                    textAlign: TextAlign.center,
-                  ),
                   SizedBox(
                     width: 32,
                     height: 32,
@@ -47,12 +43,18 @@ class DrawMain extends StatelessWidget {
                         ),
                       ),
                     ),
-                  )
+                  ),
+                  SizedBox(width:4),
+                  const Text(
+                    "MedicRecall",
+                    textAlign: TextAlign.center,
+                  ),
                 ]),
                 onTap: () => Navigator.push(
                       context,
                       MoveRightRoute(page: const Landing()),
                     ))),
+        const SizedBox(width: 100, height: 16),
         ListTile(
             key: const ValueKey('Flashcards'),
             leading: const Icon(Icons.amp_stories),
@@ -116,9 +118,9 @@ class DrawMain extends StatelessWidget {
               );
             }),
          ListTile(
-            key: const ValueKey('Full-Sized Mock Exam'),
+            key: const ValueKey('Full-Sized Mock'),
             leading: const Icon(Icons.assignment_outlined),
-            title: const Text('Full-Sized Mock Exam'),
+            title: const Text('Full-Sized Mock'),
 
             onTap: () {
               Navigator.push(

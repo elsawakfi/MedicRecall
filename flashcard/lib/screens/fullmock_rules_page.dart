@@ -26,7 +26,7 @@ class FullMockRulesState extends State<FullMockRules> {
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: const DrawMain(),
-      appBar: CustomAppBar(title: "Full-Mock Exam 1"),
+      appBar: CustomAppBar(title: "Full-Sized Mock Exam"),
       body: LayoutBuilder(builder: (context, constraints){
         double maxScreenWidth = constraints.maxWidth * 0.5;
         double maxPreferredWidth = (maxScreenWidth > 960) ? maxScreenWidth : 960; 
@@ -59,7 +59,7 @@ class FullMockRulesState extends State<FullMockRules> {
         children: [
           Center(
             child: Text(
-              'MedicRecall Full Mock 1 Exam Instructions: \n',
+              'MedicRecall Full-Sized Mock Exam Instructions: \n',
               style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 27), fontWeight: FontWeight.bold, color: Colors.black),
               textAlign: TextAlign.center,
             ),
