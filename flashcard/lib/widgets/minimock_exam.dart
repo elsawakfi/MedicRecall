@@ -229,8 +229,15 @@ class MiniMockExamState extends State<MiniMockExam> {
               title: widget.title,
               mobileTitle: widget.shortTitle,
               actions: [
-                Container(
-                  margin: const EdgeInsets.only(right: 16),
+              LayoutBuilder(
+                builder:(context, constraints) {
+                double maxScreenWidth = MediaQuery.of(context).size.width;
+                double maxPreferredWidth = 960; // 1920/2
+                double offset = (maxPreferredWidth < maxScreenWidth) ? -(maxScreenWidth - maxPreferredWidth) / 2 : 0;
+              return Transform.translate(
+              offset: Offset(offset , 0),
+                child: Container(
+                  margin: const EdgeInsets.only(right: 8),
                   width: MediaQuery.of(context).size.width < 600 ? 100 : 210,
                   height: 40,
                   decoration: BoxDecoration(
@@ -271,7 +278,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                                       fontWeight: FontWeight.w500,
                                 ))])
                   )
-                )],
+          ));})],
           ),
           body: questions.isEmpty || rankingAnswers.isEmpty
               ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
