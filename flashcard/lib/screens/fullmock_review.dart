@@ -187,8 +187,15 @@ Widget build(BuildContext context) {
       title: 'Review Page',
       mobileTitle: 'Review',
       actions: [
-        Container(
-          margin: const EdgeInsets.only(right: 16),
+        LayoutBuilder(
+          builder:(context, constraints) {
+          double maxScreenWidth = MediaQuery.of(context).size.width;
+          double maxPreferredWidth = 960; // 1920/2
+          double offset = (maxPreferredWidth < maxScreenWidth) ? -(maxScreenWidth - maxPreferredWidth) / 2 : 0;
+        return Transform.translate(
+        offset: Offset(offset , 0),
+        child: Container(
+          margin: const EdgeInsets.only(right: 8),
           width: MediaQuery.of(context).size.width < 600 ? 120 : 210,
           height: 40.31,
           decoration: BoxDecoration(
@@ -226,7 +233,7 @@ Widget build(BuildContext context) {
                         fontSize: 18.5,
                         fontWeight: FontWeight.w500,
                       ))])
-          ))
+          )));})
       ],
     ),
     body: LayoutBuilder( builder: (context, constraints) {
@@ -278,24 +285,6 @@ Widget build(BuildContext context) {
                         title: Text('Ranking Questions (Question 1 - ${widget.rankingLength})'),
                       ),
                       body: Center(
-                      //   child: GridView.builder(
-                      //   shrinkWrap: true,
-                      //   physics: NeverScrollableScrollPhysics(),
-                      //   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      //     crossAxisCount: 8, // **Exactly 8 buttons per row**
-                      //     crossAxisSpacing: 6.0,
-                      //     mainAxisSpacing: 10.0,
-                      //     childAspectRatio: 1.2, // **Adjust to fit button size**
-                      //   ),
-                      //   itemCount: widget.rankingLength,
-                      //   itemBuilder: (context, index) {
-                      //     return Padding(
-                      //       padding: const EdgeInsets.all(4.0),
-                      //       child: _buildQuestionButton(index),
-                      //     );
-                      //   },
-                      // )
-
                       child: Wrap(
                          alignment: WrapAlignment.center,
                            spacing: 10.0, //Spacing between buttons
