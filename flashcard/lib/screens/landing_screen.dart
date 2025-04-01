@@ -375,7 +375,7 @@ class LandingState extends State<Landing> {
                   key: 'Mini-Mocks',
                 ),
                 _buildStyledButton(
-                  text: 'Full Mock',
+                  text: 'Full-Sized Mock',
                   icon: Icons.assignment_outlined,
                   onPressed: () {
                     landingService.onLanding = false;
@@ -386,7 +386,7 @@ class LandingState extends State<Landing> {
                       ),
                     );
                   },
-                  key: 'Full Mock',
+                  key: 'Full-Sized Mock',
                 ),
                 _buildStyledButton(
                   text: 'Feedback',

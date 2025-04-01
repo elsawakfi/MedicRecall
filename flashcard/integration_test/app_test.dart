@@ -37,27 +37,25 @@ Future<void> loginTest(WidgetTester tester) async{
   var emailFinder = find.byKey(const ValueKey('emailSignUpField'));
   if(emailFinder.evaluate().isNotEmpty) {
     tester.printToConsole('Found email field');
-  } else {
-    tester.printToConsole("No email field found");
-  }
-  expect(emailFinder, findsOneWidget);
-  await tester.enterText(emailFinder,
-      'ooz05506@jioso.com');
-  tester.printToConsole('Entered email text');
-  FocusManager.instance.primaryFocus?.unfocus();
-  await tester.pump();
+    expect(emailFinder, findsOneWidget);
+    await tester.enterText(emailFinder,
+        'ooz05506@jioso.com');
+    tester.printToConsole('Entered email text');
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pump();
 
-  // Flutter focuses on text fields resulting in possible errors in testing if not disposed of
-  await tester.enterText(
-      find.byKey(
-          const ValueKey('passwordSignUpField')), 'password');
-  tester.printToConsole('entered password');
-  await tester.tap(find.byKey(
-    const ValueKey('Log In Button'),
-  ));
-  await tester.pumpAndSettle();
-  FocusManager.instance.primaryFocus?.unfocus();
-  await tester.pump();
+    // Flutter focuses on text fields resulting in possible errors in testing if not disposed of
+    await tester.enterText(
+        find.byKey(
+            const ValueKey('passwordSignUpField')), 'password');
+    tester.printToConsole('entered password');
+    await tester.tap(find.byKey(
+      const ValueKey('Log In Button'),
+    ));
+    await tester.pumpAndSettle();
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pump();
+  }
 
   //CLOSE POP UP
   bool isPopUp = find.text('No').evaluate().isNotEmpty;

@@ -360,8 +360,8 @@ Widget build(BuildContext context) {
                         onPressed: () {
                           _showCompletionDialog(context);
                         },
-                        icon: Icon(Icons.check_outlined, color: Theme.of(context).textTheme.bodyMedium?.color),
-                        label: Text('Complete',  style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 16)
+                        icon: Icon(Icons.check_outlined, color: Colors.white),
+                        label: Text('Complete',  style: TextStyle(color: Colors.white, fontSize: 16)
                         ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green, // Green button color

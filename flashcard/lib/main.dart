@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:flashcard_x/screens/dashboard_screen.dart';
@@ -58,8 +59,8 @@ class Flashcard extends StatelessWidget {
           theme: themeProvider.getTheme(),
           debugShowCheckedModeBanner: false,
           // Remove the debug banner
-          // home: const SignInScreen(),
-          initialRoute: SignInScreen.id,
+          // home: _home(),
+          initialRoute: _home(),
           routes: {
             VerifyEmailScreen.id: (context) => const VerifyEmailScreen(),
             SignInScreen.id: (context) => const SignInScreen(),
@@ -68,5 +69,12 @@ class Flashcard extends StatelessWidget {
             Landing.id: (context) => const Landing(),
           });
     });
+  }
+
+  String _home() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return SignInScreen.id;
+    if (!user.emailVerified) return VerifyEmailScreen.id;
+    return Landing.id;
   }
 }
