@@ -187,8 +187,15 @@ Widget build(BuildContext context) {
         title: 'Review Page',
         mobileTitle: 'Review',
         actions: [
-        Container(
-          margin: const EdgeInsets.only(right: 16),
+            LayoutBuilder(
+          builder:(context, constraints) {
+          double maxScreenWidth = MediaQuery.of(context).size.width;
+          double maxPreferredWidth = 960; // 1920/2
+          double offset = (maxPreferredWidth < maxScreenWidth) ? -(maxScreenWidth - maxPreferredWidth) / 2 : 0;
+        return Transform.translate(
+        offset: Offset(offset , 0),
+        child: Container(
+          margin: const EdgeInsets.only(right: 8),
           width: MediaQuery.of(context).size.width < 600 ? 100 : 210,
           height: 40.31,
           decoration: BoxDecoration(
@@ -226,7 +233,7 @@ Widget build(BuildContext context) {
                         fontSize: 18.5,
                         fontWeight: FontWeight.w500,
               ))])
-        ))
+        )));})
       ],
     ),
     body: LayoutBuilder( builder: (context, constraints) {

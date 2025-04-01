@@ -285,24 +285,6 @@ Widget build(BuildContext context) {
                         title: Text('Ranking Questions (Question 1 - ${widget.rankingLength})'),
                       ),
                       body: Center(
-                      //   child: GridView.builder(
-                      //   shrinkWrap: true,
-                      //   physics: NeverScrollableScrollPhysics(),
-                      //   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      //     crossAxisCount: 8, // **Exactly 8 buttons per row**
-                      //     crossAxisSpacing: 6.0,
-                      //     mainAxisSpacing: 10.0,
-                      //     childAspectRatio: 1.2, // **Adjust to fit button size**
-                      //   ),
-                      //   itemCount: widget.rankingLength,
-                      //   itemBuilder: (context, index) {
-                      //     return Padding(
-                      //       padding: const EdgeInsets.all(4.0),
-                      //       child: _buildQuestionButton(index),
-                      //     );
-                      //   },
-                      // )
-
                       child: Wrap(
                          alignment: WrapAlignment.center,
                            spacing: 10.0, //Spacing between buttons
