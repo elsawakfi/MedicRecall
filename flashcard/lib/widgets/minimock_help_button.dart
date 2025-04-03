@@ -11,18 +11,23 @@ class MiniMockHelpButton extends StatefulWidget {
 class MiniMockHelpButtonState extends State<MiniMockHelpButton> {
   @override
   Widget build(BuildContext context) {
-    return FloatingActionButton(
+    return Container(
+      width: 40,
+      height: 40,
+      child: FloatingActionButton(
       onPressed: (){
         _helpPopup(context);
       },
       clipBehavior: Clip.none,
-      backgroundColor: const Color.fromARGB(255, 235, 230, 239),
+      backgroundColor: const Color.fromARGB(255, 222, 221, 222), 
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(13),
       ),
-      child: const Icon(Icons.question_mark, color: Color.fromARGB(255, 98, 86, 139),),
+      child: const Icon(Icons.question_mark, color: Color.fromARGB(255, 0, 0, 0),),
+      ),
     );
   }
+  
 
   void _helpPopup(BuildContext context){
     showDialog(
@@ -121,7 +126,7 @@ class MiniMockHelpButtonState extends State<MiniMockHelpButton> {
               children: [
                 const Text(
                   'Next moves you to the next question. \nBack moves you to the previous question. \nReview moves you to the review page.',
-                  style: TextStyle(color: Colors.black, fontSize: 16),
+                  style: TextStyle(color: Color.fromRGBO(21, 58, 103, 1), fontSize: 16),
                 ),
               ],
             ),
@@ -166,7 +171,7 @@ class MiniMockHelpButtonState extends State<MiniMockHelpButton> {
               children: [
                 const Text(
                   'To flag/unflag a question click the flag button.\nQuestions that have been flagged can then be easily viewed on the review page.\nOn the review page click on either of the drop down menus to see a list of the questions.\nThe flagged questions represent the questions you previously flagged for revisit.\nBy clicking on a question you are taken back to that question.',
-                  style: TextStyle(color: Colors.black, fontSize: 16),
+                  style: TextStyle(color: Color.fromRGBO(21, 58, 103, 1), fontSize: 16),
                 ),
               ],
             ),
@@ -211,7 +216,7 @@ class MiniMockHelpButtonState extends State<MiniMockHelpButton> {
               children: [
                 const Text(
                   'To move an option please hold down your left mouse button with the cursor above\nthe option\'s bar and drop it where you feel is correct to reorder the list',
-                  style: TextStyle(color: Colors.black, fontSize: 16),
+                  style: TextStyle(color: Color.fromRGBO(21, 58, 103, 1), fontSize: 16),
                 ),
               ],
             ),
@@ -256,7 +261,7 @@ class MiniMockHelpButtonState extends State<MiniMockHelpButton> {
               children: [
                 const Text(
                   'Click on 3 of the possible options to fully answer the question.\nTo select a different option, unselect the option you believe\nis wrong (by clicking it again) and select another option.',
-                  style: TextStyle(color: Colors.black, fontSize: 16),
+                  style: TextStyle(color: Color.fromRGBO(21, 58, 103, 1), fontSize: 16),
                 ),
               ],
             ),

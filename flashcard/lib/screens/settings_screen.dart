@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'calendar_screen.dart';
+import 'package:flashcard_x/widgets/app_bar.dart';
 
 class Settings extends StatefulWidget {
   const Settings({super.key});
@@ -67,36 +68,9 @@ Future<void> checkNotify() async {
 
     return Scaffold(
       drawer: const DrawMain(),
-      appBar: AppBar(
-          elevation: 0,
-          title: Align(
-            alignment: const Alignment(-0.06, 0),
-            child: Stack(
-              children: [
-                Positioned(
-                  top: 2.3,
-                  child: Image.asset(
-                    'assets/newlogo.png',
-                    fit: BoxFit.cover,
-                    height: 34,
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.only(left: 32),
-                  padding: const EdgeInsets.all(8.0),
-                  child: const Text("Settings"),
-                ),
-              ],
-            ),
-          ),
-          centerTitle: true,
-          leading: Builder(
-              builder: (context) => GestureDetector(
-                    onTap: () => Scaffold.of(context).openDrawer(),
-                    child: const Icon(
-                      Icons.menu,
-                    ),
-                  ))),
+      appBar: CustomAppBar(
+        title: 'Settings',
+      ),
       body: ListView(
         children: <Widget>[
           ListTile(

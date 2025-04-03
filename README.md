@@ -62,7 +62,7 @@ This is the third iteration of the study support tool for medical students under
 - **Targeted Platforms**: ![web browser](https://img.shields.io/badge/web%20browser-blue?style=for-the-badge&logo=internet) ![Andriod](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white) ![iOS](https://img.shields.io/badge/iOS-000000?style=for-the-badge&logo=ios&logoColor=white) 
 
 <details>
-  <summary>Firebase Structure</summary>
+  <summary>Previous Firebase Structure</summary>
     <p align="left">
       <img width="470" alt="image" src="https://user-images.githubusercontent.com/98459342/215339659-6753675e-f5d8-4566-ab32-5f4cdd8817e5.png" style="box-shadow: 5px 5px 10px rgba(0,0,0,0.5)">
     </p>     
@@ -79,13 +79,13 @@ This is the third iteration of the study support tool for medical students under
 
 ## Project Requirements
 
-- **Learning Progress Tracking**
+- **Learning Progress Tracking**<br>
   _MVP Release_
   - [x] Implement revision reminders
   - [x] Develop quarterly Mini Mocks
 <br>
 
-- **Quarterly Mini Mocks**
+- **Quarterly Mini Mocks**<br>
   _MVP Release_
   - [x] Implemented mini-mock landing page with locked feature
   - [x] Implemented mini-mock rules page
@@ -98,11 +98,12 @@ This is the third iteration of the study support tool for medical students under
   - [x] Implemented scoring page which takes in individual and average score
   
   _Final Release_
-  - [ ] Update the mini-mock colour scheme for light mode compatibility
-  - [ ] Implement a new ranking UI system, as proposed by the client 
+  - [x] Update the mini-mock colour scheme for light mode compatibility
+  - [x] Implement a new ranking UI system, as proposed by the client 
+  - [x] Update the mock related screens to be mobile compatible
   <br>
 
-- **Countdown Button/ Scheduling-Calendar Feature**  
+- **Countdown Button/ Scheduling-Calendar Feature**<br>
   _MVP Release_
   - [x] Complete exam countdown button that comes with a pop-up that prompts for study scheduling
   - [x] Mini mock and exam date events reflecting on calendar
@@ -114,8 +115,9 @@ This is the third iteration of the study support tool for medical students under
   - [x] Complete calendar redesign with revision reminders and event labels
 
   _Final Release_
-  - [ ] Complete calendar redesign with single event edit/ delete feature and links to the respective page
-  - [ ] Scheduling feature which has exclusion of certain day(s) for studying (TBD)
+  - [x] Complete calendar redesign with single event edit/ delete feature and links to the respective page
+  - [x] Scheduling feature which has exclusion of certain day(s) for studying
+  - [x] Update the design to be mobile compatible 
 
 ### Additional Features
 
@@ -181,23 +183,19 @@ To build MedicRecall yourself, you will need the following tools:
    ```sh
    flutter build ios --release --no-codesign
    ```
-   - macOS: run 
+   - macOS:
    ```sh
    flutter create --platforms=macos
-   ``` 
-   followed by 
-   ```sh
    flutter build macos
-   ```
+   ``` 
    - Web browser:  
    ```sh
    flutter build web
    ```
-4. Run 
+4. To start the app on a device or web browser run:
     ```sh
     flutter run
     ``` 
-    to start the app on a device or web browser
 
 <p align="right">(<a href="#title">back to top</a>)</p>
 
@@ -235,6 +233,6 @@ To build MedicRecall yourself, you will need the following tools:
 | Elsa Wakfi                   | [xp23980@bristol.ac.uk](mailto:xp23980@bristol.ac.uk) |[![elsa-linkedin](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/elsa-wakfi-9925fklg/)
 | Tinaye Samuel Chibanda       | [ua20351@bristol.ac.uk](mailto:ua20351@bristol.ac.uk) | [![sam-linkedin](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/tinaye-samuel-chibanda-825280257/)
 | Rowan Watcham                | [no23481@bristol.ac.uk](mailto:no23481@bristol.ac.uk) | [![rowan-linkedin](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/rowan-watcham/)
-| Dennis Han                   | [jf23616@bristol.ac.uk](mailto:jf23616@bristol.ac.uk) | [![dennis-linkedin](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/kaung-zaw-han-660614333/)
+| Dennis Han                   | [jf23616@bristol.ac.uk](mailto:jf23616@bristol.ac.uk) | [![dennis-linkedin](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/dennis-han-660614333/)
 | Saud Binlebdah               | [hr22169@bristol.ac.uk](mailto:hr22169@bristol.ac.uk) | [![saud-linkedin](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/saud-binlebdah/)
 

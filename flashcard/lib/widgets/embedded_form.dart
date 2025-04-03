@@ -1,5 +1,11 @@
 import 'package:universal_html/html.dart';
-import 'dart:ui' as ui;
+//import 'dart:ui' as ui;
+// import 'dart:html';
+import 'dart:io' if (dart.library.html) 'dart:ui' as ui;
+
+//If we want to test actual instances of our widgets, we will need to explore changing this file
+//Alternatively, Rowan and I discussed the possibility of creating a test user to make things simpler
+
 
 import 'package:flutter/cupertino.dart';
 

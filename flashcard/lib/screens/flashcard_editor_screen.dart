@@ -2,7 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flashcard_x/screens/button_screen.dart';
+import 'package:flashcard_x/widgets/countdown_button.dart';
+import 'package:flashcard_x/widgets/app_bar.dart';
 
 import '../widgets/drawer_widget.dart';
 import 'add_flashcard_screen.dart';
@@ -32,41 +33,9 @@ class FlashcardEditorState extends State<FlashcardEditor> {
   Widget build(BuildContext context) {
     return Scaffold(
         drawer: const DrawMain(),
-        appBar: AppBar(
-          title: Align(
-            alignment: const Alignment(-0.05,0),
-            child: Stack(
-              children: [
-                Positioned(
-                  top: 2.3,
-                  child: Image.asset(
-                    'assets/newlogo.png',
-                    fit: BoxFit.cover,
-                    height: 34,
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.only(left: 32),
-                  padding: const EdgeInsets.all(8.0),
-                  child: const Text('Create New Flashcards',
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          centerTitle: true,
-          leading: Builder(
-            builder: (context) => GestureDetector(
-              onTap: () => Scaffold.of(context).openDrawer(),
-              child: const Icon(
-                Icons.menu,
-              ),
-            ),
-            // child: const Icon(
-            //   Icons.menu,
-            // ),
-          ),
+        appBar: CustomAppBar(
+          title: 'Create New Flashcards',
+          mobileTitle: 'Create Flashcards',
         ),
       body: SafeArea(
         child: Column(

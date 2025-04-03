@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:flashcard_x/screens/dashboard_screen.dart';
@@ -27,19 +28,19 @@ Future<void> main() async {
   );
 
   await Firebase.initializeApp(
-  options: DefaultFirebaseOptions.currentPlatform,
-);
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive).then((_) {
     // full screen mode
     SharedPreferences.getInstance().then((prefs) {
+      bool isDarkMode =
+          prefs.getBool('darkMode') ?? true; // Default to dark mode
       runApp(
         ChangeNotifierProvider<ThemeProvider>(
             create: (context) => ThemeProvider(
-                MyTheme.darkTheme),
+                isDarkMode ? MyTheme.darkTheme : MyTheme.lightTheme),
             child: const Flashcard()),
-        // child: Login(), //run to log into the app
-        // child: SignInScreen()), //run to log into the app
       );
     });
   });
@@ -58,16 +59,22 @@ class Flashcard extends StatelessWidget {
           theme: themeProvider.getTheme(),
           debugShowCheckedModeBanner: false,
           // Remove the debug banner
-          // home: const SignInScreen(),
-          initialRoute: SignInScreen.id,
+          // home: _home(),
+          initialRoute: _home(),
           routes: {
             VerifyEmailScreen.id: (context) => const VerifyEmailScreen(),
             SignInScreen.id: (context) => const SignInScreen(),
             SignUpScreen.id: (context) => const SignUpScreen(),
             HomePage.id: (context) => const HomePage(title: "Medicine Upload"),
             Landing.id: (context) => const Landing(),
-          }
-          );
+          });
     });
+  }
+
+  String _home() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return SignInScreen.id;
+    if (!user.emailVerified) return VerifyEmailScreen.id;
+    return Landing.id;
   }
 }

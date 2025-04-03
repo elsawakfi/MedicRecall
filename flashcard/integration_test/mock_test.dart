@@ -1,0 +1,198 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:integration_test/integration_test.dart';
+import 'app_test.dart';
+
+void main() {
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  group('Mock Tests:', () {
+
+    testWidgets("Run through the mini-mock-1 exam",
+          (WidgetTester tester) async {
+        await tester.pump(const Duration(seconds: 1));
+        tester.printToConsole('Testing exam date feature');
+        await loginTest(tester);
+        await tester.pumpAndSettle();
+
+        expect(find.text('Mini-Mocks'), findsOneWidget);
+        await tester.tap(find.text('Mini-Mocks'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Mini-Mock 1'), findsOneWidget);
+        expect(find.byIcon(Icons.lock_open_sharp), findsAny);
+        await tester.tap(find.text('Mini-Mock 1'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Begin Exam'), findsOneWidget);
+        await tester.tap(find.text('Begin Exam'));
+        await tester.pumpAndSettle();
+
+        // Check if navigation works
+        expect(find.text('Question 1/25'), findsOneWidget);
+        expect(find.byIcon(Icons.arrow_forward), findsOneWidget);
+        await tester.tap(find.byIcon(Icons.arrow_forward));
+        await tester.pumpAndSettle();
+        expect(find.text('Question 2/25'), findsOneWidget);
+        expect(find.byIcon(Icons.arrow_back), findsOneWidget);
+        await tester.tap(find.byIcon(Icons.arrow_back));
+        await tester.pumpAndSettle();
+        expect(find.text('Question 1/25'), findsOneWidget);
+
+        // Check flagging system works
+        expect(find.text('Flag for review'), findsOneWidget);
+        await tester.tap(find.text('Flag for review'));
+        await tester.pumpAndSettle();
+        expect(find.text('Flagged'), findsOneWidget);
+
+        // Check review page works
+        await tester.tap(find.text('Review Page'));
+        await tester.pumpAndSettle();
+        // await tester.tap(find.text('Ranking Questions (Question 1 - 13)'));
+        // await tester.pumpAndSettle();
+        expect(find.byIcon(Icons.flag), findsOneWidget);
+
+        await tester.tap(find.text('1'));
+        await tester.pumpAndSettle();
+        expect(find.text('Question 1/25'), findsOneWidget);
+
+        // Complete the exam
+        await tester.tap(find.text('Review Page'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Complete'));
+        await tester.pumpAndSettle();
+      });
+
+    testWidgets("Test Mobile Ranking UI",
+            (WidgetTester tester) async {
+
+            // Set the screen size
+            final mobileSize = Size(580, 860);
+            tester.view.physicalSize = mobileSize;
+            tester.view.devicePixelRatio = 1.0;
+            addTearDown(tester.view.resetPhysicalSize);
+
+            await tester.pump(const Duration(seconds: 1));
+            tester.printToConsole('Testing exam date feature');
+            await loginTest(tester);
+            await tester.pumpAndSettle();
+
+            tester.printToConsole('scroll');
+
+            // Scrollable field is required as other flutter finds too many scrollables and throws a bad state error
+            await tester.scrollUntilVisible(
+              find.text('Mini-Mocks'),
+              100.0,
+              scrollable: find.byType(Scrollable).last
+            );
+            await tester.pumpAndSettle();
+            tester.printToConsole('scrolling');
+            expect(find.text('Mini-Mocks'), findsOneWidget);
+            await tester.tap(find.text('Mini-Mocks'));
+            await tester.pumpAndSettle();
+
+            expect(find.text('Mini-Mock 1'), findsOneWidget);
+            expect(find.byIcon(Icons.lock_open_sharp), findsAny);
+            await tester.tap(find.text('Mini-Mock 1'));
+            await tester.pumpAndSettle();
+
+            await tester.scrollUntilVisible(
+              find.text('Begin Exam'),
+              100.0,
+              scrollable: find.byType(Scrollable).last
+            );
+            await tester.pumpAndSettle();
+            expect(find.text('Begin Exam'), findsOneWidget);
+            await tester.tap(find.text('Begin Exam'));
+            await tester.pumpAndSettle();
+            expect(find.text('1/25'), findsOneWidget);
+
+
+            List<ValueKey<String>> expectedOrder = [ValueKey('A'), ValueKey('B'), ValueKey('C'), ValueKey('D'), ValueKey('E')];
+            var listTiles = tester.widgetList<Draggable<String>>(
+              find.byWidgetPredicate((widget) => widget is Draggable<String>),
+            );
+
+            // Verify the number of items matches
+            expect(listTiles.length, expectedOrder.length);
+            // Verify the order of items
+            for (var i = 0; i < expectedOrder.length; i++) {
+                var listTile = listTiles.elementAt(i);
+                expect(listTile.key, expectedOrder[i]);
+            }
+
+            // Move A to B: ['A','B','C','D','E'] -> ['B','A','C','D','E']
+            Offset optionPosition = tester.getCenter(find.byKey(ValueKey('A')));
+            Offset targetPosition = tester.getCenter(find.byKey(ValueKey('B')));
+            // Calculate the required distance for the drag function (requires offset of a tile's height)
+            double yOffset = targetPosition.dy - optionPosition.dy;
+            // Simulate dragging option 1 from its position to the position of option 2
+            await tester.dragFrom(optionPosition, Offset(0, yOffset));
+            await tester.pumpAndSettle();
+
+            expectedOrder = [ValueKey('B'), ValueKey('A'), ValueKey('C'), ValueKey('D'), ValueKey('E')];
+            listTiles = tester.widgetList<Draggable<String>>(
+              find.byWidgetPredicate((widget) => widget is Draggable<String>),
+            );
+
+            // Verify the number of items matches
+            expect(listTiles.length, expectedOrder.length);
+            // Verify the order of items
+            for (var i = 0; i < expectedOrder.length; i++) {
+                var listTile = listTiles.elementAt(i);
+                expect(listTile.key, expectedOrder[i]);
+            }
+        });
+
+    testWidgets("Test Multiple Choice UI",
+            (WidgetTester tester) async {
+          await tester.pump(const Duration(seconds: 1));
+          tester.printToConsole('Testing exam date feature');
+          await loginTest(tester);
+          await tester.pumpAndSettle();
+
+          expect(find.text('Mini-Mocks'), findsOneWidget);
+          await tester.tap(find.text('Mini-Mocks'));
+          await tester.pumpAndSettle();
+
+          expect(find.text('Mini-Mock 1'), findsOneWidget);
+          expect(find.byIcon(Icons.lock_open_sharp), findsAny);
+          await tester.tap(find.text('Mini-Mock 1'));
+          await tester.pumpAndSettle();
+
+          expect(find.text('Begin Exam'), findsOneWidget);
+          await tester.tap(find.text('Begin Exam'));
+          await tester.pumpAndSettle();
+          expect(find.text('Question 1/25'), findsOneWidget);
+
+          await tester.tap(find.text('Review Page'));
+          await tester.pumpAndSettle();
+          await tester.tap(find.text('14'));
+          await tester.pumpAndSettle();
+          expect(find.text('Question 14/25'), findsOneWidget);
+
+          // No options have been selected
+          expect(find.byWidgetPredicate((widget) {
+            return widget is Checkbox && widget.value == true;
+          }), findsNothing);
+
+          // Tap 4 choices and ensure only 3 are selected
+          await tester.tap(find.byKey(ValueKey('A')));
+          await tester.tap(find.byKey(ValueKey('B')));
+          await tester.tap(find.byKey(ValueKey('C')));
+          await tester.tap(find.byKey(ValueKey('D')));
+          await tester.pumpAndSettle();
+          expect(find.byWidgetPredicate((widget) {
+            return widget is Checkbox && widget.value == true;
+          }), findsExactly(3));
+
+          // Unselect the options
+          await tester.tap(find.byKey(ValueKey('A')));
+          await tester.tap(find.byKey(ValueKey('B')));
+          await tester.tap(find.byKey(ValueKey('C')));
+          await tester.pumpAndSettle();
+          expect(find.byWidgetPredicate((widget) {
+            return widget is Checkbox && widget.value == true;
+          }), findsNothing);
+        });
+  });
+}

@@ -9,9 +9,10 @@ import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flashcard_x/utils/authentication.dart';
 import 'package:flashcard_x/utils/page_transition.dart';
 import 'package:flutter/material.dart';
-
 import '../screens/calendar_screen.dart';
 import '../screens/flashcard_editor_screen.dart';
+import 'package:flashcard_x/screens/fullmock_landing.dart';
+import 'package:flashcard_x/widgets/design_main.dart';
 
 class DrawMain extends StatelessWidget {
   const DrawMain({super.key});
@@ -21,36 +22,39 @@ class DrawMain extends StatelessWidget {
     return Drawer(
         child: Column(
       children: [
-        const SizedBox(width: 100, height: 32),
+        const SizedBox(width: 100, height: 16),
         MouseRegion(
-          cursor: SystemMouseCursors.click,
-          child: GestureDetector(
-            child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  Text(
-                    "MedicRecall",
-                    textAlign: TextAlign.center,
-                    //style: TextStyle(
-                      //fontSize: 2,
-                    //),
-                  ),
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+                child:
+                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                   SizedBox(
                     width: 32,
                     height: 32,
                     child: FittedBox(
-                      child: Image(
-                        image: AssetImage("assets/newlogo.png"),
+                      child: ColorFiltered(
+                        colorFilter: ColorFilter.mode(
+                          Theme.of(context).appBarTheme.iconTheme?.color ??
+                              Colors.white,
+                          BlendMode.srcIn,
+                        ),
+                        child: Image(
+                          image: AssetImage('assets/newlogo.png'),
+                        ),
                       ),
                     ),
-                  )
+                  ),
+                  SizedBox(width:4),
+                  const Text(
+                    "MedicRecall",
+                    textAlign: TextAlign.center,
+                  ),
                 ]),
-            onTap: () => Navigator.push(
-                  context,
-                  MoveRightRoute(page: const Landing()),
-                )
-          )
-          ),
+                onTap: () => Navigator.push(
+                      context,
+                      MoveRightRoute(page: const Landing()),
+                    ))),
+        const SizedBox(width: 100, height: 16),
         ListTile(
             key: const ValueKey('Flashcards'),
             leading: const Icon(Icons.amp_stories),
@@ -74,7 +78,6 @@ class DrawMain extends StatelessWidget {
             key: const ValueKey('Flashcard Editor'),
             leading: const Icon(Icons.rate_review),
             title: const Text('Create New Flashcards'),
-
             onTap: () {
               Navigator.push(
                 context,
@@ -108,11 +111,21 @@ class DrawMain extends StatelessWidget {
             key: const ValueKey('Mini-Mocks'),
             leading: const Icon(Icons.assignment_outlined),
             title: const Text('Mini-Mocks'),
-
             onTap: () {
               Navigator.push(
                 context,
                 MoveRightRoute(page: const MiniMockLanding()),
+              );
+            }),
+         ListTile(
+            key: const ValueKey('Full-Sized Mock'),
+            leading: const Icon(Icons.assignment_outlined),
+            title: const Text('Full-Sized Mock'),
+
+            onTap: () {
+              Navigator.push(
+                context,
+                MoveRightRoute(page: const FullMockLanding()),
               );
             }),
         /*
@@ -192,9 +205,9 @@ class DrawMain extends StatelessWidget {
                 Icons.logout,
                 color: Colors.red,
               ),
-              title: const Text(
+              title: Text(
                 'Logout',
-                style: TextStyle(color: Colors.red),
+                style: TextStyle(color: Colors.red[400]),
               ),
               onTap: () {
                 Authentication.signOut(context: context);
@@ -208,4 +221,3 @@ class DrawMain extends StatelessWidget {
     ));
   }
 }
-

@@ -36,9 +36,12 @@ class MyTheme {
       titleTextStyle: TextStyle(
         fontFamily: 'Akshar',
         color: Color.fromRGBO(21, 58, 103, 1),
-        fontSize: 21,
+        fontSize: 23,
         fontWeight: FontWeight.bold,
       ),
+    ),
+    checkboxTheme: CheckboxThemeData(
+      side: BorderSide(color: Color.fromRGBO(21, 58, 103, 1)),
     ),
     dropdownMenuTheme: const DropdownMenuThemeData(
       // Set the color of the dropdown menu text
@@ -46,36 +49,40 @@ class MyTheme {
       inputDecorationTheme: InputDecorationTheme(
         // Set the color of the underline for the dropdown menu
         enabledBorder: UnderlineInputBorder(
-          borderSide: BorderSide(color: Colors.deepPurpleAccent), // Set underline color to white
+          borderSide: BorderSide(
+              color: Colors.deepPurpleAccent), // Set underline color to white
         ),
       ),
     ),
     colorScheme: ColorScheme.fromSwatch().copyWith(
       secondary: const Color.fromARGB(61, 71, 173, 224),
     ),
-    scaffoldBackgroundColor: Colors.white,
+    scaffoldBackgroundColor: Colors.grey[200],
     // using this for `Reset` button color
     primaryColor: const Color(0xFFE6EDF2),
     // using this for `Reset` shadow1 color
     shadowColor: const Color.fromARGB(255, 180, 193, 203),
     // using this for `Reset` shadow2 color
     splashColor: Colors.white,
-    textTheme: const TextTheme(
-      bodyLarge: TextStyle(color: Colors.grey, fontFamily: 'Akshar'),
+    textTheme: TextTheme(
+      bodyLarge: const TextStyle(color: Colors.grey, fontFamily: 'Akshar'),
       // navbar text colour
-      headlineSmall: TextStyle(color: Colors.black87, fontFamily: 'Akshar'),
-      bodySmall: TextStyle(color: Colors.blueAccent, fontFamily: 'Akshar'),
-      titleMedium: TextStyle(color: Colors.black, fontFamily: 'Akshar'),
-      bodyMedium: TextStyle(
+      headlineSmall:
+          const TextStyle(color: Colors.black87, fontFamily: 'Akshar'),
+      bodySmall:
+          const TextStyle(color: Colors.blueAccent, fontFamily: 'Akshar'),
+      titleMedium: const TextStyle(color: Colors.black, fontFamily: 'Akshar'),
+      bodyMedium: const TextStyle(
           color: Color.fromRGBO(21, 58, 103, 1), fontFamily: 'Akshar'),
-      displayLarge: TextStyle(fontFamily: 'Akshar'),
-      displayMedium: TextStyle(fontFamily: 'Akshar'),
-      displaySmall: TextStyle(fontFamily: 'Akshar'),
-      headlineMedium : TextStyle(fontFamily: 'Akshar'),
-      titleLarge: TextStyle(fontFamily: 'Akshar'),
-      titleSmall: TextStyle(fontFamily: 'Akshar'),
-      labelLarge: TextStyle(fontFamily: 'Akshar'),
+      displayLarge: const TextStyle(fontFamily: 'Akshar'),
+      displayMedium: const TextStyle(fontFamily: 'Akshar'),
+      displaySmall: const TextStyle(fontFamily: 'Akshar'),
+      headlineMedium: const TextStyle(fontFamily: 'Akshar'),
+      titleLarge: TextStyle(color: Colors.blueGrey[700], fontFamily: 'Akshar'),
+      titleSmall: TextStyle(color: Colors.blueGrey[400], fontFamily: 'Akshar'),
+      labelLarge: const TextStyle(fontFamily: 'Akshar'),
     ),
+    disabledColor: Colors.red,
   );
 
   //*************   D  A  R  K     T  H  E  M  E   **************//
@@ -85,7 +92,8 @@ class MyTheme {
     fontFamily: 'Akshar',
     hintColor: Colors.blueGrey[200],
   ).copyWith(
-    listTileTheme: const ListTileThemeData(iconColor: Colors.white),
+    listTileTheme: const ListTileThemeData(
+        iconColor: Colors.white, textColor: Colors.white),
     // to change list tile icons in navbar
     elevatedButtonTheme: ElevatedButtonThemeData(
         style: ButtonStyle(
@@ -101,40 +109,49 @@ class MyTheme {
         fontWeight: FontWeight.bold,
       ),
     ),
+    checkboxTheme: CheckboxThemeData(
+      side: BorderSide(color: Colors.white),
+    ),
     dropdownMenuTheme: const DropdownMenuThemeData(
       // Set the color of the dropdown menu text
       textStyle: TextStyle(color: Colors.white),
-  inputDecorationTheme: InputDecorationTheme(
-  // Set the color of the underline for the dropdown menu
-  enabledBorder: UnderlineInputBorder(
-  borderSide: BorderSide(color: Colors.white), // Set underline color to white
-  ),
-  ),
+      inputDecorationTheme: InputDecorationTheme(
+        // Set the color of the underline for the dropdown menu
+        enabledBorder: UnderlineInputBorder(
+          borderSide:
+              BorderSide(color: Colors.white), // Set underline color to white
+        ),
+      ),
     ),
     colorScheme: ColorScheme.fromSwatch().copyWith(
       secondary: const Color.fromARGB(255, 255, 255, 255),
     ),
-    scaffoldBackgroundColor: const Color.fromARGB(255, 47, 106, 161),
+    scaffoldBackgroundColor: const Color.fromARGB(255, 47, 78, 110),
+    drawerTheme: const DrawerThemeData(
+      backgroundColor: Color.fromARGB(255, 47, 78, 110),
+    ),
     // using this for `Reset` button color
-    primaryColor: const Color.fromARGB(255, 47, 106, 161),
+    primaryColor: const Color.fromARGB(255, 47, 78, 110),
     // using this for `Reset` shadow1 color
     shadowColor: Colors.black,
     // using this for `Reset` shadow2 color
     splashColor: Colors.white12,
-    textTheme: const TextTheme(
-      bodyLarge: TextStyle(color: Colors.white, fontFamily: 'Akshar'),
+    textTheme: TextTheme(
+      bodyLarge: const TextStyle(color: Colors.white, fontFamily: 'Akshar'),
       // navbar text colour
-      bodyMedium: TextStyle(color: Colors.white, fontFamily: 'Akshar'),
-      headlineSmall: TextStyle(color: Colors.white, fontFamily: 'Akshar'),
-      bodySmall: TextStyle(color: Color(0xFF253341), fontFamily: 'Akshar'),
-      titleMedium: TextStyle(color: Colors.white, fontFamily: 'Akshar'),
-      displayLarge: TextStyle(fontFamily: 'Akshar'),
-      displayMedium: TextStyle(fontFamily: 'Akshar'),
-      displaySmall: TextStyle(fontFamily: 'Akshar'),
-      headlineMedium: TextStyle(fontFamily: 'Akshar'),
-      titleLarge: TextStyle(fontFamily: 'Akshar'),
-      titleSmall: TextStyle(fontFamily: 'Akshar'),
-      labelLarge: TextStyle(fontFamily: 'Akshar'),
+      bodyMedium: const TextStyle(color: Colors.white, fontFamily: 'Akshar'),
+      headlineSmall: const TextStyle(color: Colors.white, fontFamily: 'Akshar'),
+      bodySmall:
+          const TextStyle(color: Color(0xFF253341), fontFamily: 'Akshar'),
+      titleMedium: const TextStyle(color: Colors.white, fontFamily: 'Akshar'),
+      displayLarge: const TextStyle(fontFamily: 'Akshar'),
+      displayMedium: const TextStyle(fontFamily: 'Akshar'),
+      displaySmall: const TextStyle(fontFamily: 'Akshar'),
+      headlineMedium: const TextStyle(fontFamily: 'Akshar'),
+      titleLarge: TextStyle(color: Colors.blueGrey[300], fontFamily: 'Akshar'),
+      titleSmall: TextStyle(color: Colors.grey[400], fontFamily: 'Akshar'),
+      labelLarge: const TextStyle(fontFamily: 'Akshar'),
     ),
+    disabledColor: Colors.grey[400],
   );
 }
