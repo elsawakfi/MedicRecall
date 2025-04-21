@@ -38,7 +38,7 @@ class HomePageState extends State<HomePage> {
   Map<String, bool> checked = {};
   Map<String, int> seenCards = {};
   Map<String, int> totalCards = {};
-  late DateTime testDay; 
+  late DateTime testDay;
   late DateTime _firstStudyDate;
   late Map<DateTime?, List<Event>> selectedEvents;
   late CollectionReference _eventsCollectionRef;
@@ -114,8 +114,6 @@ class HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     getData();
-   
-  
   }
 
   Future<void> getData() async {
@@ -124,22 +122,16 @@ class HomePageState extends State<HomePage> {
       selectedEvents = {};
       loading = true;
     });
-    await  getUser();
-    
+    await getUser();
+    await userData();
     await getStats();
-   
     await getTopics();
       
-      setState(() {
+    setState(() {
       loading = false;
     });
-
-    
-
     //issue with getFirstStudyDay, takes too long but if you put it as the first getter function
-    //the page does not build 
-   
-    
+    //the page does not build
   }
 
   @override
@@ -179,32 +171,24 @@ class HomePageState extends State<HomePage> {
                         title: eventTitle,
                         color: Colors.yellow
                         );
-    
-   
+
     if (selectedEvents[date] == null) {
       selectedEvents[date] = [];
-      
     }
     selectedEvents[date]?.add(newEvent);
     QuerySnapshot querySnapshot = await _eventsCollectionRef
         .where("date", isEqualTo: Timestamp.fromDate(date))
         .get();
-   
-    
+
      List<String> updatedEvents =
         selectedEvents[date]?.map((e) => e.title).toList() ?? [];
     
     if (querySnapshot.docs.isNotEmpty) {
     String docId = querySnapshot.docs.first.id;
-   
-   
 
     // Update Firestore document
     await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
-    
   } else {
-    
-
     // If no document exists, create a new one
     DocumentReference newDoc = await _eventsCollectionRef.add({
       "date": Timestamp.fromDate(date),
@@ -240,49 +224,54 @@ class HomePageState extends State<HomePage> {
     } else {
       user = auth.currentUser!;
     }
+  }
+
+  Future<void> userData() async {
     QuerySnapshot querySnapshot =
-        await users.where("userID", isEqualTo: user.uid).get();
+    await users.where("userID", isEqualTo: user.uid).get();
     setState(() {
       name = querySnapshot.docs.last["name"];
       id = querySnapshot.docs.last.id;
       topicCount = querySnapshot.docs.last["topicCount"];
       topicLastSeen = querySnapshot.docs.last["topicLastSeen"];
-      testDay = querySnapshot.docs.last['TestDay'].toDate();
+      try {
+        testDay = querySnapshot.docs.last['TestDay'].toDate();
+      }catch (e){
+        // If testDay hasn't been set, assign a default value
+        testDay = DateTime.now();
+      }
       _firstStudyDate = DateTime.fromMicrosecondsSinceEpoch(
-            querySnapshot.docs.last["firstStudyDay"].microsecondsSinceEpoch); 
-      // loading = false;
-    }); 
-    try{   
+          querySnapshot.docs.last["firstStudyDay"].microsecondsSinceEpoch);
+    });
+    try{
       _eventsCollectionRef =
           FirebaseFirestore.instance.collection('users/$id/events');
 
       var snapshots = await _eventsCollectionRef.get();
-       for (var doc in snapshots.docs) {
+      for (var doc in snapshots.docs) {
         var data = doc.data() as Map<String, dynamic>;
         if (data.containsKey('date') && data.containsKey('events')) {
           Timestamp? timestamp = data['date'] as Timestamp?;
           List<dynamic>? eventsList = data['events'] as List<dynamic>?;
-          
+
           if (timestamp != null && eventsList != null) {
             DateTime date = timestamp.toDate();
             date = DateTime(date.year, date.month, date.day);
-            
+
             List<String> events = eventsList.map((e) => e.toString()).toList();
-            
-            
+
+
             selectedEvents[date] = events.map((title) => Event(
-              title: title,
-              color : Colors.yellow
+                title: title,
+                color : Colors.yellow
             )).toList();
           }
-        } 
-
         }
-        } catch(e){
-       print("Error loading events from DB: $e");
-      } 
- 
-    
+
+      }
+    } catch(e){
+      print("Error loading events from DB: $e");
+    }
   }
 
   Future<void> getStats() async {
@@ -333,7 +322,7 @@ class HomePageState extends State<HomePage> {
     map[key] = 1;
   }
 
- 
+
 
   //Formats the checkbox categories according to colour depending on whether the review date is due and how many flashcards have been seen.
   List<ExpansionTile> makeCheckboxList()   {
