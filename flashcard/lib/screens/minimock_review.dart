@@ -355,7 +355,9 @@ class MiniMockReviewState extends State<MiniMockReview> {
                                                           const EdgeInsets.all(
                                                               4.0),
                                                       child: _buildQuestionButton(
-                                                          index), // Use the new method
+                                                          index +
+                                                              widget
+                                                                  .rankingLength), // Use the new method
                                                     ),
                                                   ),
                                                 )))

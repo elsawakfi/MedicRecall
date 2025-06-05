@@ -45,17 +45,20 @@ class FullMockReviewState extends State<FullMockReview> {
   String _displayTime = '';
   late int remainingSeconds;
 
-//Flagging Widget for the Ranking Questions
   Widget _buildQuestionButton(int questionNumber) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double buttonWidth = screenWidth * 0.2; // 20% of screen width
+    double buttonHeight = 50;
+
     bool isFlagged = widget.flaggedQuestions.length > questionNumber &&
         widget.flaggedQuestions[questionNumber] == true;
     return SizedBox(
-      width: 90, // Ensure fixed width
-      height: 50, // Ensure fixed height
+      width: buttonWidth.clamp(60, 100), // Ensure fixed width
+      height: buttonHeight, // Ensure fixed height
       child: ElevatedButton(
         onPressed: () => _returnToFullMock(context, questionNumber),
         style: ElevatedButton.styleFrom(
-          padding: EdgeInsets.all(8), // Consistent padding
+          padding: EdgeInsets.all(8),
           alignment: Alignment.center,
         ),
         child: Row(
@@ -348,8 +351,10 @@ class FullMockReviewState extends State<FullMockReview> {
                                                         padding:
                                                             const EdgeInsets
                                                                 .all(4.0),
-                                                        child: _buildMultipleChoiceButton(
-                                                            index), // Use the new method
+                                                        child: _buildQuestionButton(
+                                                            index +
+                                                                widget
+                                                                    .rankingLength), // Use the new method
                                                       ),
                                                     ),
                                                   )))
