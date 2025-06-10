@@ -253,11 +253,14 @@ class StudySessionManager {
           dynamic>; // Turn snapshot into a data type that can be searched to see if testDay exists
       if (!data.containsKey('TestDay')) return generatedEvents;
       DateTime testDay = querySnapshot.docs.last['TestDay'].toDate();
+      testDay = DateTime(testDay.year,testDay.month,testDay.day,0,0,0,0);
       // Get topics and related data from the database or pass them as arguments
       List<String>? selectedResources = await getSelectedResources(userId);
 
       DateTime firstStudyDay =
           querySnapshot.docs.last['firstStudyDay'].toDate();
+
+     firstStudyDay = DateTime(firstStudyDay.year,firstStudyDay.month,firstStudyDay.day,0,0,0,0);
 
       // Start study sessions from today (aka. the day u start study session)
       int daysUntilTest =
@@ -395,7 +398,6 @@ class StudySessionManager {
 
     for (int i = 1; i <= repetitions; i++) {
       int interval = (daysUntilTest * (i/ repetitions)).round() - 3;
-
       // Stop if we're too close to the test day
       //if (interval >= daysUntilTest - 2) continue;
 
