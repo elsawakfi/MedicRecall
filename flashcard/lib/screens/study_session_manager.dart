@@ -235,10 +235,10 @@ class StudySessionManager {
 
   /// Helper function to get review interval based on study duration
   int getReviewInterval(int daysUntilTest) {
-    if (daysUntilTest > 90) return 3; // 3 days between reviews 
-    if (daysUntilTest >= 60) return 2;  // 2 days between reviews
-    if (daysUntilTest > 30) return 1;   // 1 day between reviews
-    return 0;  // No separation between flashcards
+    if (daysUntilTest > 91) return 4; // Spacing coefficient of 4 for >91 days until exam
+    if (daysUntilTest > 60) return 3;  // Spacing coefficient of 3 for 61-90 days until exam
+    if (daysUntilTest > 30) return 2;   // Spacing coefficient of 2 for 31-60 days until exam
+    return 1;  // Spacing coefficient of 1 for 0-30 days until exam
   }
 
   /// Generates study sessions based on user preferences and test date
