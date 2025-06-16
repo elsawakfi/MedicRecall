@@ -1,7 +1,7 @@
 name: MedicRecall2 Issue Report
-description: MedicRecall2 Main Issue Report Template
+description: MedicRecall Summer Main Issue Report Template
 title: "[Type of Issue]"
-projects: ["spe-upb/2024-MedicRecall2"]
+projects: ["elsawakfi/MedicRecall"]
 body:
   - type: markdown
     attributes:
