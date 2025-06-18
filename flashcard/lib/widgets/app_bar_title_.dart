@@ -5,21 +5,22 @@ import 'drawer_widget.dart';
 // import 'package:flashcard_x/screens/exam_answers.dart'; 
 
 AppBar buildAppBar(BuildContext context, bool showBack) {
+  final isSmallScreen = MediaQuery.of(context).size.width < 600;
   return AppBar(
+    
     title: Stack(
       children: [
         Positioned(
-          top: 2.3,
+          top: 3,
           child: Image.asset(
-            'assets/app_logo4.png',
-            fit: BoxFit.cover,
-            height: 34,
-            colorBlendMode: BlendMode.srcIn,
+          'assets/newlogo.png',
+          fit: BoxFit.cover,
+          height: isSmallScreen ? 28 : 34,
           ),
         ),
         Container(
-          margin: const EdgeInsets.only(left: 32),
-          padding: const EdgeInsets.all(8.0),
+          margin: const EdgeInsets.only(left: 50),
+          padding: const EdgeInsets.all(10),
           child: const Text('MedicRecall'),
         ),
       ],
@@ -151,6 +152,7 @@ class AppScaffoldState extends State<AppScaffold> {
       bottomNavigationBar: widget.bottomNavigationBar,
       body: Column(
         children: [
+          
           ScreenTitleBar(title: widget.title),
           Expanded(child: widget.body),
         ],
