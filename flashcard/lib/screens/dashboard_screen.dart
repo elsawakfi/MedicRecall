@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
+import 'package:flashcard_x/screens/study_session_manager.dart';
 import 'package:flashcard_x/utils/firebase_wrapper.dart';
 import 'package:flashcard_x/utils/last_revised.dart';
 import 'package:flashcard_x/utils/theme_provider.dart';
 import 'package:flashcard_x/widgets/app_bar_title_.dart';
+import 'package:flashcard_x/widgets/event.dart';
 import 'package:flashcard_x/widgets/indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/screens/feed_screen.dart';
@@ -24,6 +26,7 @@ class HomePage extends StatefulWidget {
 
 class HomePageState extends State<HomePage> {
   late User user;
+  
   late String? name;
   late String? id;
   late List<dynamic>? topicCount;
@@ -35,9 +38,67 @@ class HomePageState extends State<HomePage> {
   Map<String, bool> checked = {};
   Map<String, int> seenCards = {};
   Map<String, int> totalCards = {};
+  late DateTime _firstStudyDate;
+  late DateTime testDay;
+  late Map<DateTime?, List<Event>> selectedEvents;
+  late CollectionReference _eventsCollectionRef;
+  final CollectionReference _userCollectionRef =
+      FirebaseFirestore.instance.collection('users');
+  StudySessionManager studySessionManager = StudySessionManager();
 
   double spacing = 16;
 
+
+  Future<void> userData() async {
+  //This function, retrieves all the necessary data for the flashcard tutor. 
+  //The important part is getting the events from the database and only storing the events that have a flashcard
+  //Study session scheduled in
+    QuerySnapshot querySnapshot =
+    await users.where("userID", isEqualTo: user.uid).get();
+    setState(() {
+      name = querySnapshot.docs.last["name"];
+      id = querySnapshot.docs.last.id;
+      topicCount = querySnapshot.docs.last["topicCount"];
+      topicLastSeen = querySnapshot.docs.last["topicLastSeen"];
+      try {
+        testDay = querySnapshot.docs.last['TestDay'].toDate();
+      }catch (e){
+        // If testDay hasn't been set, assign a default value
+        testDay = DateTime.now();
+      }
+      _firstStudyDate = DateTime.fromMicrosecondsSinceEpoch(
+          querySnapshot.docs.last["firstStudyDay"].microsecondsSinceEpoch);
+    });
+    try{
+      _eventsCollectionRef =
+          FirebaseFirestore.instance.collection('users/$id/events');
+
+      var snapshots = await _eventsCollectionRef.get();
+      for (var doc in snapshots.docs) {
+        var data = doc.data() as Map<String, dynamic>;
+        if (data.containsKey('date') && data.containsKey('events')) {
+          Timestamp? timestamp = data['date'] as Timestamp?;
+          List<dynamic>? eventsList = data['events'] as List<dynamic>?;
+
+          if (timestamp != null && eventsList != null) {
+            DateTime date = timestamp.toDate();
+            date = DateTime(date.year, date.month, date.day);
+
+            List<String> events = eventsList.map((e) => e.toString()).toList();
+
+
+            selectedEvents[date] = events.map((title) => Event(
+                title: title,
+                color : Colors.yellow
+            )).toList();
+          }
+        }
+
+      }
+    } catch(e){
+      print("Error loading events from DB: $e");
+    }
+  }
   Future<List> getTopicsDatabase() async {
     List<dynamic> holderList = [];
 
@@ -70,6 +131,7 @@ class HomePageState extends State<HomePage> {
     return holderList;
   }
 
+//Get all events from database, iterate over events and look for which date a flashcard topic has been scheduled 
   Future<void> getTopics() async {
     if (mounted) {
       setState(() {
@@ -99,9 +161,11 @@ class HomePageState extends State<HomePage> {
   }
 
   Future<void> getData() async {
+    selectedEvents = {};
     await getUser();
     await getStats();
     await getTopics();
+    await userData();
   }
 
   @override
@@ -176,6 +240,7 @@ class HomePageState extends State<HomePage> {
 
   //Formats the checkbox categories according to colour depending on whether the review date is due and how many flashcards have been seen.
   List<Widget> makeCheckboxList() {
+    
 
     List<Widget> value = [];
     for (var i = 0; i < topics.length; i++) {
@@ -199,6 +264,39 @@ class HomePageState extends State<HomePage> {
       int nextReviewDateMilliseconds = (((dateToColourMap[topicCount![i]]! * 24 * 60 * 60) + topicLastSeen![i].seconds) * 1000).toInt();
       DateTime nextReviewDate = DateTime.fromMillisecondsSinceEpoch(nextReviewDateMilliseconds, isUtc: true).toLocal();
       String formattedDate = DateFormat('dd/MM/yyy').format(nextReviewDate);
+      Event? eventsForDate;
+      Event? futureEvents;
+      DateTime now = DateTime.now();
+      //To test this feature locally please change "_firstStudyDate.day" to "_firstStudyDate.day-2" and then edit 
+      //One of the flashcard decks in the calendar to be before the first study day. This will trigger the new 
+      //features 
+      DateTime targetDate = DateTime(_firstStudyDate.year, _firstStudyDate.month, _firstStudyDate.day, 0, 0, 0, 0);
+      DateTime remainingDays = DateTime(now.year,now.month,now.day+1,0,0,0,0);
+      List<(String,String)> allTopicNames = [];
+      List<(String,String)> onlyFutureNames = [];
+      
+      //Having all the events since the first study day lets us know how many times the user has reviewed a specific deck
+      //We also need the remaining days to ensure that we do not reschedule an event too often
+      while (targetDate.isBefore(testDay)){
+        eventsForDate = selectedEvents[targetDate]?.last;
+       
+        if (eventsForDate != null && eventsForDate.title.contains("Flashcards")){
+          formattedDate = DateFormat('dd/MM/yyy').format(targetDate);
+          allTopicNames.add((eventsForDate.title,formattedDate));
+        }
+        
+        targetDate = targetDate.add(Duration(days: 1));
+      }
+
+      while (remainingDays.isBefore(testDay)){
+        futureEvents = selectedEvents[remainingDays]?.last;
+        if (futureEvents != null && futureEvents.title.contains("Flashcards")){
+           formattedDate = DateFormat('dd/MM/yyy').format(targetDate);
+          onlyFutureNames.add((futureEvents.title,formattedDate));
+        }
+        remainingDays = remainingDays.add(Duration(days: 1));
+      }
+      
 
       // Section is grey if it hasn't been seen at all, Green if next review date isn't gone past and Red if next review date has none past
       if (dateToColourMap[topicCount![i]]! > howLongAgoRevisedDays) {
@@ -213,6 +311,8 @@ class HomePageState extends State<HomePage> {
         tColour = Color(0xFFD9D9D9);
         formattedDate = "N/A";
       }
+
+      
 
       value.add(Padding(padding: EdgeInsets.only(bottom: 8, left: 15, right: 15), child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
