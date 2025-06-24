@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flashcard_x/screens/calendar_screen.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flashcard_x/screens/study_session_manager.dart';
 import 'package:flashcard_x/utils/firebase_wrapper.dart';
@@ -42,6 +43,7 @@ class HomePageState extends State<HomePage> {
   late DateTime testDay;
   late Map<DateTime?, List<Event>> selectedEvents;
   late CollectionReference _eventsCollectionRef;
+  late List<String> topicNames = [];
   final CollectionReference _userCollectionRef =
       FirebaseFirestore.instance.collection('users');
   StudySessionManager studySessionManager = StudySessionManager();
@@ -74,6 +76,8 @@ class HomePageState extends State<HomePage> {
           FirebaseFirestore.instance.collection('users/$id/events');
 
       var snapshots = await _eventsCollectionRef.get();
+      
+     
       for (var doc in snapshots.docs) {
         var data = doc.data() as Map<String, dynamic>;
         if (data.containsKey('date') && data.containsKey('events')) {
@@ -85,16 +89,25 @@ class HomePageState extends State<HomePage> {
             date = DateTime(date.year, date.month, date.day);
 
             List<String> events = eventsList.map((e) => e.toString()).toList();
-
-
+            
+            for (String e in events){
+             
+              if (!topicNames.contains(e)){
+                 
+                  events.remove(e);
+                  
+              }
+            }
             selectedEvents[date] = events.map((title) => Event(
                 title: title,
                 color : Colors.yellow
             )).toList();
+            
           }
         }
 
       }
+     
     } catch(e){
       print("Error loading events from DB: $e");
     }
@@ -140,12 +153,13 @@ class HomePageState extends State<HomePage> {
     }
     
     var holderList = await getTopicsDatabase();
+    
 
     if (mounted) {
       setState(() {
         topics = holderList[0];
         checked = holderList[1];
-        loading = false;
+        topicNames = topics.map((e) => '${e['topic']} Flashcards').toList();
       });
     }
   }
@@ -161,11 +175,22 @@ class HomePageState extends State<HomePage> {
   }
 
   Future<void> getData() async {
-    selectedEvents = {};
+    //DO NOT CHANGE THE ORDER OF THIS OTHERWISE PAGE WILL NOT BUILD
+    setState((){
+      name = "loading...";
+      selectedEvents = {};
+      loading = true;
+    });
     await getUser();
-    await getStats();
     await getTopics();
     await userData();
+    await getStats();
+    
+    setState(() {
+      loading = false;
+    });
+    
+    
   }
 
   @override
@@ -241,10 +266,10 @@ class HomePageState extends State<HomePage> {
   //Formats the checkbox categories according to colour depending on whether the review date is due and how many flashcards have been seen.
   List<Widget> makeCheckboxList() {
     
-
+    
     List<Widget> value = [];
     for (var i = 0; i < topics.length; i++) {
-
+   
       var map = topics[i];
       var text = seenCards[map["topic"]] == null
           ? "0"
@@ -263,39 +288,20 @@ class HomePageState extends State<HomePage> {
 
       int nextReviewDateMilliseconds = (((dateToColourMap[topicCount![i]]! * 24 * 60 * 60) + topicLastSeen![i].seconds) * 1000).toInt();
       DateTime nextReviewDate = DateTime.fromMillisecondsSinceEpoch(nextReviewDateMilliseconds, isUtc: true).toLocal();
-      String formattedDate = DateFormat('dd/MM/yyy').format(nextReviewDate);
-      Event? eventsForDate;
-      Event? futureEvents;
-      DateTime now = DateTime.now();
-      //To test this feature locally please change "_firstStudyDate.day" to "_firstStudyDate.day-2" and then edit 
-      //One of the flashcard decks in the calendar to be before the first study day. This will trigger the new 
-      //features 
-      DateTime targetDate = DateTime(_firstStudyDate.year, _firstStudyDate.month, _firstStudyDate.day, 0, 0, 0, 0);
-      DateTime remainingDays = DateTime(now.year,now.month,now.day+1,0,0,0,0);
-      List<(String,String)> allTopicNames = [];
-      List<(String,String)> onlyFutureNames = [];
-      
-      //Having all the events since the first study day lets us know how many times the user has reviewed a specific deck
-      //We also need the remaining days to ensure that we do not reschedule an event too often
-      while (targetDate.isBefore(testDay)){
-        eventsForDate = selectedEvents[targetDate]?.last;
-       
-        if (eventsForDate != null && eventsForDate.title.contains("Flashcards")){
-          formattedDate = DateFormat('dd/MM/yyy').format(targetDate);
-          allTopicNames.add((eventsForDate.title,formattedDate));
+      String formattedDate = DateFormat('dd/MM/yyy').format(nextReviewDate); 
+      print(selectedEvents);
+      if (selectedEvents.isNotEmpty){
+        for (final entry in selectedEvents.entries){
+        for (final event in entry.value){
+          if (event.title.contains(map["topic"])){
+            formattedDate = entry.key.toString();
+            formattedDate = formattedDate.substring(0,10);
+          }
         }
-        
-        targetDate = targetDate.add(Duration(days: 1));
-      }
-
-      while (remainingDays.isBefore(testDay)){
-        futureEvents = selectedEvents[remainingDays]?.last;
-        if (futureEvents != null && futureEvents.title.contains("Flashcards")){
-           formattedDate = DateFormat('dd/MM/yyy').format(targetDate);
-          onlyFutureNames.add((futureEvents.title,formattedDate));
+        }}
+        else{
+          formattedDate = "N/A";
         }
-        remainingDays = remainingDays.add(Duration(days: 1));
-      }
       
 
       // Section is grey if it hasn't been seen at all, Green if next review date isn't gone past and Red if next review date has none past
@@ -309,8 +315,12 @@ class HomePageState extends State<HomePage> {
       if (topicCount![i] == 0) {
         // topicColour = Colors.grey;
         tColour = Color(0xFFD9D9D9);
-        formattedDate = "N/A";
+        // formattedDate = "N/A";
+        
+        
       }
+     
+
 
       
 
