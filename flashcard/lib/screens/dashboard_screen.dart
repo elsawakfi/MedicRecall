@@ -144,6 +144,47 @@ class HomePageState extends State<HomePage> {
     return holderList;
   }
 
+ Future<void> addSingleEvent(
+      DateTime date, String eventTitle, User user) async {
+    date = DateTime(date.year, date.month, date.day);
+    
+    //The delete single event function updates the UI in real time so I just copied the structure of that function 
+    Event newEvent =  Event(
+                        title: eventTitle,
+                        color: Colors.yellow
+                        );
+
+    if (selectedEvents[date] == null) {
+      selectedEvents[date] = [];
+    }
+    selectedEvents[date]?.add(newEvent);
+    QuerySnapshot querySnapshot = await _eventsCollectionRef
+        .where("date", isEqualTo: Timestamp.fromDate(date))
+        .get();
+
+     List<String> updatedEvents =
+        selectedEvents[date]?.map((e) => e.title).toList() ?? [];
+    
+    if (querySnapshot.docs.isNotEmpty) {
+    String docId = querySnapshot.docs.first.id;
+
+    // Update Firestore document
+    await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
+  } else {
+    // If no document exists, create a new one
+    DocumentReference newDoc = await _eventsCollectionRef.add({
+      "date": Timestamp.fromDate(date),
+      "events": [eventTitle] // Start with just the new event
+    });
+    
+    String newDocId = newDoc.id;
+    await _eventsCollectionRef.doc(newDocId).update({"events": updatedEvents});
+
+  }
+ 
+    setState(() {});
+  }
+
 //Get all events from database, iterate over events and look for which date a flashcard topic has been scheduled 
   Future<void> getTopics() async {
     if (mounted) {
@@ -265,7 +306,8 @@ class HomePageState extends State<HomePage> {
 
   //Formats the checkbox categories according to colour depending on whether the review date is due and how many flashcards have been seen.
   List<Widget> makeCheckboxList() {
-    
+    DateTime today = DateTime.now();
+    today = DateTime(today.year,today.month,today.day,0,0,0,0);
     
     List<Widget> value = [];
     for (var i = 0; i < topics.length; i++) {
@@ -304,34 +346,53 @@ class HomePageState extends State<HomePage> {
         else{
           formattedDate = "N/A";
         }
-      if (dateInCalendar!.isBefore(DateTime.now())){
+
+      //If the user hasn't seen any cards and it is past the revision date set it red
+      //Otherwise set it to grey
+      if (seenCards[map["topic"]] == null || seenCards[map["topic"]] == 0){
+        if (dateInCalendar!.isBefore(today)){
          tColour = Color(0xFFFF9595); 
-      }
-      if (dateInCalendar.isAfter(DateTime.now()) && topicCount![i] < 5){
-          tColour = Color(0xFFD9D9D9);
-      }
-      if(dateInCalendar.isAfter(DateTime.now()) && topicCount![i] >= 9) {
-              tColour = Color(0xFFB0FFC6); 
-      }
-      // Section is grey if it hasn't been seen at all, Green if next review date isn't gone past and Red if next review date has none past
-      // if (dateToColourMap[topicCount![i]]! > howLongAgoRevisedDays) {
-      //   // topicColour = Colors.green;
-      //   tColour = Color(0xFFB0FFC6); // green
-      // } else {
-      //   // topicColour = Colors.red;
-      //   tColour = Color(0xFFFF9595); // red
-      // }
-      // if (topicCount![i] == 0) {
-      //   // topicColour = Colors.grey;
-      //   tColour = Color(0xFFD9D9D9);
-      //   // formattedDate = "N/A";
-        
-        
-      // }
-     
+        }
+        else{
+           tColour = Color(0xFFD9D9D9);
 
-
+        }
+      }
       
+      //Of the user has seen some of the cards 
+      else  {
+
+        //If the revision date is in the future 
+        if (dateInCalendar!.isAfter(today)){
+             
+             //If the user has seen all the cards set to green
+             if (seenCards[map["topic"]]! == totalCards[map["topic"]]!) tColour = Color(0xFFB0FFC6); 
+
+            //If they haven't seen all of them set it to grey
+             if(seenCards[map["topic"]]! < totalCards[map["topic"]]!) tColour = Color(0xFFD9D9D9);   
+      }
+
+        if(dateInCalendar.isBefore(today)){
+          //Reschedule or set red
+           if (seenCards[map["topic"]]! == totalCards[map["topic"]]!){
+            tColour = Color(0xFFD9D9D9); 
+            print("RESCHEDULE ${map["topic"]}\n");
+           }
+        }
+
+        if(dateInCalendar.isAtSameMomentAs(today)){
+
+          //reschedule if it is green, or set red??
+          if (seenCards[map["topic"]]! == totalCards[map["topic"]]!){
+            tColour = Color(0xFFD9D9D9); 
+            print("RESCHEDULE ${map["topic"]}\n");
+            addSingleEvent(dateInCalendar.add(const Duration(days:6)), map["topic"], user);
+           }
+
+        }
+      
+      
+      }    
 
       value.add(Padding(padding: EdgeInsets.only(bottom: 8, left: 15, right: 15), child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
