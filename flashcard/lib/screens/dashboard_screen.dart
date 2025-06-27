@@ -320,6 +320,8 @@ class HomePageState extends State<HomePage> {
       //Number of days since topic was last revised is converted from seconds to days as an int
       var howLongAgoRevisedDays = (Timestamp.now().seconds - topicLastSeen![i].seconds) / (60 * 60 * 24);
 
+      print("${map["topic"]} last seen ${topicLastSeen![i].toDate()}\n");
+
       //A mapping of how many times the topics been seen to what the next review date gap should be. After 7 times it stays at 128 days.
       Map<int, int> dateToColourMap = {0: ((howLongAgoRevisedDays.ceil()*4)+1), 1: 2, 2: 4, 3: 8, 4: 16, 5: 32, 6: 64, 7: 128};
       // MaterialColor topicColour = Colors.green;
@@ -372,24 +374,40 @@ class HomePageState extends State<HomePage> {
              if(seenCards[map["topic"]]! < totalCards[map["topic"]]!) tColour = Color(0xFFD9D9D9);   
       }
 
-        if(dateInCalendar.isBefore(today)){
+        if(dateInCalendar.isBefore(today) || dateInCalendar.isAtSameMomentAs(today)){
           //Reschedule or set red
            if (seenCards[map["topic"]]! == totalCards[map["topic"]]!){
-            tColour = Color(0xFFD9D9D9); 
+            tColour =Color(0xFFB0FFC6);  
             print("RESCHEDULE ${map["topic"]}\n");
+            
+            //After the user has reviewed a deck once, repetition coefficient is 6 
+            //So next reviewdate = previous review date + 6 
+            //addSingleEvent(dateInCalendar.add(const Duration(days:6)), map["topic"], user);
+
+            //Above code causes an infinite loop 
+            //Adds a new event to the calendar and then runs the same code on that new event, 
+            //it gets confused 
+            
+            
+            //Reschedule needs to decrement seen cards to 0 and add a new study session according to Dr.Harris'
+            //Algorithm 
+           }
+           if (seenCards[map["topic"]] == null || seenCards[map["topic"]]! < totalCards[map["topic"]]!){
+            tColour =Color(0xFFFF9595);  
+            print("${map["topic"]} is OVERDUE \n"); 
            }
         }
 
-        if(dateInCalendar.isAtSameMomentAs(today)){
+        // if(dateInCalendar.isAtSameMomentAs(today)){
 
-          //reschedule if it is green, or set red??
-          if (seenCards[map["topic"]]! == totalCards[map["topic"]]!){
-            tColour = Color(0xFFD9D9D9); 
-            print("RESCHEDULE ${map["topic"]}\n");
-            addSingleEvent(dateInCalendar.add(const Duration(days:6)), map["topic"], user);
-           }
+        //   //reschedule if it is green, or set red??
+        //   if (seenCards[map["topic"]]! == totalCards[map["topic"]]!){
+        //     tColour = Color(0xFFD9D9D9); 
+        //     print("RESCHEDULE ${map["topic"]}\n");
+        //     addSingleEvent(dateInCalendar.add(const Duration(days:6)), map["topic"], user);
+        //    }
 
-        }
+        // }
       
       
       }    
