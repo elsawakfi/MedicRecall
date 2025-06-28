@@ -235,9 +235,10 @@ class StudySessionManager {
 
   /// Helper function to get review interval based on study duration
   int getReviewInterval(int daysUntilTest) {
-    if (daysUntilTest >= 60) return 2;  // 2 days between reviews
-    if (daysUntilTest > 30) return 1;   // 1 day between reviews
-    return 0;  // No separation between flashcards
+    if (daysUntilTest > 91) return 4; // Spacing coefficient of 4 for >91 days until exam
+    if (daysUntilTest > 60) return 3;  // Spacing coefficient of 3 for 61-90 days until exam
+    if (daysUntilTest > 30) return 2;   // Spacing coefficient of 2 for 31-60 days until exam
+    return 1;  // Spacing coefficient of 1 for 0-30 days until exam
   }
 
   /// Generates study sessions based on user preferences and test date
@@ -252,11 +253,14 @@ class StudySessionManager {
           dynamic>; // Turn snapshot into a data type that can be searched to see if testDay exists
       if (!data.containsKey('TestDay')) return generatedEvents;
       DateTime testDay = querySnapshot.docs.last['TestDay'].toDate();
+      testDay = DateTime(testDay.year,testDay.month,testDay.day,0,0,0,0);
       // Get topics and related data from the database or pass them as arguments
       List<String>? selectedResources = await getSelectedResources(userId);
 
       DateTime firstStudyDay =
           querySnapshot.docs.last['firstStudyDay'].toDate();
+
+     firstStudyDay = DateTime(firstStudyDay.year,firstStudyDay.month,firstStudyDay.day,0,0,0,0);
 
       // Start study sessions from today (aka. the day u start study session)
       int daysUntilTest =
@@ -392,17 +396,19 @@ class StudySessionManager {
     // Track last scheduled mock to maintain spacing
     DateTime? lastMockDate;
 
-    for (int i = 0; i < repetitions; i++) {
-      // Calculate intervals to spread mocks evenly, but ensure last mock is at least 2 days before test
-      int interval = (daysUntilTest * (i + 1) / (repetitions + 1)).round();
-
+    for (int i = 1; i <= repetitions; i++) {
+      int interval = (daysUntilTest * (i/ repetitions)).round() - 3;
       // Stop if we're too close to the test day
-      if (interval >= daysUntilTest - 2) continue;
+      //if (interval >= daysUntilTest - 2) continue;
 
-      DateTime targetDate = firstStudyDay.add(Duration(days: interval));
-      targetDate = DateTime(
-          targetDate.year, targetDate.month, targetDate.day, 0, 0, 0, 0);
+      //Commented out the above as Dr. Harris does want this to be scheduled closer to the test day
 
+      DateTime targetDate = DateTime(
+          firstStudyDay.year, firstStudyDay.month, firstStudyDay.day+interval, 0, 0, 0, 0);
+
+
+
+//NOT SURE ABOUT THE NECESSITY OF THE FOLLOWING FUNCTIONS ...
       // Ensure minimum spacing between mocks
       if (lastMockDate != null) {
         int minSpacing = (daysUntilTest / repetitions * 0.5).round();
@@ -423,7 +429,7 @@ class StudySessionManager {
           generatedEvents[mockExamDate] == null &&
           !await _isExcludedDay(mockExamDate, userId)) {
         generatedEvents[mockExamDate] = [
-          Event(title: "Full-sized Mock Exam ${i + 1}", color: kFullMockColor)
+          Event(title: "Full-sized Mock Exam $i", color: kFullMockColor)
         ];
         lastMockDate = mockExamDate;
       }
@@ -443,15 +449,25 @@ class StudySessionManager {
     // Track the last scheduled paper date to maintain proper spacing
     DateTime? lastPaperDate;
 
-    for (int i = 0; i < repetitions; i++) {
+    
+
+    for (int i = 1; i <= repetitions; i++) {
       // Calculate intervals to spread papers evenly, but ensure last paper is at least 2 days before test
-      int interval = (daysUntilTest * i / repetitions).round();
-      if (interval >= daysUntilTest - 2) continue;
+      int interval = (daysUntilTest * (i / repetitions)).round() - 1;
+      
+      
+      //if (interval >= daysUntilTest - 2) continue;
+      //Again think we need to ignore this to adhere to Dr. Will's new algorithms
+      
 
-      DateTime targetDate = today.add(Duration(days: interval));
-      targetDate = DateTime(
-          targetDate.year, targetDate.month, targetDate.day, 0, 0, 0, 0);
 
+      DateTime targetDate = DateTime(
+          today.year, today.month, today.day+interval, 0, 0, 0, 0);
+
+
+
+
+  //NOT SURE ABOUT THE NEXT TWO BLOCKS OF CODE AS WELL ...
       // If this is not the first paper, ensure minimum spacing from the last one
       if (lastPaperDate != null) {
         int minSpacing = (daysUntilTest / repetitions * 0.5)
@@ -475,7 +491,7 @@ class StudySessionManager {
           !await _isExcludedDay(officialPaperDate, userId)) {
         generatedEvents[officialPaperDate] = [
           Event(
-              title: "Official MSRA Practice Paper ${i + 1}",
+              title: "Official MSRA Practice Paper $i",
               color: kOfficialPaperColor)
         ];
         lastPaperDate = officialPaperDate;

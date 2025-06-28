@@ -136,7 +136,12 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
         ),
         content: Container(
           width: screenWidth < 450 ? screenWidth * 0.8 : 400,
-          child: content,
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.7,
+          ),
+          child: SingleChildScrollView(
+            child: content,
+          ),
         ),
         actions: actions,
         insetPadding: EdgeInsets.symmetric(
