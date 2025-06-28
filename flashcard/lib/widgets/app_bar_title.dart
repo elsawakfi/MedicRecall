@@ -141,14 +141,6 @@ class AppScaffoldState extends State<AppScaffold> {
       body: Column(
         children: [
           ScreenTitleBar(title: widget.title),
-          if (widget.examEndTime != null)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Text(
-                formattedRemainingTime,
-                style: theme.textTheme.subtitle1,
-              ),
-            ),
           Expanded(child: widget.body),
         ],
       ),
