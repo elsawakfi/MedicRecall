@@ -110,6 +110,10 @@ class LastRevised {
     map[key] = 1;
   }
 
+  static void _resetMap<T>(Map<T, int> map, T key) {
+    map[key] = 0;
+  }
+
   static void _updateDate(Map<String, DateTime> map, String key, DateTime newDate) {
     if (map[key] == null) {
       map[key] = newDate;

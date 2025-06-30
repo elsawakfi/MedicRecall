@@ -42,6 +42,7 @@ class HomePageState extends State<HomePage> {
   late DateTime _firstStudyDate;
   late DateTime testDay;
   late Map<DateTime?, List<Event>> selectedEvents;
+  late Map<DateTime?, List<Event>> allEvents;
   late CollectionReference _eventsCollectionRef;
   late List<String> topicNames = [];
   final CollectionReference _userCollectionRef =
@@ -89,7 +90,7 @@ class HomePageState extends State<HomePage> {
             date = DateTime(date.year, date.month, date.day);
 
             List<String> events = eventsList.map((e) => e.toString()).toList();
-            
+            allEvents[date] = events.map ((title) => Event(color: Colors.black, title: title)).toList();
             for (String e in events){
              
               if (!topicNames.contains(e)){
@@ -98,6 +99,8 @@ class HomePageState extends State<HomePage> {
                   
               }
             }
+
+
             selectedEvents[date] = events.map((title) => Event(
                 title: title,
                 color : Colors.yellow
@@ -154,16 +157,17 @@ class HomePageState extends State<HomePage> {
                         color: Colors.yellow
                         );
 
-    if (selectedEvents[date] == null) {
-      selectedEvents[date] = [];
+    if (allEvents[date] == null) {
+      
+      allEvents[date] = [];
     }
-    selectedEvents[date]?.add(newEvent);
+    allEvents[date]?.add(newEvent);
     QuerySnapshot querySnapshot = await _eventsCollectionRef
         .where("date", isEqualTo: Timestamp.fromDate(date))
         .get();
 
      List<String> updatedEvents =
-        selectedEvents[date]?.map((e) => e.title).toList() ?? [];
+        allEvents[date]?.map((e) => e.title).toList() ?? [];
     
     if (querySnapshot.docs.isNotEmpty) {
     String docId = querySnapshot.docs.first.id;
@@ -220,6 +224,7 @@ class HomePageState extends State<HomePage> {
     setState((){
       name = "loading...";
       selectedEvents = {};
+      allEvents = {};
       loading = true;
     });
     await getUser();
@@ -233,6 +238,8 @@ class HomePageState extends State<HomePage> {
     
     
   }
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -278,6 +285,8 @@ class HomePageState extends State<HomePage> {
     }
     QuerySnapshot querySnapshot =
         await users.where("userID", isEqualTo: user.uid).get();
+     
+     
 
     setState(() {
       name = querySnapshot.docs.last["name"];
@@ -304,6 +313,9 @@ class HomePageState extends State<HomePage> {
     
   }
 
+  
+  
+
   //Formats the checkbox categories according to colour depending on whether the review date is due and how many flashcards have been seen.
   List<Widget> makeCheckboxList() {
     DateTime today = DateTime.now();
@@ -320,8 +332,6 @@ class HomePageState extends State<HomePage> {
       //Number of days since topic was last revised is converted from seconds to days as an int
       var howLongAgoRevisedDays = (Timestamp.now().seconds - topicLastSeen![i].seconds) / (60 * 60 * 24);
 
-      print("${map["topic"]} last seen ${topicLastSeen![i].toDate()}\n");
-
       //A mapping of how many times the topics been seen to what the next review date gap should be. After 7 times it stays at 128 days.
       Map<int, int> dateToColourMap = {0: ((howLongAgoRevisedDays.ceil()*4)+1), 1: 2, 2: 4, 3: 8, 4: 16, 5: 32, 6: 64, 7: 128};
       // MaterialColor topicColour = Colors.green;
@@ -335,6 +345,7 @@ class HomePageState extends State<HomePage> {
       String formattedDate = DateFormat('dd/MM/yyy').format(nextReviewDate); 
       DateTime? dateInCalendar;
       
+      //Only go through the flashcard events with "selectedEvents" instead of allEvents
       if (selectedEvents.isNotEmpty){
         for (final entry in selectedEvents.entries){
         for (final event in entry.value){
@@ -368,48 +379,45 @@ class HomePageState extends State<HomePage> {
         if (dateInCalendar!.isAfter(today)){
              
              //If the user has seen all the cards set to green
-             if (seenCards[map["topic"]]! == totalCards[map["topic"]]!) tColour = Color(0xFFB0FFC6); 
+             if (seenCards[map["topic"]]! == totalCards[map["topic"]]!) {
+              tColour = Color(0xFFB0FFC6); 
+             }
 
             //If they haven't seen all of them set it to grey
              if(seenCards[map["topic"]]! < totalCards[map["topic"]]!) tColour = Color(0xFFD9D9D9);   
       }
 
-        if(dateInCalendar.isBefore(today) || dateInCalendar.isAtSameMomentAs(today)){
+        else if(dateInCalendar.isBefore(today) || dateInCalendar.isAtSameMomentAs(today)){
           //Reschedule or set red
            if (seenCards[map["topic"]]! == totalCards[map["topic"]]!){
-            tColour =Color(0xFFB0FFC6);  
-            print("RESCHEDULE ${map["topic"]}\n");
-            
-            //After the user has reviewed a deck once, repetition coefficient is 6 
-            //So next reviewdate = previous review date + 6 
-            //addSingleEvent(dateInCalendar.add(const Duration(days:6)), map["topic"], user);
 
-            //Above code causes an infinite loop 
-            //Adds a new event to the calendar and then runs the same code on that new event, 
-            //it gets confused 
+            tColour = Color(0xFFD9D9D9);   
+           
+            int repCoefficient = 6;
+            nextReviewDate = DateTime(dateInCalendar.year, dateInCalendar.month,
+            dateInCalendar.day+repCoefficient,0,0,0,0);
             
+            addSingleEvent(nextReviewDate,
+             "${map["topic"]} Flashcards", user);
+
             
-            //Reschedule needs to decrement seen cards to 0 and add a new study session according to Dr.Harris'
-            //Algorithm 
+            formattedDate = nextReviewDate
+            .toString().substring(0,10);
+            text = "0";
+
+            //Both this condition and the dateInCalendar.isAfter(today) are triggered for the same flashcard 
+            //deck- because of this the colors are incorrect. Both conditions being triggered, can be fixed by 
+            //resetting the seenCards to 0. 
+
+
+            //Can edit old flashcard deck and change the colour to a completed colour???  
+        
            }
            if (seenCards[map["topic"]] == null || seenCards[map["topic"]]! < totalCards[map["topic"]]!){
-            tColour =Color(0xFFFF9595);  
-            print("${map["topic"]} is OVERDUE \n"); 
+            tColour = Color(0xFFFF9595);   
            }
         }
-
-        // if(dateInCalendar.isAtSameMomentAs(today)){
-
-        //   //reschedule if it is green, or set red??
-        //   if (seenCards[map["topic"]]! == totalCards[map["topic"]]!){
-        //     tColour = Color(0xFFD9D9D9); 
-        //     print("RESCHEDULE ${map["topic"]}\n");
-        //     addSingleEvent(dateInCalendar.add(const Duration(days:6)), map["topic"], user);
-        //    }
-
-        // }
-      
-      
+  
       }    
 
       value.add(Padding(padding: EdgeInsets.only(bottom: 8, left: 15, right: 15), child: ClipRRect(
@@ -445,6 +453,7 @@ class HomePageState extends State<HomePage> {
 
                   for (var subtopic in map["subtopics"]) {
                     checked[subtopic.toString()] = checked[map["topic"]]!;
+                    
                   }
                 });
               },
