@@ -186,33 +186,22 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
     return PopScope(
       canPop: true,
       child: Scaffold(
-        backgroundColor: const Color.fromARGB(255, 240, 245, 250), // Blue-gray background like review page
+        backgroundColor: Colors.white,
         drawer: const DrawMain(),
         appBar: CustomAppBar(title: 'Feedback Page', mobileTitle: 'Feedback'),
       body: userAnswers.isEmpty
         ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
         : LayoutBuilder( builder: (context, constraints) {
-        double maxScreenWidth = constraints.maxWidth * 0.7;
+        double maxScreenWidth = constraints.maxWidth * 0.5;
         double maxPreferredWidth = 960; // 1920/2
 
-                return Center(
+                return Align(
+                  alignment: Alignment.center,
                   child: Container(
-                    decoration: BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
-                          spreadRadius: 5,
-                          blurRadius: 5,
-                          offset: const Offset(0, 3),
-                        )
-                      ],
-                      color: Color.fromARGB(255, 255, 255, 255),
-                    ),
                     constraints: BoxConstraints(
                       maxWidth: maxScreenWidth > maxPreferredWidth
                           ? maxScreenWidth
                           : maxPreferredWidth,
-                      minHeight: constraints.maxHeight, // Ensure container takes full height
                     ),
                     padding: EdgeInsets.all(16),
                     child: Column(
