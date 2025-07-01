@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flashcard_x/screens/landing_screen.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flutter/foundation.dart';
@@ -510,23 +511,13 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                         ),
                                       ],
                                     ),
+                                    // Button to return to the main landing page for both when mini mock and full mock are completed.
                                     child: TextButton(
                                         onPressed: () {
-                                          if (widget.questionDirectory.contains("mini-mock")) {
-                                            Navigator.of(context).push(
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                const MiniMockLanding(),
-                                              ),
+                                          Navigator.of(context).push(
+                                            MaterialPageRoute(builder:(context) => const Landing(),
+                                            ),
                                             );
-                                          } else if (widget.questionDirectory.contains("full-mock")) {
-                                            Navigator.of(context).push(
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                const FullMockLanding(),
-                                              ),
-                                            );
-                                          }
                                         },
                                         child: (MediaQuery.of(context).size.width < 600)
                                             ? Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139))
