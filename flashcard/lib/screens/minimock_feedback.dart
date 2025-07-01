@@ -186,6 +186,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
     return PopScope(
       canPop: true,
       child: Scaffold(
+        backgroundColor: const Color.fromARGB(255, 255, 255, 255), // Change this to your desired color
         drawer: const DrawMain(),
         appBar: CustomAppBar(title: 'Feedback Page', mobileTitle: 'Feedback'),
       body: userAnswers.isEmpty
@@ -278,7 +279,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                           // Display the current question text
                           Text(
                             questions[currentQuestion]['question'],
-                            style: TextStyle(fontSize: 18),
+                            style: TextStyle(color: Colors.black, fontSize: 18),
                           ),
                           SizedBox(height: 10),
                           // If the question is a ranking question, display a reorderable list of options
@@ -294,7 +295,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text('  Given Answer:',
-                                          style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 18)),
+                                          style: TextStyle(color: Colors.black, fontSize: 18)),
                                         ...userAnswers[(currentQuestion+1).toString()].asMap().entries.map<Widget>((entry) {
                                           int optionIndex = entry.key;
                                           String optionLetter = entry.value;
@@ -308,7 +309,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                               child: SizedBox(
                                                   width: double.infinity, // Define the width
                                                   child: ListTile(
-                                                      title: Text(optionText, style: TextStyle(color: Colors.white,fontSize: 18))
+                                                      title: Text(optionText, style: TextStyle(color: const Color.fromARGB(255, 250, 249, 249),fontSize: 18))
                                                   ))
                                           );
                                         })
@@ -321,16 +322,17 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                         children: [
                                         Text('  Correct Answer:',
                                           style: TextStyle(
-                                              color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 18)),
+                                              color: Colors.black, fontSize: 18)),
                                         ...questions[currentQuestion]['correct_answers'].asMap().entries.map<Widget>((entry) {
                                           String optionLetter = entry.value;
                                           String optionText = '$optionLetter. ${questions[currentQuestion]['options'][optionLetter.codeUnitAt(0) - 65]}';
                                           return Card(
+                                            color: const Color.fromARGB(223, 240, 240, 240),
                                               child: SizedBox(
                                                   width: double.infinity,
                                                   child: ListTile(
                                                     title: Text(optionText,
-                                                        style: TextStyle(color: Color.fromRGBO(21, 58, 103, 1), fontSize: 18)),
+                                                        style: TextStyle(color: Color.fromRGBO(0, 0, 0, 1), fontSize: 18)),
                                             )));
                                         })
                                     ]))
@@ -371,9 +373,9 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text("Given Answer: ${userAnswers[(currentQuestion + 1).toString()]}",
-                                        style: TextStyle(color: Colors.white, fontSize: 18)),
+                                        style: TextStyle(color: const Color.fromARGB(255, 0, 0, 0), fontSize: 18)),
                                     Text("Correct Answer: ${questions[currentQuestion]['correct_answers']}",
-                                        style: TextStyle(color: Colors.white, fontSize: 18))
+                                        style: TextStyle(color: const Color.fromARGB(255, 0, 0, 0), fontSize: 18))
                                   ]
                                 )))
                           ],
