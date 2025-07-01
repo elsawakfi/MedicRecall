@@ -186,22 +186,33 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
     return PopScope(
       canPop: true,
       child: Scaffold(
-        backgroundColor: const Color.fromARGB(255, 255, 255, 255), // Change this to your desired color
+        backgroundColor: const Color.fromARGB(255, 240, 245, 250), // Blue-gray background like review page
         drawer: const DrawMain(),
         appBar: CustomAppBar(title: 'Feedback Page', mobileTitle: 'Feedback'),
       body: userAnswers.isEmpty
         ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
         : LayoutBuilder( builder: (context, constraints) {
-        double maxScreenWidth = constraints.maxWidth * 0.5;
+        double maxScreenWidth = constraints.maxWidth * 0.7;
         double maxPreferredWidth = 960; // 1920/2
 
-                return Align(
-                  alignment: Alignment.center,
+                return Center(
                   child: Container(
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          spreadRadius: 5,
+                          blurRadius: 5,
+                          offset: const Offset(0, 3),
+                        )
+                      ],
+                      color: Color.fromARGB(255, 255, 255, 255),
+                    ),
                     constraints: BoxConstraints(
                       maxWidth: maxScreenWidth > maxPreferredWidth
                           ? maxScreenWidth
                           : maxPreferredWidth,
+                      minHeight: constraints.maxHeight, // Ensure container takes full height
                     ),
                     padding: EdgeInsets.all(16),
                     child: Column(
@@ -349,7 +360,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                               String optionLetter = String.fromCharCode(optionIndex + 65);
                               return ListTile(
                                 title: Text('$optionLetter. $option',
-                                    style: TextStyle(fontSize: 18, color: Theme.of(context).textTheme.bodyMedium?.color)),
+                                    style: TextStyle(fontSize: 18, color: Colors.black)),
                                 enabled: false,
                                 dense: true,
                                 visualDensity: VisualDensity(vertical: -4),

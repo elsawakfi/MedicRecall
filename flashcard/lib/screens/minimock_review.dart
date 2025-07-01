@@ -58,7 +58,6 @@ class MiniMockReviewState extends State<MiniMockReview> {
       child: ElevatedButton(
         onPressed: () => _returnToMiniMock(context, questionNumber),
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color.fromARGB(255, 255, 255, 255),
           padding: EdgeInsets.all(8),
           alignment: Alignment.center,
         ),
@@ -71,8 +70,8 @@ class MiniMockReviewState extends State<MiniMockReview> {
             Text(
               '${questionNumber + 1}',
               style: TextStyle(
-                // color: Theme.of(context).textTheme.bodyMedium?.color,
-                color: Colors.black,
+                color: Theme.of(context).textTheme.bodyMedium?.color,
+                //color: Colors.black,
                 fontSize: 20,
               ),
             ),
