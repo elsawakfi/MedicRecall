@@ -303,7 +303,7 @@ Future<void> fetchAverageScore() async {
                   height: 40,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
-                    color: const Color.fromARGB(255, 235, 230, 239),
+                    color: const Color.fromARGB(255, 222, 221, 222),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.2),
@@ -327,13 +327,13 @@ Future<void> fetchAverageScore() async {
                         );
                       },
                       child: (MediaQuery.of(context).size.width < 600)
-                          ? Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139))
+                          ? Icon(Icons.arrow_forward, color: Colors.black)
                           : Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text('Feedback', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 18)),
+                            Text('Feedback', style: TextStyle(color: Colors.black, fontSize: 18)),
                             SizedBox(width: 4),
-                            Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139)),
+                            Icon(Icons.arrow_forward, color: Colors.black),
                           ]
                       )
                   ))),

@@ -215,8 +215,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                             height: 40.31,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(16),
-                              color: const Color.fromARGB(
-                                  255, 235, 230, 239),
+                              color: const Color.fromARGB(255, 222, 221, 222),
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withOpacity(0.2),
@@ -231,13 +230,13 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                               child: (MediaQuery.of(context).size.width >= 600)
                                   ? Text('Question ${currentQuestion+1}/${questions.length}',
                                   style: const TextStyle(
-                                    color: Color.fromARGB(255, 98, 86, 139),
+                                    color: Colors.black,
                                     fontSize: 18,
                                     fontWeight: FontWeight.w500,
                                   ))
                                   : Text('${currentQuestion+1}/${questions.length}',
                                   style: const TextStyle(
-                                    color: Color.fromARGB(255, 98, 86, 139),
+                                    color: Colors.black,
                                     fontSize: 18,
                                     fontWeight: FontWeight.w500,
                                   ))
@@ -249,8 +248,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                             height: 40.31,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(16),
-                              color: const Color.fromARGB(
-                                  255, 235, 230, 239),
+                              color: const Color.fromARGB(255, 222, 221, 222),
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withOpacity(0.2),
@@ -266,7 +264,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                 'Score: ${widget.answerScores[currentQuestion]}/${questionMarks(currentQuestion)}',
                                 style: const TextStyle(
                                   color:
-                                      Color.fromARGB(255, 98, 86, 139),
+                                      Colors.black,
                                   fontSize: 18,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -401,7 +399,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                     height: 40,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(16),
-                                      color: const Color.fromARGB(255, 235, 230, 239),
+                                      color: const Color.fromARGB(255, 222, 221, 222),
                                       boxShadow: [
                                         BoxShadow(
                                           color: Colors.black.withOpacity(0.2),
@@ -416,13 +414,13 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                           Navigator.pop(context);
                                         },
                                         child: (MediaQuery.of(context).size.width < 600)
-                                            ? Icon(Icons.arrow_back, color: Color.fromARGB(255, 98, 86, 139))
+                                            ? Icon(Icons.arrow_back, color: Colors.black)
                                             : Row(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
-                                              Icon(Icons.arrow_back, color: Color.fromARGB(255, 98, 86, 139)),
+                                              Icon(Icons.arrow_back, color: Colors.black),
                                               SizedBox(width: 4),
-                                              Text('Scoring', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 18)),
+                                              Text('Scoring', style: TextStyle(color: Colors.black, fontSize: 18)),
                                             ]
                                         )
                                     )),
@@ -432,7 +430,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                   height: 40,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(16),
-                                    color: const Color.fromARGB(255, 235, 230, 239),
+                                    color: const Color.fromARGB(255, 222, 221, 222),
                                     boxShadow: [
                                       BoxShadow(
                                         color: Colors.black.withOpacity(0.2),
@@ -450,13 +448,13 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                         _scrollController.jumpTo(0); // Scroll to the top of the screen
                                       },
                                       child: (MediaQuery.of(context).size.width < 600)
-                                          ? Icon(Icons.arrow_back, color: Color.fromARGB(255, 98, 86, 139))
+                                          ? Icon(Icons.arrow_back, color: Colors.black)
                                           : Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Icon(Icons.arrow_back, color: Color.fromARGB(255, 98, 86, 139)),
+                                            Icon(Icons.arrow_back, color: Colors.black),
                                             SizedBox(width: 4),
-                                            Text('Back', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 18)),
+                                            Text('Back', style: TextStyle(color: Colors.black, fontSize: 18)),
                                           ]
                                       )
                                   )),
@@ -467,7 +465,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                   height: 40,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(16),
-                                    color: const Color.fromARGB(255, 235, 230, 239),
+                                    color: const Color.fromARGB(255, 222, 221, 222),
                                     boxShadow: [
                                       BoxShadow(
                                         color: Colors.black.withOpacity(0.2),
@@ -485,13 +483,13 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                         _scrollController.jumpTo(0); // Scroll to the top of the screen
                                       },
                                       child: (MediaQuery.of(context).size.width < 600)
-                                          ? Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139))
+                                          ? Icon(Icons.arrow_forward, color: Colors.black)
                                           : Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Text('Next', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 18)),
+                                            Text('Next', style: TextStyle(color: Colors.black, fontSize: 18)),
                                             SizedBox(width: 4),
-                                            Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139)),
+                                            Icon(Icons.arrow_forward, color: Colors.black),
                                           ]
                                       )
                                 )),
@@ -501,7 +499,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                     height: 40,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(16),
-                                      color: const Color.fromARGB(255, 235, 230, 239),
+                                      color: const Color.fromARGB(255, 222, 221, 222),
                                       boxShadow: [
                                         BoxShadow(
                                           color: Colors.black.withOpacity(0.2),
@@ -520,13 +518,13 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                             );
                                         },
                                         child: (MediaQuery.of(context).size.width < 600)
-                                            ? Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139))
+                                            ? Icon(Icons.arrow_forward, color: Colors.black)
                                             : Row(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
-                                              Text('Menu', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 18)),
+                                              Text('Menu', style: TextStyle(color: Colors.black, fontSize: 18)),
                                               SizedBox(width: 4),
-                                              Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139)),
+                                              Icon(Icons.arrow_forward, color: Colors.black),
                                             ]
                                         )
                                     )),
