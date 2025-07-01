@@ -249,7 +249,7 @@ class MiniMockReviewState extends State<MiniMockReview> {
               ],
             ),
             body: LayoutBuilder(builder: (context, constraints) {
-              double maxScreenWidth = constraints.maxWidth * 0.7;
+              double maxScreenWidth = constraints.maxWidth * 0.7; // Only 70% of screen width
               double maxPreferredWidth = 960; // 1920/2
 
               return Center(
