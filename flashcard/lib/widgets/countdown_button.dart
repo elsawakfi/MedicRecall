@@ -596,7 +596,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     Navigator.of(context).pop();
 
                     bool showRepetitionDialog =
-                        checkbox1.value || checkbox2.value;
+                        checkbox1.value || checkbox2.value || checkbox5.value;
 
                     if (showRepetitionDialog) {
                       _showRepetitionDialog(context, selectedResources);
@@ -633,6 +633,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     // Define separate variables for each resource's repetition count
     int? officialMSRARepetitions;
     int? fullSizedMockRepetitions;
+    int? sjtRepetitions;
 
     showDialog(
       context: context,
@@ -778,6 +779,30 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                           const SizedBox(height: 20),
                         ],
                       ),
+                    if (selectedResources
+                        .contains('Official SJT Practice Paper'))
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Official SJT Practice Paper',
+                            style: TextStyle(
+                              color: const Color.fromRGBO(21, 58, 103, 1),
+                              fontSize: isSmallScreen ? 16 : 18,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          buildChoiceChips(
+                            repetitionOptions,
+                            (value) => sjtRepetitions == value,
+                            (value) =>
+                                setState(() => sjtRepetitions = value),
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
                     if (selectedResources.contains('Full-sized Mock Exam'))
                       Column(
                         mainAxisSize: MainAxisSize.min,
@@ -834,6 +859,10 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                         fullSizedMockRepetitions == null) {
                       isValid = false;
                     }
+                    if (selectedResources.contains('Official SJT Practice Paper') &&
+                        sjtRepetitions == null) {
+                      isValid = false;
+                    }
 
                     if (isValid) {
                       QuerySnapshot u = await _userCollectionRef
@@ -844,6 +873,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                       await _userCollectionRef.doc(id).update({
                         'officialMSRARepetitions': officialMSRARepetitions,
                         'fullSizedMockRepetitions': fullSizedMockRepetitions,
+                        'sjtRepetitions': sjtRepetitions,
                       });
 
                       if (context.mounted) {
