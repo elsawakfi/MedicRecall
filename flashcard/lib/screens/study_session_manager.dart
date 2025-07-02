@@ -319,8 +319,8 @@ class StudySessionManager {
       }
 
       if (selectedResources.contains("Official SJT Practice Paper")) {
-        // Get the user's SJT repetitions setting, default to 1
-        int sjtRepetitions = 1;
+        // Get the user's SJT repetitions setting
+        int? sjtRepetitions;
         try {
           var userDataSnapshot = await _userCollectionRef
               .where("userID", isEqualTo: user.uid)
@@ -335,6 +335,15 @@ class StudySessionManager {
           if (kDebugMode) {
             print("Error getting SJT repetitions: $e");
           }
+        }
+        
+        // Ensure sjtRepetitions has been set by the user
+        if (sjtRepetitions == null) {
+          if (kDebugMode) {
+            print("SJT repetition count not found in user data");
+          }
+          // Skip scheduling SJT papers if repetitions not specified
+          return generatedEvents;
         }
         
         await _scheduleSJTPaper(
