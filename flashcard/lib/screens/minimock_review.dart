@@ -71,7 +71,6 @@ class MiniMockReviewState extends State<MiniMockReview> {
               '${questionNumber + 1}',
               style: TextStyle(
                 color: Theme.of(context).textTheme.bodyMedium?.color,
-                //color: Colors.black,
                 fontSize: 20,
               ),
             ),

@@ -196,7 +196,6 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
         double maxPreferredWidth = 960; // 1920/2
 
                 return Center(
-                  // alignment: Alignment.center,
                   child: Container(
                      decoration: BoxDecoration(
                         boxShadow: [

@@ -10,6 +10,7 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
   final double lineWidth;
   final Color progressColor;
   final Color backgroundColor;
+  final Color textColor;
 
   const ScoreIndicator({
     super.key,
@@ -19,7 +20,8 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
     required this.radius,
     required this.lineWidth,
     required this.progressColor,
-    required this.backgroundColor,
+    required this.backgroundColor, 
+    required this.textColor,
   });
 
 
@@ -30,7 +32,7 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
       children: [
         Text(
           title,
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor),
         ),
         SizedBox(height: 10),
         CircularPercentIndicator(
@@ -39,15 +41,16 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
           percent: 1 - (percentageScore/100),
           center: Text(
             "${percentageScore.toStringAsFixed(2)}%",
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: textColor),
           ),
           progressColor: progressColor,
           backgroundColor: backgroundColor,
+          //textColor: textColor,
         ),
         SizedBox(height: 10),
         Text(
           'Score: $totalScore',
-          style: TextStyle(fontSize: 16),
+          style: TextStyle(fontSize: 16, color: textColor),
         ),
       ],
     );
