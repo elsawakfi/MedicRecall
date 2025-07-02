@@ -151,8 +151,14 @@ class FullMockReviewState extends State<FullMockReview> {
       barrierDismissible: false, // Prevent dismissing by tapping outside
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("Complete Full-sized Mock?"),
-          content: const Text("Are you sure you want to submit your answers?"),
+          title: const Text(
+            "Complete Mini Mock?",
+            style: TextStyle(color: Colors.black),
+          ),
+          content: const Text(
+            "Are you sure you want to submit your answers?",
+            style: TextStyle(color: Colors.black),
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
