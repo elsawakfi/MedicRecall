@@ -1,4 +1,5 @@
 import 'dart:core';
+import 'package:flashcard_x/screens/landing_screen_new.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/calendar_screen.dart';
@@ -328,6 +329,20 @@ class LandingState extends State<Landing> {
                   ),
                 ),
                 const SizedBox(height: 40),
+                _buildStyledButton(
+                  text: 'New Landing Page',
+                  icon: Icons.note_alt_outlined,
+                  onPressed: () {
+                    landingService.onLanding = false;
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const NewLanding(),
+                      ),
+                    );
+                  },
+                  key: 'Mark Scheme',
+                ),
                 _buildStyledButton(
                   text: 'Flashcard Tutor',
                   icon: Icons.collections_bookmark_outlined,
