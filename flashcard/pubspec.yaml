@@ -115,7 +115,8 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-
+    - assets/
+    - assets/dashboard_assets/
     - assets/doughnut.png
     - assets/folder_icon.png
     - assets/google_logo.png

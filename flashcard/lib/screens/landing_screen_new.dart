@@ -14,6 +14,12 @@ import 'fullmock_landing.dart';
 import 'landing_service.dart';
 import 'mark_scheme.dart';
 import 'package:flashcard_x/screens/settings_screen.dart' as setting;
+import 'package:flutter/material.dart';
+
+
+// VARIABLES THAT MUST BE CONNECTED TO THE DATABASE
+// nextTopicForReview
+
 
 class NewLanding extends StatefulWidget {
   static String id = 'landing_screen_new';
@@ -36,6 +42,9 @@ class NewLandingState extends State<NewLanding> {
   final FirebaseAuth auth = FirebaseAuth.instance;
   late String testDayString = "Test day not set";
   User? user;
+
+  // NEW VARIABLES FROM MEDICRECALL1
+  String? nextTopicForReview;
 
   @override
   void initState() {
@@ -217,7 +226,37 @@ class NewLandingState extends State<NewLanding> {
         child: SingleChildScrollView(
           scrollDirection: Axis.vertical,
           child: Column(
-
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(height: 20),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: DashboardBoxLeft(
+                      title: 'Next Flashcard Deck for review:',
+                      subtitle: nextTopicForReview != null
+                          ? "$nextTopicForReview"
+                          : "No topics scheduled.",
+                      buttonText: 'Start Now',
+                      onPressed: () => triggerSignIn('FlashcardEditor'),
+                      // onPressed: () {
+                      //   Navigator.push(
+                      //     context,
+                      //     MoveRightRoute(page: const HomePage(title: "Flashcard Tutor")),
+                      //   );
+                      // },
+                    ),
+                  ),
+                  SizedBox(width: 16),
+                  // Expanded(
+                  //   child: DashboardBoxRight(
+                  //     title: 'Next Mock Exam:',
+                  //     subtitle: 'Official Paper 1',
+                  //   )
+                  // )
+              ],)
+            ],
           )
         )
       )    
@@ -314,3 +353,125 @@ class NewLandingState extends State<NewLanding> {
   }
 
 }
+
+class DashboardBoxLeft extends StatelessWidget {
+  const DashboardBoxLeft({super.key, 
+    required this.title,
+    required this.buttonText,
+    required this.onPressed,
+    this.subtitle,
+    this.height,
+  });
+
+  final String title;
+  final String buttonText;
+  // final Null Function() onPressed;
+  final Future<void> Function() onPressed;
+  final String? subtitle;
+  final double? height;
+
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Column(
+      children: [
+        Container(
+          height: 150,
+          decoration: BoxDecoration(
+            //color: themeProvider.isDarkMode ? Colors.white : Colors.black,
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
+          child: Column(
+            children: [
+              SizedBox(height: 4.0),
+              Container(
+                padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 4.0),
+                child: Row(
+                  children: [
+                    IconButton(
+                      label: 'Flashcard Tutor',
+                      iconFilePath: 'assets/dashboard_assets/trending_up.png',
+                      onPressed: onPressed,
+                      // onPressed: () {
+                      //   Navigator.push(
+                      //     context,
+                      //     MoveRightRoute(page: const HomePage(title: "Flashcard Tutor")),
+                      //   );
+                      // },
+                    ),
+                  ]
+                ),
+              ),
+
+              
+            ]
+          ),
+        )
+      ]
+
+
+    );
+}
+}
+
+class IconButton extends StatelessWidget {
+  
+  const IconButton({super.key, 
+    required this.label,
+    required this.onPressed,
+    this.iconFilePath,
+  });
+
+  final String label;
+  final Future<void> Function() onPressed;
+  final String? iconFilePath;
+
+  @override
+  Widget build(BuildContext context) {
+    //final theme = Theme.of(context);
+    //final themeProvider = Provider.of<ThemeProvider>(context);
+
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 5.0),
+        child: ElevatedButton(
+          onPressed: onPressed,
+          style: ElevatedButton.styleFrom(
+            //backgroundColor: themeProvider.isDarkMode ? Colors.black : Color.fromRGBO(44, 44, 44, 1),
+            backgroundColor: Colors.black,
+            padding: EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          child: Row(
+            children: [
+              SizedBox(width: 15),
+              if (iconFilePath != null) ...[
+                Image.asset(
+                  width: 30,
+                  iconFilePath!,
+                ),
+              ],
+              Expanded(
+                child: Text(
+                label,
+                textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold
+                  ),
+                ),
+              ),
+            ]
+          ),
+          )
+        ),
+      );
+  }
+}
+
