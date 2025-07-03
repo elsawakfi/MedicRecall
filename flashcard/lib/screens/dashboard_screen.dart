@@ -90,6 +90,7 @@ class HomePageState extends State<HomePage> {
             date = DateTime(date.year, date.month, date.day);
 
             List<String> events = eventsList.map((e) => e.toString()).toList();
+
             allEvents[date] = events.map ((title) => Event(color: Colors.black, title: title)).toList();
             for (String e in events){
              
@@ -99,7 +100,6 @@ class HomePageState extends State<HomePage> {
                   
               }
             }
-
 
             selectedEvents[date] = events.map((title) => Event(
                 title: title,
@@ -147,20 +147,27 @@ class HomePageState extends State<HomePage> {
     return holderList;
   }
 
- Future<void> addSingleEvent(
+ Future<void> addSingleEvent (
       DateTime date, String eventTitle, User user) async {
-    date = DateTime(date.year, date.month, date.day);
-    
+    date = DateTime(date.year, date.month, date.day,0,0,0,0);
+    if(allEvents[date] == null ){
+        print("Null Event ${allEvents[date]}\n");  
+    }else{
+    while (allEvents[date]!=null && date.isBefore(testDay)) {
+      date = date.add(const Duration(days:1));
+      print("Date : $date \n");
+      print("Event ${allEvents[date]}\n");
+    }}
     //The delete single event function updates the UI in real time so I just copied the structure of that function 
     Event newEvent =  Event(
                         title: eventTitle,
                         color: Colors.yellow
                         );
-
+    //cannot add a new revision date if the date is not empty
     if (allEvents[date] == null) {
       
       allEvents[date] = [];
-    }
+    
     allEvents[date]?.add(newEvent);
     QuerySnapshot querySnapshot = await _eventsCollectionRef
         .where("date", isEqualTo: Timestamp.fromDate(date))
@@ -184,7 +191,7 @@ class HomePageState extends State<HomePage> {
     String newDocId = newDoc.id;
     await _eventsCollectionRef.doc(newDocId).update({"events": updatedEvents});
 
-  }
+  }}
  
     setState(() {});
   }
@@ -313,6 +320,8 @@ class HomePageState extends State<HomePage> {
     
   }
 
+ 
+
   
   
 
@@ -333,34 +342,47 @@ class HomePageState extends State<HomePage> {
       var howLongAgoRevisedDays = (Timestamp.now().seconds - topicLastSeen![i].seconds) / (60 * 60 * 24);
 
       //A mapping of how many times the topics been seen to what the next review date gap should be. After 7 times it stays at 128 days.
+      
+      //CHANGE THIS FORMULA FOR to DR. Harris' new one
       Map<int, int> dateToColourMap = {0: ((howLongAgoRevisedDays.ceil()*4)+1), 1: 2, 2: 4, 3: 8, 4: 16, 5: 32, 6: 64, 7: 128};
+      
+      
+      
       // MaterialColor topicColour = Colors.green;
       Color tColour = Color(0xFFB0FFC6); // green
       if (topicCount![i]>(dateToColourMap.length-1)){
         topicCount![i]=dateToColourMap.length-1;
       }
 
+      
+
       int nextReviewDateMilliseconds = (((dateToColourMap[topicCount![i]]! * 24 * 60 * 60) + topicLastSeen![i].seconds) * 1000).toInt();
       DateTime nextReviewDate = DateTime.fromMillisecondsSinceEpoch(nextReviewDateMilliseconds, isUtc: true).toLocal();
       String formattedDate = DateFormat('dd/MM/yyy').format(nextReviewDate); 
       DateTime? dateInCalendar;
+      bool notInCalendar = true;
+      List<String> rescheduled = [];
       
       //Only go through the flashcard events with "selectedEvents" instead of allEvents
-      if (selectedEvents.isNotEmpty){
+      
+      if (selectedEvents.isNotEmpty && !rescheduled.contains(map["topic"])){
         for (final entry in selectedEvents.entries){
         for (final event in entry.value){
           if (event.title.contains(map["topic"])){
             formattedDate = entry.key.toString();
             dateInCalendar = entry.key;
             formattedDate = formattedDate.substring(0,10);
+            notInCalendar = false;
           }
         }
-        }}
-        else{
-          formattedDate = "N/A";
         }
+        if (notInCalendar){
+          formattedDate = "N/A";
+          tColour = Color(0xFFD9D9D9);
+        }
+        else{
 
-      //If the user hasn't seen any cards and it is past the revision date set it red
+         //If the user hasn't seen any cards and it is past the revision date set it red
       //Otherwise set it to grey
       if (seenCards[map["topic"]] == null || seenCards[map["topic"]] == 0){
         if (dateInCalendar!.isBefore(today)){
@@ -390,17 +412,24 @@ class HomePageState extends State<HomePage> {
         else if(dateInCalendar.isBefore(today) || dateInCalendar.isAtSameMomentAs(today)){
           //Reschedule or set red
            if (seenCards[map["topic"]]! == totalCards[map["topic"]]!){
-
+            
+            rescheduled.add("${map["topic"]}");
             tColour = Color(0xFFD9D9D9);   
            
-            int repCoefficient = 6;
-            nextReviewDate = DateTime(dateInCalendar.year, dateInCalendar.month,
-            dateInCalendar.day+repCoefficient,0,0,0,0);
-            
-            addSingleEvent(nextReviewDate,
-             "${map["topic"]} Flashcards", user);
+            // int repCoefficient = 6;
+            // nextReviewDate = DateTime(dateInCalendar.year, dateInCalendar.month,
+            // dateInCalendar.day+repCoefficient,0,0,0,0);
+           
+            // while (allEvents[addedDate] != null && addedDate.isBefore(testDay)){
+            //    print(allEvents[addedDate]);
+            //    addedDate = DateTime(addedDate.year,addedDate.month,
+            // addedDate.day+1,0,0,0,0);
+              
+            // }
 
             
+            addSingleEvent(nextReviewDate,
+              "${map["topic"]} Flashcards", user);
             formattedDate = nextReviewDate
             .toString().substring(0,10);
             text = "0";
@@ -416,9 +445,16 @@ class HomePageState extends State<HomePage> {
            if (seenCards[map["topic"]] == null || seenCards[map["topic"]]! < totalCards[map["topic"]]!){
             tColour = Color(0xFFFF9595);   
            }
+        
         }
-  
-      }    
+        
+     
+      }}}
+      else{
+          formattedDate = "N/A";
+          //dateInCalendar = today;
+          tColour = Color(0xFFD9D9D9);
+        }
 
       value.add(Padding(padding: EdgeInsets.only(bottom: 8, left: 15, right: 15), child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
