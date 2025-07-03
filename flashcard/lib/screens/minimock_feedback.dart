@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flashcard_x/screens/landing_screen.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flutter/foundation.dart';
@@ -191,16 +192,28 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
       body: userAnswers.isEmpty
         ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
         : LayoutBuilder( builder: (context, constraints) {
-        double maxScreenWidth = constraints.maxWidth * 0.5;
+        double maxScreenWidth = constraints.maxWidth * 0.7;
         double maxPreferredWidth = 960; // 1920/2
 
-                return Align(
-                  alignment: Alignment.center,
+                return Center(
                   child: Container(
+                     decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            spreadRadius: 5,
+                            blurRadius: 5,
+                            offset: const Offset(0, 3),
+                          )
+                        ],
+                        color: Color.fromARGB(255, 255, 255, 255),
+                      ),
                     constraints: BoxConstraints(
                       maxWidth: maxScreenWidth > maxPreferredWidth
                           ? maxScreenWidth
                           : maxPreferredWidth,
+                           minHeight: constraints
+                            .maxHeight, // Ensure container takes full height
                     ),
                     padding: EdgeInsets.all(16),
                     child: Column(
@@ -213,8 +226,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                             height: 40.31,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(16),
-                              color: const Color.fromARGB(
-                                  255, 235, 230, 239),
+                              color: const Color.fromARGB(255, 222, 221, 222),
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withOpacity(0.2),
@@ -229,13 +241,13 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                               child: (MediaQuery.of(context).size.width >= 600)
                                   ? Text('Question ${currentQuestion+1}/${questions.length}',
                                   style: const TextStyle(
-                                    color: Color.fromARGB(255, 98, 86, 139),
+                                    color: Colors.black,
                                     fontSize: 18,
                                     fontWeight: FontWeight.w500,
                                   ))
                                   : Text('${currentQuestion+1}/${questions.length}',
                                   style: const TextStyle(
-                                    color: Color.fromARGB(255, 98, 86, 139),
+                                    color: Colors.black,
                                     fontSize: 18,
                                     fontWeight: FontWeight.w500,
                                   ))
@@ -247,8 +259,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                             height: 40.31,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(16),
-                              color: const Color.fromARGB(
-                                  255, 235, 230, 239),
+                              color: const Color.fromARGB(255, 222, 221, 222),
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withOpacity(0.2),
@@ -264,13 +275,15 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                 'Score: ${widget.answerScores[currentQuestion]}/${questionMarks(currentQuestion)}',
                                 style: const TextStyle(
                                   color:
-                                      Color.fromARGB(255, 98, 86, 139),
+                                      Colors.black,
                                   fontSize: 18,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ))
+                            
                         ]),
+                        
                         Expanded(
                           child: SingleChildScrollView(
                             controller: _scrollController,
@@ -278,7 +291,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                           // Display the current question text
                           Text(
                             questions[currentQuestion]['question'],
-                            style: TextStyle(fontSize: 18),
+                            style: TextStyle(color: Colors.black, fontSize: 18),
                           ),
                           SizedBox(height: 10),
                           // If the question is a ranking question, display a reorderable list of options
@@ -294,7 +307,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text('  Given Answer:',
-                                          style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 18)),
+                                          style: TextStyle(color: Colors.black, fontSize: 18)),
                                         ...userAnswers[(currentQuestion+1).toString()].asMap().entries.map<Widget>((entry) {
                                           int optionIndex = entry.key;
                                           String optionLetter = entry.value;
@@ -308,7 +321,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                               child: SizedBox(
                                                   width: double.infinity, // Define the width
                                                   child: ListTile(
-                                                      title: Text(optionText, style: TextStyle(color: Colors.white,fontSize: 18))
+                                                      title: Text(optionText, style: TextStyle(color: const Color.fromARGB(255, 250, 249, 249),fontSize: 18))
                                                   ))
                                           );
                                         })
@@ -321,16 +334,17 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                         children: [
                                         Text('  Correct Answer:',
                                           style: TextStyle(
-                                              color: Theme.of(context).textTheme.bodyMedium?.color, fontSize: 18)),
+                                              color: Colors.black, fontSize: 18)),
                                         ...questions[currentQuestion]['correct_answers'].asMap().entries.map<Widget>((entry) {
                                           String optionLetter = entry.value;
                                           String optionText = '$optionLetter. ${questions[currentQuestion]['options'][optionLetter.codeUnitAt(0) - 65]}';
                                           return Card(
+                                            color: const Color.fromARGB(223, 240, 240, 240),
                                               child: SizedBox(
                                                   width: double.infinity,
                                                   child: ListTile(
                                                     title: Text(optionText,
-                                                        style: TextStyle(color: Color.fromRGBO(21, 58, 103, 1), fontSize: 18)),
+                                                        style: TextStyle(color: Color.fromRGBO(0, 0, 0, 1), fontSize: 18)),
                                             )));
                                         })
                                     ]))
@@ -347,7 +361,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                               String optionLetter = String.fromCharCode(optionIndex + 65);
                               return ListTile(
                                 title: Text('$optionLetter. $option',
-                                    style: TextStyle(fontSize: 18, color: Theme.of(context).textTheme.bodyMedium?.color)),
+                                    style: TextStyle(fontSize: 18, color: Colors.black)),
                                 enabled: false,
                                 dense: true,
                                 visualDensity: VisualDensity(vertical: -4),
@@ -371,9 +385,9 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text("Given Answer: ${userAnswers[(currentQuestion + 1).toString()]}",
-                                        style: TextStyle(color: Colors.white, fontSize: 18)),
+                                        style: TextStyle(color: const Color.fromARGB(255, 0, 0, 0), fontSize: 18)),
                                     Text("Correct Answer: ${questions[currentQuestion]['correct_answers']}",
-                                        style: TextStyle(color: Colors.white, fontSize: 18))
+                                        style: TextStyle(color: const Color.fromARGB(255, 0, 0, 0), fontSize: 18))
                                   ]
                                 )))
                           ],
@@ -398,7 +412,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                     height: 40,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(16),
-                                      color: const Color.fromARGB(255, 235, 230, 239),
+                                      color: const Color.fromARGB(255, 222, 221, 222),
                                       boxShadow: [
                                         BoxShadow(
                                           color: Colors.black.withOpacity(0.2),
@@ -413,13 +427,13 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                           Navigator.pop(context);
                                         },
                                         child: (MediaQuery.of(context).size.width < 600)
-                                            ? Icon(Icons.arrow_back, color: Color.fromARGB(255, 98, 86, 139))
+                                            ? Icon(Icons.arrow_back, color: Colors.black)
                                             : Row(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
-                                              Icon(Icons.arrow_back, color: Color.fromARGB(255, 98, 86, 139)),
+                                              Icon(Icons.arrow_back, color: Colors.black),
                                               SizedBox(width: 4),
-                                              Text('Scoring', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 18)),
+                                              Text('Scoring', style: TextStyle(color: Colors.black, fontSize: 18)),
                                             ]
                                         )
                                     )),
@@ -429,7 +443,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                   height: 40,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(16),
-                                    color: const Color.fromARGB(255, 235, 230, 239),
+                                    color: const Color.fromARGB(255, 222, 221, 222),
                                     boxShadow: [
                                       BoxShadow(
                                         color: Colors.black.withOpacity(0.2),
@@ -447,13 +461,13 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                         _scrollController.jumpTo(0); // Scroll to the top of the screen
                                       },
                                       child: (MediaQuery.of(context).size.width < 600)
-                                          ? Icon(Icons.arrow_back, color: Color.fromARGB(255, 98, 86, 139))
+                                          ? Icon(Icons.arrow_back, color: Colors.black)
                                           : Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Icon(Icons.arrow_back, color: Color.fromARGB(255, 98, 86, 139)),
+                                            Icon(Icons.arrow_back, color: Colors.black),
                                             SizedBox(width: 4),
-                                            Text('Back', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 18)),
+                                            Text('Back', style: TextStyle(color: Colors.black, fontSize: 18)),
                                           ]
                                       )
                                   )),
@@ -464,7 +478,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                   height: 40,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(16),
-                                    color: const Color.fromARGB(255, 235, 230, 239),
+                                    color: const Color.fromARGB(255, 222, 221, 222),
                                     boxShadow: [
                                       BoxShadow(
                                         color: Colors.black.withOpacity(0.2),
@@ -482,13 +496,13 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                         _scrollController.jumpTo(0); // Scroll to the top of the screen
                                       },
                                       child: (MediaQuery.of(context).size.width < 600)
-                                          ? Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139))
+                                          ? Icon(Icons.arrow_forward, color: Colors.black)
                                           : Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Text('Next', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 18)),
+                                            Text('Next', style: TextStyle(color: Colors.black, fontSize: 18)),
                                             SizedBox(width: 4),
-                                            Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139)),
+                                            Icon(Icons.arrow_forward, color: Colors.black),
                                           ]
                                       )
                                 )),
@@ -498,7 +512,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                     height: 40,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(16),
-                                      color: const Color.fromARGB(255, 235, 230, 239),
+                                      color: const Color.fromARGB(255, 222, 221, 222),
                                       boxShadow: [
                                         BoxShadow(
                                           color: Colors.black.withOpacity(0.2),
@@ -508,32 +522,22 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                         ),
                                       ],
                                     ),
+                                    // Button to return to the main landing page for both when mini mock and full mock are completed.
                                     child: TextButton(
                                         onPressed: () {
-                                          if (widget.questionDirectory.contains("mini-mock")) {
-                                            Navigator.of(context).push(
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                const MiniMockLanding(),
-                                              ),
+                                          Navigator.of(context).push(
+                                            MaterialPageRoute(builder:(context) => const Landing(),
+                                            ),
                                             );
-                                          } else if (widget.questionDirectory.contains("full-mock")) {
-                                            Navigator.of(context).push(
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                const FullMockLanding(),
-                                              ),
-                                            );
-                                          }
                                         },
                                         child: (MediaQuery.of(context).size.width < 600)
-                                            ? Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139))
+                                            ? Icon(Icons.arrow_forward, color: Colors.black)
                                             : Row(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
-                                              Text('Menu', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 18)),
+                                              Text('Menu', style: TextStyle(color: Colors.black, fontSize: 18)),
                                               SizedBox(width: 4),
-                                              Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139)),
+                                              Icon(Icons.arrow_forward, color: Colors.black),
                                             ]
                                         )
                                     )),

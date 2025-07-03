@@ -25,6 +25,7 @@ class MiniMockScoring extends StatefulWidget {
     required this.title,
     required this.questionDirectory,
     required this.answerDirectory,
+    
 
   });
   @override
@@ -225,13 +226,25 @@ Future<void> fetchAverageScore() async {
             double maxPreferredWidth = 960; // 1920/2
             bool isDesktop = constraints.maxWidth > 600;
 
-           return Align(
-              alignment: Alignment.center,
-              child: Container(
-              
-              constraints: BoxConstraints(
-                maxWidth: maxScreenWidth > maxPreferredWidth ? maxScreenWidth : maxPreferredWidth,
-              ),
+          return Center(
+              child: Container(decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            spreadRadius: 5,
+                            blurRadius: 5,
+                            offset: const Offset(0, 3),
+                          )
+                        ],
+                        color: Color.fromARGB(255, 255, 255, 255),
+                      ),
+                    constraints: BoxConstraints(
+                      maxWidth: maxScreenWidth > maxPreferredWidth
+                          ? maxScreenWidth
+                          : maxPreferredWidth,
+                           minHeight: constraints
+                            .maxHeight, // Ensure container takes full height
+                    ),
               padding: EdgeInsets.all(16),
               child: Column(
                 children: [
@@ -252,7 +265,8 @@ Future<void> fetchAverageScore() async {
                       radius: 120,
                       lineWidth: 25.0,
                       progressColor: Colors.red,
-                      backgroundColor: Colors.green
+                      backgroundColor: Colors.green,
+                      textColor: Colors.black, // Add this parameter to set text color
                     ),
                     
                   SizedBox(width:100),
@@ -263,7 +277,8 @@ Future<void> fetchAverageScore() async {
                       radius: 120.0,
                       lineWidth:  25.0,
                       progressColor: Colors.red,
-                      backgroundColor:  Colors.green
+                      backgroundColor:  Colors.green,
+                      textColor: Colors.black,
                     ),
                 ],
               )
@@ -277,7 +292,8 @@ Future<void> fetchAverageScore() async {
                       radius: 90.0,
                       lineWidth: 20.0,
                       progressColor: Colors.red,
-                      backgroundColor: Colors.green
+                      backgroundColor: Colors.green,
+                      textColor: Colors.black, // Add this parameter to set text color
                     ),
                   
                   SizedBox(height: 20),
@@ -289,6 +305,7 @@ Future<void> fetchAverageScore() async {
                       lineWidth:  20.0,
                       progressColor: Colors.red,
                       backgroundColor:  Colors.green,
+                      textColor: Colors.black, // Add this parameter to set text color
                     ),
                 ],
               ),
@@ -303,7 +320,7 @@ Future<void> fetchAverageScore() async {
                   height: 40,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
-                    color: const Color.fromARGB(255, 235, 230, 239),
+                    color: const Color.fromARGB(255, 222, 221, 222),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.2),
@@ -327,13 +344,13 @@ Future<void> fetchAverageScore() async {
                         );
                       },
                       child: (MediaQuery.of(context).size.width < 600)
-                          ? Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139))
+                          ? Icon(Icons.arrow_forward, color: Colors.black)
                           : Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text('Feedback', style: TextStyle(color: Color.fromARGB(255, 98, 86, 139), fontSize: 18)),
+                            Text('Feedback', style: TextStyle(color: Colors.black, fontSize: 18)),
                             SizedBox(width: 4),
-                            Icon(Icons.arrow_forward, color: Color.fromARGB(255, 98, 86, 139)),
+                            Icon(Icons.arrow_forward, color: Colors.black),
                           ]
                       )
                   ))),

@@ -152,8 +152,14 @@ class MiniMockReviewState extends State<MiniMockReview> {
       barrierDismissible: false, // Prevent dismissing by tapping outside
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text("Complete Mini Mock?"),
-          content: const Text("Are you sure you want to submit your answers?"),
+          title: const Text(
+            "Complete Mini Mock?",
+            style: TextStyle(color: Colors.black),
+          ),
+          content: const Text(
+            "Are you sure you want to submit your answers?",
+            style: TextStyle(color: Colors.black),
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -248,7 +254,8 @@ class MiniMockReviewState extends State<MiniMockReview> {
               ],
             ),
             body: LayoutBuilder(builder: (context, constraints) {
-              double maxScreenWidth = constraints.maxWidth * 0.7;
+              double maxScreenWidth =
+                  constraints.maxWidth * 0.7; // Only 70% of screen width
               double maxPreferredWidth = 960; // 1920/2
 
               return Center(
