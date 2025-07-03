@@ -213,7 +213,7 @@ class LandingState extends State<Landing> {
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: textSize,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.normal,
                       ),
                       textAlign: TextAlign.center,
                     ),

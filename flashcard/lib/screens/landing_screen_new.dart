@@ -200,7 +200,7 @@ class NewLandingState extends State<NewLanding> {
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: textSize,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.normal,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -240,21 +240,48 @@ class NewLandingState extends State<NewLanding> {
                           : "No topics scheduled.",
                       buttonText: 'Start Now',
                       onPressed: () => triggerSignIn('FlashcardEditor'),
-                      // onPressed: () {
-                      //   Navigator.push(
-                      //     context,
-                      //     MoveRightRoute(page: const HomePage(title: "Flashcard Tutor")),
-                      //   );
-                      // },
                     ),
                   ),
                   SizedBox(width: 16),
-                  // Expanded(
-                  //   child: DashboardBoxRight(
-                  //     title: 'Next Mock Exam:',
-                  //     subtitle: 'Official Paper 1',
-                  //   )
-                  // )
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: DashboardBoxRight(
+                      title: 'Next Mock Exam:',
+                      subtitle: 'Official Paper 1',
+                        onPressed1: () async {
+                          landingService.onLanding = false;
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const FullMockLanding(),
+                            ),
+                          );
+                        },
+                        onPressed2: () async {
+                          landingService.onLanding = false;
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const MiniMockLanding(),
+                            ),
+                          );
+                        },
+                    ),
+                  ),
+                ]
+              ),
+              SizedBox(height: 20),
+              Row(children: [
+                IconButton(
+                  label: 'Study Schedule',
+                  iconFilePath: 'assets/dashboard_assets/calendar.png',
+                  onPressed: () => triggerSignIn('Calendar'),
+                ),
+                IconButton(
+                  label: 'Create New Flashcards',
+                  iconFilePath: 'assets/dashboard_assets/plus.png',
+                  onPressed: () => triggerSignIn('FlashcardEditor'),
+                ),
               ],)
             ],
           )
@@ -354,69 +381,6 @@ class NewLandingState extends State<NewLanding> {
 
 }
 
-class DashboardBoxLeft extends StatelessWidget {
-  const DashboardBoxLeft({super.key, 
-    required this.title,
-    required this.buttonText,
-    required this.onPressed,
-    this.subtitle,
-    this.height,
-  });
-
-  final String title;
-  final String buttonText;
-  // final Null Function() onPressed;
-  final Future<void> Function() onPressed;
-  final String? subtitle;
-  final double? height;
-
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Column(
-      children: [
-        Container(
-          height: 150,
-          decoration: BoxDecoration(
-            //color: themeProvider.isDarkMode ? Colors.white : Colors.black,
-            color: Colors.white,
-            borderRadius: BorderRadius.all(Radius.circular(10)),
-          ),
-          child: Column(
-            children: [
-              SizedBox(height: 4.0),
-              Container(
-                padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 4.0),
-                child: Row(
-                  children: [
-                    IconButton(
-                      label: 'Flashcard Tutor',
-                      iconFilePath: 'assets/dashboard_assets/trending_up.png',
-                      onPressed: onPressed,
-                      // onPressed: () {
-                      //   Navigator.push(
-                      //     context,
-                      //     MoveRightRoute(page: const HomePage(title: "Flashcard Tutor")),
-                      //   );
-                      // },
-                    ),
-                  ]
-                ),
-              ),
-
-              
-            ]
-          ),
-        )
-      ]
-
-
-    );
-}
-}
-
 class IconButton extends StatelessWidget {
   
   const IconButton({super.key, 
@@ -460,11 +424,7 @@ class IconButton extends StatelessWidget {
                 child: Text(
                 label,
                 textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold
-                  ),
+                  style: textStyle1,
                 ),
               ),
             ]
@@ -475,3 +435,178 @@ class IconButton extends StatelessWidget {
   }
 }
 
+class DashboardBoxLeft extends StatelessWidget {
+  const DashboardBoxLeft({super.key, 
+    required this.title,
+    required this.buttonText,
+    required this.onPressed,
+    this.subtitle,
+    this.height,
+  });
+
+  final String title;
+  final String buttonText;
+  final Future<void> Function() onPressed;
+  final String? subtitle;
+  final double? height;
+
+
+  @override
+  Widget build(BuildContext context) {
+
+    return Column(
+      children: [
+        Container(
+          height: 150,
+          decoration: BoxDecoration(
+            //color: themeProvider.isDarkMode ? Colors.white : Colors.black,
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
+          child: Column(
+            children: [
+              SizedBox(height: 4.0),
+              Container(
+                padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 4.0),
+                child: Row(
+                  children: [
+                    IconButton(
+                      label: 'Flashcard Tutor',
+                      iconFilePath: 'assets/dashboard_assets/trending_up.png',
+                      onPressed: onPressed,
+                      // onPressed: () {
+                      //   Navigator.push(
+                      //     context,
+                      //     MoveRightRoute(page: const HomePage(title: "Flashcard Tutor")),
+                      //   );
+                      // },
+                    ),
+                  ]
+                ),
+              ),
+
+              
+            ]
+          ),
+        )
+      ]
+
+
+    );
+}
+}
+
+class DashboardBoxRight extends StatelessWidget {
+  const DashboardBoxRight({super.key, 
+    required this.title,
+    required this.onPressed1,
+    required this.onPressed2,
+    this.subtitle,
+    this.height,
+  });
+
+  final Future<void> Function() onPressed1;
+  final Future<void> Function() onPressed2;
+  final String title;
+  final String? subtitle;
+  final double? height;
+
+
+  @override
+  Widget build(BuildContext context) {
+  
+    return Column(
+      children: [
+        Container(
+          height: 150,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
+          child: Column(
+            children: [
+              SizedBox(height: 4.0),
+              Container(
+                padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 4.0),
+                child: Row(
+                  children: [
+                    IconButton(
+                      label: 'Full-Sized Mock',
+                      iconFilePath: 'assets/dashboard_assets/play_circle.png',
+                      onPressed: onPressed1,
+                      // onPressed: () {
+                      //   Navigator.push(
+                      //     context,
+                      //     MoveRightRoute(page: const HomePage(title: "Exam Declaration")),
+                      //   );
+                      // },
+                    ),
+                    IconButton(
+                      label: 'Mini Mock',
+                      iconFilePath: 'assets/dashboard_assets/target.png',
+                      onPressed: onPressed2,
+                      // onPressed: () {
+                      //   Navigator.push(
+                      //     context,
+                      //     MoveRightRoute(page: const HomePage(title: "Exam Declaration")),
+                      //   );
+                      // },
+                    ),
+                  ]
+                ),
+              ),
+
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                child: Container(
+                  height: 80,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    //color: themeProvider.isDarkMode ? Colors.white : Colors.black,
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10), bottomRight: Radius.circular(10)),
+                  ),
+                  child: Column(
+                    children: [
+                      SizedBox(height: 10),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        alignment: Alignment.topLeft,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children:[
+                            SizedBox(height: 5),
+                            // Text(
+                            //   title,
+                            //   style: theme.textTheme.titleMedium?.copyWith(
+                            //       color: themeProvider.isDarkMode ? Colors.black : Colors.white)
+                            // ),
+                            // subtitle == null ? CircularProgressIndicator(color: themeProvider.isDarkMode ? Colors.black : Colors.white) : 
+                            // Text(
+                            //   subtitle!,
+                            //   style: theme.textTheme.bodyMedium?.copyWith(
+                            //     color: themeProvider.isDarkMode ? Colors.black : Colors.white,
+                            //   )
+                            // ),
+                            SizedBox(height: 5),
+                        ]),
+                      ),
+                    ])
+                ),
+              ),
+            ]
+          ),
+        )
+      ]
+
+
+    );
+  }
+}
+
+final TextStyle textStyle1 = TextStyle(
+  fontFamily: 'Lato',
+  fontSize: 16,
+  fontWeight: FontWeight.normal,
+  color: Colors.white,
+);
