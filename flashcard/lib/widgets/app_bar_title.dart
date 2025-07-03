@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flashcard_x/widgets/title_bar.dart';
+
 import 'drawer_widget.dart';
 
 class AppBarTitle extends StatelessWidget {
@@ -140,7 +140,7 @@ class AppScaffoldState extends State<AppScaffold> {
       bottomNavigationBar: widget.bottomNavigationBar,
       body: Column(
         children: [
-          ScreenTitleBar(title: widget.title),
+          
           Expanded(child: widget.body),
         ],
       ),
