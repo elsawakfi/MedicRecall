@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'utils/firebase_wrapper.dart';
 
 import 'utils/theme_provider.dart';
 
@@ -30,6 +31,9 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Initialize FirebaseWrapper
+  FirebaseWrapper.setup();
 
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive).then((_) {
     // full screen mode

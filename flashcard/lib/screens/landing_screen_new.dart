@@ -1,20 +1,21 @@
 import 'dart:core';
+import 'package:flashcard_x/screens/explanation.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/calendar_screen.dart';
 import 'package:flashcard_x/screens/dashboard_screen.dart';
 import 'package:flashcard_x/screens/faq.dart';
 import 'package:flashcard_x/screens/flashcard_editor_screen.dart';
-import 'package:flashcard_x/widgets/countdown_button.dart';
 import 'package:flashcard_x/screens/minimock_landing.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'feedback_screen.dart';
 import 'fullmock_landing.dart';
 import 'landing_service.dart';
-import 'mark_scheme.dart';
-import 'package:flashcard_x/screens/settings_screen.dart' as setting;
-import 'package:flutter/material.dart';
+import 'package:flashcard_x/utils/last_revised.dart';
+import 'package:flashcard_x/utils/firebase_wrapper.dart';
+import 'dart:async';
+
 
 
 // VARIABLES THAT MUST BE CONNECTED TO THE DATABASE
@@ -33,6 +34,7 @@ class NewLandingState extends State<NewLanding> {
   bool testDayBool_ = true;
   DateTime? hasDate;
   DateTime? _examDate;
+  DateTime? examDate; // Add this field
   DateTime? _firstStudyDate;
   bool onLanding = true;
   int buildCount = 0;
@@ -42,17 +44,82 @@ class NewLandingState extends State<NewLanding> {
   final FirebaseAuth auth = FirebaseAuth.instance;
   late String testDayString = "Test day not set";
   User? user;
+  StreamSubscription? stream; // Add this field
+  String daysUntilExam = "Date Not Set"; // Add this field
+
+  List<bool> whichDaysRevised = [];
+  List<DateTime> daysLoggedIn = [];
+  int noDaysLoggedIn = 0;
+  DateTime todaysDate = DateTime.now().copyWith(hour: 0, minute: 0, second: 0, millisecond: 0, microsecond: 0);
+  int numberOfDecksRevised = 0;
+  int howManyDaysInARow = 0;
+
+    // FETCHES DATA FROM FIREBASE AND UPDATES THE STATE
+  Future<void> loadStreakData() async {
+    StreakStats streakStats = await LastRevised.loadStreakStats();
+    setState(() {
+      numberOfDecksRevised = streakStats.numberOfDecksRevised;
+      howManyDaysInARow = streakStats.howManyDaysInARow();
+      whichDaysRevised = streakStats.last7Days();
+      //examDate = streakStats.examDate;
+      daysLoggedIn = streakStats.daysLoggedIn;
+      noDaysLoggedIn = daysLoggedIn.length;
+      todaysDate = DateTime.now().copyWith(hour: 0, minute: 0, second: 0, millisecond: 0, microsecond: 0);
+    });
+
+  }
 
   // NEW VARIABLES FROM MEDICRECALL1
   String? nextTopicForReview;
 
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   getUser();
+  //   getFirstStudyDay();
+  //   landingService.onLanding = true;
+  //   if (mounted) setState(() {});
+  // }
+
+  // ----- Retrieve information for the dashboard -----
+  Future<void> getNextTopicForReview() async {
+    TopicStats stats = await LastRevised.getStats(includeSubtopics: false);
+    Map<String, DateTime> nextReviewDatesMap = LastRevised.nextReviewDateByTopic(stats);
+    String nextTopic = nextReviewDatesMap.keys.first;
+    DateTime nextReviewDate = nextReviewDatesMap.values.first;
+
+    for (String topicID in nextReviewDatesMap.keys) {
+      if (nextReviewDatesMap[topicID]!.isBefore(nextReviewDate)) {
+        nextTopic = topicID;
+        nextReviewDate = nextReviewDatesMap[topicID]!;
+      }
+    }
+
+    if (mounted) {
+      setState(() {
+        nextTopicForReview = nextTopic;
+      });
+    }
+
+  }
+
   @override
   void initState() {
     super.initState();
-    getUser();
-    getFirstStudyDay();
     landingService.onLanding = true;
-    if (mounted) setState(() {});
+    getUser().then( (_) async {
+      await LastRevised.recordLogin();
+      final nextTopic = await LastRevised.getNextTopicForReview();
+      await getExamDate(); // Remove the assignment since it returns void
+
+      // Update the state with the fetched data
+      if (mounted) {
+        setState(() {
+          this.nextTopicForReview = nextTopic;
+          // Remove this.examDate = examDate; since getExamDate() returns void
+        });
+      }
+    });
   }
 
   Future<void> getUser() async {
@@ -189,19 +256,15 @@ class NewLandingState extends State<NewLanding> {
                         shape: BoxShape.circle,
                       ),
                       padding: EdgeInsets.all(isMobile ? 1.5 : 2.0),
-                      child: Icon(icon, color: Colors.white, size: 24),
+                      child: Icon(icon, color: Colors.black, size: 24),
                     )
                   else
-                    Icon(icon, color: Colors.white, size: 24),
+                    Icon(icon, color: Colors.black, size: 24),
                   SizedBox(width: isMobile ? 8 : 10),
                   Expanded(
                     child: Text(
                       text,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: textSize,
-                        fontWeight: FontWeight.normal,
-                      ),
+                      style: textStyle1,
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -229,6 +292,8 @@ class NewLandingState extends State<NewLanding> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               SizedBox(height: 20),
+
+              // TOP LEFT AND RIGHT WIDGETS (FLASHCARD TUTOR AND MOCK EXAMS)
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -242,7 +307,6 @@ class NewLandingState extends State<NewLanding> {
                       onPressed: () => triggerSignIn('FlashcardEditor'),
                     ),
                   ),
-                  SizedBox(width: 16),
                   SizedBox(width: 16),
                   Expanded(
                     child: DashboardBoxRight(
@@ -270,7 +334,10 @@ class NewLandingState extends State<NewLanding> {
                   ),
                 ]
               ),
+
               SizedBox(height: 20),
+
+              // STUDY SCHEDULE AND CREATE NEW FLASHCARDS ICON BUTTONS
               Row(children: [
                 IconButton(
                   label: 'Study Schedule',
@@ -282,7 +349,102 @@ class NewLandingState extends State<NewLanding> {
                   iconFilePath: 'assets/dashboard_assets/plus.png',
                   onPressed: () => triggerSignIn('FlashcardEditor'),
                 ),
-              ],)
+              ],
+              ),
+
+              SizedBox(height: 16),
+
+              // 3 STATISTICS WIDGETS
+              Row(
+                children: [
+                  Expanded(
+                    child: Card(
+                      color: AppColours.almostWhite,
+                      child: Padding(
+                        padding: EdgeInsetsDirectional.symmetric(horizontal: 20.0, vertical: 15.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+
+                            Row(mainAxisAlignment: MainAxisAlignment.start,
+                            children:[
+                              SizedBox(width: 15),
+                              Image.asset(
+                                'assets/dashboard_assets/bar_chart.png',
+                                height: 18,
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                "Statistics",
+                                style: textStyleBlack,
+                              ),
+                            ]),
+
+                          SizedBox(height: 2),
+                          Row(children: [
+                            StatisticsWidget(title: "Streak Count", iconFilePath: 'assets/dashboard_assets/fire.png', iconHeight: 55, displayedValue: howManyDaysInARow),
+                            SizedBox(width: 10),
+                            StatisticsWidget(title: "Total Days Revised", iconFilePath: 'assets/dashboard_assets/clock.png', iconHeight: 40, displayedValue: numberOfDecksRevised),
+                            SizedBox(width: 10),
+                            StatisticsWidget(
+                              title: "Exam Countdown", iconFilePath: 'assets/dashboard_assets/calendar.png', iconHeight: 45,
+                              // displayedValue: localExamDate != null
+                              // ? (localExamDate.isAfter(todaysDate)
+                              //   ? localExamDate.difference(todaysDate).inDays
+                              //   : 0)
+                              // : -1
+                              displayedValue: 1, // PLACEHOLDER
+                            ),
+                          ]),
+                        ])
+                      )
+                    )
+                  )
+                ]
+              ),
+
+              SizedBox(height: 16),
+
+              // HOW DOES MEDICRECALL WORK, FAQ, FEEDBACK ICON BUTTONS
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  IconButton(
+                    label: 'How does MedicRecall work?',
+                    onPressed: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ExplanationScreen(),
+                        )
+                      );
+                    },
+                  ),
+                  IconButton(
+                    label: 'Frequently asked Questions',
+                    onPressed: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const FAQScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  IconButton(
+                    label: 'Give us Feedback',
+                    onPressed: () async {
+                      landingService.onLanding = false;
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const FeedbackScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ],
           )
         )
@@ -379,6 +541,34 @@ class NewLandingState extends State<NewLanding> {
     if (mounted) setState(() {});
   }
 
+    Future<void> getExamDate() async {
+
+    if (FirebaseWrapper.auth().currentUser == null) {
+      return;
+    }
+
+    String userID = (await FirebaseWrapper.firestore().collection("users").where("userID", isEqualTo: FirebaseWrapper.auth().currentUser!.uid).get()).docs.last.id;
+    var snapshots =  FirebaseWrapper.firestore().doc("users/$userID").snapshots();
+
+    if (mounted) {
+      stream = snapshots.listen((snapshot) {
+        Timestamp? testDay = (snapshot.data()??{})["TestDay"];
+        if (mounted) {
+          if (testDay != null) {
+            setState(() {
+              daysUntilExam = "${testDay.toDate().difference(DateTime.now()).inDays} days";
+            });
+          } else {
+            setState(() {
+              daysUntilExam = "Date Not Set";
+            });
+          }
+        }
+      });
+
+      setState(() {});
+    }
+  }
 }
 
 class IconButton extends StatelessWidget {
@@ -413,7 +603,7 @@ class IconButton extends StatelessWidget {
           ),
           child: Row(
             children: [
-              SizedBox(width: 15),
+              SizedBox(width: 15), 
               if (iconFilePath != null) ...[
                 Image.asset(
                   width: 30,
@@ -460,7 +650,7 @@ class DashboardBoxLeft extends StatelessWidget {
           height: 150,
           decoration: BoxDecoration(
             //color: themeProvider.isDarkMode ? Colors.white : Colors.black,
-            color: Colors.white,
+            color: AppColours.almostWhite,
             borderRadius: BorderRadius.all(Radius.circular(10)),
           ),
           child: Column(
@@ -484,8 +674,39 @@ class DashboardBoxLeft extends StatelessWidget {
                   ]
                 ),
               ),
-
-              
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                child: Container(
+                  height: 80,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: AppColours.almostWhite,
+                    borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10), bottomRight: Radius.circular(10)),
+                  ),
+                  child: Column(
+                    children: [
+                      SizedBox(height: 10),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        alignment: Alignment.topLeft,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children:[
+                            SizedBox(height: 5),
+                            Text(
+                              title,
+                              style: textStyleBlack.copyWith(fontSize: 18),
+                            ),
+                            Text(
+                              subtitle!,
+                              style: textStyleBlack.copyWith(fontSize: 14),
+                            ),
+                            SizedBox(height: 5),
+                        ]),
+                      ),
+                    ])
+                ),
+              ),
             ]
           ),
         )
@@ -520,7 +741,7 @@ class DashboardBoxRight extends StatelessWidget {
         Container(
           height: 150,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppColours.almostWhite,
             borderRadius: BorderRadius.all(Radius.circular(10)),
           ),
           child: Column(
@@ -534,26 +755,15 @@ class DashboardBoxRight extends StatelessWidget {
                       label: 'Full-Sized Mock',
                       iconFilePath: 'assets/dashboard_assets/play_circle.png',
                       onPressed: onPressed1,
-                      // onPressed: () {
-                      //   Navigator.push(
-                      //     context,
-                      //     MoveRightRoute(page: const HomePage(title: "Exam Declaration")),
-                      //   );
-                      // },
                     ),
                     IconButton(
                       label: 'Mini Mock',
                       iconFilePath: 'assets/dashboard_assets/target.png',
                       onPressed: onPressed2,
-                      // onPressed: () {
-                      //   Navigator.push(
-                      //     context,
-                      //     MoveRightRoute(page: const HomePage(title: "Exam Declaration")),
-                      //   );
-                      // },
                     ),
                   ]
                 ),
+                
               ),
 
               Padding(
@@ -563,7 +773,7 @@ class DashboardBoxRight extends StatelessWidget {
                   width: double.infinity,
                   decoration: BoxDecoration(
                     //color: themeProvider.isDarkMode ? Colors.white : Colors.black,
-                    color: Colors.white,
+                    color: AppColours.almostWhite,
                     borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10), bottomRight: Radius.circular(10)),
                   ),
                   child: Column(
@@ -576,18 +786,15 @@ class DashboardBoxRight extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children:[
                             SizedBox(height: 5),
-                            // Text(
-                            //   title,
-                            //   style: theme.textTheme.titleMedium?.copyWith(
-                            //       color: themeProvider.isDarkMode ? Colors.black : Colors.white)
-                            // ),
-                            // subtitle == null ? CircularProgressIndicator(color: themeProvider.isDarkMode ? Colors.black : Colors.white) : 
-                            // Text(
-                            //   subtitle!,
-                            //   style: theme.textTheme.bodyMedium?.copyWith(
-                            //     color: themeProvider.isDarkMode ? Colors.black : Colors.white,
-                            //   )
-                            // ),
+                            Text(
+                              title,
+                              style: textStyleBlack.copyWith(fontSize: 18),
+                            ),
+                            subtitle == null ? CircularProgressIndicator(color: Colors.black) : 
+                            Text(
+                              subtitle!,
+                              style: textStyleBlack.copyWith(fontSize: 14),
+                            ),
                             SizedBox(height: 5),
                         ]),
                       ),
@@ -604,9 +811,88 @@ class DashboardBoxRight extends StatelessWidget {
   }
 }
 
+class StatisticsWidget extends StatelessWidget {
+  const StatisticsWidget({super.key, 
+    required this.title,
+    required this.iconFilePath,
+    required this.displayedValue,
+    required this.iconHeight,
+  });
+
+  final String title;
+  final String iconFilePath;
+  final int displayedValue;
+  final int iconHeight;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Expanded(
+      child: Card(
+        color: Colors.black,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(10,15,10,10),
+          child: Column(
+            children: [
+              Column(children: [
+                SizedBox(height: 5),
+                Text(
+                  title,
+                  textAlign: TextAlign.left,
+                  style: textStyle1,
+                ),
+                SizedBox(height: 15),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                    "$displayedValue days",
+                      style: theme.textTheme.titleLarge!.copyWith(
+                        color: AppColours.almostWhite,
+                        fontWeight: FontWeight.w200,
+                        fontSize: 40
+                      )
+                    ),
+                    SizedBox(width: 20),
+                    Container(
+                      height: iconHeight.toDouble(),
+                      child: Image.asset(
+                        iconFilePath,
+                      )
+                    ),
+                ])
+              ])
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 final TextStyle textStyle1 = TextStyle(
   fontFamily: 'Lato',
-  fontSize: 16,
+  fontSize: 18,
   fontWeight: FontWeight.normal,
-  color: Colors.white,
+  color: AppColours.almostWhite,
 );
+
+final TextStyle textStyleBlack = TextStyle(
+  fontFamily: 'Lato',
+  fontSize: 18,
+  fontWeight: FontWeight.normal,
+  color: Colors.black,
+);
+
+final TextStyle bodyMedium = TextStyle(
+  fontFamily: 'Lato',
+  fontSize: 14,
+  fontWeight: FontWeight.normal,
+  color: AppColours.almostWhite,
+);
+
+class AppColours {
+  static const Color darkBlue = Color.fromRGBO(20, 35, 52, 1);
+  static const Color almostWhite = Color.fromRGBO(230, 230, 230, 1);
+  static const Color orange = Color.fromRGBO(221, 117, 67, 1);
+}
