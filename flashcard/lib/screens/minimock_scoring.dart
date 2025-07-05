@@ -12,8 +12,8 @@ import 'package:flashcard_x/widgets/circular_percentage_indicator.dart';
 import 'package:http/http.dart' as http;
 
 import '../widgets/drawer_widget.dart';
-import 'landing_screen.dart';
-import 'landing_new_screen.dart';
+import 'package:flashcard_x/screens/landing_screen.dart';
+import 'package:flashcard_x/screens/landing_screen_new.dart';
 
 
 class MiniMockScoring extends StatefulWidget {

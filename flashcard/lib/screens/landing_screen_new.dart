@@ -12,11 +12,17 @@ import 'package:flutter/material.dart';
 import 'feedback_screen.dart';
 import 'fullmock_landing.dart';
 import 'landing_service.dart';
+import 'package:flashcard_x/widgets/app_bar.dart';
+import 'mark_scheme.dart';
+import 'package:flashcard_x/screens/settings_screen.dart' as setting;
+import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flashcard_x/utils/last_revised.dart';
 import 'package:flashcard_x/utils/firebase_wrapper.dart';
 import 'dart:async';
 import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flashcard_x/widgets/drawer_widget.dart';
+import 'package:flashcard_x/widgets/countdown_button.dart';
 
 // VARIABLES THAT MUST BE CONNECTED TO THE DATABASE
 // nextTopicForReview
@@ -282,6 +288,8 @@ class NewLandingState extends State<NewLanding> {
   Widget build(BuildContext context) {
     buildCount++;
     return Scaffold(  
+        floatingActionButton: const CustomFloatingButton(),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
       //title: "User Dashboard",
       drawer: const DrawMain(),
       appBar: CustomAppBar(

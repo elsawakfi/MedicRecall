@@ -1,5 +1,6 @@
 import 'package:flashcard_x/widgets/app_bar_title.dart';
 import 'package:flutter/material.dart';
+import 'package:flashcard_x/widgets/app_bar.dart';
 
 const double _spacing = 16.0;
 const double _cardWidth = 750;
@@ -10,6 +11,9 @@ class ExplanationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        appBar: CustomAppBar(
+        title: 'How does MedicRecall work?',
+        ),
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
@@ -22,6 +26,7 @@ class ExplanationScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
+                        SizedBox(height: 10),
                         _buildSection(
                           context,
                           icon: Icons.calendar_today,
