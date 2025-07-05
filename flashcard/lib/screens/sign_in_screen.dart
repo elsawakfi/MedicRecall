@@ -47,16 +47,6 @@ class SignInScreenState extends State<SignInScreen> {
               // this file doesn't exist and generates error
               height: 130,
               ),
-              // ColorFiltered(
-              //   colorFilter: ColorFilter.mode(
-              //     Theme.of(context).appBarTheme.iconTheme?.color ?? Colors.white,
-              //     BlendMode.srcIn,
-              //   ),
-              //   child: Image.asset(
-              //   'assets/dashboard_assets/app_logo4.png',
-              //   // this file doesn't exist and generates error
-              //   height: 130,
-              // )),
               const SizedBox(height: 20),
               Text("MedicRecall",
                 style: textStyle1.copyWith(
