@@ -10,8 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
 import 'package:flashcard_x/widgets/circular_percentage_indicator.dart';
 import 'package:http/http.dart' as http;
-
-import '../widgets/drawer_widget.dart';
+import '../widgets/drawer_widget2.dart';
 import 'package:flashcard_x/screens/landing_screen.dart';
 import 'package:flashcard_x/screens/landing_screen_new.dart';
 
@@ -217,7 +216,7 @@ Future<void> fetchAverageScore() async {
         }
       },
       child: Scaffold(
-        drawer: const DrawMain(),
+        drawer: const DrawMain2(),
         appBar: CustomAppBar(title: 'Scoring Page', mobileTitle: 'Scoring'),
         body: answerScores.isEmpty || (maxScore == 0)
             ? Center(child: CircularProgressIndicator(),) // If data is still being fetched, show loading circle

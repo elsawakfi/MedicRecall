@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flashcard_x/widgets/drawer_widget.dart';
+import 'package:flashcard_x/widgets/drawer_widget2.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flashcard_x/screens/minimock_exams.dart';
 
@@ -24,7 +24,7 @@ class MiniMock2RulesState extends State<MiniMock2Rules> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const DrawMain(),
+      drawer: const DrawMain2(),
       appBar: CustomAppBar(title: "Mini-Mock Exam 2"),
        body:  LayoutBuilder(builder: (context, constraints) { 
         double maxScreenWidth = constraints.maxWidth * 0.5;

@@ -1,6 +1,5 @@
 import 'dart:core';
-
-import 'package:flashcard_x/widgets/drawer_widget.dart';
+import 'package:flashcard_x/widgets/drawer_widget2.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +14,7 @@ class Resources extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        drawer: const DrawMain(),
+        drawer: const DrawMain2(),
         appBar: CustomAppBar(
           title: 'Resources',
         ),

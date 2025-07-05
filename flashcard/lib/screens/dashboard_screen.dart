@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flashcard_x/screens/study_session_manager.dart';
-import 'package:flashcard_x/widgets/drawer_widget.dart';
+import 'package:flashcard_x/widgets/drawer_widget2.dart';
 import 'package:flashcard_x/widgets/event.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/screens/calendar_screen.dart';
@@ -141,7 +141,7 @@ class HomePageState extends State<HomePage> {
     
     return Scaffold(
       key: _key,
-      drawer: const DrawMain(),
+      drawer: const DrawMain2(),
       appBar: CustomAppBar(
         title: 'Flashcard Tutor',
         mobileTitle: 'Flashcard Tutor',

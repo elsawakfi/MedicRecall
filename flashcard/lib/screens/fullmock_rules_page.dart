@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flashcard_x/widgets/drawer_widget.dart';
+import 'package:flashcard_x/widgets/drawer_widget2.dart';
 import 'package:flashcard_x/screens/minimock_exams.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
 
@@ -25,7 +25,7 @@ class FullMockRulesState extends State<FullMockRules> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const DrawMain(),
+      drawer: const DrawMain2(),
       appBar: CustomAppBar(title: "Full-Sized Mock Exam"),
       body: LayoutBuilder(builder: (context, constraints){
         double maxScreenWidth = constraints.maxWidth * 0.5;

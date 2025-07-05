@@ -12,6 +12,7 @@ import '../screens/minimock_landing.dart';
 import '../screens/minimock_review.dart';
 import '../utils/timer.dart';
 import 'drawer_widget.dart';
+import 'drawer_widget2.dart';
 import 'minimock_help_button.dart';
 
 abstract class MiniMockExam extends StatefulWidget {
@@ -226,7 +227,7 @@ class MiniMockExamState extends State<MiniMockExam> {
         canPop: true,
         child: Scaffold(
           key: ValueKey(widget.title),
-          drawer: const DrawMain(),
+          drawer: const DrawMain2(),
           appBar: CustomAppBar(
               title: widget.title,
               mobileTitle: widget.shortTitle,

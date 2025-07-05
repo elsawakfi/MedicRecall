@@ -21,7 +21,7 @@ import 'package:flashcard_x/utils/last_revised.dart';
 import 'package:flashcard_x/utils/firebase_wrapper.dart';
 import 'dart:async';
 import 'package:flashcard_x/widgets/app_bar.dart';
-import 'package:flashcard_x/widgets/drawer_widget.dart';
+import 'package:flashcard_x/widgets/drawer_widget2.dart';
 import 'package:flashcard_x/widgets/countdown_button.dart';
 
 // VARIABLES THAT MUST BE CONNECTED TO THE DATABASE
@@ -291,7 +291,7 @@ class NewLandingState extends State<NewLanding> {
         floatingActionButton: const CustomFloatingButton(),
         floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
       //title: "User Dashboard",
-      drawer: const DrawMain(),
+      drawer: const DrawMain2(),
       appBar: CustomAppBar(
         title: 'MedicRecall',
         mobileTitle: 'MedicRecall',

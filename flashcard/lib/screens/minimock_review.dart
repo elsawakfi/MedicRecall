@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flashcard_x/widgets/drawer_widget.dart';
+import 'package:flashcard_x/widgets/drawer_widget2.dart';
 // import 'package:flashcard_x/screens/minimock_exams.dart';
 
 import '../utils/timer.dart';
@@ -186,7 +186,7 @@ class MiniMockReviewState extends State<MiniMockReview> {
           }
         },
         child: Scaffold(
-            drawer: const DrawMain(),
+            drawer: const DrawMain2(),
             appBar: CustomAppBar(
               title: 'Review Page',
               mobileTitle: 'Review',

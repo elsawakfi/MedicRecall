@@ -17,7 +17,7 @@ import 'study_session_manager.dart';
 import 'minimock_landing.dart';
 import 'quiz_choice_screen.dart';
 import 'feed_screen.dart'; // Contains AboveEverything widget
-import '../widgets/drawer_widget.dart';
+import '../widgets/drawer_widget2.dart';
 import '../widgets/event.dart';
 import 'package:flashcard_x/screens/dashboard_screen.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
@@ -1131,7 +1131,7 @@ class CalendarStateO extends State<Calendar> {
   Widget build(BuildContext context) {
     bool isSmallScreen = MediaQuery.of(context).size.width < 600;
     return Scaffold(
-      drawer: const DrawMain(),
+      drawer: const DrawMain2(),
       appBar: CustomAppBar(
         title: 'Revision Calendar',
         mobileTitle: 'Calendar',

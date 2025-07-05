@@ -4,8 +4,8 @@ import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/countdown_button.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
+import '../widgets/drawer_widget2.dart';
 
-import '../widgets/drawer_widget.dart';
 import 'add_flashcard_screen.dart';
 
 class FlashcardEditor extends StatefulWidget {
@@ -32,7 +32,7 @@ class FlashcardEditorState extends State<FlashcardEditor> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        drawer: const DrawMain(),
+        drawer: const DrawMain2(),
         appBar: CustomAppBar(
           title: 'Create New Flashcards',
           mobileTitle: 'Create Flashcards',
