@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'landing_screen.dart';
+import 'landing_screen_new.dart';
 
 class VerifyEmailScreen extends StatefulWidget {
   static String id = 'verifyEmail';
@@ -78,7 +79,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
     if (isEmailVerified) {
       // Schedule navigation for the next frame
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.pushReplacementNamed(context, Landing.id);
+        Navigator.pushReplacementNamed(context, NewLanding.id);
       });
       // Return empty container while redirecting
       return Container();

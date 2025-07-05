@@ -13,6 +13,7 @@ import 'package:http/http.dart' as http;
 
 import '../widgets/drawer_widget.dart';
 import 'landing_screen.dart';
+import 'landing_new_screen.dart';
 
 
 class MiniMockScoring extends StatefulWidget {

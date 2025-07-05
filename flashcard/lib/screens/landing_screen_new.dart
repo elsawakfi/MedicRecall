@@ -15,8 +15,8 @@ import 'landing_service.dart';
 import 'package:flashcard_x/utils/last_revised.dart';
 import 'package:flashcard_x/utils/firebase_wrapper.dart';
 import 'dart:async';
-
-
+import 'package:flashcard_x/widgets/app_bar.dart';
+import 'package:flashcard_x/widgets/drawer_widget.dart';
 
 // VARIABLES THAT MUST BE CONNECTED TO THE DATABASE
 // nextTopicForReview
@@ -281,9 +281,13 @@ class NewLandingState extends State<NewLanding> {
   @override
   Widget build(BuildContext context) {
     buildCount++;
-    return Scaffold(
-      key: const ValueKey('Welcome bar'),   
+    return Scaffold(  
       //title: "User Dashboard",
+      drawer: const DrawMain(),
+      appBar: CustomAppBar(
+        title: 'MedicRecall',
+        mobileTitle: 'MedicRecall',
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
@@ -339,12 +343,12 @@ class NewLandingState extends State<NewLanding> {
 
               // STUDY SCHEDULE AND CREATE NEW FLASHCARDS ICON BUTTONS
               Row(children: [
-                IconButton(
+                _IconButton(
                   label: 'Study Schedule',
                   iconFilePath: 'assets/dashboard_assets/calendar.png',
                   onPressed: () => triggerSignIn('Calendar'),
                 ),
-                IconButton(
+                _IconButton(
                   label: 'Create New Flashcards',
                   iconFilePath: 'assets/dashboard_assets/plus.png',
                   onPressed: () => triggerSignIn('FlashcardEditor'),
@@ -409,7 +413,7 @@ class NewLandingState extends State<NewLanding> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  IconButton(
+                  _IconButton(
                     label: 'How does MedicRecall work?',
                     onPressed: () async {
                       await Navigator.push(
@@ -420,7 +424,7 @@ class NewLandingState extends State<NewLanding> {
                       );
                     },
                   ),
-                  IconButton(
+                  _IconButton(
                     label: 'Frequently asked Questions',
                     onPressed: () async {
                       await Navigator.push(
@@ -431,7 +435,7 @@ class NewLandingState extends State<NewLanding> {
                       );
                     },
                   ),
-                  IconButton(
+                  _IconButton(
                     label: 'Give us Feedback',
                     onPressed: () async {
                       landingService.onLanding = false;
@@ -571,9 +575,9 @@ class NewLandingState extends State<NewLanding> {
   }
 }
 
-class IconButton extends StatelessWidget {
+class _IconButton extends StatelessWidget {
   
-  const IconButton({super.key, 
+  const _IconButton({super.key, 
     required this.label,
     required this.onPressed,
     this.iconFilePath,
@@ -660,7 +664,7 @@ class DashboardBoxLeft extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 4.0),
                 child: Row(
                   children: [
-                    IconButton(
+                    _IconButton(
                       label: 'Flashcard Tutor',
                       iconFilePath: 'assets/dashboard_assets/trending_up.png',
                       onPressed: onPressed,
@@ -751,12 +755,12 @@ class DashboardBoxRight extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 4.0),
                 child: Row(
                   children: [
-                    IconButton(
+                    _IconButton(
                       label: 'Full-Sized Mock',
                       iconFilePath: 'assets/dashboard_assets/play_circle.png',
                       onPressed: onPressed1,
                     ),
-                    IconButton(
+                    _IconButton(
                       label: 'Mini Mock',
                       iconFilePath: 'assets/dashboard_assets/target.png',
                       onPressed: onPressed2,

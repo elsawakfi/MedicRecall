@@ -11,6 +11,7 @@ import 'dashboard_screen.dart';
 
 // Internal imports
 import 'landing_screen.dart';
+import 'landing_screen_new.dart';
 import 'sign_in_screen.dart';
 import 'study_session_manager.dart';
 import 'minimock_landing.dart';
@@ -814,7 +815,7 @@ class CalendarStateO extends State<Calendar> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => Landing()),
+                      MaterialPageRoute(builder: (context) => NewLanding()),
                     );
                   },
                   style: TextButton.styleFrom(

@@ -44,7 +44,6 @@ class SignInScreenState extends State<SignInScreen> {
             children: [
               Image.asset(
               'assets/dashboard_assets/app_logo4.png',
-              // this file doesn't exist and generates error
               height: 130,
               ),
               const SizedBox(height: 20),

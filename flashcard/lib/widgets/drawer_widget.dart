@@ -2,6 +2,7 @@ import 'package:flashcard_x/screens/dashboard_screen.dart';
 import 'package:flashcard_x/screens/faq.dart';
 import 'package:flashcard_x/screens/feedback_screen.dart';
 import 'package:flashcard_x/screens/landing_screen.dart';
+import 'package:flashcard_x/screens/landing_screen_new.dart';
 import 'package:flashcard_x/screens/mark_scheme.dart';
 import 'package:flashcard_x/screens/minimock_landing.dart';
 import 'package:flashcard_x/screens/settings_screen.dart';
@@ -52,7 +53,7 @@ class DrawMain extends StatelessWidget {
                 ]),
                 onTap: () => Navigator.push(
                       context,
-                      MoveRightRoute(page: const Landing()),
+                      MoveRightRoute(page: const NewLanding()),
                     ))),
         const SizedBox(width: 100, height: 16),
         ListTile(
