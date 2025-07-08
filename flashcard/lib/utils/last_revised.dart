@@ -2,6 +2,41 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flashcard_x/utils/firebase_wrapper.dart';
 
 class LastRevised {
+
+  //Chat function for resetting seen cards
+static Future<void> resetSeenCardsForTopic(String topicName) async {
+  if (FirebaseWrapper.auth().currentUser == null) return;
+
+  // Get user ID
+  String userID = (await FirebaseWrapper.firestore()
+      .collection("users")
+      .where("userID", isEqualTo: FirebaseWrapper.auth().currentUser!.uid)
+      .get())
+      .docs
+      .last
+      .id;
+
+  // References
+  CollectionReference flashcardRef = FirebaseWrapper.firestore().collection('flashcards');
+  CollectionReference seenRef = FirebaseWrapper.firestore().collection("users/$userID/flashcardsSeen");
+
+  // Get all flashcards in this topic
+  QuerySnapshot matchingCards = await flashcardRef.where("topic", isEqualTo: topicName).get();
+  Set<String> cardIDsToDelete = matchingCards.docs.map((doc) => doc.id).toSet();
+
+  // Get all seen cards
+  QuerySnapshot seenDocs = await seenRef.get();
+
+  // Filter and delete only those seen cards that match the topic
+  for (var doc in seenDocs.docs) {
+    String cardID = doc["cardID"];
+    if (cardIDsToDelete.contains(cardID)) {
+      await seenRef.doc(doc.id).delete();
+    }
+  }
+
+  print("Reset all seen cards for topic: $topicName");
+}
   
   static Future<TopicStats> getStats({bool includeSubtopics=true}) async {
 
@@ -205,6 +240,7 @@ class LastRevised {
   }
 
 }
+
 
 class TopicStats {
 

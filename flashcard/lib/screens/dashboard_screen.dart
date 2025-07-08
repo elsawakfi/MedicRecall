@@ -14,6 +14,7 @@ import 'package:flashcard_x/screens/feed_screen.dart';
 import 'package:provider/provider.dart';
 import '../utils/page_transition.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter/foundation.dart';
 
 class HomePage extends StatefulWidget {
   static String id = 'home';
@@ -30,6 +31,7 @@ class HomePageState extends State<HomePage> {
   
   late String? name;
   late String? id;
+  bool getEvensOnce = false;
   late List<dynamic>? topicCount;
   List<dynamic>? topicLastSeen;
   CollectionReference users = FirebaseWrapper.firestore().collection('users');
@@ -42,7 +44,7 @@ class HomePageState extends State<HomePage> {
   late DateTime _firstStudyDate;
   late DateTime testDay;
   late Map<DateTime?, List<Event>> selectedEvents;
-  late Map<DateTime?, List<Event>> allEvents;
+  late Map<DateTime, List<Event>> allEvents;
   late CollectionReference _eventsCollectionRef;
   late List<String> topicNames = [];
   final CollectionReference _userCollectionRef =
@@ -72,6 +74,11 @@ class HomePageState extends State<HomePage> {
       _firstStudyDate = DateTime.fromMicrosecondsSinceEpoch(
           querySnapshot.docs.last["firstStudyDay"].microsecondsSinceEpoch);
     });
+    
+
+    // if(!getEvensOnce){
+      //Do not keep updating events???
+    
     try{
       _eventsCollectionRef =
           FirebaseFirestore.instance.collection('users/$id/events');
@@ -94,7 +101,7 @@ class HomePageState extends State<HomePage> {
             allEvents[date] = events.map ((title) => Event(color: Colors.black, title: title)).toList();
             for (String e in events){
              
-              if (!topicNames.contains(e)){
+              if (!topicNames.contains(e) && !e.contains("Completed:")){
                  
                   events.remove(e);
                   
@@ -105,6 +112,7 @@ class HomePageState extends State<HomePage> {
                 title: title,
                 color : Colors.yellow
             )).toList();
+            getEvensOnce = true;
             
           }
         }
@@ -114,6 +122,52 @@ class HomePageState extends State<HomePage> {
     } catch(e){
       print("Error loading events from DB: $e");
     }
+  }
+
+    Future<void> updateOneEvent(
+      Event oldEvent, String newTitle, DateTime newDate) async {
+    DateTime normalizedDate =
+        DateTime(newDate.year, newDate.month, newDate.day,0,0,0,0);
+    // Remove old event from Firestore
+    await deleteSingleEvent(normalizedDate, oldEvent.title, user);
+    await addSingleEvent(normalizedDate, newTitle, user,edit :true);
+  }
+
+
+    Future<void> deleteSingleEvent(
+      DateTime date, String eventTitle, User user) async {
+    date = DateTime(date.year, date.month, date.day,0,0,0,0);
+
+    if (!allEvents.containsKey(date)) {
+      print("No events found for date: ${date.toString().split(' ')[0]}");
+      return;
+    }
+
+    allEvents[date]?.removeWhere((event) => event.title == eventTitle);
+
+    if (allEvents[date]?.isEmpty ?? false) {
+      allEvents.remove(date);
+    }
+
+    QuerySnapshot querySnapshot = await _eventsCollectionRef
+        .where("date", isEqualTo: Timestamp.fromDate(date))
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      String docId = querySnapshot.docs.first.id;
+      List<String> updatedEvents =
+          allEvents[date]?.map((e) => e.title).toList() ?? [];
+
+      if (updatedEvents.isEmpty) {
+        await _eventsCollectionRef
+            .doc(docId)
+            .delete(); // ❗ Ensure deletion happens
+      } else {
+        await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
+      }
+    }
+
+    setState(() {});
   }
   Future<List> getTopicsDatabase() async {
     List<dynamic> holderList = [];
@@ -146,28 +200,196 @@ class HomePageState extends State<HomePage> {
 
     return holderList;
   }
+  
+  
+  Future<bool> _isExcludedDay(DateTime date, String userId) async {
+    try {
+      QuerySnapshot querySnapshot =
+          await _userCollectionRef.where("userID", isEqualTo: userId).get();
+      if (querySnapshot.docs.isEmpty) return false;
+
+      var userData = querySnapshot.docs.last.data() as Map<String, dynamic>;
+      if (!userData.containsKey('excludedDays')) return false;
+
+      List<String> excludedDays = List<String>.from(userData['excludedDays']);
+      String dayName = _getDayName(date.weekday);
+      return excludedDays.contains(dayName);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error checking excluded day: $e');
+      }
+      return false;
+    }
+  }
+
+    String _getDayName(int weekday) {
+    switch (weekday) {
+      case 1:
+        return "Monday";
+      case 2:
+        return "Tuesday";
+      case 3:
+        return "Wednesday";
+      case 4:
+        return "Thursday";
+      case 5:
+        return "Friday";
+      case 6:
+        return "Saturday";
+      case 7:
+        return "Sunday";
+      default:
+        return "";
+    }
+  }
+
+
+  Future<DateTime> findNearestFreeDate(
+      DateTime targetDate,
+      int maxDaysToMove,
+      DateTime testDay,
+      DateTime today,
+      Map<DateTime, List<Event>> generatedEvents,
+      String userId,
+      {int requiredSpacing = 0}) async {
+    // First check if the target date is already available
+    if (generatedEvents[targetDate] == null &&
+        !await _isExcludedDay(targetDate, userId)) {
+      return targetDate;
+    }
+
+    // Try to find a date forward (preferred direction)
+    DateTime nextDate = targetDate;
+    int daysForward = 0;
+    while (nextDate.isBefore(testDay) && daysForward < maxDaysToMove) {
+      nextDate = nextDate.add(const Duration(days: 1));
+      daysForward++;
+      
+      // Check if this date respects both availability and required spacing
+      if (generatedEvents[nextDate] == null &&
+          !await _isExcludedDay(nextDate, userId)) {
+        // If we need to maintain spacing, check adjacent days
+        if (requiredSpacing > 0) {
+          bool hasAdjacentEvent = false;
+          
+          // Check days before based on spacing
+          for (int i = 1; i <= requiredSpacing; i++) {
+            DateTime checkDate = nextDate.subtract(Duration(days: i));
+            if (generatedEvents[checkDate] != null) {
+              hasAdjacentEvent = true;
+              break;
+            }
+          }
+          
+          // Check days after based on spacing
+          if (!hasAdjacentEvent) {
+            for (int i = 1; i <= requiredSpacing; i++) {
+              DateTime checkDate = nextDate.add(Duration(days: i));
+              if (checkDate.isAfter(testDay)) break;
+              if (generatedEvents[checkDate] != null) {
+                hasAdjacentEvent = true;
+                break;
+              }
+            }
+          }
+          
+          if (!hasAdjacentEvent) {
+            return nextDate;
+          }
+          // Continue searching if this date doesn't meet spacing requirements
+          continue;
+        }
+        
+        return nextDate;
+      }
+    }
+
+    // If no future date found within maxDaysToMove, try searching backward
+    DateTime prevDate = targetDate;
+    int daysBackward = 0;
+    while (prevDate.isAfter(today) && daysBackward < maxDaysToMove) {
+      prevDate = prevDate.subtract(const Duration(days: 1));
+      daysBackward++;
+      
+      // Check if this date respects both availability and required spacing
+      if (generatedEvents[prevDate] == null &&
+          !await _isExcludedDay(prevDate, userId)) {
+        // If we need to maintain spacing, check adjacent days
+        if (requiredSpacing > 0) {
+          bool hasAdjacentEvent = false;
+          
+          // Check days before based on spacing
+          for (int i = 1; i <= requiredSpacing; i++) {
+            DateTime checkDate = prevDate.subtract(Duration(days: i));
+            if (checkDate.isBefore(today)) break;
+            if (generatedEvents[checkDate] != null) {
+              hasAdjacentEvent = true;
+              break;
+            }
+          }
+          
+          // Check days after based on spacing
+          if (!hasAdjacentEvent) {
+            for (int i = 1; i <= requiredSpacing; i++) {
+              DateTime checkDate = prevDate.add(Duration(days: i));
+              if (generatedEvents[checkDate] != null) {
+                hasAdjacentEvent = true;
+                break;
+              }
+            }
+          }
+          
+          if (!hasAdjacentEvent) {
+            return prevDate;
+          }
+          // Continue searching if this date doesn't meet spacing requirements
+          continue;
+        }
+        
+        return prevDate;
+      }
+    }
+
+    // If we reach here, try the start date itself as a last resort
+    if (generatedEvents[today] == null &&
+        !await _isExcludedDay(today, userId)) {
+      return today;
+    }
+
+    // If absolutely no valid date found, return the original target date
+    // The calling methods will need to check if this date is actually usable
+    return targetDate;
+  }
+
 
  Future<void> addSingleEvent (
-      DateTime date, String eventTitle, User user) async {
+      DateTime date, String eventTitle, User user,{bool edit = false}) async {
     date = DateTime(date.year, date.month, date.day,0,0,0,0);
-    if(allEvents[date] == null ){
-        print("Null Event ${allEvents[date]}\n");  
-    }else{
-    while (allEvents[date]!=null && date.isBefore(testDay)) {
-      date = date.add(const Duration(days:1));
-      print("Date : $date \n");
-      print("Event ${allEvents[date]}\n");
-    }}
+   
+  DateTime today = DateTime.now();
+  
+  if (edit == false){
+  print("Finding nearest date\n");
+  date = await findNearestFreeDate(date, 5, testDay, today, allEvents, user.uid);
+  print("Found??\n");
+  }
+
+  Color color =  Colors.yellow; 
+
+  if (edit == true) color = Colors.black;
+  
     //The delete single event function updates the UI in real time so I just copied the structure of that function 
     Event newEvent =  Event(
                         title: eventTitle,
-                        color: Colors.yellow
+                        color: color
                         );
     //cannot add a new revision date if the date is not empty
     if (allEvents[date] == null) {
-      
+      selectedEvents[date] = [];
       allEvents[date] = [];
+      print("Adding event to $date\n");
     
+    selectedEvents[date]?.add(newEvent);
     allEvents[date]?.add(newEvent);
     QuerySnapshot querySnapshot = await _eventsCollectionRef
         .where("date", isEqualTo: Timestamp.fromDate(date))
@@ -362,10 +584,12 @@ class HomePageState extends State<HomePage> {
       DateTime? dateInCalendar;
       bool notInCalendar = true;
       List<String> rescheduled = [];
+      Event e = Event(color:Color(0xFFB0FFC6),title: "Shouldn't add"); 
+      
       
       //Only go through the flashcard events with "selectedEvents" instead of allEvents
       
-      if (selectedEvents.isNotEmpty && !rescheduled.contains(map["topic"])){
+      if (selectedEvents.isNotEmpty ){
         for (final entry in selectedEvents.entries){
         for (final event in entry.value){
           if (event.title.contains(map["topic"])){
@@ -373,6 +597,7 @@ class HomePageState extends State<HomePage> {
             dateInCalendar = entry.key;
             formattedDate = formattedDate.substring(0,10);
             notInCalendar = false;
+            e = event;
           }
         }
         }
@@ -394,7 +619,7 @@ class HomePageState extends State<HomePage> {
         }
       }
       
-      //Of the user has seen some of the cards 
+      //if the user has seen some of the cards 
       else  {
 
         //If the revision date is in the future 
@@ -409,37 +634,25 @@ class HomePageState extends State<HomePage> {
              if(seenCards[map["topic"]]! < totalCards[map["topic"]]!) tColour = Color(0xFFD9D9D9);   
       }
 
-        else if(dateInCalendar.isBefore(today) || dateInCalendar.isAtSameMomentAs(today)){
+        else if(dateInCalendar.isBefore(today) || dateInCalendar.isAtSameMomentAs(today)) {
           //Reschedule or set red
            if (seenCards[map["topic"]]! == totalCards[map["topic"]]!){
             
             rescheduled.add("${map["topic"]}");
             tColour = Color(0xFFD9D9D9);   
            
-            // int repCoefficient = 6;
-            // nextReviewDate = DateTime(dateInCalendar.year, dateInCalendar.month,
-            // dateInCalendar.day+repCoefficient,0,0,0,0);
-           
-            // while (allEvents[addedDate] != null && addedDate.isBefore(testDay)){
-            //    print(allEvents[addedDate]);
-            //    addedDate = DateTime(addedDate.year,addedDate.month,
-            // addedDate.day+1,0,0,0,0);
-              
-            // }
-
-            
+ 
             addSingleEvent(nextReviewDate,
               "${map["topic"]} Flashcards", user);
             formattedDate = nextReviewDate
             .toString().substring(0,10);
             text = "0";
 
-            //Both this condition and the dateInCalendar.isAfter(today) are triggered for the same flashcard 
-            //deck- because of this the colors are incorrect. Both conditions being triggered, can be fixed by 
-            //resetting the seenCards to 0. 
+            
+            updateOneEvent(e, "Completed: ${e.title} ", dateInCalendar);
 
-
-            //Can edit old flashcard deck and change the colour to a completed colour???  
+            LastRevised.resetSeenCardsForTopic("${map["topic"]}");
+            selectedEvents.remove(dateInCalendar);
         
            }
            if (seenCards[map["topic"]] == null || seenCards[map["topic"]]! < totalCards[map["topic"]]!){
