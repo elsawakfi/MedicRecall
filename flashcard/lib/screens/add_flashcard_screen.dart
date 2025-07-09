@@ -171,22 +171,50 @@ class _AddCardState extends State<AddCard> {
     child: Column(
     mainAxisAlignment: MainAxisAlignment.start,
     children: [
-    Padding(
+   Padding(
     padding: const EdgeInsets.all(10),
+    child: Container(
+    decoration: BoxDecoration(
+      color: Colors.white,                         
+      borderRadius: BorderRadius.circular(12),      
+    ),
+    padding: const EdgeInsets.all(10),           
     child: TextField(
-    controller: front,
-    decoration: const InputDecoration(
-    border: OutlineInputBorder(),
-    hintText: 'front of card',
-    ))),
+      controller: front,
+      textAlign: TextAlign.center,                 
+      style: const TextStyle(fontSize: 20),        
+      decoration: const InputDecoration(
+        border: InputBorder.none,                  
+        hintText: 'Qusetions',
+        hintStyle: TextStyle(fontSize: 20),        
+      ),
+    ),
+  ),
+),
+
+
     Padding(
-    padding: const EdgeInsets.all(10),
+  padding: const EdgeInsets.all(10),
+  child: Container(
+    decoration: BoxDecoration(
+      color: Colors.white,                         
+      borderRadius: BorderRadius.circular(12),      
+    ),
+    padding: const EdgeInsets.all(10),           
     child: TextField(
-    controller: back,
-    decoration: const InputDecoration(
-    border: OutlineInputBorder(),
-    hintText: 'back of card',
-    ))),
+      controller: front,
+      textAlign: TextAlign.center,                 
+      style: const TextStyle(fontSize: 20),        
+      decoration: const InputDecoration(
+        border: InputBorder.none,                  
+        hintText: 'Anwers',
+        hintStyle: TextStyle(fontSize: 20),        
+      ),
+    ),
+  ),
+),
+
+
     DropdownButton<String>(
     value: topic,
     icon: Icon(Icons.arrow_downward, color: Theme.of(context).iconTheme.color),
