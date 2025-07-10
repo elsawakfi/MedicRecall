@@ -172,47 +172,65 @@ class _AddCardState extends State<AddCard> {
     mainAxisAlignment: MainAxisAlignment.start,
     children: [
    Padding(
-    padding: const EdgeInsets.all(10),
-    child: Container(
-    decoration: BoxDecoration(
-      color: Colors.white,                         
-      borderRadius: BorderRadius.circular(12),      
-    ),
-    padding: const EdgeInsets.all(10),           
-    child: TextField(
-      controller: front,
-      textAlign: TextAlign.center,                 
-      style: const TextStyle(fontSize: 20),        
-      decoration: const InputDecoration(
-        border: InputBorder.none,                  
-        hintText: 'Qusetions',
-        hintStyle: TextStyle(fontSize: 20),        
-      ),
-    ),
-  ),
-),
-
-
-    Padding(
   padding: const EdgeInsets.all(10),
-  child: Container(
-    decoration: BoxDecoration(
-      color: Colors.white,                         
-      borderRadius: BorderRadius.circular(12),      
-    ),
-    padding: const EdgeInsets.all(10),           
-    child: TextField(
-      controller: front,
-      textAlign: TextAlign.center,                 
-      style: const TextStyle(fontSize: 20),        
-      decoration: const InputDecoration(
-        border: InputBorder.none,                  
-        hintText: 'Anwers',
-        hintStyle: TextStyle(fontSize: 20),        
+  child: Center(
+  child: FractionallySizedBox(
+    widthFactor: 0.75, 
+    child: Container(
+      decoration: BoxDecoration(
+        color: Colors.white,                         
+        borderRadius: BorderRadius.circular(12),      
       ),
+      padding: const EdgeInsets.all(10),            
+      child: TextField(
+        controller: front,
+        textAlign: TextAlign.center,                 
+        style: const TextStyle(
+            fontSize: 20,
+            color: Colors.black, 
+          ),       
+        decoration: const InputDecoration(
+          border: InputBorder.none,                  
+          hintText: 'Questions',
+          hintStyle: TextStyle(fontSize: 20),       
+        ),
+      ),
+    ),
     ),
   ),
 ),
+
+
+
+  Padding(
+  padding: const EdgeInsets.all(10),
+  child: Center(
+  child: FractionallySizedBox(
+    widthFactor: 0.75, 
+    child: Container(
+      decoration: BoxDecoration(
+        color: Colors.white,                         
+        borderRadius: BorderRadius.circular(12),      
+      ),
+      padding: const EdgeInsets.all(10),           
+      child: TextField(
+        controller: back,
+        textAlign: TextAlign.center,                
+        style: const TextStyle(
+            fontSize: 20,
+            color: Colors.black, 
+          ),       
+        decoration: const InputDecoration(
+          border: InputBorder.none,                  
+          hintText: 'Answers',
+          hintStyle: TextStyle(fontSize: 20),        
+        ),
+      ),
+    ),
+    ),
+  ),
+),
+
 
 
     DropdownButton<String>(
