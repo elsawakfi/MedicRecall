@@ -11,6 +11,7 @@ import 'package:flashcard_x/widgets/event.dart';
 import 'package:flashcard_x/widgets/indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/screens/feed_screen.dart';
+import '../widgets/countdown_button.dart';
 import 'package:provider/provider.dart';
 import '../utils/page_transition.dart';
 import 'package:intl/intl.dart';
@@ -476,6 +477,8 @@ class HomePageState extends State<HomePage> {
     // double height = MediaQuery.of(context).size.height;
 
     return AppScaffold(
+        floatingActionButton: const CustomFloatingButton(),
+        
         body:  Center(
       heightFactor: 0.5,
       child: loading
@@ -544,11 +547,6 @@ class HomePageState extends State<HomePage> {
     }
     
   }
-
- 
-
-  
-  
 
   //Formats the checkbox categories according to colour depending on whether the review date is due and how many flashcards have been seen.
   List<Widget> makeCheckboxList() {
@@ -681,7 +679,14 @@ class HomePageState extends State<HomePage> {
         borderRadius: BorderRadius.circular(20),
         child: Tooltip(
           message: "Click to view subtopics",
-          decoration: BoxDecoration(color: Colors.transparent),
+          triggerMode: TooltipTriggerMode.tap, // Optional: make tooltip appear on tap
+          onTriggered: () {
+            
+            setState(() {
+             
+          });
+              },
+          decoration: BoxDecoration(color: Colors.black),
           enableTapToDismiss: true,
           verticalOffset: -11,
           preferBelow: false,
@@ -843,25 +848,31 @@ class HomePageState extends State<HomePage> {
         ),
       ),
 
-      const SizedBox(height: 20),
+      // const SizedBox(height: 20),
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SizedBox(width: 60),
-          Spacer(flex: 1),
+          SizedBox(
+            width: 60
+            
+            ),
+          Spacer(
+            flex: 1),
           Expanded(
             flex: 1,
             child: Align(child: TextButton(
               key: const ValueKey("Revise"),
               style: TextButton.styleFrom(
                 textStyle: const TextStyle(
-                  fontSize: 30,
+                  fontSize: 25,
                   backgroundColor: Colors.black,
                   color: Colors.white,
                 ),
                 shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10))),
+                    borderRadius: BorderRadius.all(Radius.circular(40))),
+                    backgroundColor: Colors.black,
+                    foregroundColor: Colors.white,
               ),
 
               onPressed: () {
@@ -871,7 +882,10 @@ class HomePageState extends State<HomePage> {
 
               child: const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
-                child: Text('Revise'),
+                child: Text(
+                  'Revise',
+                  selectionColor: Colors.white,
+                ),
               ),
             ),
           )),
@@ -884,6 +898,7 @@ class HomePageState extends State<HomePage> {
                 style: TextButton.styleFrom(
                   shape: const RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(10))),
+                      backgroundColor: Colors.black,
                 ),
 
                 onPressed: () {
@@ -892,10 +907,12 @@ class HomePageState extends State<HomePage> {
 
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
-                  child: Icon(Icons.question_mark, color: Colors.black,),
+                  child: Icon(Icons.question_mark, color: Colors.white,),
                 ),
               ),
+              
             )
+          
           ),
           SizedBox(width: 60,)
         ],

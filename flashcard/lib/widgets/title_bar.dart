@@ -11,6 +11,7 @@ class ScreenTitleBar extends StatelessWidget {
     final theme = Theme.of(context);
     return Container(
       width: double.infinity,
+      height: 75,
       color: Colors.blue[300],
       padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
       child: Row(
@@ -22,7 +23,7 @@ class ScreenTitleBar extends StatelessWidget {
               style: theme.textTheme.titleLarge?.copyWith(color: Colors.black),
             ),
           ),
-          const CustomFloatingButton(),
+          // const CustomFloatingButton(),
         ],
       ),
      

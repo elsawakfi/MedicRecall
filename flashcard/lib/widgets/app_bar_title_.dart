@@ -8,7 +8,10 @@ AppBar buildAppBar(BuildContext context, bool showBack) {
   final isSmallScreen = MediaQuery.of(context).size.width < 600;
   return AppBar(
     
-    title: Stack(
+    title: 
+    
+    Stack(
+      
       children: [
         Positioned(
           top: 3,
@@ -45,6 +48,7 @@ AppBar buildAppBar(BuildContext context, bool showBack) {
 }
 AppBar buildAppBarWithTitle(BuildContext context, bool showBack, String appBarTitle) {
   return AppBar(
+    titleSpacing: -500,
     title: Text(appBarTitle),
     centerTitle: true,
     elevation: 0,
@@ -71,6 +75,7 @@ class AppScaffold extends StatefulWidget {
   final Color? backgroundColor;
   final bool? showBack;
   final Widget? floatingActionButton;
+  final FloatingActionButtonLocation? floatingActionButtonLocation;
   final bool? resizeToAvoidBottomInset;
   final Widget? bottomNavigationBar;
   final DateTime? examEndTime;
@@ -82,6 +87,7 @@ class AppScaffold extends StatefulWidget {
     this.showBack,
     this.backgroundColor,
     this.floatingActionButton,
+    this.floatingActionButtonLocation,
     this.resizeToAvoidBottomInset,
     this.bottomNavigationBar,
     this.examEndTime,
@@ -148,6 +154,7 @@ class AppScaffoldState extends State<AppScaffold> {
       backgroundColor: widget.backgroundColor ?? theme.scaffoldBackgroundColor,
       appBar: buildAppBar(context, widget.showBack ?? false),
       floatingActionButton: widget.floatingActionButton,
+      floatingActionButtonLocation: FloatingActionButtonLocation.miniEndTop,
       resizeToAvoidBottomInset: widget.resizeToAvoidBottomInset,
       bottomNavigationBar: widget.bottomNavigationBar,
       body: Column(
