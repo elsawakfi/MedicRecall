@@ -369,9 +369,9 @@ class HomePageState extends State<HomePage> {
   DateTime today = DateTime.now();
   
   if (edit == false){
-  print("Finding nearest date\n");
+
   date = await findNearestFreeDate(date, 5, testDay, today, allEvents, user.uid);
-  print("Found??\n");
+ 
   }
 
   Color color =  Colors.yellow; 
@@ -387,7 +387,7 @@ class HomePageState extends State<HomePage> {
     if (allEvents[date] == null) {
       selectedEvents[date] = [];
       allEvents[date] = [];
-      print("Adding event to $date\n");
+      print("Adding event $eventTitle to $date\n");
     
     selectedEvents[date]?.add(newEvent);
     allEvents[date]?.add(newEvent);
@@ -477,15 +477,18 @@ class HomePageState extends State<HomePage> {
 
     return AppScaffold(
         body:  Center(
+      heightFactor: 0.5,
       child: loading
           ? const CircularProgressIndicator()
           : SingleChildScrollView(
-        child: Column(
+        child: Padding(
+          padding : const EdgeInsets.symmetric(vertical:2,horizontal:2),
+          child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: makeColumn(),
         ),
       ),
-    ),
+    ),),
         title: "Flashcard Tutor"
     );
   }
@@ -566,7 +569,7 @@ class HomePageState extends State<HomePage> {
       //A mapping of how many times the topics been seen to what the next review date gap should be. After 7 times it stays at 128 days.
       
       //CHANGE THIS FORMULA FOR to DR. Harris' new one
-      Map<int, int> dateToColourMap = {0: ((howLongAgoRevisedDays.ceil()*4)+1), 1: 2, 2: 4, 3: 8, 4: 16, 5: 32, 6: 64, 7: 128};
+      Map<int, int> dateToColourMap = {0: ((howLongAgoRevisedDays.ceil()*4)+1), 1: 6, 2: 10, 3: 16, 4: 24, 5: 36};
       
       
       
@@ -580,6 +583,7 @@ class HomePageState extends State<HomePage> {
 
       int nextReviewDateMilliseconds = (((dateToColourMap[topicCount![i]]! * 24 * 60 * 60) + topicLastSeen![i].seconds) * 1000).toInt();
       DateTime nextReviewDate = DateTime.fromMillisecondsSinceEpoch(nextReviewDateMilliseconds, isUtc: true).toLocal();
+      nextReviewDate = DateTime(nextReviewDate.year, nextReviewDate.month,nextReviewDate.day,0,0,0,0);
       String formattedDate = DateFormat('dd/MM/yyy').format(nextReviewDate); 
       DateTime? dateInCalendar;
       bool notInCalendar = true;
@@ -607,10 +611,12 @@ class HomePageState extends State<HomePage> {
         }
         else{
 
+          
+
          //If the user hasn't seen any cards and it is past the revision date set it red
       //Otherwise set it to grey
       if (seenCards[map["topic"]] == null || seenCards[map["topic"]] == 0){
-        if (dateInCalendar!.isBefore(today)){
+        if (dateInCalendar!.isBefore(today) || dateInCalendar!.isAtSameMomentAs(today)){
          tColour = Color(0xFFFF9595); 
         }
         else{
@@ -640,8 +646,10 @@ class HomePageState extends State<HomePage> {
             
             rescheduled.add("${map["topic"]}");
             tColour = Color(0xFFD9D9D9);   
-           
- 
+            nextReviewDate = dateInCalendar.add(Duration(days:dateToColourMap[topicCount![i]]!));
+            print("${map["topic"]}\n");
+            print("next review is $nextReviewDate\n");
+            print("Topic count or times seen is ${dateToColourMap[topicCount![i]]}\n");
             addSingleEvent(nextReviewDate,
               "${map["topic"]} Flashcards", user);
             formattedDate = nextReviewDate
@@ -652,7 +660,7 @@ class HomePageState extends State<HomePage> {
             updateOneEvent(e, "Completed: ${e.title} ", dateInCalendar);
 
             LastRevised.resetSeenCardsForTopic("${map["topic"]}");
-            selectedEvents.remove(dateInCalendar);
+            // selectedEvents.remove(dateInCalendar);
         
            }
            if (seenCards[map["topic"]] == null || seenCards[map["topic"]]! < totalCards[map["topic"]]!){
@@ -848,7 +856,9 @@ class HomePageState extends State<HomePage> {
               key: const ValueKey("Revise"),
               style: TextButton.styleFrom(
                 textStyle: const TextStyle(
-                  fontSize: 20,
+                  fontSize: 30,
+                  backgroundColor: Colors.black,
+                  color: Colors.white,
                 ),
                 shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10))),
