@@ -171,11 +171,14 @@ class _AddCardState extends State<AddCard> {
     child: Column(
     mainAxisAlignment: MainAxisAlignment.start,
     children: [
+       const SizedBox(height: 30), 
    Padding(
   padding: const EdgeInsets.all(10),
   child: Center(
   child: FractionallySizedBox(
-    widthFactor: 0.75, 
+    widthFactor: 0.75,
+    child:SizedBox(
+      height: 100,
     child: Container(
       decoration: BoxDecoration(
         color: Colors.white,                         
@@ -184,7 +187,8 @@ class _AddCardState extends State<AddCard> {
       padding: const EdgeInsets.all(10),            
       child: TextField(
         controller: front,
-        textAlign: TextAlign.center,                 
+        textAlign: TextAlign.center,
+        textAlignVertical: TextAlignVertical.center,                 
         style: const TextStyle(
             fontSize: 20,
             color: Colors.black, 
@@ -192,21 +196,25 @@ class _AddCardState extends State<AddCard> {
         decoration: const InputDecoration(
           border: InputBorder.none,                  
           hintText: 'Questions',
-          hintStyle: TextStyle(fontSize: 20),       
+          hintStyle: TextStyle(fontSize: 20), 
+          contentPadding: EdgeInsets.zero,      
         ),
       ),
     ),
     ),
+    ),
   ),
 ),
-
-
+ const SizedBox(height: 16), 
+ 
 
   Padding(
   padding: const EdgeInsets.all(10),
   child: Center(
   child: FractionallySizedBox(
     widthFactor: 0.75, 
+    child:SizedBox(
+    height: 100, 
     child: Container(
       decoration: BoxDecoration(
         color: Colors.white,                         
@@ -215,7 +223,8 @@ class _AddCardState extends State<AddCard> {
       padding: const EdgeInsets.all(10),           
       child: TextField(
         controller: back,
-        textAlign: TextAlign.center,                
+        textAlign: TextAlign.center,
+        textAlignVertical: TextAlignVertical.center,               
         style: const TextStyle(
             fontSize: 20,
             color: Colors.black, 
@@ -223,17 +232,20 @@ class _AddCardState extends State<AddCard> {
         decoration: const InputDecoration(
           border: InputBorder.none,                  
           hintText: 'Answers',
-          hintStyle: TextStyle(fontSize: 20),        
+          hintStyle: TextStyle(fontSize: 20), 
+          contentPadding: EdgeInsets.zero,       
         ),
       ),
     ),
     ),
+    ),
   ),
 ),
-
+ const SizedBox(height: 16),
 
 
     DropdownButton<String>(
+    
     value: topic,
     icon: Icon(Icons.arrow_downward, color: Theme.of(context).iconTheme.color),
     elevation: 16,
