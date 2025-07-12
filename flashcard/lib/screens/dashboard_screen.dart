@@ -28,6 +28,7 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
+  int? _hoveringIndex;
   late User user;
   
   late String? name;
@@ -75,10 +76,6 @@ class HomePageState extends State<HomePage> {
       _firstStudyDate = DateTime.fromMicrosecondsSinceEpoch(
           querySnapshot.docs.last["firstStudyDay"].microsecondsSinceEpoch);
     });
-    
-
-    // if(!getEvensOnce){
-      //Do not keep updating events???
     
     try{
       _eventsCollectionRef =
@@ -475,7 +472,7 @@ class HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     // double width = MediaQuery.of(context).size.width;
     // double height = MediaQuery.of(context).size.height;
-
+    
     return AppScaffold(
         floatingActionButton: const CustomFloatingButton(),
         
@@ -675,66 +672,87 @@ class HomePageState extends State<HomePage> {
           tColour = Color(0xFFD9D9D9);
         }
 
-      value.add(Padding(padding: EdgeInsets.only(bottom: 8, left: 15, right: 15), child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: Tooltip(
-          message: "Click to view subtopics",
-          triggerMode: TooltipTriggerMode.tap, // Optional: make tooltip appear on tap
-          onTriggered: () {
-            
-            setState(() {
-             
-          });
-              },
-          decoration: BoxDecoration(color: Colors.black),
-          enableTapToDismiss: true,
-          verticalOffset: -11,
-          preferBelow: false,
-          child: ExpansionTile(
-            trailing: Text(
-                "$text / ${totalCards[map["topic"].toString()]}",
-                style: const TextStyle(color: Colors.black),
-            ),
-            backgroundColor: tColour,
-            collapsedBackgroundColor: tColour,
-            textColor: Colors.black,
-            title: Text(
-                "${map["topic"]}",
-                style: const TextStyle(color: Colors.black),
-            ),
-            leading: Checkbox(
-              side: const BorderSide(
-                      color: Colors.black,
-                      width: 1.5
-                    ),
-              key: i == 0 ? const ValueKey("Checkbox") : UniqueKey(),
-              value: checked[map["topic"]],
-              onChanged: (bool? value) {
-                setState(() {
-                  checked[map["topic"]] = value!;
 
-                  for (var subtopic in map["subtopics"]) {
-                    checked[subtopic.toString()] = checked[map["topic"]]!;
-                    
-                  }
-                });
+
+
+ value.add(
+    Padding(
+      padding: const EdgeInsets.only(bottom: 8, left: 15, right: 15),
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _hoveringIndex = i),
+        onExit: (_) => setState(() => _hoveringIndex = null),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: ExpansionTile(
+                 onExpansionChanged: (expanded) {
+                 if (expanded) {
+                  setState(() {
+                    _hoveringIndex = null; // hide message once expanded
+                  });
+                }
               },
-            ),
-            subtitle: Row(
-              children: [
-                const Text(
-                  "Next Review Date: ",
-                  style: TextStyle(color: Colors.black),
-                ),
-                Text(
-                  formattedDate,
+                trailing: Text(
+                  "$text / ${totalCards[map["topic"].toString()]}",
                   style: const TextStyle(color: Colors.black),
                 ),
-              ],
+                backgroundColor: tColour,
+                collapsedBackgroundColor: tColour,
+                textColor: Colors.black,
+                title: Text(
+                  "${map["topic"]}",
+                  style: const TextStyle(color: Colors.black),
+                ),
+                leading: Checkbox(
+                  side: const BorderSide(color: Colors.black, width: 1.5),
+                  key: i == 0 ? const ValueKey("Checkbox") : UniqueKey(),
+                  value: checked[map["topic"]],
+                  onChanged: (bool? value) {
+                    
+                    setState(() {
+                      checked[map["topic"]] = value!;
+                      for (var subtopic in map["subtopics"]) {
+                        checked[subtopic.toString()] = value;
+                      }
+                    });
+                  },
+                ),
+                subtitle: Row(
+                  children: [
+                    const Text("Next Review Date: ",
+                        style: TextStyle(color: Colors.black)),
+                    Text(
+                      formattedDate,
+                      style: const TextStyle(color: Colors.black),
+                    ),
+                  ],
+                ),
+                children: makeCheckbox(map),
+              ),
             ),
-            children: makeCheckbox(map))
+
+            // ✅ Show hover text only for the hovered item
+            if (_hoveringIndex == i)
+              IgnorePointer(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.85),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Text(
+                    "Click to view subtopics",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+          ],
         ),
-      )));
+      ),
+    ),
+  );
     }
     return value;
   }
