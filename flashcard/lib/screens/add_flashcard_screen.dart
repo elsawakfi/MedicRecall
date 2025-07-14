@@ -237,7 +237,9 @@ class _AddCardState extends State<AddCard> {
                 borderRadius: BorderRadius.circular(4),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 12),
+              width: 200,
               child: DropdownButton<String>(
+                isExpanded: true,
                 value: topic,
                 dropdownColor: Colors.white,
                  icon: const Icon(Icons.arrow_downward, color: Colors.black),
@@ -260,14 +262,16 @@ class _AddCardState extends State<AddCard> {
                     .toList(),
               ),
             ),
-          
+          const SizedBox(height: 16),
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(4),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 12),
+              width: 200,
               child: DropdownButton<String>(
+                isExpanded: true,
                 value: subtopic,
                 dropdownColor: Colors.white,
                 icon: const Icon(Icons.arrow_downward, color: Colors.black),
@@ -287,11 +291,21 @@ class _AddCardState extends State<AddCard> {
                     .toList(),
               ),
             ),
-          ],
+        
+        const SizedBox(height: 24),
+        GFButton(
+        onPressed: uploadCard,
+        text: "Submit",
+        icon: const Icon(Icons.keyboard_arrow_right_sharp),
+        shape: GFButtonShape.pills,
+        color: Colors.green,
+        textStyle: const TextStyle(fontSize: 18, color: Colors.white),
+),  ],
         ),
       ),
     );
   }
+  
 
   void homepage() {
     Navigator.pop(context);
