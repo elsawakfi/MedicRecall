@@ -902,7 +902,7 @@ class HomePageState extends State<HomePage> {
                 padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
                 child: Text(
                   'Revise',
-                  selectionColor: Colors.white,
+                  selectionColor: Colors.black,
                 ),
               ),
             ),
