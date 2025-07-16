@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../screens/calendar_screen.dart';
 import '../screens/flashcard_editor_screen.dart';
+import 'package:flashcard_x/screens/subtopic_choice_screen.dart';
 
 class DrawMain2 extends StatelessWidget {
   const DrawMain2({super.key});
@@ -51,21 +52,16 @@ class DrawMain2 extends StatelessWidget {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MoveRightRoute(page: const FlashcardEditor()),
+                          MaterialPageRoute(
+                            builder: (context) => SubtopicChoice(
+                              flashcardSet: "Medical Topics",
+                              subtopics: ["Cardiology", "Neurology", "Endocrinology", "Respiratory"],
+                            ),
+                          ),
                         );
                       },
                       icon: const Icon(Icons.rate_review_outlined),
                       title: "Flashcard Tutor",
-                    ),
-                    DrawerTile(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MoveRightRoute(page: const UMS()),
-                        );  
-                      },
-                      icon: const Icon(Icons.check_box_outlined),
-                      title: "Mark Scheme",
                     ),
                     DrawerTile(
                       onPressed: () {
@@ -86,6 +82,16 @@ class DrawMain2 extends StatelessWidget {
                       },
                       icon: const Icon(Icons.fact_check),
                       title: 'Full-Sized Mock',
+                    ),
+                    DrawerTile(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MoveRightRoute(page: const UMS()),
+                        );  
+                      },
+                      icon: const Icon(Icons.check_box_outlined),
+                      title: "Mark Scheme",
                     ),
                     DrawerTile(
                       onPressed: (){

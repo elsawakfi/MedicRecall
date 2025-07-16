@@ -1133,8 +1133,8 @@ class CalendarStateO extends State<Calendar> {
     return Scaffold(
       drawer: const DrawMain2(),
       appBar: CustomAppBar(
-        title: 'Revision Calendar',
-        mobileTitle: 'Calendar',
+        title: 'Study Schedule',
+        mobileTitle: 'Schedule',
       ),
       body: loading
           ? const Center(

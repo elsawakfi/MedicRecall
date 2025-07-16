@@ -23,6 +23,7 @@ import 'dart:async';
 import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flashcard_x/widgets/drawer_widget2.dart';
 import 'package:flashcard_x/widgets/countdown_button.dart';
+import 'package:flashcard_x/screens/subtopic_choice_screen.dart';
 
 // VARIABLES THAT MUST BE CONNECTED TO THE DATABASE
 // nextTopicForReview
@@ -316,7 +317,17 @@ class NewLandingState extends State<NewLanding> {
                           ? "$nextTopicForReview"
                           : "No topics scheduled.",
                       buttonText: 'Start Now',
-                      onPressed: () => triggerSignIn('FlashcardEditor'),
+                      onPressed: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SubtopicChoice(
+                              flashcardSet: "Medical Topics",
+                              subtopics: ["Cardiology", "Neurology", "Endocrinology", "Respiratory"],
+                            ),
+                          ),
+                        );
+                      }
                     ),
                   ),
                   SizedBox(width: 16),
@@ -606,6 +617,7 @@ class _IconButton extends StatelessWidget {
         child: ElevatedButton(
           onPressed: onPressed,
           style: ElevatedButton.styleFrom(
+            elevation: 4,
             //backgroundColor: themeProvider.isDarkMode ? Colors.black : Color.fromRGBO(44, 44, 44, 1),
             backgroundColor: Colors.black,
             padding: EdgeInsets.symmetric(vertical: 16),

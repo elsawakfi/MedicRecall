@@ -1,3 +1,4 @@
+import 'package:flashcard_x/screens/add_flashcard_screen.dart';
 import 'package:flashcard_x/screens/dashboard_screen.dart';
 import 'package:flashcard_x/screens/faq.dart';
 import 'package:flashcard_x/screens/feedback_screen.dart';
@@ -7,6 +8,7 @@ import 'package:flashcard_x/screens/mark_scheme.dart';
 import 'package:flashcard_x/screens/minimock_landing.dart';
 import 'package:flashcard_x/screens/settings_screen.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
+import 'package:flashcard_x/screens/subtopic_choice_screen.dart';
 import 'package:flashcard_x/utils/authentication.dart';
 import 'package:flashcard_x/utils/page_transition.dart';
 import 'package:flutter/material.dart';
@@ -60,13 +62,18 @@ class DrawMain extends StatelessWidget {
             key: const ValueKey('Flashcards'),
             leading: const Icon(Icons.amp_stories),
             title: const Text('Flashcard Tutor'),
-            onTap: () => Navigator.push(
-                  context,
-                  MoveNoneRoute(
-                      page: const HomePage(
-                    title: 'Home',
-                  )),
-                )),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SubtopicChoice(
+                    flashcardSet: "Medical Topics",
+                    subtopics: ["Cardiology", "Neurology", "Endocrinology", "Respiratory"],
+                  ),
+                ),
+              );
+            },
+        ),
         ListTile(
             key: const ValueKey('Mark Scheme'),
             leading: const Icon(Icons.check),
@@ -88,7 +95,7 @@ class DrawMain extends StatelessWidget {
         ListTile(
             key: const ValueKey('Calendar'),
             leading: const Icon(Icons.calendar_month_outlined),
-            title: const Text('Revision Calendar'),
+            title: const Text('Study Schedule'),
             onTap: () => Navigator.push(
                   // ListTile(
                   //   leading: Icon(Icons.supervised_user_circle_rounded),
