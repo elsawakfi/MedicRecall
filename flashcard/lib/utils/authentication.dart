@@ -4,6 +4,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart'; //IsWeb;
+import 'package:flashcard_x/utils/subscription_data.dart';
+import 'package:flashcard_x/utils/subscription_service.dart';
 
 class Authentication {
   static SnackBar customSnackBar({required String content}) {
@@ -116,6 +118,7 @@ class Authentication {
         "email": user?.email,
         "userID": user?.uid,
         "name": user?.displayName,
+        "subscription": SubscriptionData.free().toMap(),
         "topicCount": [0, 0, 0, 0, 0, 0, 0, 0],
         "topicScore": [0, 0, 0, 0, 0, 0, 0, 0],
         "topicLastSeen": [
@@ -141,6 +144,11 @@ class Authentication {
           "topicCount": [0, 0, 0, 0, 0, 0, 0, 0]
         });
       }
+      if (!userData.containsKey("subscription")){
+        collectionRef.doc(querySnapshot.docs.first.id).update({
+          "subscription": SubscriptionData.free().toMap(),
+        });
+      }
       if (!userData.containsKey("topicLastSeen")) {
         collectionRef.doc(querySnapshot.docs.first.id).update({
           "topicLastSeen": [
@@ -156,7 +164,7 @@ class Authentication {
         });
       }
     }
-
+    await subscriptionService.loadSubscription();
     return user;
   }
 
@@ -216,6 +224,7 @@ class Authentication {
         "email" : user?.email,
         "userID": user?.uid,
         "name": user?.displayName,
+        "subscription": SubscriptionData.free().toMap(),
         "topicCount": [0, 0, 0, 0, 0, 0, 0, 0],
         "topicScore": [0, 0, 0, 0, 0, 0, 0, 0],
         "topicLastSeen": [
@@ -256,7 +265,13 @@ class Authentication {
           ]
         });
       }
+      if (!userData.containsKey("subscription")) {
+        collectionRef.doc(querySnapshot.docs.first.id).update({
+          "subscription": SubscriptionData.free().toMap()
+        });
+      }
     }
+    await subscriptionService.loadSubscription();
     return user;
   }
 
@@ -298,6 +313,7 @@ class Authentication {
           "name": user?.displayName,
           "topicCount": [0, 0, 0, 0, 0, 0, 0, 0],
           "topicScore": [0, 0, 0, 0, 0, 0, 0, 0],
+          "subscription": SubscriptionData.free().toMap(),
           "topicLastSeen": [
             Timestamp.now(),
             Timestamp.now(),
@@ -338,6 +354,11 @@ class Authentication {
             ]
           });
         }
+        if (!userData.containsKey("subscription")) {
+          collectionRef.doc(querySnapshot.docs.first.id).update({
+            "subscription": SubscriptionData.free().toMap(),
+        });
+      }
       }
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
@@ -367,6 +388,9 @@ class Authentication {
       if (kDebugMode) {
         print(e);
       }
+    }
+    if (user != null){
+      await subscriptionService.loadSubscription();
     }
     return user;
   }
