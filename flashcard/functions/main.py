@@ -6,6 +6,8 @@ from firebase_functions import https_fn, firestore_fn
 from firebase_admin import firestore, initialize_app
 from datetime import datetime, timedelta
 import os.path
+import stripe
+
 
 from firebase_functions.firestore_fn import Event, Change, DocumentSnapshot
 from google.auth.transport.requests import Request
@@ -228,3 +230,27 @@ def update_exam_score(event: Event[Change[DocumentSnapshot]]) -> None:
     stats_ref.set({"scores": scores, "median": median_score}, merge=True)
 
     print(f"Updated median score for {mock_id}: {median_score}")
+
+# STRIPE WEBHOOKS
+STRIPE_WEBHOOK_SECRET = "PLACEHOLDER"  # Replace with your actual secret
+
+@https_fn.on_request()
+def stripe_webhook(req: https_fn.Request) -> https_fn.Response:
+    payload = req.get_data()
+    sig_header = req.headers.get("stripe-signature")
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, STRIPE_WEBHOOK_SECRET
+        )
+    except ValueError:
+        return https_fn.Response("Invalid payload", status=400)
+    except stripe.error.SignatureVerificationError:
+        return https_fn.Response("Invalid signature", status=400)
+
+    # Handle the event
+    if event["type"] == "payment_intent.succeeded":
+        payment_intent = event["data"]["object"]
+        print(f"PaymentIntent was successful: {payment_intent['id']}")
+
+    return https_fn.Response("Webhook received", status=200)

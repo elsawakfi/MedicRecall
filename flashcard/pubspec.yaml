@@ -33,7 +33,6 @@ dependencies:
   flutter:
     sdk: flutter
 
-
   http: ^1.2.2
   flip_card: ^0.7.0
 
