@@ -49,3 +49,6 @@ app.*.map.json
 
 #ephemeral files
 **/ephemeral/**
+
+# FVM Version Cache
+.fvm/
