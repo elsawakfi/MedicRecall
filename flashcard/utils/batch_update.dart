@@ -19,13 +19,30 @@ Future<void> updateFlashcardTitles() async {
         if(topic is String && topic == "Coping with pressure"){
           if(subtopic == "Managing workload"){
             await collection.doc(doc.id).update({
-            'subtopic': "Managing Worload",
+            'subtopic': "Managing Your Workload",
            });
+          }
+
+          if(subtopic == "Apology"){
+            await collection.doc(doc.id).update({
+            'subtopic': "Complaints",
+           });
+          }
+
+           if(subtopic == "Handover"){
+            await collection.doc(doc.id).update({
+            'subtopic': "Personal and Staff Wellbeing",
+           });
+          }
+
+          if(subtopic == "High-pressure scenarios"){
+            await collection.doc(doc.id).delete();
+            continue;
           }
         
         await collection.doc(doc.id).update({
         'topic': "Coping With Pressure",
-        });
+        });}
 
        if(topic == "Team working"){
         if(subtopic == "Working with senior colleagues"){
@@ -45,6 +62,11 @@ Future<void> updateFlashcardTitles() async {
             'subtopic': "Working With Junior Colleagues",
            });
           }
+
+          if(subtopic == "Common teamworking scenarios"){
+            await collection.doc(doc.id).delete();
+            continue;
+          }
         
         await collection.doc(doc.id).update({
         'topic': "Team Working",
@@ -54,7 +76,7 @@ Future<void> updateFlashcardTitles() async {
 
         if(subtopic == "Intimate examination"){
             await collection.doc(doc.id).update({
-            'subtopic': "Intimate Examination",
+            'subtopic': "Empathy and Sensitivity",
            });
           }
 
@@ -63,6 +85,16 @@ Future<void> updateFlashcardTitles() async {
             'subtopic': "Maintaining Patient Focus",
            });
           }
+        if (subtopic == "Mental capacity"){
+          await collection.doc(doc.id).update({
+            'subtopic': "Mental Capacity Act"
+          });
+        }
+
+        if(subtopic == "DNACPR"|| subtopic == "Driving"){
+          await collection.doc(doc.id).delete();
+          continue;
+        }
      await collection.doc(doc.id).update({
         'topic': "Patient Focus",
       });
@@ -77,6 +109,25 @@ Future<void> updateFlashcardTitles() async {
     }
     
     if(topic == "Acting within your remit"){
+     if (subtopic == "Consent for procedures"){
+      await collection.doc(doc.id).update({
+        'subtopic': 'Procedures'
+      });
+      //Need to move consent questions to effective commmunication
+     }
+
+     if(subtopic == "Bleep"||subtopic == "Jobs"||subtopic == "Who's Who"){
+      await collection.doc(doc.id).delete();
+      continue;
+      //delete empty topics
+     }
+
+     if (subtopic == "Discharge"){
+      await collection.doc(doc.id).update({
+        'subtopic': 'Discharging Patients'
+      });
+     }
+     
      await collection.doc(doc.id).update({
         'topic': "Acting Within Your Remit",
       });
@@ -94,23 +145,37 @@ Future<void> updateFlashcardTitles() async {
             'subtopic': "Clinical Incidents",
            });
           }
+
+        if(subtopic == "Staffing"|| subtopic == "Professional practice"){
+          await collection.doc(doc.id).delete();
+          continue;
+        }
+
+        if(subtopic == "Maintaining patient-doctor boundaries"){
+          await collection.doc(doc.id).update({
+            'subtopic': 'Maintaining the Doctor-Patient Relationship'
+          });
+        }
      
      await collection.doc(doc.id).update({
-        'topic': "Commitment To Professionalism",
+        'topic': "Professional Integrity",
       });
     }
 
-     if(topic == "Effective communication"){
-     await collection.doc(doc.id).update({
+    if(topic == "Effective communication"){
+    await collection.doc(doc.id).update({
         'topic': "Effective Communication",
       });
+    
+    }
+    
+    if (topic == "Confidentiality"){
+      if(subtopic == "Child protection rules"){
+        await collection.doc(doc.id).update({
+          'subtopic': 'Child Protection Guidlines'
+        });
+      }
     }
       }
     }
    }
-}
-
-String _toTitleCase(String text) {
-  if (text.isEmpty) return text;
-  return text[0].toUpperCase() + text.substring(1);
-}
