@@ -644,7 +644,7 @@ class HomePageState extends State<HomePage> {
             nextReviewDate = dateInCalendar.add(Duration(days:dateToColourMap[topicCount![i]]!));
             print("${map["topic"]}\n");
             print("next review is $nextReviewDate\n");
-            print("Topic count or times seen is ${dateToColourMap[topicCount![i]]}\n");
+            print("Topic seen ${topicCount![i]} times so will try add ${dateToColourMap[topicCount![i]]} days till next review \n");
             addSingleEvent(nextReviewDate,
               "${map["topic"]} Flashcards", user);
             formattedDate = nextReviewDate
@@ -806,6 +806,7 @@ class HomePageState extends State<HomePage> {
             'Instructions',
             style: TextStyle(fontSize: 20),
             ),
+          backgroundColor: Colors.black,
           content: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -946,6 +947,8 @@ class HomePageState extends State<HomePage> {
     return AlertDialog(
       title: const Text(
           'No topics selected'),
+      //Need to fix this for the logic of dark mode vs light mode 
+      backgroundColor: Colors.black, 
       content: const Text(
           'Please select a topic by ticking the checkbox beside the category before pressing revise.'),
       actions: <
