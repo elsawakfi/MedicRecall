@@ -295,7 +295,7 @@ class _AddCardState extends State<AddCard> {
         const SizedBox(height: 24),
         GFButton(
         onPressed: uploadCard,
-        text: "Submit",
+        text: "Create",
         icon: const Icon(Icons.keyboard_arrow_right_sharp),
         shape: GFButtonShape.pills,
         color: Colors.green,
