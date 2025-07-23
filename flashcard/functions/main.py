@@ -7,6 +7,7 @@ from firebase_admin import firestore, initialize_app
 from datetime import datetime, timedelta
 import os.path
 import stripe
+import json
 
 
 from firebase_functions.firestore_fn import Event, Change, DocumentSnapshot
@@ -231,27 +232,36 @@ def update_exam_score(event: Event[Change[DocumentSnapshot]]) -> None:
 
     print(f"Updated median score for {mock_id}: {median_score}")
 
-# STRIPE WEBHOOKS
-function_config = json.loads(os.environ.get('FIREBASE_FUNCTIONS_CONFIG', '{}'))
-STRIPE_WEBHOOK_SECRET = function_config.get('stripe', {}).get('webhook_secret', '')
+# STRIPE WEBHOOK HANDLER
+from firebase_functions import https_fn
+from flask import Request
+import stripe
+import json
+
+stripe.api_key = 'sk_test_51RlQDO2ftVRKaOw9LKEV2Df1Kl4BdeHoUBLZvhsoig5oJaiKJGnsd0cmmlJ3StRmJrJmmmxOl4IQn8zPRmlmmh8j00cxnaGBL9'  # Your Stripe key
+endpoint_secret = 'whsec_5PcLIXJ4Wrzp3OXVAwpqME0BX1bfCEzq'
 
 @https_fn.on_request()
 def stripe_webhook(req: https_fn.Request) -> https_fn.Response:
-    print("Stripe webhook called")
+    payload = req.get_data(as_text=False)
     sig_header = req.headers.get("stripe-signature")
 
     try:
-        event = stripe.Webhook.construct_event(
-            payload, sig_header, STRIPE_WEBHOOK_SECRET
-        )
-    except ValueError:
+        event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
+    except ValueError as e:
+        print('⚠️ Invalid payload', str(e))
         return https_fn.Response("Invalid payload", status=400)
-    except stripe.error.SignatureVerificationError:
+    except stripe.error.SignatureVerificationError as e:
+        print('⚠️ Invalid signature', str(e))
         return https_fn.Response("Invalid signature", status=400)
 
-    # Handle the event
-    if event["type"] == "payment_intent.succeeded":
-        payment_intent = event["data"]["object"]
-        print(f"PaymentIntent was successful: {payment_intent['id']}")
+    # Handle event types
+    if event['type'] == 'payment_intent.succeeded':
+        payment_intent = event['data']['object']
+        print(f"✅ Payment for {payment_intent['amount']} succeeded.")
+    elif event['type'] == 'payment_method.attached':
+        print("✅ Payment method attached.")
+    else:
+        print(f"❓ Unhandled event type: {event['type']}")
 
     return https_fn.Response("Webhook received", status=200)
