@@ -232,11 +232,12 @@ def update_exam_score(event: Event[Change[DocumentSnapshot]]) -> None:
     print(f"Updated median score for {mock_id}: {median_score}")
 
 # STRIPE WEBHOOKS
-STRIPE_WEBHOOK_SECRET = "PLACEHOLDER"  # Replace with your actual secret
+function_config = json.loads(os.environ.get('FIREBASE_FUNCTIONS_CONFIG', '{}'))
+STRIPE_WEBHOOK_SECRET = function_config.get('stripe', {}).get('webhook_secret', '')
 
 @https_fn.on_request()
 def stripe_webhook(req: https_fn.Request) -> https_fn.Response:
-    payload = req.get_data()
+    print("Stripe webhook called")
     sig_header = req.headers.get("stripe-signature")
 
     try:
