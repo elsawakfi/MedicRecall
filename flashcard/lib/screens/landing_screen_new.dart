@@ -88,6 +88,15 @@ class NewLandingState extends State<NewLanding> {
   //   if (mounted) setState(() {});
   // }
 
+   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    //waits for build function to complete and then calls back to call the condition checking function
+    WidgetsBinding.instance.addPostFrameCallback((_)async{
+      await getTestDay();
+    });
+  }
+
   // ----- Retrieve information for the dashboard -----
   Future<void> getNextTopicForReview() async {
     TopicStats stats = await LastRevised.getStats(includeSubtopics: false);
@@ -114,11 +123,12 @@ class NewLandingState extends State<NewLanding> {
   void initState() {
     super.initState();
     landingService.onLanding = true;
+    getTestDay();
     getUser().then( (_) async {
       await LastRevised.recordLogin();
       final nextTopic = await LastRevised.getNextTopicForReview();
       await getExamDate(); // Remove the assignment since it returns void
-
+      await getTestDay();
       // Update the state with the fetched data
       if (mounted) {
         setState(() {
@@ -188,6 +198,12 @@ class NewLandingState extends State<NewLanding> {
         if (mounted) setState(() {});
       }
     }
+  }
+
+    int _calculateDaysUntilExam(DateTime examDate) {
+    final now = DateTime.now();
+    final difference = examDate.difference(now);
+    return difference.inDays + 1; // Ensure "today" counts as a day
   }
 
   Future<void> getFirstStudyDay() async {
@@ -287,6 +303,7 @@ class NewLandingState extends State<NewLanding> {
 
   @override
   Widget build(BuildContext context) {
+    
     buildCount++;
     return Scaffold(  
         floatingActionButton: const CustomFloatingButton(),
@@ -416,7 +433,7 @@ class NewLandingState extends State<NewLanding> {
                               //   ? localExamDate.difference(todaysDate).inDays
                               //   : 0)
                               // : -1
-                              displayedValue: 1, // PLACEHOLDER
+                              displayedValue: _examDate != null ? _calculateDaysUntilExam(_examDate!) : 0 , // PLACEHOLDER
                             ),
                           ]),
                         ])
