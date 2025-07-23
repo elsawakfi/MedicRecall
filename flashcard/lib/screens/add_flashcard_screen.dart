@@ -36,8 +36,7 @@ class _AddCardState extends State<AddCard> {
 
   bool loading = true;
   CollectionReference flashcards =
-  FirebaseFirestore.instance.collection('flashcards');
-
+      FirebaseFirestore.instance.collection('flashcards');
 
   String cardID;
   bool editCard;
@@ -47,14 +46,12 @@ class _AddCardState extends State<AddCard> {
   Future<void> getUser() async {
     NavigatorState nav = Navigator.of(context);
     if (auth.currentUser == null) {
-      var tmp = await auth
-          .authStateChanges()
-          .first;
+      var tmp = await auth.authStateChanges().first;
       if (tmp == null) {
         nav.push(
-            MaterialPageRoute(
-              builder: (context) => const SignInScreen(),
-            )
+          MaterialPageRoute(
+            builder: (context) => const SignInScreen(),
+          ),
         );
       } else {
         user = tmp;
@@ -69,7 +66,7 @@ class _AddCardState extends State<AddCard> {
 
   Future<void> getCard() async {
     await FirebaseFirestore.instance
-        .collection('flashcards') // suppose you have a collection named "Users"
+        .collection('flashcards')
         .doc(cardID)
         .get()
         .then((value) {
@@ -88,10 +85,7 @@ class _AddCardState extends State<AddCard> {
     getTopics();
     front = TextEditingController();
     back = TextEditingController();
-    //topic = TextEditingController();
     resource = TextEditingController();
-    // subtopic = TextEditingController();
-
     if (editCard) {
       getCard();
     }
@@ -99,7 +93,7 @@ class _AddCardState extends State<AddCard> {
 
   Future<void> getTopics() async {
     CollectionReference topicRef =
-    FirebaseFirestore.instance.collection("topics");
+        FirebaseFirestore.instance.collection("topics");
 
     QuerySnapshot topicSnapshot = await topicRef.get();
     for (var doc in topicSnapshot.docs) {
@@ -126,10 +120,8 @@ class _AddCardState extends State<AddCard> {
   }
 
   void editCardDB() {
-    //print(front.text + back.text + topic.text + resource.text);
-    //flashcards.add({"front":front.text, "back":back.text, "resource":resource.text, "topic":topic.text});
     flashcards.doc(cardID).update({
-      "front": front.text ,
+      "front": front.text,
       "back": back.text,
       "resource": resource.text,
       "topic": topic,
@@ -157,98 +149,165 @@ class _AddCardState extends State<AddCard> {
     homepage();
   }
 
-  get key =>
-      null; // no clue if this is the appropriate thing to do, just did so because it made it work
+  get key => null;
 
   @override
   Widget build(BuildContext context) {
-    // navigatorKey:
     AddCard.navKey;
     return Scaffold(
-        appBar: DesignMain.appBarMain("Add Flashcard", context),
-    body: Visibility(
-    visible: !loading,
-    child: Column(
-    mainAxisAlignment: MainAxisAlignment.start,
-    children: [
-    Padding(
-    padding: const EdgeInsets.all(10),
-    child: TextField(
-    controller: front,
-    decoration: const InputDecoration(
-    border: OutlineInputBorder(),
-    hintText: 'front of card',
-    ))),
-    Padding(
-    padding: const EdgeInsets.all(10),
-    child: TextField(
-    controller: back,
-    decoration: const InputDecoration(
-    border: OutlineInputBorder(),
-    hintText: 'back of card',
-    ))),
-    DropdownButton<String>(
-    value: topic,
-    icon: Icon(Icons.arrow_downward, color: Theme.of(context).iconTheme.color),
-    elevation: 16,
-      style: TextStyle(color: Theme.of(context).dropdownMenuTheme.textStyle?.color),
-    underline: Container(
-    height: 2,
-    color: Theme.of(context).dropdownMenuTheme.inputDecorationTheme?.enabledBorder?.borderSide.color
-    ),
-    onChanged: (String? newValue) {
-    setState(() {
-    topic = newValue!;
-    subtopics = subtopicsMap[topic]!;
-    subtopic = "";
-    if (subtopics.isNotEmpty) {
-    subtopic = subtopics[0];
-    }
-    });
-    },
-    items: topics.map<DropdownMenuItem<String>>((String value) {
-    return DropdownMenuItem<String>(
-    value: value,
-    child: Text(value),
-    );
-    }).toList(),
-    ),
-    DropdownButton<String>(
-    value: subtopic,
-    icon: Icon(Icons.arrow_downward, color: Theme.of(context).iconTheme.color),
-    elevation: 16,
-      style: TextStyle(color: Theme.of(context).dropdownMenuTheme.textStyle?.color),
-    underline: Container(
-    height: 2,
-        color: Theme.of(context).dropdownMenuTheme.inputDecorationTheme?.enabledBorder?.borderSide.color
-    ),
-    onChanged: (String? newValue) {
-    setState(() {
-    subtopic = newValue!;
-    });
-    },
-    items: subtopics.map<DropdownMenuItem<String>>((String value) {
-    return DropdownMenuItem<String>(
-    value: value,
-    child: Text(value),
-    );
-    }).toList(),
-    ),
-    GFButton(
-    onPressed: uploadCard,
-    text: "Submit",
-    icon: const Icon(Icons.keyboard_arrow_right_sharp),
-    shape: GFButtonShape.pills,
-    color: Colors.green,
-    textStyle: const TextStyle(fontSize: 18, color: Colors.white),
-    ),
-    ],
-    ),
-    ),
+      appBar: DesignMain.appBarMain("Add Flashcard", context),
+      body: Visibility(
+        visible: !loading,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            const SizedBox(height: 30),
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: Center(
+                child: FractionallySizedBox(
+                  widthFactor: 0.75,
+                  child: SizedBox(
+                    height: 100,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.all(10),
+                      child: TextField(
+                        controller: front,
+                        textAlign: TextAlign.center,
+                        textAlignVertical: TextAlignVertical.center,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          color: Colors.black,
+                        ),
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          hintText: 'Questions',
+                          hintStyle: TextStyle(fontSize: 20),
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: Center(
+                child: FractionallySizedBox(
+                  widthFactor: 0.75,
+                  child: SizedBox(
+                    height: 100,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.all(10),
+                      child: TextField(
+                        controller: back,
+                        textAlign: TextAlign.center,
+                        textAlignVertical: TextAlignVertical.center,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          color: Colors.black,
+                        ),
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          hintText: 'Answers',
+                          hintStyle: TextStyle(fontSize: 20),
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              width: 200,
+              child: DropdownButton<String>(
+                isExpanded: true,
+                value: topic,
+                dropdownColor: Colors.white,
+                 icon: const Icon(Icons.arrow_downward, color: Colors.black),
+                elevation: 16,
+                style: const TextStyle(color: Colors.black),
+                underline: Container(height: 0),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    topic = newValue!;
+                    subtopics = subtopicsMap[topic]!;
+                    subtopic =
+                        subtopics.isNotEmpty ? subtopics[0] : '';
+                  });
+                },
+                items: topics
+                    .map((value) => DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        ))
+                    .toList(),
+              ),
+            ),
+          const SizedBox(height: 16),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              width: 200,
+              child: DropdownButton<String>(
+                isExpanded: true,
+                value: subtopic,
+                dropdownColor: Colors.white,
+                icon: const Icon(Icons.arrow_downward, color: Colors.black),
+                elevation: 16,
+                style: const TextStyle(color: Colors.black),
+                underline: Container(height: 0),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    subtopic = newValue!;
+                  });
+                },
+                items: subtopics
+                    .map((value) => DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        ))
+                    .toList(),
+              ),
+            ),
+        
+        const SizedBox(height: 24),
+        GFButton(
+        onPressed: uploadCard,
+        text: "Create",
+        icon: const Icon(Icons.keyboard_arrow_right_sharp),
+        shape: GFButtonShape.pills,
+        color: Colors.green,
+        textStyle: const TextStyle(fontSize: 18, color: Colors.white),
+),  ],
+        ),
+      ),
     );
   }
+  
 
   void homepage() {
     Navigator.pop(context);
-    }
+  }
 }
