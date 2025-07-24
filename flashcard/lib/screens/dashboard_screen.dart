@@ -1,18 +1,21 @@
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flashcard_x/screens/calendar_screen.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flashcard_x/screens/study_session_manager.dart';
-import 'package:flashcard_x/widgets/drawer_widget.dart';
+import 'package:flashcard_x/utils/firebase_wrapper.dart';
+import 'package:flashcard_x/utils/last_revised.dart';
+import 'package:flashcard_x/utils/theme_provider.dart';
+import 'package:flashcard_x/widgets/app_bar_title_.dart';
 import 'package:flashcard_x/widgets/event.dart';
+import 'package:flashcard_x/widgets/indicator.dart';
 import 'package:flutter/material.dart';
-import 'package:flashcard_x/screens/calendar_screen.dart';
 import 'package:flashcard_x/screens/feed_screen.dart';
-import 'package:flashcard_x/widgets/countdown_button.dart';
+import '../widgets/countdown_button.dart';
+import 'package:provider/provider.dart';
 import '../utils/page_transition.dart';
 import 'package:intl/intl.dart';
-import 'package:flashcard_x/widgets/app_bar.dart';
+import 'package:flutter/foundation.dart';
 
 class HomePage extends StatefulWidget {
   static String id = 'home';
@@ -25,35 +28,150 @@ class HomePage extends StatefulWidget {
 }
 
 class HomePageState extends State<HomePage> {
-  final GlobalKey<ScaffoldState> _key = GlobalKey();
+  int? _hoveringIndex;
   late User user;
+  
   late String? name;
   late String? id;
+  bool getEvensOnce = false;
   late List<dynamic>? topicCount;
   List<dynamic>? topicLastSeen;
-  CollectionReference users = FirebaseFirestore.instance.collection('users');
+  CollectionReference users = FirebaseWrapper.firestore().collection('users');
   final FirebaseAuth auth = FirebaseAuth.instance;
   bool loading = true;
   List<Map<String, dynamic>> topics = [];
   Map<String, bool> checked = {};
   Map<String, int> seenCards = {};
   Map<String, int> totalCards = {};
-  late DateTime testDay;
   late DateTime _firstStudyDate;
+  late DateTime testDay;
   late Map<DateTime?, List<Event>> selectedEvents;
+  late Map<DateTime, List<Event>> allEvents;
   late CollectionReference _eventsCollectionRef;
+  late List<String> topicNames = [];
   final CollectionReference _userCollectionRef =
       FirebaseFirestore.instance.collection('users');
   StudySessionManager studySessionManager = StudySessionManager();
 
-
   double spacing = 16;
 
+
+  Future<void> userData() async {
+  //This function, retrieves all the necessary data for the flashcard tutor. 
+  //The important part is getting the events from the database and only storing the events that have a flashcard
+  //Study session scheduled in
+    QuerySnapshot querySnapshot =
+    await users.where("userID", isEqualTo: user.uid).get();
+    setState(() {
+      name = querySnapshot.docs.last["name"];
+      id = querySnapshot.docs.last.id;
+      topicCount = querySnapshot.docs.last["topicCount"];
+      topicLastSeen = querySnapshot.docs.last["topicLastSeen"];
+      try {
+        testDay = querySnapshot.docs.last['TestDay'].toDate();
+      }catch (e){
+        // If testDay hasn't been set, assign a default value
+        testDay = DateTime.now();
+      }
+      _firstStudyDate = DateTime.fromMicrosecondsSinceEpoch(
+          querySnapshot.docs.last["firstStudyDay"].microsecondsSinceEpoch);
+    });
+    
+    try{
+      _eventsCollectionRef =
+          FirebaseFirestore.instance.collection('users/$id/events');
+
+      var snapshots = await _eventsCollectionRef.get();
+      
+     
+      for (var doc in snapshots.docs) {
+        var data = doc.data() as Map<String, dynamic>;
+        if (data.containsKey('date') && data.containsKey('events')) {
+          Timestamp? timestamp = data['date'] as Timestamp?;
+          List<dynamic>? eventsList = data['events'] as List<dynamic>?;
+
+          if (timestamp != null && eventsList != null) {
+            DateTime date = timestamp.toDate();
+            date = DateTime(date.year, date.month, date.day);
+
+            List<String> events = eventsList.map((e) => e.toString()).toList();
+
+            allEvents[date] = events.map ((title) => Event(color: Colors.black, title: title)).toList();
+            for (String e in events){
+             
+              if (!topicNames.contains(e) && !e.contains("Completed:")){
+                 
+                  events.remove(e);
+                  
+              }
+            }
+
+            selectedEvents[date] = events.map((title) => Event(
+                title: title,
+                color : Colors.yellow
+            )).toList();
+            getEvensOnce = true;
+            
+          }
+        }
+
+      }
+     
+    } catch(e){
+      print("Error loading events from DB: $e");
+    }
+  }
+
+    Future<void> updateOneEvent(
+      Event oldEvent, String newTitle, DateTime newDate) async {
+    DateTime normalizedDate =
+        DateTime(newDate.year, newDate.month, newDate.day,0,0,0,0);
+    // Remove old event from Firestore
+    await deleteSingleEvent(normalizedDate, oldEvent.title, user);
+    await addSingleEvent(normalizedDate, newTitle, user,edit :true);
+  }
+
+
+    Future<void> deleteSingleEvent(
+      DateTime date, String eventTitle, User user) async {
+    date = DateTime(date.year, date.month, date.day,0,0,0,0);
+
+    if (!allEvents.containsKey(date)) {
+      print("No events found for date: ${date.toString().split(' ')[0]}");
+      return;
+    }
+
+    allEvents[date]?.removeWhere((event) => event.title == eventTitle);
+
+    if (allEvents[date]?.isEmpty ?? false) {
+      allEvents.remove(date);
+    }
+
+    QuerySnapshot querySnapshot = await _eventsCollectionRef
+        .where("date", isEqualTo: Timestamp.fromDate(date))
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      String docId = querySnapshot.docs.first.id;
+      List<String> updatedEvents =
+          allEvents[date]?.map((e) => e.title).toList() ?? [];
+
+      if (updatedEvents.isEmpty) {
+        await _eventsCollectionRef
+            .doc(docId)
+            .delete(); // ❗ Ensure deletion happens
+      } else {
+        await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
+      }
+    }
+
+    setState(() {});
+  }
   Future<List> getTopicsDatabase() async {
     List<dynamic> holderList = [];
 
     CollectionReference topicRef =
-    FirebaseFirestore.instance.collection("topics");
+    FirebaseWrapper.firestore().collection("topics");
     QuerySnapshot topicSnapshot = await topicRef.get();
     List<Map<String, dynamic>> holder = [];
     Map<String, bool> holderChecked = {};
@@ -80,108 +198,203 @@ class HomePageState extends State<HomePage> {
 
     return holderList;
   }
-
-    
-
   
-  Future<void> getTopics() async {
-    // setState(() {
-    //   loading = true;
-    // });
+  
+  Future<bool> _isExcludedDay(DateTime date, String userId) async {
+    try {
+      QuerySnapshot querySnapshot =
+          await _userCollectionRef.where("userID", isEqualTo: userId).get();
+      if (querySnapshot.docs.isEmpty) return false;
 
-    var holderList = await getTopicsDatabase();
+      var userData = querySnapshot.docs.last.data() as Map<String, dynamic>;
+      if (!userData.containsKey('excludedDays')) return false;
 
-    setState(() {
-      topics = holderList[0];
-      checked = holderList[1];
-      // loading = false;
+      List<String> excludedDays = List<String>.from(userData['excludedDays']);
+      String dayName = _getDayName(date.weekday);
+      return excludedDays.contains(dayName);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error checking excluded day: $e');
+      }
+      return false;
+    }
+  }
+
+    String _getDayName(int weekday) {
+    switch (weekday) {
+      case 1:
+        return "Monday";
+      case 2:
+        return "Tuesday";
+      case 3:
+        return "Wednesday";
+      case 4:
+        return "Thursday";
+      case 5:
+        return "Friday";
+      case 6:
+        return "Saturday";
+      case 7:
+        return "Sunday";
+      default:
+        return "";
+    }
+  }
+
+
+  Future<DateTime> findNearestFreeDate(
+      DateTime targetDate,
+      int maxDaysToMove,
+      DateTime testDay,
+      DateTime today,
+      Map<DateTime, List<Event>> generatedEvents,
+      String userId,
+      {int requiredSpacing = 0}) async {
+    // First check if the target date is already available
+    if (generatedEvents[targetDate] == null &&
+        !await _isExcludedDay(targetDate, userId)) {
+      return targetDate;
+    }
+
+    // Try to find a date forward (preferred direction)
+    DateTime nextDate = targetDate;
+    int daysForward = 0;
+    while (nextDate.isBefore(testDay) && daysForward < maxDaysToMove) {
+      nextDate = nextDate.add(const Duration(days: 1));
+      daysForward++;
       
-    });
+      // Check if this date respects both availability and required spacing
+      if (generatedEvents[nextDate] == null &&
+          !await _isExcludedDay(nextDate, userId)) {
+        // If we need to maintain spacing, check adjacent days
+        if (requiredSpacing > 0) {
+          bool hasAdjacentEvent = false;
+          
+          // Check days before based on spacing
+          for (int i = 1; i <= requiredSpacing; i++) {
+            DateTime checkDate = nextDate.subtract(Duration(days: i));
+            if (generatedEvents[checkDate] != null) {
+              hasAdjacentEvent = true;
+              break;
+            }
+          }
+          
+          // Check days after based on spacing
+          if (!hasAdjacentEvent) {
+            for (int i = 1; i <= requiredSpacing; i++) {
+              DateTime checkDate = nextDate.add(Duration(days: i));
+              if (checkDate.isAfter(testDay)) break;
+              if (generatedEvents[checkDate] != null) {
+                hasAdjacentEvent = true;
+                break;
+              }
+            }
+          }
+          
+          if (!hasAdjacentEvent) {
+            return nextDate;
+          }
+          // Continue searching if this date doesn't meet spacing requirements
+          continue;
+        }
+        
+        return nextDate;
+      }
+    }
+
+    // If no future date found within maxDaysToMove, try searching backward
+    DateTime prevDate = targetDate;
+    int daysBackward = 0;
+    while (prevDate.isAfter(today) && daysBackward < maxDaysToMove) {
+      prevDate = prevDate.subtract(const Duration(days: 1));
+      daysBackward++;
+      
+      // Check if this date respects both availability and required spacing
+      if (generatedEvents[prevDate] == null &&
+          !await _isExcludedDay(prevDate, userId)) {
+        // If we need to maintain spacing, check adjacent days
+        if (requiredSpacing > 0) {
+          bool hasAdjacentEvent = false;
+          
+          // Check days before based on spacing
+          for (int i = 1; i <= requiredSpacing; i++) {
+            DateTime checkDate = prevDate.subtract(Duration(days: i));
+            if (checkDate.isBefore(today)) break;
+            if (generatedEvents[checkDate] != null) {
+              hasAdjacentEvent = true;
+              break;
+            }
+          }
+          
+          // Check days after based on spacing
+          if (!hasAdjacentEvent) {
+            for (int i = 1; i <= requiredSpacing; i++) {
+              DateTime checkDate = prevDate.add(Duration(days: i));
+              if (generatedEvents[checkDate] != null) {
+                hasAdjacentEvent = true;
+                break;
+              }
+            }
+          }
+          
+          if (!hasAdjacentEvent) {
+            return prevDate;
+          }
+          // Continue searching if this date doesn't meet spacing requirements
+          continue;
+        }
+        
+        return prevDate;
+      }
+    }
+
+    // If we reach here, try the start date itself as a last resort
+    if (generatedEvents[today] == null &&
+        !await _isExcludedDay(today, userId)) {
+      return today;
+    }
+
+    // If absolutely no valid date found, return the original target date
+    // The calling methods will need to check if this date is actually usable
+    return targetDate;
+  }
+
+
+ Future<void> addSingleEvent (
+      DateTime date, String eventTitle, User user,{bool edit = false}) async {
+    date = DateTime(date.year, date.month, date.day,0,0,0,0);
    
+  DateTime today = DateTime.now();
+  
+  if (edit == false){
 
+  date = await findNearestFreeDate(date, 5, testDay, today, allEvents, user.uid);
+ 
   }
 
-  //  @override
-  // void didChangeDependencies(){
-  //   super.didChangeDependencies();
-  //   //waits for build function to complete and then calls back to call the condition checking function 
-  //   WidgetsBinding.instance.addPostFrameCallback((_){
-  //    setState((){});
-  //   });
-  // }
+  Color color =  Colors.yellow; 
 
-  @override
-  void initState() {
-    super.initState();
-    getData();
-  }
-
-  Future<void> getData() async {
-    setState((){
-      name = "loading...";
-      selectedEvents = {};
-      loading = true;
-    });
-    await getUser();
-    await userData();
-    await getStats();
-    await getTopics();
-      
-    setState(() {
-      loading = false;
-    });
-    //issue with getFirstStudyDay, takes too long but if you put it as the first getter function
-    //the page does not build
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // double width = MediaQuery.of(context).size.width;
-    // double height = MediaQuery.of(context).size.height;
-    
-    
-    return Scaffold(
-      key: _key,
-      drawer: const DrawMain(),
-      appBar: CustomAppBar(
-        title: 'Flashcard Tutor',
-        mobileTitle: 'Flashcard Tutor',
-      ),
-      body: Center (
-        child: loading 
-        ? CircularProgressIndicator()
-        : SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: makeColumn(),
-                ),
-              ),
-      ),
-      floatingActionButton: const CustomFloatingButton(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
-    );
-  }
-
-    Future<void> addSingleEvent(
-      DateTime date, String eventTitle, User user) async {
-    date = DateTime(date.year, date.month, date.day);
-    
+  if (edit == true) color = Colors.black;
+  
     //The delete single event function updates the UI in real time so I just copied the structure of that function 
     Event newEvent =  Event(
                         title: eventTitle,
-                        color: Colors.yellow
+                        color: color
                         );
-
-    if (selectedEvents[date] == null) {
+    //cannot add a new revision date if the date is not empty
+    if (allEvents[date] == null) {
       selectedEvents[date] = [];
-    }
+      allEvents[date] = [];
+      print("Adding event $eventTitle to $date\n");
+    
     selectedEvents[date]?.add(newEvent);
+    allEvents[date]?.add(newEvent);
     QuerySnapshot querySnapshot = await _eventsCollectionRef
         .where("date", isEqualTo: Timestamp.fromDate(date))
         .get();
 
      List<String> updatedEvents =
-        selectedEvents[date]?.map((e) => e.title).toList() ?? [];
+        allEvents[date]?.map((e) => e.title).toList() ?? [];
     
     if (querySnapshot.docs.isNotEmpty) {
     String docId = querySnapshot.docs.first.id;
@@ -198,16 +411,94 @@ class HomePageState extends State<HomePage> {
     String newDocId = newDoc.id;
     await _eventsCollectionRef.doc(newDocId).update({"events": updatedEvents});
 
-  }
+  }}
  
     setState(() {});
   }
 
+//Get all events from database, iterate over events and look for which date a flashcard topic has been scheduled 
+  Future<void> getTopics() async {
+    if (mounted) {
+      setState(() {
+        loading = true;
+      });
+    }
+    
+    var holderList = await getTopicsDatabase();
+    
+
+    if (mounted) {
+      setState(() {
+        topics = holderList[0];
+        checked = holderList[1];
+        topicNames = topics.map((e) => '${e['topic']} Flashcards').toList();
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    setState(() {
+      name = "loading...";
+    });
+    getData();
+    setState(() {});
+  }
+
+  Future<void> getData() async {
+    //DO NOT CHANGE THE ORDER OF THIS OTHERWISE PAGE WILL NOT BUILD
+    setState((){
+      name = "loading...";
+      selectedEvents = {};
+      allEvents = {};
+      loading = true;
+    });
+    await getUser();
+    await getTopics();
+    await userData();
+    await getStats();
+    
+    setState(() {
+      loading = false;
+    });
+    
+    
+  }
+
+  
+
+  @override
+  Widget build(BuildContext context) {
+    // double width = MediaQuery.of(context).size.width;
+    // double height = MediaQuery.of(context).size.height;
+    
+    return AppScaffold(
+        floatingActionButton: const CustomFloatingButton(),
+        
+        body:  Center(
+      heightFactor: 0.5,
+      child: loading
+          ? const CircularProgressIndicator()
+          : SingleChildScrollView(
+        child: Padding(
+          padding : const EdgeInsets.symmetric(vertical:2,horizontal:2),
+          child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: makeColumn(),
+        ),
+      ),
+    ),),
+        title: "Flashcard Tutor"
+    );
+  }
+
   Future<void> getUser() async {
-    // setState(() {
-    //   loading = true;
-    // });
+
     NavigatorState nav = Navigator.of(context);
+    setState(() {
+      loading = true;
+    });
     if (auth.currentUser == null) {
       var tmp = await auth
           .authStateChanges()
@@ -224,287 +515,244 @@ class HomePageState extends State<HomePage> {
     } else {
       user = auth.currentUser!;
     }
-  }
-
-  Future<void> userData() async {
     QuerySnapshot querySnapshot =
-    await users.where("userID", isEqualTo: user.uid).get();
+        await users.where("userID", isEqualTo: user.uid).get();
+     
+     
+
     setState(() {
       name = querySnapshot.docs.last["name"];
       id = querySnapshot.docs.last.id;
       topicCount = querySnapshot.docs.last["topicCount"];
       topicLastSeen = querySnapshot.docs.last["topicLastSeen"];
-      try {
-        testDay = querySnapshot.docs.last['TestDay'].toDate();
-      }catch (e){
-        // If testDay hasn't been set, assign a default value
-        testDay = DateTime.now();
-      }
-      _firstStudyDate = DateTime.fromMicrosecondsSinceEpoch(
-          querySnapshot.docs.last["firstStudyDay"].microsecondsSinceEpoch);
+      loading = false;
     });
-    try{
-      _eventsCollectionRef =
-          FirebaseFirestore.instance.collection('users/$id/events');
-
-      var snapshots = await _eventsCollectionRef.get();
-      for (var doc in snapshots.docs) {
-        var data = doc.data() as Map<String, dynamic>;
-        if (data.containsKey('date') && data.containsKey('events')) {
-          Timestamp? timestamp = data['date'] as Timestamp?;
-          List<dynamic>? eventsList = data['events'] as List<dynamic>?;
-
-          if (timestamp != null && eventsList != null) {
-            DateTime date = timestamp.toDate();
-            date = DateTime(date.year, date.month, date.day);
-
-            List<String> events = eventsList.map((e) => e.toString()).toList();
-
-
-            selectedEvents[date] = events.map((title) => Event(
-                title: title,
-                color : Colors.yellow
-            )).toList();
-          }
-        }
-
-      }
-    } catch(e){
-      print("Error loading events from DB: $e");
-    }
   }
 
   Future<void> getStats() async {
-  //  setState(() {
-  //     loading = true;
-  //   });
-    CollectionReference flashcardRef =
-        FirebaseFirestore.instance.collection('flashcards');
-    CollectionReference seenRef = FirebaseFirestore.instance
-        .collection("users/${id!}/flashcardsSeen");
-    QuerySnapshot seen = await seenRef.get();
-    QuerySnapshot all =
-        await flashcardRef.where("owner", isEqualTo: "all").get();
-    QuerySnapshot userCards =
-        await flashcardRef.where("owner", isEqualTo: id).get();
+    setState(() {
+      loading = true;
+    });
 
-    for (var doc in seen.docs) {
-      DocumentSnapshot card = await flashcardRef.doc(doc["cardID"]).get();
-      if (card.exists) {
-        Map<String, dynamic> data = card.data() as Map<String, dynamic>;
-        incrementMap(seenCards, data["topic"].toString());
-        if (data["subtopic"] != "") {
-          incrementMap(seenCards, data["subtopic"].toString());
-        }
-      }
+    TopicStats stats = await LastRevised.getStats();
+    if (mounted) {
+      setState(() {
+        totalCards = stats.totalCards;
+        seenCards = stats.seenCards;
+        loading = false;
+      });
     }
-                                                 //to do: change this to only load cards selected
-    for (var doc in all.docs + userCards.docs) { //This loads all the cards during the dashboard screen loading process...
-      if (doc.exists) {
-        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-        // print(data.toString());
-        incrementMap(totalCards, data["topic"].toString());
-        if (data["subtopic"] != "") {
-          incrementMap(totalCards, data["subtopic"].toString());
-        }
-      }
-    }
-    // setState(() {
-    //   loading = false;
-    // });
+    
   }
-
-  void incrementMap(Map<String, int> map, String key) {
-    if (map.containsKey(key)) {
-      map.update(key, (i) => map[key]! + 1);
-      return;
-    }
-    map[key] = 1;
-  }
-
-
 
   //Formats the checkbox categories according to colour depending on whether the review date is due and how many flashcards have been seen.
-  List<ExpansionTile> makeCheckboxList()   {
-      Event? eventsForDate;
-      Event? futureEvents;
-      DateTime now = DateTime.now();
-      //To test this feature locally please change "_firstStudyDate.day" to "_firstStudyDate.day-2" and then edit 
-      //One of the flashcard decks in the calendar to be before the first study day. This will trigger the new 
-      //features 
-      DateTime targetDate = DateTime(_firstStudyDate.year, _firstStudyDate.month, _firstStudyDate.day, 0, 0, 0, 0);
-      DateTime remainingDays = DateTime(now.year,now.month,now.day+1,0,0,0,0);
-      List<(String,String)> allTopicNames = [];
-      List<(String,String)> onlyFutureNames = [];
-      
-      //Having all the events since the first study day lets us know how many times the user has reviewed a specific deck
-      //We also need the remaining days to ensure that we do not reschedule an event too often
-      while (targetDate.isBefore(testDay)){
-        eventsForDate = selectedEvents[targetDate]?.last;
-       
-        if (eventsForDate != null && eventsForDate.title.contains("Flashcards")){
-           String formattedDate = DateFormat('dd/MM/yyy').format(targetDate);
-          allTopicNames.add((eventsForDate.title,formattedDate));
-        }
-        
-        targetDate = targetDate.add(Duration(days: 1));
-      }
-
-      while (remainingDays.isBefore(testDay)){
-        futureEvents = selectedEvents[remainingDays]?.last;
-        if (futureEvents != null && futureEvents.title.contains("Flashcards")){
-           String formattedDate = DateFormat('dd/MM/yyy').format(targetDate);
-          onlyFutureNames.add((futureEvents.title,formattedDate));
-        }
-        remainingDays = remainingDays.add(Duration(days: 1));
-      }
-  
-    List<ExpansionTile> value = [];
+  List<Widget> makeCheckboxList() {
+    DateTime today = DateTime.now();
+    today = DateTime(today.year,today.month,today.day,0,0,0,0);
+    
+    List<Widget> value = [];
     for (var i = 0; i < topics.length; i++) {
-
+   
       var map = topics[i];
-      bool overdue = false;
-      int numCards = seenCards[map["topic"]] ?? 0;
-      
-      var shade = numCards / (totalCards[map["topic"]]?? 1)*100;
       var text = seenCards[map["topic"]] == null
           ? "0"
           : seenCards[map["topic"].toString()].toString();
-
 
       //Number of days since topic was last revised is converted from seconds to days as an int
       var howLongAgoRevisedDays = (Timestamp.now().seconds - topicLastSeen![i].seconds) / (60 * 60 * 24);
 
       //A mapping of how many times the topics been seen to what the next review date gap should be. After 7 times it stays at 128 days.
-      Map<int, int> dateToColourMap = {0: ((howLongAgoRevisedDays.ceil()*4)+1), 1: 2, 2: 4, 3: 8, 4: 16, 5: 32, 6: 64, 7: 128};
-      MaterialColor topicColour = Colors.green;
+      
+      //CHANGE THIS FORMULA FOR to DR. Harris' new one
+      Map<int, int> dateToColourMap = {0: ((howLongAgoRevisedDays.ceil()*4)+1), 1: 6, 2: 10, 3: 16, 4: 24, 5: 36};
+      
+      
+      
+      // MaterialColor topicColour = Colors.green;
+      Color tColour = Color(0xFFB0FFC6); // green
       if (topicCount![i]>(dateToColourMap.length-1)){
         topicCount![i]=dateToColourMap.length-1;
       }
 
       
-      String formattedDate = DateFormat('dd/MM/yyy').format(DateTime.now());
-      //DateTime targetDate = DateTime(_firstStudyDate.year, _firstStudyDate.month, _firstStudyDate.day-3, 0, 0, 0, 0);
+
+      int nextReviewDateMilliseconds = (((dateToColourMap[topicCount![i]]! * 24 * 60 * 60) + topicLastSeen![i].seconds) * 1000).toInt();
+      DateTime nextReviewDate = DateTime.fromMillisecondsSinceEpoch(nextReviewDateMilliseconds, isUtc: true).toLocal();
+      nextReviewDate = DateTime(nextReviewDate.year, nextReviewDate.month,nextReviewDate.day,0,0,0,0);
+      String formattedDate = DateFormat('dd/MM/yyy').format(nextReviewDate); 
+      DateTime? dateInCalendar;
+      bool notInCalendar = true;
+      List<String> rescheduled = [];
+      Event e = Event(color:Color(0xFFB0FFC6),title: "Shouldn't add"); 
       
-      //this tuple gives us fast access to the date that corresponds to this flashcards' study session
-      var format = allTopicNames.firstWhere(
-      (tuple) => tuple.$1.contains(map["topic"]),
-      orElse: () => ("", "N/A"), 
-      );
-
-       var eventFuture = allTopicNames.lastWhere( (tuple) => tuple.$1.contains(map["topic"]),
-      orElse: () => ("", "N/A"), 
-      );
-
-      //we remove the current topic we are on, to ensure that we do not iterate through it again. 
-      allTopicNames.remove(format);
-
-      DateTime eventDay = DateTime.now();
-      if(format.$2 != "N/A") eventDay = DateFormat("dd/MM/yyyy").parse(format.$2);
-
-      // var eventHistory = allTopicNames.where(
-      // (tuple) => tuple.$1.contains(map["topic"]));
-
-      if(eventDay.isAtSameMomentAs(DateTime(now.year, now.month, now.day, 0, 0, 0, 0))){
-                if (eventFuture.$2 == "N/A"){ //this means that if there are no other future events 
-                    formattedDate = "Today";
-                    topicColour = Colors.grey;
-                }
-
-      }
-
-      //At the moment all this does is greedily look for the next free day in the calendar, a queue should be
-      //Implemented in the future, i.e the flashcard deck that has been reviewed the least, should be scheduled 
-      //ASAP and the rest are not a priority. 
-      if(eventDay.isBefore(DateTime(now.year, now.month, now.day, 0, 0, 0, 0)) && (eventFuture == format) ){
-                DateTime rescheduledDate = DateTime(now.year, now.month, now.day+1, 0, 0, 0, 0);
-               
-                while (rescheduledDate.isBefore(testDay) && selectedEvents[rescheduledDate] != null && selectedEvents[rescheduledDate] != [] && !selectedEvents[rescheduledDate]!.last.toString().contains(map["topic"]))  {
-                    rescheduledDate = rescheduledDate.add(Duration(days: 1));
-                }
-                if (selectedEvents[rescheduledDate] == [] || selectedEvents[rescheduledDate] == null && rescheduledDate != testDay){
-                    selectedEvents[rescheduledDate] = [];
-                    addSingleEvent(rescheduledDate, "${topics[i]["topic"]} Flashcards", user);
-                    formattedDate = DateFormat('dd/MM/yyy').format(rescheduledDate);
-                   
-                  } else{
-                  formattedDate = "N/A";
-                }   
-                
+      
+      //Only go through the flashcard events with "selectedEvents" instead of allEvents
+      
+      if (selectedEvents.isNotEmpty ){
+        for (final entry in selectedEvents.entries){
+        for (final event in entry.value){
+          if (event.title.contains(map["topic"])){
+            formattedDate = entry.key.toString();
+            dateInCalendar = entry.key;
+            formattedDate = formattedDate.substring(0,10);
+            notInCalendar = false;
+            e = event;
           }
-       else if (eventFuture != format && eventFuture.$2 != "N/A"){ 
-                formattedDate = eventFuture.$2;
-        
-                if (shade <= 20) {
-                  topicColour = Colors.red;
-                  formattedDate = "${eventFuture.$2} (Did not complete previous review)";
-                  }
-                else if (shade == 100) {
-                  topicColour = Colors.green;
-                  } else{topicColour = Colors.grey;}
-            }
-      else {
-                //This block should run only if there is no past record of the specified
-                //flashcard deck therefore the event only occurs in the future 
-                formattedDate = eventFuture.$2;
-        
-                if (shade == 100) {
-                  formattedDate = "Done Early";
-                  topicColour = Colors.green;
-                  }
-                else{topicColour = Colors.grey;}
-            }
-      if (overdue == true){topicColour = Colors.red;}
+        }
+        }
+        if (notInCalendar){
+          formattedDate = "N/A";
+          tColour = Color(0xFFD9D9D9);
+        }
+        else{
 
-    int nextReviewDateMilliseconds = (((dateToColourMap[topicCount![i]]! * 24 * 60 * 60) + topicLastSeen![i].seconds) * 1000).toInt();
-    DateTime nextReviewDate = DateTime.fromMillisecondsSinceEpoch(nextReviewDateMilliseconds, isUtc: true).toLocal();
-      if (dateToColourMap[topicCount![i]]! < howLongAgoRevisedDays) {
-        topicColour = Colors.red;
-        formattedDate = DateFormat('dd/MM/yyy').format(nextReviewDate);
+          
+
+         //If the user hasn't seen any cards and it is past the revision date set it red
+      //Otherwise set it to grey
+      if (seenCards[map["topic"]] == null || seenCards[map["topic"]] == 0){
+        if (dateInCalendar!.isBefore(today) || dateInCalendar!.isAtSameMomentAs(today)){
+         tColour = Color(0xFFFF9595); 
+        }
+        else{
+           tColour = Color(0xFFD9D9D9);
+
+        }
       }
-      value.add(
-          ExpansionTile(
-          trailing: Text(
-              "$text / ${totalCards[map["topic"].toString()]}",
-              style: const TextStyle(color: Colors.white),
-          ),
-          backgroundColor: topicColour,
-          collapsedBackgroundColor: topicColour,
-          textColor: Colors.black,
-          title: Text(
-              "${map["topic"]}  ${map["emoji"]}",
-              style: const TextStyle(color: Colors.white),
-          ),
-          leading: Checkbox(
-            side: const BorderSide(
-                    color: Colors.white,
-                    width: 1.5
-                  ),
-            key: i == 0 ? const ValueKey("Checkbox") : UniqueKey(),
-            value: checked[map["topic"]],
-            onChanged: (bool? value) {
-              setState(() {
-                checked[map["topic"]] = value!;
+      
+      //if the user has seen some of the cards 
+      else  {
 
-                for (var subtopic in map["subtopics"]) {
-                  checked[subtopic.toString()] = checked[map["topic"]]!;
+        //If the revision date is in the future 
+        if (dateInCalendar!.isAfter(today)){
+             
+             //If the user has seen all the cards set to green
+             if (seenCards[map["topic"]]! == totalCards[map["topic"]]!) {
+              tColour = Color(0xFFB0FFC6); 
+             }
+
+            //If they haven't seen all of them set it to grey
+             if(seenCards[map["topic"]]! < totalCards[map["topic"]]!) tColour = Color(0xFFD9D9D9);   
+      }
+
+        else if(dateInCalendar.isBefore(today) || dateInCalendar.isAtSameMomentAs(today)) {
+          //Reschedule or set red
+           if (seenCards[map["topic"]]! == totalCards[map["topic"]]!){
+            
+            rescheduled.add("${map["topic"]}");
+            tColour = Color(0xFFD9D9D9);   
+            nextReviewDate = dateInCalendar.add(Duration(days:dateToColourMap[topicCount![i]]!));
+            print("${map["topic"]}\n");
+            print("next review is $nextReviewDate\n");
+            print("Topic seen ${topicCount![i]} times so will try add ${dateToColourMap[topicCount![i]]} days till next review \n");
+            addSingleEvent(nextReviewDate,
+              "${map["topic"]} Flashcards", user);
+            formattedDate = nextReviewDate
+            .toString().substring(0,10);
+            text = "0";
+
+            
+            updateOneEvent(e, "Completed: ${e.title} ", dateInCalendar);
+
+            LastRevised.resetSeenCardsForTopic("${map["topic"]}");
+            // selectedEvents.remove(dateInCalendar);
+        
+           }
+           if (seenCards[map["topic"]] == null || seenCards[map["topic"]]! < totalCards[map["topic"]]!){
+            tColour = Color(0xFFFF9595);   
+           }
+        
+        }
+        
+     
+      }}}
+      else{
+          formattedDate = "N/A";
+          //dateInCalendar = today;
+          tColour = Color(0xFFD9D9D9);
+        }
+
+
+
+
+ value.add(
+    Padding(
+      padding: const EdgeInsets.only(bottom: 8, left: 15, right: 15),
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _hoveringIndex = i),
+        onExit: (_) => setState(() => _hoveringIndex = null),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: ExpansionTile(
+                 onExpansionChanged: (expanded) {
+                 if (expanded) {
+                  setState(() {
+                    _hoveringIndex = null; // hide message once expanded
+                  });
                 }
-              });
-            },
-          ),
-          subtitle: Row(
-            children: [
-              const Text(
-                "Next Review Date: ",
-                style: TextStyle(color: Colors.white),
+              },
+                trailing: Text(
+                  "$text / ${totalCards[map["topic"].toString()]}",
+                  style: const TextStyle(color: Colors.black),
+                ),
+                backgroundColor: tColour,
+                collapsedBackgroundColor: tColour,
+                textColor: Colors.black,
+                title: Text(
+                  "${map["topic"]}",
+                  style: const TextStyle(color: Colors.black),
+                ),
+                leading: Checkbox(
+                  side: const BorderSide(color: Colors.black, width: 1.5),
+                  key: i == 0 ? const ValueKey("Checkbox") : UniqueKey(),
+                  value: checked[map["topic"]],
+                  onChanged: (bool? value) {
+                    
+                    setState(() {
+                      checked[map["topic"]] = value!;
+                      for (var subtopic in map["subtopics"]) {
+                        checked[subtopic.toString()] = value;
+                      }
+                    });
+                  },
+                ),
+                subtitle: Row(
+                  children: [
+                    const Text("Next Review Date: ",
+                        style: TextStyle(color: Colors.black)),
+                    Text(
+                      formattedDate,
+                      style: const TextStyle(color: Colors.black),
+                    ),
+                  ],
+                ),
+                children: makeCheckbox(map),
               ),
-              Text(
-                formattedDate,
-                style: const TextStyle(color: Colors.white),
+            ),
+
+            // ✅ Show hover text only for the hovered item
+            if (_hoveringIndex == i)
+              IgnorePointer(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.85),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Text(
+                    "Click to view subtopics",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
               ),
-            ],
-          ),
-          children: makeCheckbox(map)));
+          ],
+        ),
+      ),
+    ),
+  );
     }
     return value;
   }
@@ -517,11 +765,11 @@ class HomePageState extends State<HomePage> {
           : seenCards[subtopic.toString()].toString();
       value.add(CheckboxListTile(
         side: const BorderSide(
-            color: Colors.white,
+            color: Colors.black,
             width: 1.5),
         secondary: Text(
           "$text / ${totalCards[subtopic.toString()]}",
-          style: const TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.black),
         ),
         value: checked[subtopic.toString()],
         controlAffinity: ListTileControlAffinity.leading,
@@ -542,7 +790,7 @@ class HomePageState extends State<HomePage> {
         },
         title: Text(
           subtopic.toString(),
-          style: const TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.black),
         ),
       ));
     }
@@ -554,28 +802,29 @@ class HomePageState extends State<HomePage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: const Color.fromRGBO(67, 67, 67, 1.0),
-          title: const Text('Instructions',
-              style: TextStyle(
-                color: Colors.white,
-              )
-          ),
+          title: const Text(
+            'Instructions',
+            style: TextStyle(fontSize: 20),
+            ),
+          backgroundColor: Colors.black,
           content: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: const [
+                SizedBox(height: 5),
                 Text(
                   '1. Start a revision session by completing one or more of our flashcard decks.\n'
                       '2. Work through each question, ensuring that you answer the question in your head before flipping the card (active recall).\n'
                       '3. Click the tick or cross next to the flashcard to indicate whether you have mastered the card.\n'
                       '4. At the end of each deck, you will be prompted to review all the cards that you are still learning before moving on.\n'
                       '5.	Once completed, the deck will turn green.\n'
-                      '6. After two days, the categories will turn red, signifying that it is time to review the deck again.\n'
-                      '7. Repeat this cycle throughout your revision periods; the time between repetitions will increase with successive reviews.\n'
+                      '6. Then, our tailored spaced repetition algorithm kicks in and will schedule your next review date for that topic.\n'
+                      '7. Repeat this cycle throughout your revision period; the time between repetitions will increase with successive reviews.\n'
                       '8.	If you wish to receive email reminders when a topic is overdue, you can turn on this feature in our settings tab.',
-                    style: TextStyle(
-                      color: Colors.white,
-                    )
+                      style: TextStyle(
+                        fontSize: 18,
+                        height: 1.5,
+                      )
                 ),
               ],
             ),
@@ -593,65 +842,21 @@ class HomePageState extends State<HomePage> {
     );
   }
 
-  List<Widget> makeColumn()  {
+  List<Widget> makeColumn() {
     List<Widget> widgets = [
-      const SizedBox(height: 40),
-      Container(
-          width:1200,
-          height: 200,
-          margin: const EdgeInsets.only(bottom: 10.0, left: 30.0, right: 30.0),
-          padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
-          decoration: BoxDecoration(
-            color: Colors.blueGrey,
-            borderRadius: BorderRadius.circular(10.0),
-          ),
-        child: const Center(
-          child: SingleChildScrollView(
-            child: Text(
-              "Our pre-made flashcard decks contain hundreds of high-yield questions,\n"
-                  " all derived from UFPO and GMC guidance. It uses our unique spaced repetition system to help you\n"
-                  "to learn and retain more content in less time.",
-              //get the question from the map
-              textAlign: TextAlign.center,
-              style: TextStyle(
-              fontSize:26,
-              color: Colors.white,
-              )
-            )
-          ),
-        ),
-
-      ),
       const SizedBox(height: 10),
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         crossAxisAlignment: CrossAxisAlignment.center,
 
-        children: [
-          TextButton(
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.white,
-              backgroundColor: const Color.fromRGBO(0, 160, 227, 1),
-              side: const BorderSide(
-                  color: Color.fromRGBO(0, 160, 227, 1), width: 2),
-              shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(100))),
-            ),
+        children: <Widget>[
+          Indicator(color: Color.fromRGBO(0xFA, 0xFA, 0xFA, 1), text: "Unseen"),
+          Indicator(color: Color.fromRGBO(0xFF, 0x95, 0x95, 1), text: "Needs Review"),
+          Indicator(color: Color.fromRGBO(0xB0, 0xFF, 0xC6, 1), text: "Recently Reviewed"),
 
-            onPressed: () {
-              explanationBox();
-            },
-
-            child: const Padding(
-              padding: EdgeInsets.only(left: 10.0, right: 10.0),
-              child: Text('How does it work?',
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 34,
-                      fontWeight: FontWeight.w500)),
-            ),
-          ),
         ],
+
+
       ),
 
       const SizedBox(height: 40),
@@ -662,37 +867,73 @@ class HomePageState extends State<HomePage> {
         ),
       ),
 
-      const SizedBox(height: 20),
+      // const SizedBox(height: 20),
       Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          TextButton(
-            key: const ValueKey("Revise"),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.white,
-              backgroundColor: const Color.fromRGBO(0, 160, 227, 1),
-              side: const BorderSide(
-                  color: Color.fromRGBO(0, 160, 227, 1), width: 2),
-              shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(100))),
+          SizedBox(
+            width: 60
+            
             ),
+          Spacer(
+            flex: 1),
+          Expanded(
+            flex: 1,
+            child: Align(child: TextButton(
+              key: const ValueKey("Revise"),
+              style: TextButton.styleFrom(
+                textStyle: const TextStyle(
+                  fontSize: 25,
+                  backgroundColor: Colors.black,
+                  color: Colors.white,
+                ),
+                shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(40))),
+                    backgroundColor: Colors.black,
+                    foregroundColor: Colors.white,
+              ),
 
-            onPressed: () {
-              // reviseCards("revise");
-              reviseCards();
-            },
+              onPressed: () {
+                // reviseCards("revise");
+                reviseCards();
+              },
 
-
-            child: const Padding(
-              padding: EdgeInsets.only(left: 10.0, right: 10.0),
-              child: Text('Revise',
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 34,
-                      fontWeight: FontWeight.w500)),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                child: Text(
+                  'Revise',
+                  selectionColor: Colors.black,
+                ),
+              ),
             ),
+          )),
+
+          Expanded(
+            flex: 1, 
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                style: TextButton.styleFrom(
+                  shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10))),
+                      backgroundColor: Colors.black,
+                ),
+
+                onPressed: () {
+                  explanationBox();
+                },
+
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
+                  child: Icon(Icons.question_mark, color: Colors.white,),
+                ),
+              ),
+              
+            )
+          
           ),
+          SizedBox(width: 60,)
         ],
       ),
       const SizedBox(height: 20),
@@ -705,7 +946,9 @@ class HomePageState extends State<HomePage> {
   AlertDialog alertDialogue() {
     return AlertDialog(
       title: const Text(
-          'Alert'),
+          'No topics selected'),
+      //Need to fix this for the logic of dark mode vs light mode 
+      backgroundColor: Colors.black, 
       content: const Text(
           'Please select a topic by ticking the checkbox beside the category before pressing revise.'),
       actions: <
@@ -755,3 +998,4 @@ class HomePageState extends State<HomePage> {
     }
   }
 }
+
