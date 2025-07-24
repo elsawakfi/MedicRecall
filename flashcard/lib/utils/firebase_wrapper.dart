@@ -1,17 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
+//import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
 
 class FirebaseWrapper {
-  
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static final FirebaseAuth _auth = FirebaseAuth.instance;
 
   // static void setup() {
-  //   _firestore = 
+  //   _firestore =
   //   _auth = FirebaseAuth.instance;
   // }
-
 
   // static void setupForIntegrationTesting() {
   //   setup();
@@ -22,7 +20,7 @@ class FirebaseWrapper {
   // static Future<void> setupForTesting(FirebaseFirestore database) async {
 
   //   _firestore = database;
-    
+
   //   _auth = MockFirebaseAuth(
   //     signedIn: true,
   //     mockUser: MockUser(
@@ -40,5 +38,4 @@ class FirebaseWrapper {
   static FirebaseAuth auth() {
     return _auth;
   }
-
 }
