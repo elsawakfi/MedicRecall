@@ -319,8 +319,35 @@ class StudySessionManager {
       }
 
       if (selectedResources.contains("Official SJT Practice Paper")) {
+        // Get the user's SJT repetitions setting
+        int? sjtRepetitions;
+        try {
+          var userDataSnapshot = await _userCollectionRef
+              .where("userID", isEqualTo: user.uid)
+              .get();
+          if (userDataSnapshot.docs.isNotEmpty) {
+            var userData = userDataSnapshot.docs.first.data() as Map<String, dynamic>;
+            if (userData.containsKey('sjtRepetitions')) {
+              sjtRepetitions = userData['sjtRepetitions'] as int;
+            }
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            print("Error getting SJT repetitions: $e");
+          }
+        }
+        
+        // Ensure sjtRepetitions has been set by the user
+        if (sjtRepetitions == null) {
+          if (kDebugMode) {
+            print("SJT repetition count not found in user data");
+          }
+          // Skip scheduling SJT papers if repetitions not specified
+          return generatedEvents;
+        }
+        
         await _scheduleSJTPaper(
-            firstStudyDay, normalizedTestDay, daysUntilTest, generatedEvents);
+            firstStudyDay, normalizedTestDay, daysUntilTest, generatedEvents, sjtRepetitions);
       }
 
       return generatedEvents;
@@ -500,32 +527,64 @@ class StudySessionManager {
   }
 
   Future<void> _scheduleSJTPaper(DateTime firstStudyDay, DateTime testDay,
-      int daysUntilTest, Map<DateTime, List<Event>> generatedEvents) async {
-    final userId = auth.currentUser!.uid;
+    int daysUntilTest, Map<DateTime, List<Event>> generatedEvents,
+    [int repetitions = 1]) async {
+  final userId = auth.currentUser!.uid;
 
-    // Always schedule at 75% through the study period
-    DateTime SJTDate =
-        firstStudyDay.add(Duration(days: (daysUntilTest * 3 / 4).round()));
-    SJTDate = DateTime(SJTDate.year, SJTDate.month, SJTDate.day, 0, 0, 0, 0);
-
-    // Check if the calculated date is excluded
-    if (await _isExcludedDay(SJTDate, userId) ||
-        generatedEvents.containsKey(SJTDate)) {
-      // Find the nearest available date
-      SJTDate = await findNearestFreeDate(
-          SJTDate, 7, testDay, firstStudyDay, generatedEvents, userId);
+  // Calculate the minimum spacing between SJT papers based on study duration
+  int minSpacing = max(7, daysUntilTest ~/ (repetitions * 2)); // At least 7 days apart
+  
+  // Track the last scheduled paper date to maintain proper spacing
+  DateTime? lastPaperDate;
+  
+  for (int i = 0; i < repetitions; i++) {
+    // Distribute papers evenly throughout the study period
+    // For single paper, keep the 75% position, otherwise distribute evenly
+    double position = repetitions == 1 
+        ? 0.75 // Original 75% position for single paper
+        : (i + 1) / (repetitions + 1); // Distribute evenly for multiple papers
+        
+    // Calculate target date based on position in study timeline
+    DateTime targetDate = firstStudyDay.add(
+        Duration(days: (daysUntilTest * position).round()));
+    targetDate = DateTime(targetDate.year, targetDate.month, targetDate.day, 0, 0, 0, 0);
+    
+    // If this is not the first paper, ensure minimum spacing from the last one
+    if (lastPaperDate != null) {
+      // Ensure minimum spacing between papers
+      if (targetDate.difference(lastPaperDate).inDays < minSpacing) {
+        targetDate = lastPaperDate.add(Duration(days: minSpacing));
+      }
     }
-
+    
+    // Check if the calculated date is excluded or already has an event
+    if (await _isExcludedDay(targetDate, userId) ||
+        generatedEvents.containsKey(targetDate)) {
+      // Find the nearest available date
+      targetDate = await findNearestFreeDate(
+          targetDate, 7, testDay, firstStudyDay, generatedEvents, userId);
+    }
+    
     // Ensure the selected date is valid before scheduling
-    if (!SJTDate.isAfter(testDay) &&
-        !SJTDate.isBefore(firstStudyDay) &&
-        !await _isExcludedDay(SJTDate, userId) &&
-        generatedEvents[SJTDate] == null) {
-      generatedEvents[SJTDate] = [
-        Event(title: "Official SJT Practice Paper", color: kSJTPaperColor)
+    if (!targetDate.isAfter(testDay) &&
+        !targetDate.isBefore(firstStudyDay) &&
+        !await _isExcludedDay(targetDate, userId) &&
+        generatedEvents[targetDate] == null) {
+      
+      // Create numbered or single title based on repetitions
+      String title = repetitions > 1 
+          ? "Official SJT Practice Paper ${i+1}" 
+          : "Official SJT Practice Paper";
+          
+      generatedEvents[targetDate] = [
+        Event(title: title, color: kSJTPaperColor)
       ];
+      
+      // Update the last paper date
+      lastPaperDate = targetDate;
     }
   }
+}
 
   /// Schedule flashcard events
   Future<void> _scheduleFlashcards(

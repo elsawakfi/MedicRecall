@@ -59,7 +59,7 @@ class FlashcardEditorState extends State<FlashcardEditor> {
                         vertical: 10.0,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.blueGrey,
+                        color: Colors.white,
                         borderRadius: BorderRadius.circular(10.0),
                       ),
                       child: const Center(
@@ -69,7 +69,7 @@ class FlashcardEditorState extends State<FlashcardEditor> {
                               "Use the green button to create your own flashcards and have them seamlessly merge with our existing database.",
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                color: Colors.white,
+                                color: Colors.black,
                                 fontSize: 20,
                               ),
                             ),
@@ -100,14 +100,17 @@ class FlashcardEditorState extends State<FlashcardEditor> {
                             return ListTileTheme(
                               contentPadding: const EdgeInsets.all(15),
                               iconColor: Colors.red,
-                              textColor: Colors.black54,
-                              tileColor: Colors.yellow[100],
+                              textColor: Colors.black,
+                              tileColor: Colors.white,
                               style: ListTileStyle.list,
                               dense: true,
                               child: ListView.builder(
                                 itemCount: snapshot.data.docs.length,
                                 itemBuilder: (context, index) => Card(
-                                  margin: const EdgeInsets.all(10),
+                                  margin: const EdgeInsets.all(10),shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  clipBehavior: Clip.antiAlias,
                                   child: ListTile(
                                     title: Text(
                                       snapshot.data.docs[index]['front'],

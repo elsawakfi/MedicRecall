@@ -2,6 +2,43 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flashcard_x/utils/firebase_wrapper.dart';
 
 class LastRevised {
+
+
+  //Chat function for resetting seen cards
+static Future<void> resetSeenCardsForTopic(String topicName) async {
+  if (FirebaseWrapper.auth().currentUser == null) return;
+
+  // Get user ID
+  String userID = (await FirebaseWrapper.firestore()
+      .collection("users")
+      .where("userID", isEqualTo: FirebaseWrapper.auth().currentUser!.uid)
+      .get())
+      .docs
+      .last
+      .id;
+
+  // References
+  CollectionReference flashcardRef = FirebaseWrapper.firestore().collection('flashcards');
+  CollectionReference seenRef = FirebaseWrapper.firestore().collection("users/$userID/flashcardsSeen");
+
+  // Get all flashcards in this topic
+  QuerySnapshot matchingCards = await flashcardRef.where("topic", isEqualTo: topicName).get();
+  Set<String> cardIDsToDelete = matchingCards.docs.map((doc) => doc.id).toSet();
+
+  // Get all seen cards
+  QuerySnapshot seenDocs = await seenRef.get();
+
+  // Filter and delete only those seen cards that match the topic
+  for (var doc in seenDocs.docs) {
+    String cardID = doc["cardID"];
+    if (cardIDsToDelete.contains(cardID)) {
+      await seenRef.doc(doc.id).delete();
+    }
+  }
+
+  print("Reset all seen cards for topic: $topicName");
+}
+
   
   static Future<TopicStats> getStats({bool includeSubtopics=true}) async {
 
@@ -102,6 +139,7 @@ class LastRevised {
 
   }
 
+
   static Future<String?> getNextTopicForReview() async {
     TopicStats stats = await getStats(includeSubtopics: false);
     Map<String, DateTime> nextReviewDatesMap = nextReviewDateByTopic(stats);
@@ -123,6 +161,7 @@ class LastRevised {
     return nextTopic;
   }
 
+
   static void _incrementMap<T>(Map<T, int> map, T key) {
     if (map.containsKey(key)) {
       map.update(key, (i) => map[key]! + 1);
@@ -130,6 +169,12 @@ class LastRevised {
     }
     map[key] = 1;
   }
+
+
+  static void _resetMap<T>(Map<T, int> map, T key) {
+    map[key] = 0;
+  }
+
 
   static void _updateDate(Map<String, DateTime> map, String key, DateTime newDate) {
     if (map[key] == null) {
@@ -210,6 +255,7 @@ class LastRevised {
     var userInfo = await FirebaseWrapper.firestore().doc("users/$userID").get();
     int decksSeen = (userInfo.data()??{})["totalDecksSeen"] ?? 0;
 
+
     // exam date - commented out as it's not currently used
     // Timestamp? timestamp = (userInfo.data()??{})["TestDay"];
     
@@ -218,7 +264,6 @@ class LastRevised {
   }
 
 }
-
 class TopicStats {
 
   final Map<String, int> seenCards;

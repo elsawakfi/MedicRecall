@@ -596,12 +596,15 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     Navigator.of(context).pop();
 
                     bool showRepetitionDialog =
-                        checkbox1.value || checkbox2.value;
+                        checkbox1.value || checkbox2.value || checkbox5.value;
 
+                    final BuildContext rootContext = context;
+                    
                     if (showRepetitionDialog) {
-                      _showRepetitionDialog(context, selectedResources);
+                      _showRepetitionDialog(rootContext, selectedResources);
                     } else {
-                      _scheduleCompleteDialog(context);
+                      // Generate schedule directly without showing the schedule complete dialog
+                      _generateAndViewSchedule(context, rootContext: rootContext, popParentDialog: false);
                     }
                   },
                   style: TextButton.styleFrom(
@@ -633,6 +636,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     // Define separate variables for each resource's repetition count
     int? officialMSRARepetitions;
     int? fullSizedMockRepetitions;
+    int? sjtRepetitions;
 
     showDialog(
       context: context,
@@ -778,6 +782,30 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                           const SizedBox(height: 20),
                         ],
                       ),
+                    if (selectedResources
+                        .contains('Official SJT Practice Paper'))
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Official SJT Practice Paper',
+                            style: TextStyle(
+                              color: const Color.fromRGBO(21, 58, 103, 1),
+                              fontSize: isSmallScreen ? 16 : 18,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          buildChoiceChips(
+                            repetitionOptions,
+                            (value) => sjtRepetitions == value,
+                            (value) =>
+                                setState(() => sjtRepetitions = value),
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
                     if (selectedResources.contains('Full-sized Mock Exam'))
                       Column(
                         mainAxisSize: MainAxisSize.min,
@@ -834,6 +862,10 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                         fullSizedMockRepetitions == null) {
                       isValid = false;
                     }
+                    if (selectedResources.contains('Official SJT Practice Paper') &&
+                        sjtRepetitions == null) {
+                      isValid = false;
+                    }
 
                     if (isValid) {
                       QuerySnapshot u = await _userCollectionRef
@@ -844,11 +876,13 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                       await _userCollectionRef.doc(id).update({
                         'officialMSRARepetitions': officialMSRARepetitions,
                         'fullSizedMockRepetitions': fullSizedMockRepetitions,
+                        'sjtRepetitions': sjtRepetitions,
                       });
 
                       if (context.mounted) {
+                        final BuildContext rootContext = context;
                         Navigator.of(context).pop();
-                        _scheduleCompleteDialog(context);
+                        _generateAndViewSchedule(context, rootContext: rootContext, popParentDialog: false);
                       }
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -1466,6 +1500,108 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
     final now = DateTime.now();
     final difference = examDate.difference(now);
     return difference.inDays + 1; // Ensure "today" counts as a day
+  }
+
+  // Method to generate schedule and navigate to calendar
+  void _generateAndViewSchedule(BuildContext dialogContext, {required BuildContext rootContext, bool popParentDialog = false}) async {
+    final screenWidth = MediaQuery.of(dialogContext).size.width;
+    final isSmallScreen = screenWidth < 600;
+    
+    // Declare a variable to capture the inner dialog context
+    late BuildContext innerDialogContext;
+    
+    // Show loading indicator while processing
+    await Future.delayed(Duration.zero, () {
+      if (rootContext.mounted) {
+        showDialog(
+          context: rootContext, 
+          barrierDismissible: false,
+          builder: (BuildContext loadingContext) {
+            // Capture the inner dialog context that's guaranteed to be mounted
+            innerDialogContext = loadingContext;
+            return _buildAlertDialog(
+              title: '',
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      const Color.fromRGBO(51, 178, 73, 1),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Generating your personalised revision schedule...',
+                    style: TextStyle(
+                      fontSize: isSmallScreen ? 14 : 16,
+                      color: const Color.fromRGBO(21, 58, 103, 1),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+              actions: [],
+            );
+          },
+        );
+      }
+    });
+
+    try {
+      // Generate and save study sessions before navigating to calendar
+      final studySessionManager = StudySessionManager();
+      final events = await studySessionManager
+          .generateStudySessions(user!);
+      await studySessionManager.saveStudySessionsToDB(
+          user!, events);
+
+      // First, close the loading dialog using innerDialogContext
+      if (innerDialogContext.mounted) {
+        Navigator.of(innerDialogContext).pop();
+      }
+      
+      if (popParentDialog && rootContext.mounted) {
+        Navigator.of(rootContext).pop();
+      }
+      
+      if (innerDialogContext.mounted) {
+        Navigator.push(
+          innerDialogContext,
+          MaterialPageRoute(builder: (context) => Calendar()),
+        );
+      } else if (rootContext.mounted) {
+        Navigator.push(
+          rootContext,
+          MaterialPageRoute(builder: (context) => Calendar()),
+        );
+      }
+    } catch (e) {
+      if (innerDialogContext.mounted) {
+        Navigator.of(innerDialogContext).pop();
+      } else if (rootContext.mounted) {
+        Navigator.of(rootContext).pop();
+      }
+      
+      BuildContext errorContext = innerDialogContext.mounted ? innerDialogContext : rootContext;
+      if (errorContext.mounted) {
+        showDialog(
+          context: errorContext,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Error'),
+              content: Text(
+                'Failed to generate schedule: ${e.toString()}'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      }
+    }
   }
 
   @override
