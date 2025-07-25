@@ -7,6 +7,7 @@ import 'package:flashcard_x/screens/settings_screen.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flashcard_x/screens/fullmock_landing.dart';
 import 'package:flashcard_x/screens/fullmock_landing.dart';
+import 'package:flashcard_x/screens/subscription_screen.dart';
 //import 'package:flashcard_x/screens/streaks_page.dart';
 import 'package:flashcard_x/utils/authentication.dart';
 import 'package:flashcard_x/utils/page_transition.dart';
@@ -110,6 +111,14 @@ class DrawMain2 extends StatelessWidget {
                       ),
                       icon: const Icon(Icons.calendar_month_outlined),
                       title: 'Study Schedule',
+                    ),
+                    DrawerTile(
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const SubscriptionScreen()),
+                      ),
+                      icon: const Icon(Icons.star_rate),
+                      title: 'Subscription',
                     ),
                     DrawerTile(
                       onPressed: () {
