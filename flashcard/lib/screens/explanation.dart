@@ -2,7 +2,7 @@ import 'package:flashcard_x/widgets/app_bar_title.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
 
-const double _spacing = 16.0;
+const double _spacing = 8.0;
 const double _cardWidth = 750;
 
 class ExplanationScreen extends StatelessWidget {
@@ -18,7 +18,6 @@ class ExplanationScreen extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
             child: Container(
-              padding: EdgeInsets.only(left: _spacing, right: _spacing, bottom: _spacing),
               child: SingleChildScrollView(
                 child: Center(
                   child: SizedBox(
@@ -26,7 +25,7 @@ class ExplanationScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        SizedBox(height: 10),
+                        SizedBox(height: _spacing * 3),
                         _buildSection(
                           context,
                           icon: Icons.calendar_today,
@@ -77,6 +76,7 @@ class ExplanationScreen extends StatelessWidget {
                           "Follow your structured yet flexible plan to build knowledge steadily.\n\n"
                           "Arrive at your exam fully prepared, confident, and performing at your best.",
                         ),
+                        SizedBox(height: _spacing * 3),
                       ],
                     ),
                   ),
@@ -100,7 +100,7 @@ class ExplanationScreen extends StatelessWidget {
         ),
         color: Colors.blue[50],
         child: Padding(
-          padding: const EdgeInsets.all(_spacing),
+          padding: const EdgeInsets.symmetric(horizontal: _spacing * 5, vertical: _spacing * 2),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

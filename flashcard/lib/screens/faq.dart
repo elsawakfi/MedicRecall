@@ -3,6 +3,9 @@ import 'package:flashcard_x/widgets/drawer_widget2.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flutter/material.dart';
 
+const double _spacing = 8.0;
+const double _cardWidth = 750;
+
 class FAQScreen extends StatelessWidget {
   const FAQScreen({super.key});
 
@@ -15,7 +18,7 @@ class FAQScreen extends StatelessWidget {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
           child: SingleChildScrollView(
             child:Center(
               child: SizedBox(
@@ -107,7 +110,7 @@ class FAQScreen extends StatelessWidget {
       {required IconData icon, required String title, required String content}) {
     final theme = Theme.of(context);
     return SizedBox(
-      width: double.infinity,
+      width: _cardWidth,
       child: Card(
         elevation: 4,
         shape: RoundedRectangleBorder(
@@ -115,16 +118,18 @@ class FAQScreen extends StatelessWidget {
         ),
         color: Colors.blue[50],
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: _spacing * 5, vertical: _spacing * 2),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Icon(icon, size: 40, color: Colors.blue),
               SizedBox(height: 8.0),
               Text(
                 title,
                 textAlign: TextAlign.center,
-                style: theme.textTheme.titleMedium!.copyWith(
+                style: TextStyle(
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.bold,
                   color: Colors.blue[800],
                 ),
               ),
