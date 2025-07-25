@@ -4,7 +4,7 @@ import 'package:flashcard_x/screens/minimock2_rules_page.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:flashcard_x/widgets/drawer_widget.dart';
+import 'package:flashcard_x/widgets/drawer_widget2.dart';
 import 'package:flashcard_x/screens/minimock1_rules_page.dart';
 import 'package:flashcard_x/widgets/countdown_button.dart';
 
@@ -115,7 +115,7 @@ class MiniMockLandingState extends State<MiniMockLanding> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const DrawMain(),
+      drawer: const DrawMain2(),
       appBar: CustomAppBar(title: "Mini-Mocks"),
       body: examSet == null || halfway == null
           ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle

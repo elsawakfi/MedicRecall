@@ -27,17 +27,11 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           children: [
             Positioned(
               top: 4,
-              child: ColorFiltered(
-                colorFilter: ColorFilter.mode(
-                  theme.appBarTheme.iconTheme?.color ?? Colors.white,
-                  BlendMode.srcIn,
-                ),
-                child: Image.asset(
-                  'assets/newlogo.png',
-                  fit: BoxFit.cover,
-                  height: isSmallScreen ? 28 : 34,
-                ),
-              ),
+              child: Image.asset(
+                'assets/dashboard_assets/app_logo4.png',
+                fit: BoxFit.cover,
+                height: isSmallScreen ? 28 : 34,
+              )
             ),
             Container(
               margin: EdgeInsets.only(left: isSmallScreen ? 24 : 30),

@@ -3,6 +3,7 @@ import 'package:flashcard_x/utils/firebase_wrapper.dart';
 
 class LastRevised {
 
+
   //Chat function for resetting seen cards
 static Future<void> resetSeenCardsForTopic(String topicName) async {
   if (FirebaseWrapper.auth().currentUser == null) return;
@@ -37,6 +38,7 @@ static Future<void> resetSeenCardsForTopic(String topicName) async {
 
   print("Reset all seen cards for topic: $topicName");
 }
+
   
   static Future<TopicStats> getStats({bool includeSubtopics=true}) async {
 
@@ -137,6 +139,29 @@ static Future<void> resetSeenCardsForTopic(String topicName) async {
 
   }
 
+
+  static Future<String?> getNextTopicForReview() async {
+    TopicStats stats = await getStats(includeSubtopics: false);
+    Map<String, DateTime> nextReviewDatesMap = nextReviewDateByTopic(stats);
+    
+    if (nextReviewDatesMap.isEmpty) {
+      return null;
+    }
+    
+    String nextTopic = nextReviewDatesMap.keys.first;
+    DateTime nextReviewDate = nextReviewDatesMap.values.first;
+
+    for (String topicID in nextReviewDatesMap.keys) {
+      if (nextReviewDatesMap[topicID]!.isBefore(nextReviewDate)) {
+        nextTopic = topicID;
+        nextReviewDate = nextReviewDatesMap[topicID]!;
+      }
+    }
+
+    return nextTopic;
+  }
+
+
   static void _incrementMap<T>(Map<T, int> map, T key) {
     if (map.containsKey(key)) {
       map.update(key, (i) => map[key]! + 1);
@@ -145,9 +170,11 @@ static Future<void> resetSeenCardsForTopic(String topicName) async {
     map[key] = 1;
   }
 
+
   static void _resetMap<T>(Map<T, int> map, T key) {
     map[key] = 0;
   }
+
 
   static void _updateDate(Map<String, DateTime> map, String key, DateTime newDate) {
     if (map[key] == null) {
@@ -228,20 +255,15 @@ static Future<void> resetSeenCardsForTopic(String topicName) async {
     var userInfo = await FirebaseWrapper.firestore().doc("users/$userID").get();
     int decksSeen = (userInfo.data()??{})["totalDecksSeen"] ?? 0;
 
-    // exam date
-    Timestamp? timestamp = (userInfo.data()??{})["TestDay"];
-    DateTime? examDate;
-    if (timestamp != null) {
-      examDate = timestamp.toDate();
-    } 
+
+    // exam date - commented out as it's not currently used
+    // Timestamp? timestamp = (userInfo.data()??{})["TestDay"];
     
-    return StreakStats(numberOfDecksRevised: decksSeen, daysLoggedIn: daysLoggedIn, examDate: examDate);
+    return StreakStats(numberOfDecksRevised: decksSeen, daysLoggedIn: daysLoggedIn);
 
   }
 
 }
-
-
 class TopicStats {
 
   final Map<String, int> seenCards;
@@ -257,9 +279,9 @@ class StreakStats {
   
   final int numberOfDecksRevised;
   final List<DateTime> daysLoggedIn; // ordered most recent to least recent
-  final DateTime? examDate; // can be null if the user has not set a date
+  //final DateTime? examDate; // can be null if the user has not set a date
 
-  StreakStats({required this.numberOfDecksRevised, required this.daysLoggedIn, this.examDate});
+  StreakStats({required this.numberOfDecksRevised, required this.daysLoggedIn});
 
   int howManyDaysInARow() {
     // starts at today

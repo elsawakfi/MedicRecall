@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
-import 'package:flashcard_x/widgets/drawer_widget.dart';
+import 'package:flashcard_x/widgets/drawer_widget2.dart';
 import 'package:flashcard_x/utils/authentication.dart';
 // import 'package:flashcard_x/widgets/design_main.dart';
 import 'package:flutter/material.dart';
@@ -34,7 +34,7 @@ class UserDetailsPageState extends State<UserDetailsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        drawer: const DrawMain(),
+        drawer: const DrawMain2(),
         appBar: AppBar(
             // title: const Text("User Details"),
             title: Align(

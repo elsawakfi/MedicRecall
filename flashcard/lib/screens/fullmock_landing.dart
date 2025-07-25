@@ -5,7 +5,8 @@ import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flashcard_x/widgets/countdown_button.dart';
 import 'package:flutter/material.dart';
-import 'package:flashcard_x/widgets/drawer_widget.dart';
+import 'package:flashcard_x/widgets/drawer_widget2.dart';
+
 import 'fullmock_rules_page.dart';
 
 class FullMockLanding extends StatefulWidget {
@@ -71,7 +72,7 @@ class FullMockLandingState extends State<FullMockLanding> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const DrawMain(),
+      drawer: const DrawMain2(),
       appBar: CustomAppBar(title: "Full-Sized Mock Exam", mobileTitle: "Full Mock",),
       body: daysUntilTest == null
           ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle

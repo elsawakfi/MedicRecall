@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flashcard_x/screens/landing_screen_new.dart';
 import 'firebase_options.dart';
 import 'package:flashcard_x/screens/dashboard_screen.dart';
 import 'package:flashcard_x/screens/landing_screen.dart';
@@ -11,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'utils/firebase_wrapper.dart';
 
 import 'utils/theme_provider.dart';
 
@@ -30,6 +32,9 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Initialize FirebaseWrapper
+  FirebaseWrapper.setup();
 
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive).then((_) {
     // full screen mode
@@ -66,7 +71,8 @@ class Flashcard extends StatelessWidget {
             SignInScreen.id: (context) => const SignInScreen(),
             SignUpScreen.id: (context) => const SignUpScreen(),
             HomePage.id: (context) => const HomePage(title: "Medicine Upload"),
-            Landing.id: (context) => const Landing(),
+            Landing.id: (context) => const NewLanding(),
+            NewLanding.id: (context) => const NewLanding(),
           });
     });
   }
@@ -75,6 +81,6 @@ class Flashcard extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return SignInScreen.id;
     if (!user.emailVerified) return VerifyEmailScreen.id;
-    return Landing.id;
+    return NewLanding.id;
   }
 }

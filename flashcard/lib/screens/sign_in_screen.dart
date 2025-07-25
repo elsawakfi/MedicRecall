@@ -42,19 +42,17 @@ class SignInScreenState extends State<SignInScreen> {
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ColorFiltered(
-                colorFilter: ColorFilter.mode(
-                  Theme.of(context).appBarTheme.iconTheme?.color ?? Colors.white,
-                  BlendMode.srcIn,
-                ),
-                child: Image.asset(
-                'assets/newlogo.png',
-                // this file doesn't exist and generates error
-                height: 130,
-              )),
+              Image.asset(
+              'assets/dashboard_assets/app_logo4.png',
+              height: 130,
+              ),
               const SizedBox(height: 20),
-              const Text("MedicRecall",
-                  style: TextStyle(fontSize: 38, fontWeight: FontWeight.bold)),
+              Text("MedicRecall",
+                style: textStyle1.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  fontSize: 45,
+              )),
               const SizedBox(height: 20),
               FutureBuilder(
                 future: Authentication.initializeFirebase(context: context),
@@ -81,8 +79,12 @@ class SignInScreenState extends State<SignInScreen> {
                 },
                 child: const Text(
                   "Forgot Password?",
-                  style:
-                  TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontFamily: 'Lato',
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
               ),
               const SizedBox(height: 10),
@@ -90,15 +92,25 @@ class SignInScreenState extends State<SignInScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text("Don't have an account? Click here to ",
-                      style: TextStyle(fontSize: 19)),
+                    style: TextStyle(
+                    fontFamily: 'Lato',
+                    fontSize: 18,
+                    fontWeight: FontWeight.normal,
+                    color: Colors.white,
+                  ),
+                  ),
                   GestureDetector(
                     onTap: () {
                       Navigator.pushReplacementNamed(context, SignUpScreen.id);
                     },
                     child: const Text(
                       "Sign Up",
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                        fontFamily: 'Lato',
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white
+                      )
                     ),
                   ),
                 ],
@@ -113,4 +125,17 @@ class SignInScreenState extends State<SignInScreen> {
       ),
     );
   }
+}
+
+final TextStyle textStyle1 = TextStyle(
+  fontFamily: 'Lato',
+  fontSize: 18,
+  fontWeight: FontWeight.normal,
+  color: AppColours.almostWhite,
+);
+
+class AppColours {
+  static const Color darkBlue = Color.fromRGBO(20, 35, 52, 1);
+  static const Color almostWhite = Color.fromRGBO(230, 230, 230, 1);
+  static const Color orange = Color.fromRGBO(221, 117, 67, 1);
 }

@@ -5,7 +5,7 @@ import 'package:day_night_switcher/day_night_switcher.dart';
 import 'package:flashcard_x/screens/user_details_screen.dart';
 //import 'package:flashcard_x/utils/page_transition.dart';
 import 'package:flashcard_x/utils/theme_provider.dart';
-import 'package:flashcard_x/widgets/drawer_widget.dart';
+import 'package:flashcard_x/widgets/drawer_widget2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -67,7 +67,7 @@ Future<void> checkNotify() async {
     final themeProvider = Provider.of<ThemeProvider>(context);
 
     return Scaffold(
-      drawer: const DrawMain(),
+      drawer: const DrawMain2(),
       appBar: CustomAppBar(
         title: 'Settings',
       ),

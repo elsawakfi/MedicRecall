@@ -1,6 +1,5 @@
 import 'dart:core';
-
-import 'package:flashcard_x/widgets/drawer_widget.dart';
+import 'package:flashcard_x/widgets/drawer_widget2.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flutter/material.dart';
 
@@ -57,7 +56,7 @@ Have the first place be an explanation of the mark scheme, leave blank for rn
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const DrawMain(),
+      drawer: const DrawMain2(),
       appBar: CustomAppBar(
         title: 'Unofficial Mark Scheme',
         mobileTitle: 'Mark Scheme',

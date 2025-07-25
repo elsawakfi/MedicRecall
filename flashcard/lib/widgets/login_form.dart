@@ -4,7 +4,8 @@ import 'package:flashcard_x/utils/authentication.dart';
 import 'package:flashcard_x/utils/string_validation.dart';
 import 'package:flutter/material.dart';
 
-import '../screens/landing_screen.dart';
+import '../screens/landing_screen_new.dart';
+
 
 
 class LoginForm extends StatefulWidget {
@@ -49,6 +50,7 @@ class _LoginFormState extends State<LoginForm> {
             width: 350,
             height: 60,
             child: TextFormField(
+              style: TextStyle(color: Colors.black, fontFamily: 'Lato'),
               key: const ValueKey('emailSignUpField'),
               controller: _email,
               focusNode: widget.emailFocusNode,
@@ -60,21 +62,28 @@ class _LoginFormState extends State<LoginForm> {
               // keyboardType:
               //     TextInputType.emailAddress, // special keyboard for email address
               decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.white,
                 prefixIcon: const Icon(
                   Icons.email,
                 ),
-                labelText: 'Email',
+                //labelText: 'Email',
                 hintText: 'Enter Email',
+                hintStyle: const TextStyle(
+                  fontFamily: 'Lato',
+                  color: Color.fromRGBO(0,0,0,0.5),
+                  fontSize: 15,
+                ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20.0),
+                  borderRadius: BorderRadius.circular(10.0),
                   borderSide: const BorderSide(
-                      // color: Colors.blue,
-                      ),
+                    color: Colors.white,
+                  ),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20.0),
+                  borderRadius: BorderRadius.circular(10.0),
                   borderSide: const BorderSide(
-                    // color: Colors.lightBlueAccent,
+                    color: Colors.white,
                     width: 2.0,
                   ),
                 ),
@@ -87,6 +96,7 @@ class _LoginFormState extends State<LoginForm> {
             width: 350,
             height: 60,
             child: TextFormField(
+              style: TextStyle(color: Colors.black, fontFamily: 'Lato'),
               key: const ValueKey('passwordSignUpField'),
               controller: _password,
               focusNode: widget.passwordFocusNode,
@@ -97,16 +107,23 @@ class _LoginFormState extends State<LoginForm> {
               cursorColor: Colors.black,
               textInputAction: TextInputAction.done,
               decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.white,
                 prefixIcon: const Icon(
                   Icons.lock,
                 ),
-                labelText: 'Password',
+                //labelText: 'Password',
                 hintText: 'Enter Password',
+                hintStyle: const TextStyle(
+                  color: Color.fromRGBO(0, 0, 0, 0.5),
+                  fontSize: 15,
+                  fontFamily: 'Lato',
+                ),
                 suffixIcon: IconButton(
                   icon: Icon(
                     passwordVisible ? Icons.visibility_off : Icons.visibility,
                     color:
-                        Theme.of(context).secondaryHeaderColor.withOpacity(0.8),
+                    Color.fromRGBO(0,0,0,0.5)
                   ),
                   onPressed: () {
                     setState(() {
@@ -115,15 +132,15 @@ class _LoginFormState extends State<LoginForm> {
                   },
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20.0),
+                  borderRadius: BorderRadius.circular(10.0),
                   borderSide: const BorderSide(
-                      // color: Colors.blue,
-                      ),
+                    color: Colors.white,
+                  ),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20.0),
+                  borderRadius: BorderRadius.circular(10.0),
                   borderSide: const BorderSide(
-                    // color: Colors.lightBlueAccent,
+                    color: Colors.white,
                     width: 2.0,
                   ),
                 ),
@@ -162,7 +179,7 @@ class _LoginFormState extends State<LoginForm> {
 
                           if (user != null && user.emailVerified) {
                             // if a user object is filled
-                            Navigator.pushReplacementNamed(context, Landing.id); //push replace page with homepage instance, with id, which is a string
+                            Navigator.pushReplacementNamed(context, NewLanding.id); //push replace page with homepage instance, with id, which is a string
                           }else if (user != null){
                             navigator.pushReplacementNamed(VerifyEmailScreen.id);
                           }

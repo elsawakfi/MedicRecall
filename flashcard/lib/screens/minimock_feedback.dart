@@ -6,7 +6,7 @@ import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
-import '../widgets/drawer_widget.dart';
+import '../widgets/drawer_widget2.dart';
 import 'fullmock_landing.dart';
 import 'minimock_landing.dart';
 
@@ -187,7 +187,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
     return PopScope(
       canPop: true,
       child: Scaffold(
-        drawer: const DrawMain(),
+        drawer: const DrawMain2(),
         appBar: CustomAppBar(title: 'Feedback Page', mobileTitle: 'Feedback'),
       body: userAnswers.isEmpty
         ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle

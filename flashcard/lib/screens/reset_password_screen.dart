@@ -77,7 +77,7 @@ class _ForgotPassword extends State<ForgotPassword> {
                               prefixIcon: const Icon(
                                 Icons.email,
                               ),
-                              labelText: 'Email',
+                              //labelText: 'Email',
                               hintText: 'Enter Email',
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(20.0),

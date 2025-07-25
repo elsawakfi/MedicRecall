@@ -3,7 +3,6 @@
 import 'package:flashcard_x/utils/page_transition.dart';
 import 'package:flashcard_x/widgets/design_main.dart';
 import 'package:flutter/material.dart';
-
 import 'feed_screen.dart';
 
 class SubtopicChoice extends StatefulWidget {

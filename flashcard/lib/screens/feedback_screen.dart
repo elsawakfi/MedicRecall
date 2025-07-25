@@ -1,6 +1,5 @@
 import 'dart:core';
-
-import 'package:flashcard_x/widgets/drawer_widget.dart';
+import 'package:flashcard_x/widgets/drawer_widget2.dart';
 import 'package:flashcard_x/widgets/embedded_form.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
@@ -10,7 +9,7 @@ class FeedbackScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        drawer: const DrawMain(),
+        drawer: const DrawMain2(),
         appBar: CustomAppBar(
           title: 'Feedback',
         ),

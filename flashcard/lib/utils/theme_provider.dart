@@ -23,7 +23,7 @@ class MyTheme {
 
   static final lightTheme = ThemeData(
     brightness: Brightness.light,
-    fontFamily: 'Akshar',
+    fontFamily: 'Lato',
     hintColor: const Color(0xFF0C91D6),
   ).copyWith(
     elevatedButtonTheme: ElevatedButtonThemeData(
@@ -34,7 +34,7 @@ class MyTheme {
       color: Color(0xFFE6EDF2),
       iconTheme: IconThemeData(color: Color.fromRGBO(21, 58, 103, 1), size: 25),
       titleTextStyle: TextStyle(
-        fontFamily: 'Akshar',
+        fontFamily: 'Lato',
         color: Color.fromRGBO(21, 58, 103, 1),
         fontSize: 23,
         fontWeight: FontWeight.bold,
@@ -65,22 +65,22 @@ class MyTheme {
     // using this for `Reset` shadow2 color
     splashColor: Colors.white,
     textTheme: TextTheme(
-      bodyLarge: const TextStyle(color: Colors.grey, fontFamily: 'Akshar'),
+      bodyLarge: const TextStyle(color: Colors.grey, fontFamily: 'Lato'),
       // navbar text colour
       headlineSmall:
-          const TextStyle(color: Colors.black87, fontFamily: 'Akshar'),
+          const TextStyle(color: Colors.black87, fontFamily: 'Lato'),
       bodySmall:
-          const TextStyle(color: Colors.blueAccent, fontFamily: 'Akshar'),
-      titleMedium: const TextStyle(color: Colors.black, fontFamily: 'Akshar'),
+          const TextStyle(color: Colors.blueAccent, fontFamily: 'Lato'),
+      titleMedium: const TextStyle(color: Colors.black, fontFamily: 'Lato'),
       bodyMedium: const TextStyle(
-          color: Color.fromRGBO(21, 58, 103, 1), fontFamily: 'Akshar'),
-      displayLarge: const TextStyle(fontFamily: 'Akshar'),
-      displayMedium: const TextStyle(fontFamily: 'Akshar'),
-      displaySmall: const TextStyle(fontFamily: 'Akshar'),
-      headlineMedium: const TextStyle(fontFamily: 'Akshar'),
-      titleLarge: TextStyle(color: Colors.blueGrey[700], fontFamily: 'Akshar'),
-      titleSmall: TextStyle(color: Colors.blueGrey[400], fontFamily: 'Akshar'),
-      labelLarge: const TextStyle(fontFamily: 'Akshar'),
+          color: Color.fromRGBO(21, 58, 103, 1), fontFamily: 'Lato'),
+      displayLarge: const TextStyle(fontFamily: 'Lato'),
+      displayMedium: const TextStyle(fontFamily: 'Lato'),
+      displaySmall: const TextStyle(fontFamily: 'Lato'),
+      headlineMedium: const TextStyle(fontFamily: 'Lato'),
+      titleLarge: TextStyle(color: Colors.blueGrey[700], fontFamily: 'Lato'),
+      titleSmall: TextStyle(color: Colors.blueGrey[400], fontFamily: 'Lato'),
+      labelLarge: const TextStyle(fontFamily: 'Lato'),
     ),
     disabledColor: Colors.red,
   );
@@ -89,7 +89,7 @@ class MyTheme {
 
   static final darkTheme = ThemeData(
     brightness: Brightness.dark,
-    fontFamily: 'Akshar',
+    fontFamily: 'Lato',
     hintColor: Colors.blueGrey[200],
   ).copyWith(
     listTileTheme: const ListTileThemeData(
@@ -103,7 +103,7 @@ class MyTheme {
       color: Color.fromARGB(255, 34, 57, 79),
       iconTheme: IconThemeData(color: Colors.white, size: 25),
       titleTextStyle: TextStyle(
-        fontFamily: 'Akshar',
+        fontFamily: 'Lato',
         color: Colors.white,
         fontSize: 23,
         fontWeight: FontWeight.bold,
@@ -137,20 +137,20 @@ class MyTheme {
     // using this for `Reset` shadow2 color
     splashColor: Colors.white12,
     textTheme: TextTheme(
-      bodyLarge: const TextStyle(color: Colors.white, fontFamily: 'Akshar'),
+      bodyLarge: const TextStyle(color: Colors.white, fontFamily: 'Lato'),
       // navbar text colour
-      bodyMedium: const TextStyle(color: Colors.white, fontFamily: 'Akshar'),
-      headlineSmall: const TextStyle(color: Colors.white, fontFamily: 'Akshar'),
+      bodyMedium: const TextStyle(color: Colors.white, fontFamily: 'Lato'),
+      headlineSmall: const TextStyle(color: Colors.white, fontFamily: 'Lato'),
       bodySmall:
-          const TextStyle(color: Color(0xFF253341), fontFamily: 'Akshar'),
-      titleMedium: const TextStyle(color: Colors.white, fontFamily: 'Akshar'),
-      displayLarge: const TextStyle(fontFamily: 'Akshar'),
-      displayMedium: const TextStyle(fontFamily: 'Akshar'),
-      displaySmall: const TextStyle(fontFamily: 'Akshar'),
-      headlineMedium: const TextStyle(fontFamily: 'Akshar'),
-      titleLarge: TextStyle(color: Colors.blueGrey[300], fontFamily: 'Akshar'),
-      titleSmall: TextStyle(color: Colors.grey[400], fontFamily: 'Akshar'),
-      labelLarge: const TextStyle(fontFamily: 'Akshar'),
+          const TextStyle(color: Color(0xFF253341), fontFamily: 'Lato'),
+      titleMedium: const TextStyle(color: Colors.white, fontFamily: 'Lato'),
+      displayLarge: const TextStyle(fontFamily: 'Lato'),
+      displayMedium: const TextStyle(fontFamily: 'Lato'),
+      displaySmall: const TextStyle(fontFamily: 'Lato'),
+      headlineMedium: const TextStyle(fontFamily: 'Lato'),
+      titleLarge: TextStyle(color: Colors.blueGrey[300], fontFamily: 'Lato'),
+      titleSmall: TextStyle(color: Colors.grey[400], fontFamily: 'Lato'),
+      labelLarge: const TextStyle(fontFamily: 'Lato'),
     ),
     disabledColor: Colors.grey[400],
   );
