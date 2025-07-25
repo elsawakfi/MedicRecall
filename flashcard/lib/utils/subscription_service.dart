@@ -53,10 +53,15 @@ class SubscriptionService {
   }
 
   // Upgrade to paid subscription
-  Future<bool> upgradeToPaid({DateTime? expiryDate}) async {
+  Future<bool> upgradeToPaid(int monthsAdded) async {
     try {
+      DateTime counterDate = DateTime.now();
+      for (int i = 0; i < monthsAdded; i++){
+        counterDate = addOneCalendarMonth(counterDate); 
+      }
+      DateTime expiryDate = counterDate;
       _subscription = SubscriptionData.paid(expiryDate: expiryDate);
-      await _saveSubscription();
+      await _updateDatabase();
       return true;
     } catch (e) {
       print("Error upgrading subscription: $e");
@@ -64,6 +69,31 @@ class SubscriptionService {
     }
   }
 
+  // HELPER FUNCTION: Adds one calendar month
+  DateTime addOneCalendarMonth(DateTime date) {
+  int year = date.year;
+  int month = date.month + 1;
+  int day = date.day;
+
+  // Handle overflow: if December, go to January of next year
+  if (month > 12) {
+    year += 1;
+    month = 1;
+  }
+
+  // Get the last valid day of the target month
+  int lastDayOfTargetMonth = DateTime(year, month, 0).day;
+
+  // Clamp day to avoid overflow (e.g., Jan 31 → Feb 28/29)
+  if (day > lastDayOfTargetMonth) {
+    day = lastDayOfTargetMonth;
+  }
+
+  return DateTime(year, month, day);
+}
+
+
+  // Cancelled means they've cancelled auto-renew but still have access until expiry
   // Cancel subscription
   Future<bool> cancelSubscription() async {
     try {
@@ -72,7 +102,7 @@ class SubscriptionService {
         status: "cancelled",
         expiryDate: _subscription.expiryDate,
       );
-      await _saveSubscription();
+      await _updateDatabase();
       return true;
     } catch (e) {
       print("Error cancelling subscription: $e");
@@ -87,11 +117,11 @@ class SubscriptionService {
       status: "expired",
       expiryDate: _subscription.expiryDate,
     );
-    await _saveSubscription();
+    await _updateDatabase();
   }
 
   // Save subscription to Firebase
-  Future<void> _saveSubscription() async {
+  Future<void> _updateDatabase() async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
@@ -113,6 +143,8 @@ class SubscriptionService {
       print("Error saving subscription: $e");
     }
   }
+
+
 }
 
 // Global instance

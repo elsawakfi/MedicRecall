@@ -45,6 +45,7 @@ class SubscriptionData {
     );
   }
 
+  // Sets user's subscription to free (with active state and no expiry date)
   factory SubscriptionData.free() {
     return SubscriptionData(
       type: "free",
@@ -53,6 +54,7 @@ class SubscriptionData {
     );
   }
 
+  // Sets user's subscription to paid with active state and an optional expiry date
   factory SubscriptionData.paid({DateTime? expiryDate}) {
     return SubscriptionData(
       type: "paid",

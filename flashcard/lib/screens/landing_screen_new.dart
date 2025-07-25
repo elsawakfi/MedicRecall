@@ -24,6 +24,7 @@ import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flashcard_x/widgets/drawer_widget2.dart';
 import 'package:flashcard_x/widgets/countdown_button.dart';
 import 'package:flashcard_x/screens/subtopic_choice_screen.dart';
+import 'package:flashcard_x/utils/subscription_service.dart';
 
 // VARIABLES THAT MUST BE CONNECTED TO THE DATABASE
 // nextTopicForReview
@@ -113,6 +114,11 @@ class NewLandingState extends State<NewLanding> {
   @override
   void initState() {
     super.initState();
+    _initLanding();
+  }
+
+  Future<void> _initLanding() async {
+    await subscriptionService.loadSubscription();
     landingService.onLanding = true;
     getUser().then( (_) async {
       await LastRevised.recordLogin();

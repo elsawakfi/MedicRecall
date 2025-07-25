@@ -257,9 +257,42 @@ def stripe_webhook(req: https_fn.Request) -> https_fn.Response:
 
     # Handle event types
     if event['type'] == 'payment_intent.succeeded':
-        payment_intent = event['data']['object']
-        print(f"✅ Payment for {payment_intent['amount']} succeeded.")
-    elif event['type'] == 'payment_method.attached':
+        session = event['data']['object']
+        print(f"✅ Payment for {session['amount']} succeeded.")
+        user_id = session.get('metadata', {}).get('user_id')
+        interval = price['recurring']['interval']
+        subscription_id = session.get('metadata', {})
+        subscription = stripe.Subscription.retrieve(subscription_id)
+        interval_count = price['recurring'].get('interval_count', 1)
+        price = subscription['items']['data'][0]['price']
+        
+        monthsToAdd = 0
+        if interval == "month" and interval_count == 1:
+            monthsToAdd = 1
+        elif interval == "month" and interval_count == 6:
+            monthsToAdd = 6
+        elif interval == "year" and interval_count == 1:
+            monthsToAdd = 12
+        else:
+            monthsToAdd = 0
+            print(f"❓ Unknown interval")
+        
+        expiry_date = datetime.now() + timedelta(days=30 * monthsToAdd)
+        if user_id:
+            users_ref = db.collection("users")
+            query = users_ref.where("userId", "==", user_id).get()
+            for doc in query:
+                doc.reference.update({
+                    "subscription": {
+                        "subscriptionType": "paid",
+                        "subscriptionStatus": "active",
+                        "subscriptionExpiryDate": expiry_date,
+                    }
+                })
+                print(f"Updated subscription for user {user_id}")
+            else:
+                print("No user_id found in payment data.")
+    elif event['type'] == 'checkout.session.completed':
         print("✅ Payment method attached.")
     else:
         print(f"❓ Unhandled event type: {event['type']}")
