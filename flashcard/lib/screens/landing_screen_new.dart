@@ -368,12 +368,12 @@ class NewLandingState extends State<NewLanding> {
 
               // STUDY SCHEDULE AND CREATE NEW FLASHCARDS ICON BUTTONS
               Row(children: [
-                _IconButton(
+                IconButtonCustom(
                   label: 'Study Schedule',
                   iconFilePath: 'assets/dashboard_assets/calendar.png',
                   onPressed: () => triggerSignIn('Calendar'),
                 ),
-                _IconButton(
+                IconButtonCustom(
                   label: 'Create New Flashcards',
                   iconFilePath: 'assets/dashboard_assets/plus.png',
                   onPressed: () => triggerSignIn('FlashcardEditor'),
@@ -438,7 +438,7 @@ class NewLandingState extends State<NewLanding> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _IconButton(
+                  IconButtonCustom(
                     label: 'How does MedicRecall work?',
                     onPressed: () async {
                       await Navigator.push(
@@ -449,7 +449,7 @@ class NewLandingState extends State<NewLanding> {
                       );
                     },
                   ),
-                  _IconButton(
+                  IconButtonCustom(
                     label: 'Frequently asked Questions',
                     onPressed: () async {
                       await Navigator.push(
@@ -460,7 +460,7 @@ class NewLandingState extends State<NewLanding> {
                       );
                     },
                   ),
-                  _IconButton(
+                  IconButtonCustom(
                     label: 'Give us Feedback',
                     onPressed: () async {
                       landingService.onLanding = false;
@@ -600,9 +600,9 @@ class NewLandingState extends State<NewLanding> {
   }
 }
 
-class _IconButton extends StatelessWidget {
+class IconButtonCustom extends StatelessWidget {
   
-  const _IconButton({super.key, 
+  const IconButtonCustom({super.key, 
     required this.label,
     required this.onPressed,
     this.iconFilePath,
@@ -690,7 +690,7 @@ class DashboardBoxLeft extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 4.0),
                 child: Row(
                   children: [
-                    _IconButton(
+                    IconButtonCustom(
                       label: 'Flashcard Tutor',
                       iconFilePath: 'assets/dashboard_assets/trending_up.png',
                       onPressed: onPressed,
@@ -781,12 +781,12 @@ class DashboardBoxRight extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 4.0),
                 child: Row(
                   children: [
-                    _IconButton(
+                    IconButtonCustom(
                       label: 'Full-Sized Mock',
                       iconFilePath: 'assets/dashboard_assets/play_circle.png',
                       onPressed: onPressed1,
                     ),
-                    _IconButton(
+                    IconButtonCustom(
                       label: 'Mini Mock',
                       iconFilePath: 'assets/dashboard_assets/target.png',
                       onPressed: onPressed2,
