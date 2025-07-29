@@ -494,8 +494,7 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                                       questions[currentQuestion]['explanation'],
                                       style: TextStyle(
                                         fontSize: 18,
-                                        color: Colors
-                                            .black, // ✅ set text color to black
+                                        color: Colors.black, //
                                       ),
                                     )
                                   ]))),
