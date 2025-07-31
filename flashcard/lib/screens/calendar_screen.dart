@@ -11,13 +11,12 @@ import 'dashboard_screen.dart';
 
 // Internal imports
 import 'landing_screen.dart';
-import 'landing_screen_new.dart';
 import 'sign_in_screen.dart';
 import 'study_session_manager.dart';
 import 'minimock_landing.dart';
 import 'quiz_choice_screen.dart';
 import 'feed_screen.dart'; // Contains AboveEverything widget
-import '../widgets/drawer_widget2.dart';
+import '../widgets/drawer_widget.dart';
 import '../widgets/event.dart';
 import 'package:flashcard_x/screens/dashboard_screen.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
@@ -86,6 +85,8 @@ class CalendarStateO extends State<Calendar> {
   final TextEditingController _eventController = TextEditingController();
   bool testDayBool = false;
   String? _isHovered;
+   List<String> flashcards = [
+    ];
 
   //The CalendarFormat variable format allows the user to change their view of the calendar, into weekly, biweekly and monthly.
   // for some reason, events need to have their time as being midnight to be shown on the calendar. So need to set the today constant to be midnight today.
@@ -258,8 +259,19 @@ class CalendarStateO extends State<Calendar> {
     }
   }
 
+
+  Future <void> getFlashcards() async{
+    CollectionReference topicRef = FirebaseFirestore.instance.collection('topics');
+    QuerySnapshot allTopics=
+      await topicRef.get();
+    for (var doc in allTopics.docs){
+        Map<String,dynamic> data = doc.data() as Map<String,dynamic>;
+        flashcards.add(data["topic"]);    
+        }
+  }
   // DATABASE FUNCTIONS:
   Future<void> getUser() async {
+    
     NavigatorState nav = Navigator.of(context);
     if (auth.currentUser == null) {
       var tmp = await auth.authStateChanges().first;
@@ -451,23 +463,13 @@ class CalendarStateO extends State<Calendar> {
   }
 
   Color _getEventColor(String title) {
-    List<String> flashcards = [
-      "Team working",
-      "Effective communication",
-      "Acting within your remit",
-      "Patient focus",
-      "Commitment to professionalism",
-      "Coping with pressure",
-      "Confidentiality"
-    ];
+    
+   
     if (title == "Test Day") return const Color.fromARGB(255, 255, 89, 94);
     if (title.contains("Mini Mock")) return StudySessionManager.kMiniMockColor;
-    if (title.contains("Full-sized Mock"))
-      return StudySessionManager.kFullMockColor;
-    if (title.contains("Official MSRA Practice Paper"))
-      return StudySessionManager.kOfficialPaperColor;
-    if (title.contains("Official SJT Practice Paper"))
-      return StudySessionManager.kSJTPaperColor;
+    if (title.contains("Full-sized Mock")) return StudySessionManager.kFullMockColor;
+    if (title.contains("Official MSRA Practice Paper")) return StudySessionManager.kOfficialPaperColor;
+    if (title.contains("Official SJT Practice Paper")) return StudySessionManager.kSJTPaperColor;
 
     for (String flashcard in flashcards) {
       if (title.contains(flashcard)) return StudySessionManager.kFlashcardColor;
@@ -518,7 +520,7 @@ class CalendarStateO extends State<Calendar> {
     if (title.contains('full-sized mock') || title.contains('full mock')) {
       return "full_mock";
     }
-    if (title.contains('flashcard')) {
+    if (title.contains('Flashcards')) {
       return "flashcard";
     }
     if (title.contains('official msra practice paper')) {
@@ -815,7 +817,7 @@ class CalendarStateO extends State<Calendar> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => NewLanding()),
+                      MaterialPageRoute(builder: (context) => Landing()),
                     );
                   },
                   style: TextButton.styleFrom(
@@ -849,6 +851,7 @@ class CalendarStateO extends State<Calendar> {
     await getUser();
     await getTestDay();
     await _loadExcludedDays();
+    await getFlashcards();
     // Only proceed with test day handling if a test day exists
     if (testDay != null && !testDayBool) {
       await getEventsFromDB(); // Then load events from database
@@ -1131,10 +1134,10 @@ class CalendarStateO extends State<Calendar> {
   Widget build(BuildContext context) {
     bool isSmallScreen = MediaQuery.of(context).size.width < 600;
     return Scaffold(
-      drawer: const DrawMain2(),
+      drawer: const DrawMain(),
       appBar: CustomAppBar(
-        title: 'Study Schedule',
-        mobileTitle: 'Schedule',
+        title: 'Revision Calendar',
+        mobileTitle: 'Calendar',
       ),
       body: loading
           ? const Center(
