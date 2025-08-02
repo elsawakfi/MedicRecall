@@ -6,7 +6,7 @@ import 'package:flashcard_x/screens/study_session_manager.dart';
 import 'package:flashcard_x/utils/firebase_wrapper.dart';
 import 'package:flashcard_x/utils/last_revised.dart';
 import 'package:flashcard_x/utils/theme_provider.dart';
-import 'package:flashcard_x/widgets/app_bar_title_.dart';
+import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flashcard_x/widgets/event.dart';
 import 'package:flashcard_x/widgets/indicator.dart';
 import 'package:flutter/material.dart';
@@ -33,7 +33,6 @@ class HomePageState extends State<HomePage> {
   
   late String? name;
   late String? id;
-  bool getEvensOnce = false;
   late List<dynamic>? topicCount;
   List<dynamic>? topicLastSeen;
   CollectionReference users = FirebaseWrapper.firestore().collection('users');
@@ -45,7 +44,7 @@ class HomePageState extends State<HomePage> {
   Map<String, int> totalCards = {};
   late DateTime _firstStudyDate;
   late DateTime testDay;
-  late Map<DateTime?, List<Event>> selectedEvents;
+  late Map<DateTime, List<Event>> selectedEvents;
   late Map<DateTime, List<Event>> allEvents;
   late CollectionReference _eventsCollectionRef;
   late List<String> topicNames = [];
@@ -86,37 +85,39 @@ class HomePageState extends State<HomePage> {
      
       for (var doc in snapshots.docs) {
         var data = doc.data() as Map<String, dynamic>;
-        if (data.containsKey('date') && data.containsKey('events')) {
-          Timestamp? timestamp = data['date'] as Timestamp?;
+        if (data.containsKey('date') && data.containsKey('events') ) {
           List<dynamic>? eventsList = data['events'] as List<dynamic>?;
-
-          if (timestamp != null && eventsList != null) {
-            DateTime date = timestamp.toDate();
-            date = DateTime(date.year, date.month, date.day);
-
-            List<String> events = eventsList.map((e) => e.toString()).toList();
-
-            allEvents[date] = events.map ((title) => Event(color: Colors.black, title: title)).toList();
-            for (String e in events){
-             
-              if (!topicNames.contains(e) && !e.contains("Completed:")){
-                 
-                  events.remove(e);
-                  
+          
+         
+          for (var event in eventsList!){
+            String title = event.toString();
+            if(title.contains("Completed")&& title.contains("Flashcards")) continue;            if(!title.contains("Flashcards")) {
+               Timestamp? timestamp = data['date'] as Timestamp?;
+                  if (timestamp != null) {
+                DateTime date = timestamp.toDate();
+                date = DateTime(date.year, date.month, date.day);
+                List<String> events = eventsList.map((e) => e.toString()).toList();
+                allEvents[date] = events.map ((title) => Event(color: Colors.black, title: title)).toList();
+            }}
+            else{
+                  Timestamp? timestamp = data['date'] as Timestamp?;
+                  if (timestamp != null) {
+                DateTime date = timestamp.toDate();
+                date = DateTime(date.year, date.month, date.day);
+                List<String> events = eventsList.map((e) => e.toString()).toList();
+               
+                selectedEvents[date] = events.map((title) => Event(
+                    title: title,
+                    color : Colors.yellow
+                )).toList(); 
               }
-            }
-
-            selectedEvents[date] = events.map((title) => Event(
-                title: title,
-                color : Colors.yellow
-            )).toList();
-            getEvensOnce = true;
-            
-          }
         }
 
+
+            }
+        }
       }
-     
+      allEvents.addAll(selectedEvents);
     } catch(e){
       print("Error loading events from DB: $e");
     }
@@ -416,6 +417,8 @@ class HomePageState extends State<HomePage> {
     setState(() {});
   }
 
+
+
 //Get all events from database, iterate over events and look for which date a flashcard topic has been scheduled 
   Future<void> getTopics() async {
     if (mounted) {
@@ -446,6 +449,13 @@ class HomePageState extends State<HomePage> {
     setState(() {});
   }
 
+  @override didChangeDependencies(){
+    super.didChangeDependencies();
+    //waits for build function to complete and then calls back to call the condition checking function
+    WidgetsBinding.instance.addPostFrameCallback((_) async{
+      await userData();
+    });
+  }
   Future<void> getData() async {
     //DO NOT CHANGE THE ORDER OF THIS OTHERWISE PAGE WILL NOT BUILD
     setState((){
@@ -470,26 +480,24 @@ class HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // double width = MediaQuery.of(context).size.width;
-    // double height = MediaQuery.of(context).size.height;
-    
-    return AppScaffold(
-        floatingActionButton: const CustomFloatingButton(),
-        
+    return Scaffold(
+      appBar: CustomAppBar(
+        title: 'Flashcard Tutor',
+      ),
         body:  Center(
-      heightFactor: 0.5,
       child: loading
           ? const CircularProgressIndicator()
           : SingleChildScrollView(
         child: Padding(
-          padding : const EdgeInsets.symmetric(vertical:2,horizontal:2),
+          padding : const EdgeInsets.symmetric(vertical:0,horizontal:2),
           child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           children: makeColumn(),
         ),
       ),
     ),),
-        title: "Flashcard Tutor"
+      floatingActionButton: const CustomFloatingButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
     );
   }
 
@@ -573,9 +581,6 @@ class HomePageState extends State<HomePage> {
       if (topicCount![i]>(dateToColourMap.length-1)){
         topicCount![i]=dateToColourMap.length-1;
       }
-
-      
-
       int nextReviewDateMilliseconds = (((dateToColourMap[topicCount![i]]! * 24 * 60 * 60) + topicLastSeen![i].seconds) * 1000).toInt();
       DateTime nextReviewDate = DateTime.fromMillisecondsSinceEpoch(nextReviewDateMilliseconds, isUtc: true).toLocal();
       nextReviewDate = DateTime(nextReviewDate.year, nextReviewDate.month,nextReviewDate.day,0,0,0,0);
@@ -583,6 +588,7 @@ class HomePageState extends State<HomePage> {
       DateTime? dateInCalendar;
       bool notInCalendar = true;
       List<String> rescheduled = [];
+      List<String> completed = [];
       Event e = Event(color:Color(0xFFB0FFC6),title: "Shouldn't add"); 
       
       
@@ -600,6 +606,7 @@ class HomePageState extends State<HomePage> {
           }
         }
         }
+        
         if (notInCalendar){
           formattedDate = "N/A";
           tColour = Color(0xFFD9D9D9);
@@ -624,11 +631,16 @@ class HomePageState extends State<HomePage> {
       else  {
 
         //If the revision date is in the future 
-        if (dateInCalendar!.isAfter(today)){
+        if (dateInCalendar!.isAfter(today) && !completed.contains(map["topic"])) {
              
              //If the user has seen all the cards set to green
              if (seenCards[map["topic"]]! == totalCards[map["topic"]]!) {
+              // print("Apparently not in completed $completed\n");
               tColour = Color(0xFFB0FFC6); 
+              completed.add(map["topic"]);
+              
+
+              // updateOneEvent(e, "Completed: ${e.title} ", dateInCalendar);
              }
 
             //If they haven't seen all of them set it to grey
