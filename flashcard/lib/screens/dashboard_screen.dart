@@ -6,6 +6,7 @@ import 'package:flashcard_x/screens/study_session_manager.dart';
 import 'package:flashcard_x/utils/firebase_wrapper.dart';
 import 'package:flashcard_x/utils/last_revised.dart';
 import 'package:flashcard_x/utils/theme_provider.dart';
+import '../widgets/drawer_widget2.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flashcard_x/widgets/event.dart';
 import 'package:flashcard_x/widgets/indicator.dart';
@@ -481,6 +482,7 @@ class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const DrawMain2(),
       appBar: CustomAppBar(
         title: 'Flashcard Tutor',
       ),
