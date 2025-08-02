@@ -13,7 +13,7 @@ import 'feedback_screen.dart';
 import 'fullmock_landing.dart';
 import 'landing_service.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
-import '../draft/mark_scheme.dart';
+//import '../draft/mark_scheme.dart';
 import 'package:flashcard_x/screens/settings_screen.dart' as setting;
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
