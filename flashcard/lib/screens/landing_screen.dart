@@ -13,7 +13,7 @@ import 'package:flutter/material.dart';
 import 'feedback_screen.dart';
 import 'fullmock_landing.dart';
 import 'landing_service.dart';
-import 'mark_scheme.dart';
+//import '../draft/mark_scheme.dart';
 import 'package:flashcard_x/screens/settings_screen.dart' as setting;
 // import 'package:flashcard_x/screens/exam_guide_screen.dart';
 // import 'package:flashcard_x/screens/resources.dart';
@@ -349,7 +349,7 @@ class LandingState extends State<Landing> {
                   onPressed: () => triggerSignIn('HomePage'),
                   key: 'Flashcards',
                 ),
-                _buildStyledButton(
+                /*_buildStyledButton(
                   text: 'Unofficial Mark Scheme',
                   icon: Icons.note_alt_outlined,
                   onPressed: () {
@@ -362,7 +362,7 @@ class LandingState extends State<Landing> {
                     );
                   },
                   key: 'Mark Scheme',
-                ),
+                ),*/
                 _buildStyledButton(
                   text: 'Create New Flashcards',
                   icon: Icons.add_box_outlined,

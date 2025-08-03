@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flashcard_x/screens/ms_single.dart';
 import 'package:flutter/material.dart';
 
-import 'mark_scheme.dart';
+import '../draft/mark_scheme.dart';
 
 // Here we need to cycle through the firestore and make a list of MSI's.
 // THe MSIs are based on one type. (Ranking questions)

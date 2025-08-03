@@ -3,8 +3,8 @@ import 'package:flashcard_x/widgets/drawer_widget2.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flutter/material.dart';
 
-import 'dashboard_screen.dart';
-import 'ms_questions.dart';
+import '../screens/dashboard_screen.dart';
+import '../screens/ms_questions.dart';
 import 'package:flashcard_x/widgets/countdown_button.dart';
 
 

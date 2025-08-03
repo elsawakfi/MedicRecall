@@ -1,7 +1,7 @@
 //import 'package:flashcard_x/screens/dash_screen.dart';
 import 'package:flashcard_x/screens/dashboard_screen.dart';
 import 'package:flashcard_x/screens/landing_screen_new.dart';
-import 'package:flashcard_x/screens/mark_scheme.dart';
+import 'package:flashcard_x/draft/mark_scheme.dart';
 import 'package:flashcard_x/screens/minimock_landing.dart';
 import 'package:flashcard_x/screens/settings_screen.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
@@ -83,7 +83,7 @@ class DrawMain2 extends StatelessWidget {
                       icon: const Icon(Icons.fact_check),
                       title: 'Full-Sized Mock',
                     ),
-                    DrawerTile(
+                    /*DrawerTile(
                       onPressed: () {
                         Navigator.push(
                           context,
@@ -92,7 +92,7 @@ class DrawMain2 extends StatelessWidget {
                       },
                       icon: const Icon(Icons.check_box_outlined),
                       title: "Mark Scheme",
-                    ),
+                    ),*/
                     DrawerTile(
                       onPressed: (){
                         Navigator.push(
