@@ -172,7 +172,7 @@ class HomePageState extends State<HomePage> {
 
     CollectionReference topicRef =
     FirebaseWrapper.firestore().collection("topics");
-    QuerySnapshot topicSnapshot = await topicRef.get();
+    QuerySnapshot topicSnapshot = await topicRef.orderBy('order').get();
     List<Map<String, dynamic>> holder = [];
     Map<String, bool> holderChecked = {};
     for (var doc in topicSnapshot.docs) {

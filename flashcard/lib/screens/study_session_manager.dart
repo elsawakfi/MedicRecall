@@ -596,6 +596,9 @@ class StudySessionManager {
     try {
       final CollectionReference<Map<String, dynamic>> flashcards =
           FirebaseFirestore.instance.collection('flashcards');
+          CollectionReference topicRef =
+     FirebaseFirestore.instance.collection("topics");
+    QuerySnapshot topicSnapshot = await topicRef.orderBy('order').get();
 
       // Get the required spacing between flashcard reviews based on study duration
       int requiredSpacing = getReviewInterval(daysUntilTest);
@@ -606,32 +609,16 @@ class StudySessionManager {
       
       // First collect all topics that need to be scheduled
       Set<String> allTopics = {};
-      
-      // Get seen flashcards
-      final seenFlashcards = await Algo().getFlashcards(userId);
-      for (final flashcard in seenFlashcards) {
-        allTopics.add(flashcard["topic"]);
+      for (var doc in topicSnapshot.docs){
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        String topic = data['topic'];
+        allTopics.add(topic);
       }
-      
-      // Get all available flashcards
-      final QuerySnapshot<Map<String, dynamic>> flashcardDeck =
-          await flashcards.get();
-      for (final doc in flashcardDeck.docs) {
-        final Map<String, dynamic> flashcard = doc.data();
-        allTopics.add(flashcard["topic"]);
-      }
-      
-      // Calculate how many study days we have available
-      int availableDays = testDay.difference(today).inDays;
-      if (availableDays <= 0) return;
-      
-      // Sort topics alphabetically to ensure consistent scheduling
-      List<String> sortedTopics = allTopics.toList()..sort();
-      
+      print("These are all the ordered topics:\n$allTopics");
       // Schedule flashcards with consistent spacing
       DateTime currentTargetDate = today.add(const Duration(days: 1)); // Start one day after today
       
-      for (final topic in sortedTopics) {
+      for (final topic in allTopics) {
         // Skip if we're too close to the test day
         if (currentTargetDate.isAfter(testDay.subtract(const Duration(days: 1)))) {
           break;
