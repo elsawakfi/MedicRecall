@@ -630,6 +630,7 @@ class HomePageState extends State<HomePage> {
              //If the user has seen all the cards set to green
              if (seenCards[map["topic"]]! == totalCards[map["topic"]]!) {
               tColour = Color(0xFFB0FFC6); 
+              formattedDate = "Completed Early";
              }
 
             //If they haven't seen all of them set it to grey
@@ -649,8 +650,9 @@ class HomePageState extends State<HomePage> {
             formattedDate = nextReviewDate
             .toString().substring(0,10);
             text = "0";
-            updateOneEvent(e, "Completed: ${e.title} ", dateInCalendar);
+            updateOneEvent(e, "Completed Deck: ${map["topic"]} ", dateInCalendar);
             LastRevised.resetSeenCardsForTopic("${map["topic"]}");
+            userData();
            }
            if (seenCards[map["topic"]] == null || seenCards[map["topic"]]! < totalCards[map["topic"]]!){
             tColour = Color(0xFFFF9595);   
