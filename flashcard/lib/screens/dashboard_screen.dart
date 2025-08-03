@@ -89,11 +89,10 @@ class HomePageState extends State<HomePage> {
         if (data.containsKey('date') && data.containsKey('events') ) {
           List<dynamic>? eventsList = data['events'] as List<dynamic>?;
           
-         
           for (var event in eventsList!){
-            String title = event.toString();
-            if(title.contains("Completed")&& title.contains("Flashcards")) continue;            if(!title.contains("Flashcards")) {
-               Timestamp? timestamp = data['date'] as Timestamp?;
+            String title = event.toString();          
+            if(!title.contains("Flashcards")) {
+                Timestamp? timestamp = data['date'] as Timestamp?;
                   if (timestamp != null) {
                 DateTime date = timestamp.toDate();
                 date = DateTime(date.year, date.month, date.day);
@@ -106,7 +105,6 @@ class HomePageState extends State<HomePage> {
                 DateTime date = timestamp.toDate();
                 date = DateTime(date.year, date.month, date.day);
                 List<String> events = eventsList.map((e) => e.toString()).toList();
-               
                 selectedEvents[date] = events.map((title) => Event(
                     title: title,
                     color : Colors.yellow
@@ -589,8 +587,6 @@ class HomePageState extends State<HomePage> {
       String formattedDate = DateFormat('dd/MM/yyy').format(nextReviewDate); 
       DateTime? dateInCalendar;
       bool notInCalendar = true;
-      List<String> rescheduled = [];
-      List<String> completed = [];
       Event e = Event(color:Color(0xFFB0FFC6),title: "Shouldn't add"); 
       
       
@@ -614,9 +610,6 @@ class HomePageState extends State<HomePage> {
           tColour = Color(0xFFD9D9D9);
         }
         else{
-
-          
-
          //If the user hasn't seen any cards and it is past the revision date set it red
       //Otherwise set it to grey
       if (seenCards[map["topic"]] == null || seenCards[map["topic"]] == 0){
@@ -628,21 +621,15 @@ class HomePageState extends State<HomePage> {
 
         }
       }
-      
       //if the user has seen some of the cards 
       else  {
 
         //If the revision date is in the future 
-        if (dateInCalendar!.isAfter(today) && !completed.contains(map["topic"])) {
+        if (dateInCalendar!.isAfter(today)) {
              
              //If the user has seen all the cards set to green
              if (seenCards[map["topic"]]! == totalCards[map["topic"]]!) {
-              // print("Apparently not in completed $completed\n");
               tColour = Color(0xFFB0FFC6); 
-              completed.add(map["topic"]);
-              
-
-              // updateOneEvent(e, "Completed: ${e.title} ", dateInCalendar);
              }
 
             //If they haven't seen all of them set it to grey
@@ -652,8 +639,6 @@ class HomePageState extends State<HomePage> {
         else if(dateInCalendar.isBefore(today) || dateInCalendar.isAtSameMomentAs(today)) {
           //Reschedule or set red
            if (seenCards[map["topic"]]! == totalCards[map["topic"]]!){
-            
-            rescheduled.add("${map["topic"]}");
             tColour = Color(0xFFD9D9D9);   
             nextReviewDate = dateInCalendar.add(Duration(days:dateToColourMap[topicCount![i]]!));
             print("${map["topic"]}\n");
@@ -664,31 +649,19 @@ class HomePageState extends State<HomePage> {
             formattedDate = nextReviewDate
             .toString().substring(0,10);
             text = "0";
-
-            
             updateOneEvent(e, "Completed: ${e.title} ", dateInCalendar);
-
             LastRevised.resetSeenCardsForTopic("${map["topic"]}");
-            // selectedEvents.remove(dateInCalendar);
-        
            }
            if (seenCards[map["topic"]] == null || seenCards[map["topic"]]! < totalCards[map["topic"]]!){
             tColour = Color(0xFFFF9595);   
            }
         
-        }
-        
-     
-      }}}
+        } }}}
       else{
           formattedDate = "N/A";
           //dateInCalendar = today;
           tColour = Color(0xFFD9D9D9);
         }
-
-
-
-
  value.add(
     Padding(
       padding: const EdgeInsets.only(bottom: 8, left: 15, right: 15),
