@@ -2,7 +2,6 @@ import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/drawer_widget2.dart';
 // import 'package:flashcard_x/screens/minimock_exams.dart';
-
 import '../utils/timer.dart';
 import '../widgets/minimock_help_button.dart';
 
@@ -152,7 +151,7 @@ class FullMockReviewState extends State<FullMockReview> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text(
-            "Complete Mini Mock?",
+            "Complete Full Mock?",
             style: TextStyle(color: Colors.black),
           ),
           content: const Text(

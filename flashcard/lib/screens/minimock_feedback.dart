@@ -9,6 +9,7 @@ import 'package:collection/collection.dart';
 import '../widgets/drawer_widget2.dart';
 import 'fullmock_landing.dart';
 import 'minimock_landing.dart';
+import 'package:flashcard_x/screens/landing_screen_new.dart';
 
 class MiniMockFeedBack extends StatefulWidget {
   final String title;
@@ -30,8 +31,10 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
   int currentQuestion = 0;
   List<Map<String, dynamic>> questions = [];
   Map<String, dynamic> userAnswers = {};
-  List<List<MapEntry<String, String>>> examOptions = []; // Correct option associated to each letter of the correct answers
-  List<List<MapEntry<String, String>>> userOptions = []; // Correct option associated to each letter of the user answers
+  List<List<MapEntry<String, String>>> examOptions =
+      []; // Correct option associated to each letter of the correct answers
+  List<List<MapEntry<String, String>>> userOptions =
+      []; // Correct option associated to each letter of the user answers
   final ScrollController _scrollController = ScrollController();
 
   final FirebaseAuth auth = FirebaseAuth.instance;
@@ -61,11 +64,9 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
     if (auth.currentUser == null) {
       var tmp = await auth.authStateChanges().first;
       if (tmp == null) {
-        nav.push(
-            MaterialPageRoute(
-              builder: (context) => const SignInScreen(),
-            )
-        );
+        nav.push(MaterialPageRoute(
+          builder: (context) => const SignInScreen(),
+        ));
       } else {
         user = tmp;
       }
@@ -94,11 +95,14 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
           String type = doc['type'];
           switch (type) {
             case 'ranking':
-              String modifiedQuestion = doc['question'].replaceFirst('Rank', '\nRank');
-              doc['question'] = modifiedQuestion; // Add a newline between the question (could store a newline in the firebase itself but this allows for easier customisation)
+              String modifiedQuestion =
+                  doc['question'].replaceFirst('Rank', '\nRank');
+              doc['question'] =
+                  modifiedQuestion; // Add a newline between the question (could store a newline in the firebase itself but this allows for easier customisation)
               break;
             case 'multiple choice':
-              String modifiedQuestion = doc['question'].replaceFirst('Choose', '\nChoose');
+              String modifiedQuestion =
+                  doc['question'].replaceFirst('Choose', '\nChoose');
               doc['question'] = modifiedQuestion;
               break;
             default:
@@ -127,32 +131,40 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
         // These letters are then compared with the index of the correct arrangement allowing them to be reordered correctly
         // (Essentially pairs each letter in correct_answers, which is just a list of letters, to their respective option for later visualisation)
         List<MapEntry<String, String>> tempExamOptions = List.generate(
-            options.length, (index) => MapEntry(String.fromCharCode(65 + index), options[index]));
-        tempExamOptions.sort((a, b) => examLetters.indexOf(a.key).compareTo(examLetters.indexOf(b.key)));
+            options.length,
+            (index) =>
+                MapEntry(String.fromCharCode(65 + index), options[index]));
+        tempExamOptions.sort((a, b) =>
+            examLetters.indexOf(a.key).compareTo(examLetters.indexOf(b.key)));
         examOptions.add(tempExamOptions);
 
         // (Essentially pairs each letter in userAnswers, which is just a list of letters, to their respective option for later visualisation)
         List<MapEntry<String, String>> tempUserOptions = List.generate(
-            options.length, (index) => MapEntry(String.fromCharCode(65 + index), options[index]));
-        tempUserOptions.sort((a, b) => userLetters.indexOf(a.key).compareTo(userLetters.indexOf(b.key)));
+            options.length,
+            (index) =>
+                MapEntry(String.fromCharCode(65 + index), options[index]));
+        tempUserOptions.sort((a, b) =>
+            userLetters.indexOf(a.key).compareTo(userLetters.indexOf(b.key)));
         userOptions.add(tempUserOptions);
       }
     }
   }
 
   Future<Map<String, dynamic>> queryUserAnswerData() async {
-       QuerySnapshot snapshot = await FirebaseFirestore.instance
-           .collection('users')
-           .where('userID', isEqualTo: user.uid)
-           .get();
-       var id = snapshot.docs.last.id;
-       DocumentSnapshot<
-           Map<String, dynamic>> userAnswers = await FirebaseFirestore.instance
-           .collection('users')
-           .doc(id).collection('examAnswers')
-           .doc(widget.answerDirectory).get();
-       Map<String, dynamic> userAnswerMap = userAnswers.get('answers');
-       return userAnswerMap;
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .where('userID', isEqualTo: user.uid)
+        .get();
+    var id = snapshot.docs.last.id;
+    DocumentSnapshot<Map<String, dynamic>> userAnswers = await FirebaseFirestore
+        .instance
+        .collection('users')
+        .doc(id)
+        .collection('examAnswers')
+        .doc(widget.answerDirectory)
+        .get();
+    Map<String, dynamic> userAnswerMap = userAnswers.get('answers');
+    return userAnswerMap;
   }
 
   Future<void> fetchUserAnswers() async {
@@ -185,19 +197,22 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: true,
-      child: Scaffold(
-        drawer: const DrawMain2(),
-        appBar: CustomAppBar(title: 'Feedback Page', mobileTitle: 'Feedback'),
-      body: userAnswers.isEmpty
-        ? Center(child: CircularProgressIndicator()) // If data is still being fetched, show loading circle
-        : LayoutBuilder( builder: (context, constraints) {
-        double maxScreenWidth = constraints.maxWidth * 0.7;
-        double maxPreferredWidth = 960; // 1920/2
+        canPop: true,
+        child: Scaffold(
+            drawer: const DrawMain2(),
+            appBar:
+                CustomAppBar(title: 'Feedback Page', mobileTitle: 'Feedback'),
+            body: userAnswers.isEmpty
+                ? Center(
+                    child:
+                        CircularProgressIndicator()) // If data is still being fetched, show loading circle
+                : LayoutBuilder(builder: (context, constraints) {
+                    double maxScreenWidth = constraints.maxWidth * 0.7;
+                    double maxPreferredWidth = 960; // 1920/2
 
-                return Center(
-                  child: Container(
-                     decoration: BoxDecoration(
+                    return Center(
+                        child: Container(
+                      decoration: BoxDecoration(
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.2),
@@ -208,344 +223,507 @@ class MinimockFeedbackState extends State<MiniMockFeedBack> {
                         ],
                         color: Color.fromARGB(255, 255, 255, 255),
                       ),
-                    constraints: BoxConstraints(
-                      maxWidth: maxScreenWidth > maxPreferredWidth
-                          ? maxScreenWidth
-                          : maxPreferredWidth,
-                           minHeight: constraints
+                      constraints: BoxConstraints(
+                        maxWidth: maxScreenWidth > maxPreferredWidth
+                            ? maxScreenWidth
+                            : maxPreferredWidth,
+                        minHeight: constraints
                             .maxHeight, // Ensure container takes full height
-                    ),
-                    padding: EdgeInsets.all(16),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Row( children: [
-                          Container(
-                            margin: const EdgeInsets.only(bottom: 10),
-                            width: MediaQuery.of(context).size.width < 600 ? 75 : 160,
-                            height: 40.31,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              color: const Color.fromARGB(255, 222, 221, 222),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
-                                  spreadRadius: 0,
-                                  blurRadius: 5,
-                                  offset: const Offset(0,
-                                      3), // changes position of shadow
-                                ),
-                              ],
-                            ),
-                            child: Center(
-                              child: (MediaQuery.of(context).size.width >= 600)
-                                  ? Text('Question ${currentQuestion+1}/${questions.length}',
-                                  style: const TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w500,
-                                  ))
-                                  : Text('${currentQuestion+1}/${questions.length}',
-                                  style: const TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w500,
-                                  ))
-                            )),
-                          Spacer(),
-                          Container(
-                            margin: const EdgeInsets.only(bottom: 10),
-                            width: 160,
-                            height: 40.31,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              color: const Color.fromARGB(255, 222, 221, 222),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
-                                  spreadRadius: 0,
-                                  blurRadius: 5,
-                                  offset: const Offset(0,
-                                      3), // changes position of shadow
-                                ),
-                              ],
-                            ),
-                            child: Center(
-                              child: Text(
-                                'Score: ${widget.answerScores[currentQuestion]}/${questionMarks(currentQuestion)}',
-                                style: const TextStyle(
-                                  color:
-                                      Colors.black,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ))
-                            
-                        ]),
-                        
-                        Expanded(
-                          child: SingleChildScrollView(
-                            controller: _scrollController,
-                            child: Column(children: [
-                          // Display the current question text
-                          Text(
-                            questions[currentQuestion]['question'],
-                            style: TextStyle(color: Colors.black, fontSize: 18),
-                          ),
-                          SizedBox(height: 10),
-                          // If the question is a ranking question, display a reorderable list of options
-                          if (questions[currentQuestion]['type'] == "ranking") ...[
-                            Column(
-                                children: [
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // USER ANSWERS
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text('  Given Answer:',
-                                          style: TextStyle(color: Colors.black, fontSize: 18)),
-                                        ...userAnswers[(currentQuestion+1).toString()].asMap().entries.map<Widget>((entry) {
-                                          int optionIndex = entry.key;
-                                          String optionLetter = entry.value;
-                                          // Get the correct option based on the letter (e.g. B = 1 => is option 2 in the options array)
-                                          String optionText = (optionLetter != '') ? '$optionLetter. ${questions[currentQuestion]['options'][optionLetter.codeUnitAt(0) - 65]}'
-                                              : '';
-                                          return Card(
-                                              color: (questions[currentQuestion]['correct_answers'][optionIndex] == optionLetter)
-                                                  ? Colors.green
-                                                  : Colors.red.shade400,
-                                              child: SizedBox(
-                                                  width: double.infinity, // Define the width
-                                                  child: ListTile(
-                                                      title: Text(optionText, style: TextStyle(color: const Color.fromARGB(255, 250, 249, 249),fontSize: 18))
-                                                  ))
-                                          );
-                                        })
-                                    ])
-                                  ),
-                                  // CORRECT ANSWERS
-                                  Expanded(
-                                    child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                        Text('  Correct Answer:',
-                                          style: TextStyle(
-                                              color: Colors.black, fontSize: 18)),
-                                        ...questions[currentQuestion]['correct_answers'].asMap().entries.map<Widget>((entry) {
-                                          String optionLetter = entry.value;
-                                          String optionText = '$optionLetter. ${questions[currentQuestion]['options'][optionLetter.codeUnitAt(0) - 65]}';
-                                          return Card(
-                                            color: const Color.fromARGB(223, 240, 240, 240),
-                                              child: SizedBox(
-                                                  width: double.infinity,
-                                                  child: ListTile(
-                                                    title: Text(optionText,
-                                                        style: TextStyle(color: Color.fromRGBO(0, 0, 0, 1), fontSize: 18)),
-                                            )));
-                                        })
-                                    ]))
-                                ])
-                            ])
-                          ]
-                          // If the question is a multiple choice question, display checkboxes
-                          else if (questions[currentQuestion]['type'] == "multiple choice") ...[
-                            //Line below takes the result of the map() and spreads its widgets into the children of Column
-                            Column(
-                                children: questions[currentQuestion]['options'].asMap().entries.map<Widget>((entry) {
-                              int optionIndex = entry.key;
-                              String option = entry.value;
-                              String optionLetter = String.fromCharCode(optionIndex + 65);
-                              return ListTile(
-                                title: Text('$optionLetter. $option',
-                                    style: TextStyle(fontSize: 18, color: Colors.black)),
-                                enabled: false,
-                                dense: true,
-                                visualDensity: VisualDensity(vertical: -4),
-                              );
-                            }).toList()),
-                            SizedBox(height: 10),
-                            //display the selected answers and the correct answers
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: Container(
-                                padding: EdgeInsets.all(16),
-                                margin: EdgeInsets.symmetric(vertical: 8),
+                      ),
+                      padding: EdgeInsets.all(16),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Row(children: [
+                            Container(
+                                margin: const EdgeInsets.only(bottom: 10),
+                                width: MediaQuery.of(context).size.width < 600
+                                    ? 75
+                                    : 160,
+                                height: 40.31,
                                 decoration: BoxDecoration(
-                                  color: (UnorderedIterableEquality()
-                                          .equals(questions[currentQuestion]['correct_answers'], userAnswers[(currentQuestion + 1).toString()]))
-                                      ? Colors.green
-                                      : Colors.red.shade400, // Dark background for contrast
-                                  borderRadius: BorderRadius.circular(10),
+                                  borderRadius: BorderRadius.circular(16),
+                                  color:
+                                      const Color.fromARGB(255, 222, 221, 222),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.2),
+                                      spreadRadius: 0,
+                                      blurRadius: 5,
+                                      offset: const Offset(
+                                          0, 3), // changes position of shadow
+                                    ),
+                                  ],
                                 ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text("Given Answer: ${userAnswers[(currentQuestion + 1).toString()]}",
-                                        style: TextStyle(color: const Color.fromARGB(255, 0, 0, 0), fontSize: 18)),
-                                    Text("Correct Answer: ${questions[currentQuestion]['correct_answers']}",
-                                        style: TextStyle(color: const Color.fromARGB(255, 0, 0, 0), fontSize: 18))
-                                  ]
-                                )))
-                          ],
-                          SizedBox(height: 10),
-                          Text(questions[currentQuestion]['explanation'],
-                            style: TextStyle(fontSize: 18),
-                          )
-                        ]))),
-                        //compare the answers keys and the user's answers and provided
-                        //format tbd
+                                child: Center(
+                                    child: (MediaQuery.of(context).size.width >=
+                                            600)
+                                        ? Text(
+                                            'Question ${currentQuestion + 1}/${questions.length}',
+                                            style: const TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w500,
+                                            ))
+                                        : Text(
+                                            '${currentQuestion + 1}/${questions.length}',
+                                            style: const TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w500,
+                                            )))),
+                            Spacer(),
+                            Container(
+                                margin: const EdgeInsets.only(bottom: 10),
+                                width: 160,
+                                height: 40.31,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(16),
+                                  color:
+                                      const Color.fromARGB(255, 222, 221, 222),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.2),
+                                      spreadRadius: 0,
+                                      blurRadius: 5,
+                                      offset: const Offset(
+                                          0, 3), // changes position of shadow
+                                    ),
+                                  ],
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    'Score: ${widget.answerScores[currentQuestion]}/${questionMarks(currentQuestion)}',
+                                    style: const TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ))
+                          ]),
 
-                        // Buttons to change questions
-                        SizedBox(height: 10),
-                        Align(
-                          alignment: Alignment.bottomCenter,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              if (currentQuestion == 0) //Prevents button being shown if no previous questions available
-                                Container(
-                                    width: MediaQuery.of(context).size.width < 600 ? 50 : 120,
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(16),
-                                      color: const Color.fromARGB(255, 222, 221, 222),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.2),
-                                          spreadRadius: 0,
-                                          blurRadius: 6,
-                                          offset: const Offset(0, 6), // changes position of shadow
-                                        ),
-                                      ],
+                          Expanded(
+                              child: SingleChildScrollView(
+                                  controller: _scrollController,
+                                  child: Column(children: [
+                                    // Display the current question text
+                                    Text(
+                                      questions[currentQuestion]['question'],
+                                      style: TextStyle(
+                                          color: Colors.black, fontSize: 18),
                                     ),
-                                    child: TextButton(
-                                        onPressed: () {
-                                          Navigator.pop(context);
-                                        },
-                                        child: (MediaQuery.of(context).size.width < 600)
-                                            ? Icon(Icons.arrow_back, color: Colors.black)
-                                            : Row(
-                                            mainAxisSize: MainAxisSize.min,
+                                    SizedBox(height: 10),
+                                    // If the question is a ranking question, display a reorderable list of options
+                                    if (questions[currentQuestion]['type'] ==
+                                        "ranking") ...[
+                                      Column(children: [
+                                        Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
-                                              Icon(Icons.arrow_back, color: Colors.black),
-                                              SizedBox(width: 4),
-                                              Text('Scoring', style: TextStyle(color: Colors.black, fontSize: 18)),
-                                            ]
-                                        )
-                                    )),
-                              if (currentQuestion > 0) //Prevents button being shown if no previous questions available
-                                Container(
-                                  width: MediaQuery.of(context).size.width < 600 ? 50 : 100,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(16),
-                                    color: const Color.fromARGB(255, 222, 221, 222),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.2),
-                                        spreadRadius: 0,
-                                        blurRadius: 6,
-                                        offset: const Offset(0, 6), // changes position of shadow
-                                      ),
+                                              // USER ANSWERS
+                                              Expanded(
+                                                  child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                    Text('  Given Answer:',
+                                                        style: TextStyle(
+                                                            color: Colors.black,
+                                                            fontSize: 18)),
+                                                    ...userAnswers[
+                                                            (currentQuestion +
+                                                                    1)
+                                                                .toString()]
+                                                        .asMap()
+                                                        .entries
+                                                        .map<Widget>((entry) {
+                                                      int optionIndex =
+                                                          entry.key;
+                                                      String optionLetter =
+                                                          entry.value;
+                                                      // Get the correct option based on the letter (e.g. B = 1 => is option 2 in the options array)
+                                                      String optionText =
+                                                          (optionLetter != '')
+                                                              ? '$optionLetter. ${questions[currentQuestion]['options'][optionLetter.codeUnitAt(0) - 65]}'
+                                                              : '';
+                                                      return Card(
+                                                          color: (questions[currentQuestion]
+                                                                          ['correct_answers']
+                                                                      [
+                                                                      optionIndex] ==
+                                                                  optionLetter)
+                                                              ? Colors.green
+                                                              : Colors
+                                                                  .red.shade400,
+                                                          child: SizedBox(
+                                                              width: double
+                                                                  .infinity, // Define the width
+                                                              child: ListTile(
+                                                                  title: Text(
+                                                                      optionText,
+                                                                      style: TextStyle(
+                                                                          color: const Color.fromARGB(
+                                                                              255,
+                                                                              250,
+                                                                              249,
+                                                                              249),
+                                                                          fontSize:
+                                                                              18)))));
+                                                    })
+                                                  ])),
+                                              // CORRECT ANSWERS
+                                              Expanded(
+                                                  child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                    Text('  Correct Answer:',
+                                                        style: TextStyle(
+                                                            color: Colors.black,
+                                                            fontSize: 18)),
+                                                    ...questions[
+                                                                currentQuestion]
+                                                            ['correct_answers']
+                                                        .asMap()
+                                                        .entries
+                                                        .map<Widget>((entry) {
+                                                      String optionLetter =
+                                                          entry.value;
+                                                      String optionText =
+                                                          '$optionLetter. ${questions[currentQuestion]['options'][optionLetter.codeUnitAt(0) - 65]}';
+                                                      return Card(
+                                                          color: const Color
+                                                              .fromARGB(223,
+                                                              240, 240, 240),
+                                                          child: SizedBox(
+                                                              width: double
+                                                                  .infinity,
+                                                              child: ListTile(
+                                                                title: Text(
+                                                                    optionText,
+                                                                    style: TextStyle(
+                                                                        color: Color.fromRGBO(
+                                                                            0,
+                                                                            0,
+                                                                            0,
+                                                                            1),
+                                                                        fontSize:
+                                                                            18)),
+                                                              )));
+                                                    })
+                                                  ]))
+                                            ])
+                                      ])
+                                    ]
+                                    // If the question is a multiple choice question, display checkboxes
+                                    else if (questions[currentQuestion]
+                                            ['type'] ==
+                                        "multiple choice") ...[
+                                      //Line below takes the result of the map() and spreads its widgets into the children of Column
+                                      Column(
+                                          children: questions[currentQuestion]
+                                                  ['options']
+                                              .asMap()
+                                              .entries
+                                              .map<Widget>((entry) {
+                                        int optionIndex = entry.key;
+                                        String option = entry.value;
+                                        String optionLetter =
+                                            String.fromCharCode(
+                                                optionIndex + 65);
+                                        return ListTile(
+                                          title: Text('$optionLetter. $option',
+                                              style: TextStyle(
+                                                  fontSize: 18,
+                                                  color: Colors.black)),
+                                          enabled: false,
+                                          dense: true,
+                                          visualDensity:
+                                              VisualDensity(vertical: -4),
+                                        );
+                                      }).toList()),
+                                      SizedBox(height: 10),
+                                      //display the selected answers and the correct answers
+                                      Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: Container(
+                                              padding: EdgeInsets.all(16),
+                                              margin: EdgeInsets.symmetric(
+                                                  vertical: 8),
+                                              decoration: BoxDecoration(
+                                                color: (UnorderedIterableEquality().equals(
+                                                        questions[
+                                                                currentQuestion]
+                                                            ['correct_answers'],
+                                                        userAnswers[
+                                                            (currentQuestion +
+                                                                    1)
+                                                                .toString()]))
+                                                    ? Colors.green
+                                                    : Colors.red
+                                                        .shade400, // Dark background for contrast
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                              ),
+                                              child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                        "Given Answer: ${userAnswers[(currentQuestion + 1).toString()]}",
+                                                        style: TextStyle(
+                                                            color: const Color
+                                                                .fromARGB(
+                                                                255, 0, 0, 0),
+                                                            fontSize: 18)),
+                                                    Text(
+                                                        "Correct Answer: ${questions[currentQuestion]['correct_answers']}",
+                                                        style: TextStyle(
+                                                            color: const Color
+                                                                .fromARGB(
+                                                                255, 0, 0, 0),
+                                                            fontSize: 18))
+                                                  ])))
                                     ],
-                                  ),
-                                  child: TextButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          currentQuestion--; // Move to next question
-                                        });
-                                        _scrollController.jumpTo(0); // Scroll to the top of the screen
-                                      },
-                                      child: (MediaQuery.of(context).size.width < 600)
-                                          ? Icon(Icons.arrow_back, color: Colors.black)
-                                          : Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(Icons.arrow_back, color: Colors.black),
-                                            SizedBox(width: 4),
-                                            Text('Back', style: TextStyle(color: Colors.black, fontSize: 18)),
-                                          ]
-                                      )
-                                  )),
-                              const SizedBox(width: 8),
-                              if (currentQuestion < questions.length - 1)
-                                Container(
-                                  width: MediaQuery.of(context).size.width < 600 ? 50 : 100,
-                                  height: 40,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(16),
-                                    color: const Color.fromARGB(255, 222, 221, 222),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.2),
-                                        spreadRadius: 0,
-                                        blurRadius: 6,
-                                        offset: const Offset(0, 6), // changes position of shadow
+                                    SizedBox(height: 10),
+                                    Text(
+                                      questions[currentQuestion]['explanation'],
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        color: Colors.black, //
                                       ),
-                                    ],
-                                  ),
-                                  child: TextButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          currentQuestion++; // Move to next question
-                                        });
-                                        _scrollController.jumpTo(0); // Scroll to the top of the screen
-                                      },
-                                      child: (MediaQuery.of(context).size.width < 600)
-                                          ? Icon(Icons.arrow_forward, color: Colors.black)
-                                          : Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Text('Next', style: TextStyle(color: Colors.black, fontSize: 18)),
-                                            SizedBox(width: 4),
-                                            Icon(Icons.arrow_forward, color: Colors.black),
-                                          ]
-                                      )
-                                )),
-                              if (currentQuestion == questions.length - 1)
-                                Container(
-                                    width: MediaQuery.of(context).size.width < 600 ? 50 : 100,
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(16),
-                                      color: const Color.fromARGB(255, 222, 221, 222),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.2),
-                                          spreadRadius: 0,
-                                          blurRadius: 6,
-                                          offset: const Offset(0, 6), // changes position of shadow
-                                        ),
-                                      ],
-                                    ),
-                                    // Button to return to the main landing page for both when mini mock and full mock are completed.
-                                    child: TextButton(
-                                        onPressed: () {
-                                          Navigator.of(context).push(
-                                            MaterialPageRoute(builder:(context) => const Landing(),
+                                    )
+                                  ]))),
+                          //compare the answers keys and the user's answers and provided
+                          //format tbd
+
+                          // Buttons to change questions
+                          SizedBox(height: 10),
+                          Align(
+                              alignment: Alignment.bottomCenter,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  if (currentQuestion ==
+                                      0) //Prevents button being shown if no previous questions available
+                                    Container(
+                                        width:
+                                            MediaQuery.of(context).size.width <
+                                                    600
+                                                ? 50
+                                                : 120,
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(16),
+                                          color: const Color.fromARGB(
+                                              255, 222, 221, 222),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color:
+                                                  Colors.black.withOpacity(0.2),
+                                              spreadRadius: 0,
+                                              blurRadius: 6,
+                                              offset: const Offset(0,
+                                                  6), // changes position of shadow
                                             ),
-                                            );
-                                        },
-                                        child: (MediaQuery.of(context).size.width < 600)
-                                            ? Icon(Icons.arrow_forward, color: Colors.black)
-                                            : Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Text('Menu', style: TextStyle(color: Colors.black, fontSize: 18)),
-                                              SizedBox(width: 4),
-                                              Icon(Icons.arrow_forward, color: Colors.black),
-                                            ]
-                                        )
-                                    )),
-                            ],
-                          )),
-                      ],
-                    ),
-                  ));
-              })));
+                                          ],
+                                        ),
+                                        child: TextButton(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
+                                            child: (MediaQuery.of(context)
+                                                        .size
+                                                        .width <
+                                                    600)
+                                                ? Icon(Icons.arrow_back,
+                                                    color: Colors.black)
+                                                : Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                        Icon(Icons.arrow_back,
+                                                            color:
+                                                                Colors.black),
+                                                        SizedBox(width: 4),
+                                                        Text('Scoring',
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .black,
+                                                                fontSize: 18)),
+                                                      ]))),
+                                  if (currentQuestion >
+                                      0) //Prevents button being shown if no previous questions available
+                                    Container(
+                                        width:
+                                            MediaQuery.of(context).size.width <
+                                                    600
+                                                ? 50
+                                                : 100,
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(16),
+                                          color: const Color.fromARGB(
+                                              255, 222, 221, 222),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color:
+                                                  Colors.black.withOpacity(0.2),
+                                              spreadRadius: 0,
+                                              blurRadius: 6,
+                                              offset: const Offset(0,
+                                                  6), // changes position of shadow
+                                            ),
+                                          ],
+                                        ),
+                                        child: TextButton(
+                                            onPressed: () {
+                                              setState(() {
+                                                currentQuestion--; // Move to next question
+                                              });
+                                              _scrollController.jumpTo(
+                                                  0); // Scroll to the top of the screen
+                                            },
+                                            child: (MediaQuery.of(context)
+                                                        .size
+                                                        .width <
+                                                    600)
+                                                ? Icon(Icons.arrow_back,
+                                                    color: Colors.black)
+                                                : Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                        Icon(Icons.arrow_back,
+                                                            color:
+                                                                Colors.black),
+                                                        SizedBox(width: 4),
+                                                        Text('Back',
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .black,
+                                                                fontSize: 18)),
+                                                      ]))),
+                                  const SizedBox(width: 8),
+                                  if (currentQuestion < questions.length - 1)
+                                    Container(
+                                        width:
+                                            MediaQuery.of(context).size.width <
+                                                    600
+                                                ? 50
+                                                : 100,
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(16),
+                                          color: const Color.fromARGB(
+                                              255, 222, 221, 222),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color:
+                                                  Colors.black.withOpacity(0.2),
+                                              spreadRadius: 0,
+                                              blurRadius: 6,
+                                              offset: const Offset(0,
+                                                  6), // changes position of shadow
+                                            ),
+                                          ],
+                                        ),
+                                        child: TextButton(
+                                            onPressed: () {
+                                              setState(() {
+                                                currentQuestion++; // Move to next question
+                                              });
+                                              _scrollController.jumpTo(
+                                                  0); // Scroll to the top of the screen
+                                            },
+                                            child: (MediaQuery.of(context)
+                                                        .size
+                                                        .width <
+                                                    600)
+                                                ? Icon(Icons.arrow_forward,
+                                                    color: Colors.black)
+                                                : Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                        Text('Next',
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .black,
+                                                                fontSize: 18)),
+                                                        SizedBox(width: 4),
+                                                        Icon(
+                                                            Icons.arrow_forward,
+                                                            color:
+                                                                Colors.black),
+                                                      ]))),
+                                  if (currentQuestion == questions.length - 1)
+                                    Container(
+                                        width:
+                                            MediaQuery.of(context).size.width <
+                                                    600
+                                                ? 50
+                                                : 100,
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(16),
+                                          color: const Color.fromARGB(
+                                              255, 222, 221, 222),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color:
+                                                  Colors.black.withOpacity(0.2),
+                                              spreadRadius: 0,
+                                              blurRadius: 6,
+                                              offset: const Offset(0,
+                                                  6), // changes position of shadow
+                                            ),
+                                          ],
+                                        ),
+                                        // Button to return to the main landing page for both when mini mock and full mock are completed.
+                                        child: TextButton(
+                                            onPressed: () {
+                                              Navigator.of(context).push(
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      const NewLanding(),
+                                                ),
+                                              );
+                                            },
+                                            child: (MediaQuery.of(context)
+                                                        .size
+                                                        .width <
+                                                    600)
+                                                ? Icon(Icons.arrow_forward,
+                                                    color: Colors.black)
+                                                : Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                        Text('Menu',
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .black,
+                                                                fontSize: 18)),
+                                                        SizedBox(width: 4),
+                                                        Icon(
+                                                            Icons.arrow_forward,
+                                                            color:
+                                                                Colors.black),
+                                                      ]))),
+                                ],
+                              )),
+                        ],
+                      ),
+                    ));
+                  })));
   }
 }
