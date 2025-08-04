@@ -1,4 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
+import 'package:flashcard_x/widgets/event.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/drawer_widget2.dart';
 // import 'package:flashcard_x/screens/minimock_exams.dart';
@@ -43,7 +47,175 @@ class FullMockReviewState extends State<FullMockReview> {
   late TimerController _timerController;
   String _displayTime = '';
   late int remainingSeconds;
+  late Map<DateTime?, List<Event>> selectedEvents;
+  late Map<DateTime, List<Event>> allEvents;
+  late User user;
+  late CollectionReference _eventsCollectionRef;
+  late String? id;
+  CollectionReference users = FirebaseFirestore.instance.collection('users');
+  final CollectionReference _userCollectionRef =
+      FirebaseFirestore.instance.collection('users');
+  final FirebaseAuth auth = FirebaseAuth.instance;
 
+
+  Future<void> getUser() async {
+    
+    NavigatorState nav = Navigator.of(context);
+    if (auth.currentUser == null) {
+      var tmp = await auth.authStateChanges().first;
+      if (tmp == null) {
+        nav.push(MaterialPageRoute(
+          builder: (context) => const SignInScreen(),
+        ));
+      } else {
+        user = tmp;
+      }
+    } else {
+      user = auth.currentUser!;
+    }
+  }
+  
+  Future<void> userData() async {
+    QuerySnapshot querySnapshot =
+    await users.where("userID", isEqualTo: user.uid).get();
+    setState(() {
+      id = querySnapshot.docs.last.id;
+  });
+    
+    try{
+      _eventsCollectionRef =
+          FirebaseFirestore.instance.collection('users/$id/events');
+
+      var snapshots = await _eventsCollectionRef.get();
+      
+     
+       for (var doc in snapshots.docs) {
+        var data = doc.data() as Map<String, dynamic>;
+        if (data.containsKey('date') && data.containsKey('events') ) {
+          List<dynamic>? eventsList = data['events'] as List<dynamic>?;
+
+          for (var event in eventsList!){
+            String title = event.toString();          
+            if(title.contains("Full-sized Mock")) {
+                Timestamp? timestamp = data['date'] as Timestamp?;
+                  if (timestamp != null) {
+                DateTime date = timestamp.toDate();
+                date = DateTime(date.year, date.month, date.day);
+                List<String> events = eventsList.map((e) => e.toString()).toList();
+                selectedEvents[date] = events.map ((title) => Event(color: Colors.black, title: title)).toList();
+            }}
+            else{
+                continue;
+        }}
+        print(selectedEvents);
+        }}
+        }catch(e){
+      print("Error loading events from DB: $e");
+    }
+  }
+
+  Future<void> addSingleEvent (
+      DateTime date, String eventTitle, User user) async {
+    date = DateTime(date.year, date.month, date.day,0,0,0,0);
+   
+  DateTime today = DateTime.now();
+  
+  
+
+  Color color =  Colors.yellow; 
+
+  
+  
+    //The delete single event function updates the UI in real time so I just copied the structure of that function 
+    Event newEvent =  Event(
+                        title: eventTitle,
+                        color: color
+                        );
+    //cannot add a new revision date if the date is not empty
+    if (allEvents[date] == null) {
+      selectedEvents[date] = [];
+      allEvents[date] = [];
+      print("Adding event $eventTitle to $date\n");
+    
+    selectedEvents[date]?.add(newEvent);
+    // allEvents[date]?.add(newEvent);
+    QuerySnapshot querySnapshot = await _eventsCollectionRef
+        .where("date", isEqualTo: Timestamp.fromDate(date))
+        .get();
+
+     List<String> updatedEvents =
+        selectedEvents[date]?.map((e) => e.title).toList() ?? [];
+    
+    if (querySnapshot.docs.isNotEmpty) {
+    String docId = querySnapshot.docs.first.id;
+
+    // Update Firestore document
+    await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
+  } else {
+    // If no document exists, create a new one
+    DocumentReference newDoc = await _eventsCollectionRef.add({
+      "date": Timestamp.fromDate(date),
+      "events": [eventTitle] // Start with just the new event
+    });
+    
+    String newDocId = newDoc.id;
+    await _eventsCollectionRef.doc(newDocId).update({"events": updatedEvents});
+
+  }}
+ 
+    setState(() {});
+  }
+
+  Future<void> deleteSingleEvent(
+      DateTime date, String eventTitle, User user) async {
+    date = DateTime(date.year, date.month, date.day,0,0,0,0);
+
+    if (!selectedEvents.containsKey(date)) {
+      print("No events found for date: ${date.toString().split(' ')[0]}");
+      return;
+    }
+
+    selectedEvents[date]?.removeWhere((event) => event.title == eventTitle);
+
+    if (selectedEvents[date]?.isEmpty ?? false) {
+      selectedEvents.remove(date);
+    }
+
+    QuerySnapshot querySnapshot = await _eventsCollectionRef
+        .where("date", isEqualTo: Timestamp.fromDate(date))
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      String docId = querySnapshot.docs.first.id;
+      List<String> updatedEvents =
+          selectedEvents[date]?.map((e) => e.title).toList() ?? [];
+
+      if (updatedEvents.isEmpty) {
+        await _eventsCollectionRef
+            .doc(docId)
+            .delete(); // ❗ Ensure deletion happens
+      } else {
+        await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
+      }
+    }
+
+    setState(() {});
+  }
+
+   Future<void> updateOneEvent(
+      Event oldEvent, String newTitle, DateTime newDate) async {
+    DateTime normalizedDate =
+        DateTime(newDate.year, newDate.month, newDate.day,0,0,0,0);
+    // Remove old event from Firestore
+    await deleteSingleEvent(normalizedDate, oldEvent.title, user);
+    await addSingleEvent(normalizedDate, newTitle, user);
+  }
+
+  Future<void> getData()async{
+    await getUser();
+    await userData();
+  }
+  
   Widget _buildQuestionButton(int questionNumber) {
     double screenWidth = MediaQuery.of(context).size.width;
     double buttonWidth = screenWidth * 0.2; // 20% of screen width
@@ -115,6 +287,9 @@ class FullMockReviewState extends State<FullMockReview> {
   @override
   void initState() {
     super.initState();
+    selectedEvents = {};
+    allEvents = {};
+    getData();
     questionLength = widget.rankingLength + widget.multiChoiceLength;
     remainingSeconds = widget.remainingSeconds;
     _timerController = TimerController(
@@ -406,8 +581,22 @@ class FullMockReviewState extends State<FullMockReview> {
                                               : 50,
                                       width: 150,
                                       child: ElevatedButton.icon(
-                                          onPressed: () {
+                                          onPressed: () async {
+                                            Event e = Event(color:Color(0xFFB0FFC6),title: "Shouldn't add");
+                                            DateTime? dateInCalendar = DateTime.now(); 
                                             _showCompletionDialog(context);
+                                            for (final entry in selectedEvents.entries){
+                                                for (final event in entry.value){
+                                                  dateInCalendar = entry.key;
+                                                    e = event;
+                                                    break;
+                                                }
+                                                break;
+                                                }
+                                            await updateOneEvent(e, "Completed: ${e.title}", dateInCalendar!);
+                                            print("updated calendar?\n");
+              
+                                            //UPDATE CALENDAR
                                           },
                                           icon: Icon(Icons.check_outlined,
                                               color: Colors.white),
