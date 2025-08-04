@@ -51,6 +51,7 @@ class MiniMockReviewState extends State<MiniMockReview> {
   late Map<DateTime?, List<Event>> selectedEvents;
   late Map<DateTime, List<Event>> allEvents;
   late User user;
+  DateTime? testDay;
   late CollectionReference _eventsCollectionRef;
   late String? id;
   CollectionReference users = FirebaseFirestore.instance.collection('users');
@@ -76,6 +77,42 @@ class MiniMockReviewState extends State<MiniMockReview> {
     }
   }
   
+  Future<void> getTestDay() async {
+    try {
+      QuerySnapshot querySnapshot =
+          await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+
+      if (querySnapshot.docs.isEmpty) {
+        setState(() {
+         
+          testDay = null;
+        });
+        return;
+      }
+
+      var userFromDb = querySnapshot.docs.first;
+      Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
+
+      // Check if TestDay exists in Firestore document
+      if (data.containsKey("TestDay") && data["TestDay"] != null) {
+        setState(() {
+          testDay = DateTime.fromMicrosecondsSinceEpoch(
+              data["TestDay"].microsecondsSinceEpoch);
+        });
+      } else {
+        // No test day in database
+        setState(() {
+          testDay = null;
+        });
+      }
+    } catch (e) {
+      print("Error retrieving test day: $e");
+      setState(() {
+        testDay = null;
+      });
+    }
+  }
+
   Future<void> userData() async {
     QuerySnapshot querySnapshot =
     await users.where("userID", isEqualTo: user.uid).get();
@@ -281,7 +318,9 @@ class MiniMockReviewState extends State<MiniMockReview> {
   Future<void> getData()async{
     await getUser();
     await userData();
+    await getTestDay();
   }
+  
   @override
   void initState()  {
     super.initState();
@@ -340,17 +379,20 @@ class MiniMockReviewState extends State<MiniMockReview> {
             ElevatedButton(
               onPressed: () async {
                 Event e = Event(color:Color(0xFFB0FFC6),title: "Shouldn't add");
-                 DateTime? dateInCalendar = DateTime.now(); 
+                 DateTime? dateInCalendar = DateTime.now();
+                 DateTime? temp = testDay; 
                 Navigator.pop(context); // Close the dialog
                 widget.miniMockWidget.examEnd();  // Proceed with completion
+                
                 for (final entry in selectedEvents.entries){
-                for (final event in entry.value){
-                   dateInCalendar = entry.key;
-                    e = event;
-                  
-                }
-                }
-                await updateOneEvent(e, "Completed: ${e.title}", dateInCalendar!);
+                  dateInCalendar = entry.key;
+                  if (dateInCalendar!.isBefore(temp!)){
+                    for (final event in entry.value){
+                        temp = dateInCalendar;
+                        e = event;
+                    }
+                }}
+                await updateOneEvent(e, "Completed: ${e.title}", temp!);
                 print("updated calendar?\n");//UPDATE CALENDAR 
               },
               style: ElevatedButton.styleFrom(

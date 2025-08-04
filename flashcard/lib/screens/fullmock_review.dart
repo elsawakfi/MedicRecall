@@ -50,6 +50,7 @@ class FullMockReviewState extends State<FullMockReview> {
   late Map<DateTime?, List<Event>> selectedEvents;
   late Map<DateTime, List<Event>> allEvents;
   late User user;
+  DateTime? testDay;
   late CollectionReference _eventsCollectionRef;
   late String? id;
   CollectionReference users = FirebaseFirestore.instance.collection('users');
@@ -75,6 +76,42 @@ class FullMockReviewState extends State<FullMockReview> {
     }
   }
   
+  Future<void> getTestDay() async {
+    try {
+      QuerySnapshot querySnapshot =
+          await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+
+      if (querySnapshot.docs.isEmpty) {
+        setState(() {
+         
+          testDay = null;
+        });
+        return;
+      }
+
+      var userFromDb = querySnapshot.docs.first;
+      Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
+
+      // Check if TestDay exists in Firestore document
+      if (data.containsKey("TestDay") && data["TestDay"] != null) {
+        setState(() {
+          testDay = DateTime.fromMicrosecondsSinceEpoch(
+              data["TestDay"].microsecondsSinceEpoch);
+        });
+      } else {
+        // No test day in database
+        setState(() {
+          testDay = null;
+        });
+      }
+    } catch (e) {
+      print("Error retrieving test day: $e");
+      setState(() {
+        testDay = null;
+      });
+    }
+  }
+
   Future<void> userData() async {
     QuerySnapshot querySnapshot =
     await users.where("userID", isEqualTo: user.uid).get();
@@ -107,7 +144,7 @@ class FullMockReviewState extends State<FullMockReview> {
             else{
                 continue;
         }}
-        print(selectedEvents);
+        // print(selectedEvents);
         }}
         }catch(e){
       print("Error loading events from DB: $e");
@@ -214,6 +251,7 @@ class FullMockReviewState extends State<FullMockReview> {
   Future<void> getData()async{
     await getUser();
     await userData();
+    await getTestDay();
   }
   
   Widget _buildQuestionButton(int questionNumber) {
@@ -584,16 +622,21 @@ class FullMockReviewState extends State<FullMockReview> {
                                           onPressed: () async {
                                             Event e = Event(color:Color(0xFFB0FFC6),title: "Shouldn't add");
                                             DateTime? dateInCalendar = DateTime.now(); 
+                                            DateTime? temp = testDay;
+                                            
                                             _showCompletionDialog(context);
+                                            
                                             for (final entry in selectedEvents.entries){
-                                                for (final event in entry.value){
-                                                  dateInCalendar = entry.key;
+                                                dateInCalendar = entry.key;
+                                                if (dateInCalendar!.isBefore(temp!)){
+                                                  temp = dateInCalendar;
+                                                  for (final event in entry.value){
                                                     e = event;
-                                                    break;
+                                                    print(e.title);
                                                 }
-                                                break;
                                                 }
-                                            await updateOneEvent(e, "Completed: ${e.title}", dateInCalendar!);
+                                            }
+                                            await updateOneEvent(e, "Completed: ${e.title}", temp!);
                                             print("updated calendar?\n");
               
                                             //UPDATE CALENDAR
