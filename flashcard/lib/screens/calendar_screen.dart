@@ -450,14 +450,26 @@ class CalendarStateO extends State<Calendar> {
             date = DateTime(date.year, date.month, date.day);
 
             List<String> events = eventsList.map((e) => e.toString()).toList();
-
-            selectedEvents[date] = events
-                .map((title) => Event(
-                      title: title,
-                      color: _getEventColor(title),
-                    ))
-                .toList();
+            for (String e in events){
+                if(date.isBefore(today)&& !e.contains("Completed")){
+                            selectedEvents[date] = events
+                                .map((title) => Event(
+                                      title: title,
+                                      color: const Color.fromARGB(255, 255, 0, 8),
+                                    ))
+                                .toList();}
+                else{
+                  selectedEvents[date] = events
+                                .map((title) => Event(
+                                      title: title,
+                                      color: _getEventColor(title),
+                                    ))
+                                .toList();
+                }
+                                
           }
+            }
+            
         }
       }
     } catch (e) {
@@ -468,7 +480,7 @@ class CalendarStateO extends State<Calendar> {
   Color _getEventColor(String title) {
     
     if (title.contains("Completed:")){
-      return const Color.fromARGB(255, 0, 255, 234);
+      return const Color.fromARGB(255, 0, 157, 50);
     }
     else{
     if (title == "Test Day") return const Color.fromARGB(255, 255, 89, 94);
@@ -529,7 +541,7 @@ class CalendarStateO extends State<Calendar> {
     if (title.contains('full-sized mock') || title.contains('full mock')) {
       return "full_mock";
     }
-    if (title.contains('Flashcards')) {
+    if (title.contains('flashcards')) {
       return "flashcard";
     }
     if (title.contains('official msra practice paper')) {
@@ -676,6 +688,7 @@ class CalendarStateO extends State<Calendar> {
     } 
     else if (eventType == 'completed'){
         event.complete = true;
+        updateOneEvent(event, event.title, selectedDay,complete: true);
       _showFeatureNotAvailableDialog(
         'You have already completed this event',
         '',
@@ -1871,6 +1884,31 @@ class CalendarStateO extends State<Calendar> {
                                         trailing: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
+                                             Checkbox(
+                                              value: _getEventType(event.title) == "completed", 
+                                              onChanged: (bool? value) async{
+                                                if(_getEventType(event.title) == "flashcard") {
+                                                  _showFeatureNotAvailableDialog("Go to Flashcard Turor", "To complete flashcard study events, review them in the flashcard tutor");
+                                                  return;
+                                                  }
+                                                if(_getEventType(event.title) == "mini_mock"||_getEventType(event.title) == 'full_mock') {
+                                                  _showFeatureNotAvailableDialog("Go to mock page", "To complete ${event.title} use the mock page");
+                                                  return;
+                                                  }
+                                                
+                                                if (!event.complete && _getEventType(event.title) != 'completed' ){
+                                                  setState(() {
+                                                    loading = true;
+                                                    event.complete = true;
+                                                  });
+                                                  await updateOneEvent(event, "Completed: ${event.title}", selectedDay,complete: true);
+                                                  setState(() {
+                                                    loading = false;
+                                                  });
+                                                }else{
+                                                  _showFeatureNotAvailableDialog("Event already completed", "");
+                                                }
+                                            }),
                                             IconButton(
                                               icon: Icon(Icons.edit,
                                                   color: Theme.of(context)
@@ -1912,22 +1950,7 @@ class CalendarStateO extends State<Calendar> {
                                                 },
                                               ),
                                             ),
-                                            Checkbox(value: event.complete, onChanged: (bool? newValue) async{
-                                                //STATE DOESN'T SAVE OF THE COMPLETED BOOL VARIABLE... WOULD NEED IT TO BE FINAL 
-                                                
-                                                if (!event.complete){
-                                                  setState(() {
-                                                    loading = true;
-                                                  });
-                                                  await updateOneEvent(event, "Completed: ${event.title}", selectedDay);
-                                                  event.complete = true;
-                                                  setState(() {
-                                                    loading = false;
-                                                  });
-                                                }else{
-                                                  _showFeatureNotAvailableDialog("Event already completed", "");
-                                                }
-                                            })
+                                           
                                           ],
                                         ),
                                       ),
@@ -2066,14 +2089,18 @@ class CalendarStateO extends State<Calendar> {
     );
   }
 
+  
   Future<void> addSingleEvent(
-      DateTime date, String eventTitle, User user) async {
-    date = DateTime(date.year, date.month, date.day);
-
+      DateTime date, String eventTitle, User user, {bool completed = false}) async {
+    date = DateTime(date.year, date.month, date.day); 
     //The delete single event function updates the UI in real time so I just copied the structure of that function
     Event newEvent =
         Event(title: eventTitle, color: _getEventColor(eventTitle));
-
+    if (completed){
+      newEvent =
+        Event(title: eventTitle, color: _getEventColor(eventTitle),complete: true);
+    }
+    
     if (selectedEvents[date] == null) {
       selectedEvents[date] = [];
     }
@@ -2143,7 +2170,7 @@ class CalendarStateO extends State<Calendar> {
   }
 
   Future<void> updateOneEvent(
-      Event oldEvent, String newTitle, DateTime newDate) async {
+      Event oldEvent, String newTitle, DateTime newDate,{bool complete =false}) async {
     DateTime normalizedOldDate =
         DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
     DateTime normalizedNewDate =
@@ -2151,7 +2178,9 @@ class CalendarStateO extends State<Calendar> {
 
     // Remove old event from Firestore
     await deleteSingleEvent(normalizedOldDate, oldEvent.title, user);
-    await addSingleEvent(normalizedNewDate, newTitle, user);
+    if(complete) await addSingleEvent(normalizedNewDate, newTitle, user,completed: true);
+    else await addSingleEvent(normalizedNewDate, newTitle, user);
+    
 
     // Refresh UI
     setState(() {
