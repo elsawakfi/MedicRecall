@@ -513,7 +513,7 @@ class CalendarStateO extends State<Calendar> {
 
   String _getEventType(String title) {
     title = title.toLowerCase();
-
+    
     // The 5 main event types - using contains() to be more flexible
     if (title.contains('mini mock')) {
       return "mini_mock";
@@ -521,7 +521,7 @@ class CalendarStateO extends State<Calendar> {
     if (title.contains('full-sized mock') || title.contains('full mock')) {
       return "full_mock";
     }
-    if (title.contains('Flashcards')) {
+    if (title.contains('flashcards')) {
       return "flashcard";
     }
     if (title.contains('official msra practice paper')) {
