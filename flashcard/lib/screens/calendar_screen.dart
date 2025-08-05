@@ -1913,6 +1913,8 @@ class CalendarStateO extends State<Calendar> {
                                               ),
                                             ),
                                             Checkbox(value: event.complete, onChanged: (bool? newValue) async{
+                                                //STATE DOESN'T SAVE OF THE COMPLETED BOOL VARIABLE... WOULD NEED IT TO BE FINAL 
+                                                
                                                 if (!event.complete){
                                                   setState(() {
                                                     loading = true;
@@ -1922,6 +1924,8 @@ class CalendarStateO extends State<Calendar> {
                                                   setState(() {
                                                     loading = false;
                                                   });
+                                                }else{
+                                                  _showFeatureNotAvailableDialog("Event already completed", "");
                                                 }
                                             })
                                           ],
