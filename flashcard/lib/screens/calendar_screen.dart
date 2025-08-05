@@ -479,7 +479,7 @@ class CalendarStateO extends State<Calendar> {
 
   Color _getEventColor(String title) {
     
-    if (title.contains("Completed:")){
+    if (title.contains("Completed")){
       return const Color.fromARGB(255, 0, 157, 50);
     }
     else{

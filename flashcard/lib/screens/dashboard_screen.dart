@@ -630,7 +630,7 @@ class HomePageState extends State<HomePage> {
              //If the user has seen all the cards set to green
              if (seenCards[map["topic"]]! == totalCards[map["topic"]]!) {
               tColour = Color(0xFFB0FFC6); 
-              formattedDate = "Completed Early";
+              formattedDate = "Completed";
              }
 
             //If they haven't seen all of them set it to grey
