@@ -4,6 +4,7 @@ import 'package:flashcard_x/screens/fullmock_landing.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
+import 'package:universal_html/html.dart';
 
 import 'package:url_launcher/url_launcher.dart' as launcher;
 import '../widgets/countdown_button.dart';
@@ -88,6 +89,7 @@ class CalendarStateO extends State<Calendar> {
   String? _isHovered;
    List<String> flashcards = [
     ];
+  bool _complete = false;
 
   //The CalendarFormat variable format allows the user to change their view of the calendar, into weekly, biweekly and monthly.
   // for some reason, events need to have their time as being midnight to be shown on the calendar. So need to set the today constant to be midnight today.
@@ -465,7 +467,10 @@ class CalendarStateO extends State<Calendar> {
 
   Color _getEventColor(String title) {
     
-   
+    if (title.contains("Completed:")){
+      return const Color.fromARGB(255, 0, 255, 234);
+    }
+    else{
     if (title == "Test Day") return const Color.fromARGB(255, 255, 89, 94);
     if (title.contains("Mini Mock")) return StudySessionManager.kMiniMockColor;
     if (title.contains("Full-sized Mock")) return StudySessionManager.kFullMockColor;
@@ -477,7 +482,7 @@ class CalendarStateO extends State<Calendar> {
     }
 
     return Color.fromARGB(200, 0, 0, 100);
-  }
+  }}
 
   //When creating a new revision plan we update the database with the revision topics and dates in the calendar
   Future<void> updateEventsToDB(User user) async {
@@ -514,6 +519,9 @@ class CalendarStateO extends State<Calendar> {
   String _getEventType(String title) {
     title = title.toLowerCase();
 
+     if(title.contains('completed')){
+      return "completed";
+    }else{
     // The 5 main event types - using contains() to be more flexible
     if (title.contains('mini mock')) {
       return "mini_mock";
@@ -535,7 +543,7 @@ class CalendarStateO extends State<Calendar> {
     }
     // If it's not one of the 5 main events, show "feature not available"
     return "unknown";
-  }
+  }}
 
   void _showTestDayInfoDialog() {
     showDialog(
@@ -665,7 +673,16 @@ class CalendarStateO extends State<Calendar> {
         context,
         MaterialPageRoute(builder: (context) => const FullMockLanding()),
       );
-    } else {
+    } 
+    else if (eventType == 'completed'){
+        event.complete = true;
+      _showFeatureNotAvailableDialog(
+        'You have already completed this event',
+        '',
+      );
+    }
+    
+    else {
       _showFeatureNotAvailableDialog(
         'Unknown Event Type',
         'This event type is not recognized.',
@@ -1894,7 +1911,19 @@ class CalendarStateO extends State<Calendar> {
                                                   setState(() {});
                                                 },
                                               ),
-                                            )
+                                            ),
+                                            Checkbox(value: event.complete, onChanged: (bool? newValue) async{
+                                                if (!event.complete){
+                                                  setState(() {
+                                                    loading = true;
+                                                  });
+                                                  await updateOneEvent(event, "Completed: ${event.title}", selectedDay);
+                                                  event.complete = true;
+                                                  setState(() {
+                                                    loading = false;
+                                                  });
+                                                }
+                                            })
                                           ],
                                         ),
                                       ),
