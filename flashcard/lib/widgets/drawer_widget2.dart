@@ -50,15 +50,21 @@ class DrawMain2 extends StatelessWidget {
                     ),
                     DrawerTile(
                       onPressed: () {
-                        Navigator.push(
+                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => SubtopicChoice(
-                              flashcardSet: "Medical Topics",
-                              subtopics: ["Cardiology", "Neurology", "Endocrinology", "Respiratory"],
+                            builder: (context) => const HomePage(title: "Flashcard Tutor"),
                             ),
-                          ),
-                        );
+                          );
+                        // Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(
+                        //     builder: (context) => SubtopicChoice(
+                        //       flashcardSet: "Medical Topics",
+                        //       subtopics: ["Cardiology", "Neurology", "Endocrinology", "Respiratory"],
+                        //     ),
+                        //   ),
+                        // );
                       },
                       icon: const Icon(Icons.rate_review_outlined),
                       title: "Flashcard Tutor",

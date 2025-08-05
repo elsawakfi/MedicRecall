@@ -1643,84 +1643,91 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
               if (testDayBool) {
                 _showRevisionPlanDialog(context);
               } else if (!testDayBool) {
-                showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return _buildAlertDialog(
-                        title: 'Exam Date Already Set',
-                        content: Text.rich(
-                          TextSpan(
-                            children: [
-                              TextSpan(
-                                text: 'Your exam date is already set to ',
-                                style: TextStyle(
-                                  color: const Color.fromRGBO(21, 58, 103, 1),
-                                  fontSize: isSmallScreen ? 16 : 17,
-                                ),
-                              ),
-                              TextSpan(
-                                text: '${testDayString}',
-                                style: TextStyle(
-                                  color: const Color.fromRGBO(21, 58, 103, 1),
-                                  fontSize: isSmallScreen ? 16 : 17,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              TextSpan(
-                                text: '.\nDo you want to change it?',
-                                style: TextStyle(
-                                  color: const Color.fromRGBO(21, 58, 103, 1),
-                                  fontSize: isSmallScreen ? 16 : 17,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        actions: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              TextButton(
-                                  onPressed: () => Navigator.of(context).pop(),
-                                  style: TextButton.styleFrom(
-                                    minimumSize: Size(120, 45),
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: isSmallScreen ? 12 : 24,
-                                      vertical: isSmallScreen ? 8 : 12,
-                                    ),
-                                  ),
-                                  child: Text(
-                                    'Cancel',
-                                    style: TextStyle(
-                                        fontSize: isSmallScreen ? 13 : 16),
-                                  )),
-                              TextButton(
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => Calendar()),
-                                    );
-                                  },
-                                  style: TextButton.styleFrom(
-                                    foregroundColor: Colors.white,
-                                    backgroundColor:
-                                        Color.fromRGBO(243, 90, 90, 1),
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: isSmallScreen ? 12 : 24,
-                                        vertical: isSmallScreen ? 8 : 12),
-                                    minimumSize: Size(120, 45),
-                                  ),
-                                  child: Text(
-                                    'Change Exam Date',
-                                    style: TextStyle(
-                                        fontSize: isSmallScreen ? 13 : 16),
-                                  )),
-                            ],
-                          ),
-                        ],
-                      );
-                    });
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                    builder: (context) => Calendar()),
+                    );
+                                  
+                
+                // showDialog(
+                //     context: context,
+                //     builder: (BuildContext context) {
+                //       return _buildAlertDialog(
+                //         title: 'Exam Date Already Set',
+                //         content: Text.rich(
+                //           TextSpan(
+                //             children: [
+                //               TextSpan(
+                //                 text: 'Your exam date is already set to ',
+                //                 style: TextStyle(
+                //                   color: const Color.fromRGBO(21, 58, 103, 1),
+                //                   fontSize: isSmallScreen ? 16 : 17,
+                //                 ),
+                //               ),
+                //               TextSpan(
+                //                 text: '${testDayString}',
+                //                 style: TextStyle(
+                //                   color: const Color.fromRGBO(21, 58, 103, 1),
+                //                   fontSize: isSmallScreen ? 16 : 17,
+                //                   fontWeight: FontWeight.bold,
+                //                 ),
+                //               ),
+                //               TextSpan(
+                //                 text: '.\nDo you want to change it?',
+                //                 style: TextStyle(
+                //                   color: const Color.fromRGBO(21, 58, 103, 1),
+                //                   fontSize: isSmallScreen ? 16 : 17,
+                //                 ),
+                //               ),
+                //             ],
+                //           ),
+                //         ),
+                //         actions: [
+                //           Row(
+                //             mainAxisAlignment: MainAxisAlignment.end,
+                //             children: [
+                //               TextButton(
+                //                   onPressed: () => Navigator.of(context).pop(),
+                //                   style: TextButton.styleFrom(
+                //                     minimumSize: Size(120, 45),
+                //                     padding: EdgeInsets.symmetric(
+                //                       horizontal: isSmallScreen ? 12 : 24,
+                //                       vertical: isSmallScreen ? 8 : 12,
+                //                     ),
+                //                   ),
+                //                   child: Text(
+                //                     'Cancel',
+                //                     style: TextStyle(
+                //                         fontSize: isSmallScreen ? 13 : 16),
+                //                   )),
+                //               TextButton(
+                //                   onPressed: () {
+                //                     Navigator.push(
+                //                       context,
+                //                       MaterialPageRoute(
+                //                           builder: (context) => Calendar()),
+                //                     );
+                //                   },
+                //                   style: TextButton.styleFrom(
+                //                     foregroundColor: Colors.white,
+                //                     backgroundColor:
+                //                         Color.fromRGBO(243, 90, 90, 1),
+                //                     padding: EdgeInsets.symmetric(
+                //                         horizontal: isSmallScreen ? 12 : 24,
+                //                         vertical: isSmallScreen ? 8 : 12),
+                //                     minimumSize: Size(120, 45),
+                //                   ),
+                //                   child: Text(
+                //                     'Change Exam Date',
+                //                     style: TextStyle(
+                //                         fontSize: isSmallScreen ? 13 : 16),
+                //                   )),
+                //             ],
+                //           ),
+                //         ],
+                //       );
+                //     });
               }
             },
             clipBehavior: Clip.none,
