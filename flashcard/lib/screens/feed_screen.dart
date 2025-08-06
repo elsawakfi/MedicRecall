@@ -8,6 +8,7 @@ import 'package:flashcard_x/utils/firebase_wrapper.dart';
 import 'package:flashcard_x/utils/last_revised.dart';
 // import 'package:flashcard_x/widgets/app_bar_title.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
+import 'package:flashcard_x/widgets/drawer_widget2.dart';
 import '../widgets/countdown_button.dart';
 import 'package:flip_card/flip_card.dart';
 import 'package:flutter/foundation.dart';
@@ -164,6 +165,7 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
     updateFirstSeen();
 
     return Scaffold(
+        drawer: const DrawMain2(),
         appBar: CustomAppBar(
         title: "Flashcard Tutor"
         ),

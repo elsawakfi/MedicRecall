@@ -454,7 +454,7 @@ class CalendarStateO extends State<Calendar> {
                 if(date.isBefore(today)&& !e.contains("Completed")){
                             selectedEvents[date] = events
                                 .map((title) => Event(
-                                      title: title,
+                                      title: e,
                                       color: const Color.fromARGB(255, 255, 0, 8),
                                     ))
                                 .toList();}
@@ -688,10 +688,10 @@ class CalendarStateO extends State<Calendar> {
     } 
     else if (eventType == 'completed'){
         event.complete = true;
-        updateOneEvent(event, event.title, selectedDay,complete: true);
-      _showFeatureNotAvailableDialog(
-        'You have already completed this event',
-        '',
+        //updateOneEvent(event, event.title, selectedDay,complete: true);
+        _showFeatureNotAvailableDialog(
+          'You have already completed this event',
+          '',
       );
     }
     
@@ -702,6 +702,8 @@ class CalendarStateO extends State<Calendar> {
       );
     }
   }
+
+
 
   void _showFeatureNotAvailableDialog(String title, String message) {
     showDialog(
@@ -1096,7 +1098,7 @@ class CalendarStateO extends State<Calendar> {
   }
 
   // Function to show the labels dialog (pop-up)
-  void _showLabelsDialog(BuildContext context) {
+  void _showLabelsDialog(BuildContext context){ 
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -1120,24 +1122,28 @@ class CalendarStateO extends State<Calendar> {
               children: [
                 _buildLabelItem(
                     'Test Day', const Color.fromARGB(255, 255, 89, 94)),
-                const SizedBox(height: 20),
+                const SizedBox(height: 15),
                 _buildLabelItem(
                     'Mini Mock', StudySessionManager.kMiniMockColor),
-                const SizedBox(height: 20),
+                const SizedBox(height: 15),
                 _buildLabelItem(
                     'Full-Sized Mock', StudySessionManager.kFullMockColor),
-                const SizedBox(height: 20),
+                const SizedBox(height: 15),
                 _buildLabelItem('Official MRSA Practice Paper',
                     StudySessionManager.kOfficialPaperColor),
-                const SizedBox(height: 20),
+                const SizedBox(height: 15),
                 _buildLabelItem(
                     'Flashcards', StudySessionManager.kFlashcardColor),
-                const SizedBox(height: 20),
+                const SizedBox(height: 15),
                 _buildLabelItem('Official SJT Practice Paper',
                     StudySessionManager.kSJTPaperColor),
-                const SizedBox(height: 20),
+                const SizedBox(height: 15),
+                _buildLabelItem(
+                    'Completed Events',  Color.fromARGB(255, 0, 157, 50)),
+                const SizedBox(height: 15),
                 _buildLabelItem(
                     'Custom Events', Color.fromARGB(200, 0, 0, 100)),
+                
               ],
             ),
           ),
@@ -1158,6 +1164,73 @@ class CalendarStateO extends State<Calendar> {
           ],
         );
       },
+    );
+  }
+
+  void _showCompleteEventDialog (String title, String message,Event event,DateTime eventDate){
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFFE6EDF2),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(0),
+        ),
+        title: Text(
+          title,
+          style: const TextStyle(
+            color: Color.fromRGBO(21, 58, 103, 1),
+            fontSize: 21,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        content: Text(
+          message,
+          style: const TextStyle(
+            color: Color.fromRGBO(21, 58, 103, 1),
+            fontSize: 16,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              
+              
+                    setState(() {
+                      loading = true;
+                    });
+                    String newTitle = event.title.replaceRange(0, 10, '');
+                    await updateOneEvent(event,newTitle,eventDate);
+                    setState(() {
+                      loading = false;
+                      Navigator.pop(context);
+                    });
+                                                      },
+                                                  
+         
+            style: TextButton.styleFrom(
+              foregroundColor: const Color.fromARGB(255, 90, 138, 243),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              minimumSize: const Size(120, 45),
+            ),
+            child: const Text(
+              'Yes',
+              style: TextStyle(fontSize: 16),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(
+              foregroundColor: const Color.fromRGBO(243, 90, 90, 1),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              minimumSize: const Size(120, 45),
+            ),
+            child: const Text(
+              'No',
+              style: TextStyle(fontSize: 16),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1846,26 +1919,24 @@ class CalendarStateO extends State<Calendar> {
                                     (Event event) => Padding(
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 16.0, vertical: 8.0),
-                                      child: ListTile(
-                                        title: GestureDetector(
-                                          onTap: () =>
+                                      child: GestureDetector(
+                                        onTap: () =>
                                               _navigateToEventDetails(event),
-                                          child: MouseRegion(
+                                        child: MouseRegion(
                                             onEnter: (_) => setState(() =>
                                                 _isHovered = event.title),
                                             onExit: (_) => setState(
                                                 () => _isHovered = null),
-                                            child: Text(event.title,
-                                              style: TextStyle(
+                                         child: ListTile(
+                                          title: Text(event.title,
+                                          style: TextStyle(
                                                 color: Theme.of(context).textTheme.bodyMedium?.color,
                                                 fontWeight: FontWeight.w500,
-                                                decoration: _isHovered ==event.title
-                                                    ? TextDecoration.underline
-                                                    : TextDecoration.none,
+                                                // decoration: //_isHovered == event.title
+                                                    // ? TextDecoration.none
+                                                    // : TextDecoration.none, 
                                               ),
                                             ),
-                                          ),
-                                        ),
                                         leading: Container(
                                           width: 12,
                                           height: 12,
@@ -1874,7 +1945,9 @@ class CalendarStateO extends State<Calendar> {
                                             shape: BoxShape.circle,
                                           ),
                                         ),
-                                        tileColor: event.color.withOpacity(0.5),
+                                        tileColor: _isHovered == event.title
+                                            ? event.color.withOpacity(0.8)
+                                            : event.color.withOpacity(0.5),
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
                                               BorderRadius.circular(8),
@@ -1906,7 +1979,20 @@ class CalendarStateO extends State<Calendar> {
                                                     loading = false;
                                                   });
                                                 }else{
-                                                  _showFeatureNotAvailableDialog("Event already completed", "");
+                                                      if(event.title.contains("Official MSRA Practice Paper")||
+                                                         event.title.contains("Official SJT Practice Paper")){
+                                                      _showCompleteEventDialog("Are you sure you want to mark this event as incomplete?",
+                                                      "Are you sure you want to mark this event as incomplete?",
+                                                      event,
+                                                      selectedDay);
+                                                      }else{
+                                                        _showFeatureNotAvailableDialog("Unable to mark as incomplete", 
+                                                            "Once a mock or flashcard review session has been complete it cannot be unmarked");
+                                                      }
+                                                     
+                                                  
+                                                  
+                                                  
                                                 }
                                             }),
                                             IconButton(
@@ -1956,7 +2042,7 @@ class CalendarStateO extends State<Calendar> {
                                       ),
                                     ),
                                   ),
-                                ],
+                              ))],
                               ),
                             ),
                           ),

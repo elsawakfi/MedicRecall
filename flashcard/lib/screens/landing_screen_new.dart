@@ -124,7 +124,7 @@ class NewLandingState extends State<NewLanding> {
                   if (timestamp != null) {
                       DateTime date = timestamp.toDate();
                       date = DateTime(date.year, date.month, date.day);
-                      if (date.isBefore(finalDate) ){
+                      if (date.isBefore(finalDate) && (date.isAfter(todaysDate)|| date.isAtSameMomentAs(todaysDate))){
                           nextMock = title;
                           finalDate = date;
                      }
