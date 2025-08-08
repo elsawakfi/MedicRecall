@@ -201,6 +201,7 @@ class NewLandingState extends State<NewLanding> {
       await getNextTopicForReview();
       await getNextMockForReview();
       await LastRevised.recordLogin();
+      await loadStreakData();
       // final nextTopic = await LastRevised.getNextTopicForReview();
       await getExamDate(); // Remove the assignment since it returns void
       await getTestDay();

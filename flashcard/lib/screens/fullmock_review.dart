@@ -636,8 +636,9 @@ class FullMockReviewState extends State<FullMockReview> {
                                                 }
                                                 }
                                             }
+                                            if(!e.title.contains("Completed:")){
                                             await updateOneEvent(e, "Completed: ${e.title}", temp!);
-                                            print("updated calendar?\n");
+                                            print("updated calendar?\n");}
               
                                             //UPDATE CALENDAR
                                           },

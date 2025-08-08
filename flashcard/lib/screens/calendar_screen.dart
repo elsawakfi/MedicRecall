@@ -1194,15 +1194,16 @@ class CalendarStateO extends State<Calendar> {
           TextButton(
             onPressed: () async {
               
-              
+                    Navigator.pop(context);
                     setState(() {
                       loading = true;
                     });
                     String newTitle = event.title.replaceRange(0, 10, '');
                     await updateOneEvent(event,newTitle,eventDate);
+                   
                     setState(() {
-                      loading = false;
-                      Navigator.pop(context);
+                     
+                      loading = false;  
                     });
                                                       },
                                                   
@@ -1981,8 +1982,8 @@ class CalendarStateO extends State<Calendar> {
                                                 }else{
                                                       if(event.title.contains("Official MSRA Practice Paper")||
                                                          event.title.contains("Official SJT Practice Paper")){
-                                                      _showCompleteEventDialog("Are you sure you want to mark this event as incomplete?",
-                                                      "Are you sure you want to mark this event as incomplete?",
+                                                      _showCompleteEventDialog("Mark event as incomplete?",
+                                                      "",
                                                       event,
                                                       selectedDay);
                                                       }else{
@@ -2077,7 +2078,8 @@ class CalendarStateO extends State<Calendar> {
                                                 horizontal: 24, vertical: 12),
                                       ),
                                       icon: Icon(Icons.add,
-                                          size: isSmallScreen ? 32 : 25),
+                                          size: isSmallScreen ? 32 : 25,
+                                          color: Colors.white,),
                                       label: isSmallScreen
                                           ? SizedBox.shrink()
                                           : const Text(
@@ -2111,7 +2113,8 @@ class CalendarStateO extends State<Calendar> {
                                                 horizontal: 24, vertical: 12),
                                       ),
                                       icon: Icon(Icons.delete,
-                                          size: isSmallScreen ? 32 : 25),
+                                          size: isSmallScreen ? 32 : 25,
+                                          color: Colors.white,),
                                       label: isSmallScreen
                                           ? SizedBox.shrink()
                                           : const Text(
@@ -2263,6 +2266,10 @@ class CalendarStateO extends State<Calendar> {
         DateTime(newDate.year, newDate.month, newDate.day);
 
     // Remove old event from Firestore
+    await _loadExcludedDays();
+    if(revisionDays.contains(_getDayName(newDate.day))){
+      print("Whatever case this is\n");
+    }
     await deleteSingleEvent(normalizedOldDate, oldEvent.title, user);
     if(complete) await addSingleEvent(normalizedNewDate, newTitle, user,completed: true);
     else await addSingleEvent(normalizedNewDate, newTitle, user);
@@ -2409,6 +2416,8 @@ class CalendarStateO extends State<Calendar> {
                 );
 
                 try {
+                 
+                  if(!revisionDays.contains(_getDayName((_selectedDate!.weekday)))){
                   if (event.title == "Test Day") {
                     // For Test Day events, use updateTestDay
                     await updateTestDay(_selectedDate!);
@@ -2416,6 +2425,8 @@ class CalendarStateO extends State<Calendar> {
                     // For other events, use updateOneEvent
                     await updateOneEvent(
                         event, _editEventController.text, _selectedDate!);
+                  }}else{
+                    throw Exception("Selected an Excluded Day\n");
                   }
 
                   // Close the loading dialog
@@ -2434,9 +2445,15 @@ class CalendarStateO extends State<Calendar> {
                     context: context,
                     builder: (BuildContext context) {
                       return AlertDialog(
-                        title: const Text('Error'),
+                        title:Text(e.toString()), 
+                        titleTextStyle: TextStyle(
+                          color: Colors.black,
+                        ),
                         content:
-                            Text('Failed to update event: ${e.toString()}'),
+                            Text('Failed to update event'),
+                        contentTextStyle: TextStyle(
+                          color: Colors.black
+                        ),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(),

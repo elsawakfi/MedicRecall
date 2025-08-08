@@ -343,14 +343,14 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                       Flexible(flex: 2, child: dontShowButton),
                     ],
                   ),
-                  SizedBox(height: isSmallScreen ? 12 : 16),
-                  buttonPressed
-                      ? SizedBox()
-                      : Text(
-                          'If you want to stop seeing this pop up, press the "Don\'t Show Again" button',
-                          style: TextStyle(
-                              fontSize: isSmallScreen ? 14 : 16,
-                              color: const Color.fromRGBO(21, 58, 103, 1))),
+                  // SizedBox(height: isSmallScreen ? 12 : 16),
+                  // buttonPressed
+                  //     ? SizedBox()
+                  //     : Text(
+                  //         'If you want to stop seeing this pop up, press the "Don\'t Show Again" button',
+                  //         style: TextStyle(
+                  //             fontSize: isSmallScreen ? 14 : 16,
+                  //             color: const Color.fromRGBO(21, 58, 103, 1))),
                 ],
               ),
               actions: [],
@@ -1632,7 +1632,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                               ? '${_calculateDaysUntilExam(_examDate!)} Days'
                               : '${_calculateDaysUntilExam(_examDate!)} Days to Your Exam',
               style: const TextStyle(
-                color: Color.fromARGB(255, 98, 86, 139),
+                color: Colors.black,
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
@@ -1648,90 +1648,10 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                     MaterialPageRoute(
                     builder: (context) => Calendar()),
                     );
-                                  
-                
-                // showDialog(
-                //     context: context,
-                //     builder: (BuildContext context) {
-                //       return _buildAlertDialog(
-                //         title: 'Exam Date Already Set',
-                //         content: Text.rich(
-                //           TextSpan(
-                //             children: [
-                //               TextSpan(
-                //                 text: 'Your exam date is already set to ',
-                //                 style: TextStyle(
-                //                   color: const Color.fromRGBO(21, 58, 103, 1),
-                //                   fontSize: isSmallScreen ? 16 : 17,
-                //                 ),
-                //               ),
-                //               TextSpan(
-                //                 text: '${testDayString}',
-                //                 style: TextStyle(
-                //                   color: const Color.fromRGBO(21, 58, 103, 1),
-                //                   fontSize: isSmallScreen ? 16 : 17,
-                //                   fontWeight: FontWeight.bold,
-                //                 ),
-                //               ),
-                //               TextSpan(
-                //                 text: '.\nDo you want to change it?',
-                //                 style: TextStyle(
-                //                   color: const Color.fromRGBO(21, 58, 103, 1),
-                //                   fontSize: isSmallScreen ? 16 : 17,
-                //                 ),
-                //               ),
-                //             ],
-                //           ),
-                //         ),
-                //         actions: [
-                //           Row(
-                //             mainAxisAlignment: MainAxisAlignment.end,
-                //             children: [
-                //               TextButton(
-                //                   onPressed: () => Navigator.of(context).pop(),
-                //                   style: TextButton.styleFrom(
-                //                     minimumSize: Size(120, 45),
-                //                     padding: EdgeInsets.symmetric(
-                //                       horizontal: isSmallScreen ? 12 : 24,
-                //                       vertical: isSmallScreen ? 8 : 12,
-                //                     ),
-                //                   ),
-                //                   child: Text(
-                //                     'Cancel',
-                //                     style: TextStyle(
-                //                         fontSize: isSmallScreen ? 13 : 16),
-                //                   )),
-                //               TextButton(
-                //                   onPressed: () {
-                //                     Navigator.push(
-                //                       context,
-                //                       MaterialPageRoute(
-                //                           builder: (context) => Calendar()),
-                //                     );
-                //                   },
-                //                   style: TextButton.styleFrom(
-                //                     foregroundColor: Colors.white,
-                //                     backgroundColor:
-                //                         Color.fromRGBO(243, 90, 90, 1),
-                //                     padding: EdgeInsets.symmetric(
-                //                         horizontal: isSmallScreen ? 12 : 24,
-                //                         vertical: isSmallScreen ? 8 : 12),
-                //                     minimumSize: Size(120, 45),
-                //                   ),
-                //                   child: Text(
-                //                     'Change Exam Date',
-                //                     style: TextStyle(
-                //                         fontSize: isSmallScreen ? 13 : 16),
-                //                   )),
-                //             ],
-                //           ),
-                //         ],
-                //       );
-                //     });
               }
             },
             clipBehavior: Clip.none,
-            backgroundColor: const Color.fromARGB(255, 235, 230, 239),
+            backgroundColor: const Color.fromARGB(255, 196, 196, 196),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
@@ -1739,7 +1659,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                 ? null
                 : const Icon(
                     Icons.calendar_today,
-                    color: Color.fromARGB(255, 98, 86, 139),
+                    color: Colors.black,
                   ),
           ),
         );

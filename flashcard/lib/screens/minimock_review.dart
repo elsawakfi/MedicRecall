@@ -392,8 +392,11 @@ class MiniMockReviewState extends State<MiniMockReview> {
                         e = event;
                     }
                 }}
-                await updateOneEvent(e, "Completed: ${e.title}", temp!);
-                print("updated calendar?\n");//UPDATE CALENDAR 
+                if(!e.title.contains("Completed:")){
+                  //if the mini mock has not been completed already, then add the completed flag
+                  await updateOneEvent(e, "Completed: ${e.title}", temp!);
+                  print("updated calendar?\n");//UPDATE CALENDAR 
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
