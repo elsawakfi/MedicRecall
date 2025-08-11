@@ -1,4 +1,5 @@
 import 'package:flashcard_x/widgets/app_bar_title.dart';
+import 'package:flashcard_x/widgets/drawer_widget2.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
 
@@ -11,14 +12,16 @@ class ExplanationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        drawer: const DrawMain2(),
         appBar: CustomAppBar(
-        title: 'How does MedicRecall work?',
+          title: 'How does MedicRecall work?',
         ),
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
             child: Container(
-              padding: EdgeInsets.only(left: _spacing, right: _spacing, bottom: _spacing),
+              padding: EdgeInsets.only(
+                  left: _spacing, right: _spacing, bottom: _spacing),
               child: SingleChildScrollView(
                 child: Center(
                   child: SizedBox(
@@ -32,8 +35,8 @@ class ExplanationScreen extends StatelessWidget {
                           icon: Icons.calendar_today,
                           title: "Create Your Tailored Study Schedule",
                           content:
-                          "Set up a personalised plan that integrates official resources with our GMC-based content.\n\n"
-                          "Your schedule is designed to fit around your clinical work and gives you autonomy in choosing what resources you want to use and how many repetitions to complete for each.",
+                              "Set up a personalised plan that integrates official resources with our GMC-based content.\n\n"
+                              "Your schedule is designed to fit around your clinical work and gives you autonomy in choosing what resources you want to use and how many repetitions to complete for each.",
                         ),
                         SizedBox(height: _spacing),
                         _buildSection(
@@ -41,15 +44,16 @@ class ExplanationScreen extends StatelessWidget {
                           icon: Icons.school,
                           title: "Start Learning Using Evidence-Based Study",
                           content:
-                          "Engage with time-efficient preparation by utilising active recall, interleaved practice, and concept mapping to understand the key domains tested in the exam.",
+                              "Engage with time-efficient preparation by utilising active recall, interleaved practice, and concept mapping to understand the key domains tested in the exam.",
                         ),
                         SizedBox(height: _spacing),
                         _buildSection(
                           context,
                           icon: Icons.replay,
-                          title: "Internalise GMC Rationales Through Spaced Repetition",
+                          title:
+                              "Internalise GMC Rationales Through Spaced Repetition",
                           content:
-                          "By following your study schedule and using our spaced repetition algorithms, you will begin to understand and internalise the intricacies of how the GMC and HEE rationalise professionalism scenarios.",
+                              "By following your study schedule and using our spaced repetition algorithms, you will begin to understand and internalise the intricacies of how the GMC and HEE rationalise professionalism scenarios.",
                         ),
                         SizedBox(height: _spacing),
                         _buildSection(
@@ -57,8 +61,8 @@ class ExplanationScreen extends StatelessWidget {
                           icon: Icons.assessment,
                           title: "Track Your Progress and Stay Motivated",
                           content:
-                          "Compare your performance with peers to see where you stand.\n\n"
-                          "Use detailed stats to monitor your improvement and identify areas needing more focus.",
+                              "Compare your performance with peers to see where you stand.\n\n"
+                              "Use detailed stats to monitor your improvement and identify areas needing more focus.",
                         ),
                         SizedBox(height: _spacing),
                         _buildSection(
@@ -66,7 +70,7 @@ class ExplanationScreen extends StatelessWidget {
                           icon: Icons.update,
                           title: "Adapt and Optimise Your Study Plan",
                           content:
-                          "Adjust your schedule as needed to balance preparation with your clinical commitments.",
+                              "Adjust your schedule as needed to balance preparation with your clinical commitments.",
                         ),
                         SizedBox(height: _spacing),
                         _buildSection(
@@ -74,8 +78,8 @@ class ExplanationScreen extends StatelessWidget {
                           icon: Icons.timeline,
                           title: "Peak at the Right Time for Your Exam",
                           content:
-                          "Follow your structured yet flexible plan to build knowledge steadily.\n\n"
-                          "Arrive at your exam fully prepared, confident, and performing at your best.",
+                              "Follow your structured yet flexible plan to build knowledge steadily.\n\n"
+                              "Arrive at your exam fully prepared, confident, and performing at your best.",
                         ),
                       ],
                     ),
@@ -84,12 +88,13 @@ class ExplanationScreen extends StatelessWidget {
               ),
             ),
           ),
-        )
-    );
+        ));
   }
 
   Widget _buildSection(BuildContext context,
-      {required IconData icon, required String title, required String content}) {
+      {required IconData icon,
+      required String title,
+      required String content}) {
     final theme = Theme.of(context);
     return SizedBox(
       width: _cardWidth,
