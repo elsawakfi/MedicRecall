@@ -591,7 +591,7 @@ class HomePageState extends State<HomePage> {
       
       
       //Only go through the flashcard events with "selectedEvents" instead of allEvents
-      
+      userData();
       if (selectedEvents.isNotEmpty ){
         for (final entry in selectedEvents.entries){
         for (final event in entry.value){
@@ -620,6 +620,11 @@ class HomePageState extends State<HomePage> {
            tColour = Color(0xFFD9D9D9);
 
         }
+        if (e.title.contains("Completed") && e.title.contains("Flashcards")){
+            updateOneEvent(e, "Completed: ${map["topic"]} ", dateInCalendar);
+        }
+
+
       }
       //if the user has seen some of the cards 
       else  {
@@ -628,10 +633,14 @@ class HomePageState extends State<HomePage> {
         if (dateInCalendar!.isAfter(today)) {
              
              //If the user has seen all the cards set to green
-             if (seenCards[map["topic"]]! == totalCards[map["topic"]]!) {
+             if (seenCards[map["topic"]]! == totalCards[map["topic"]]! ) {
+             
               tColour = Color(0xFFB0FFC6); 
               formattedDate = "Completed";
-             }
+              if (!e.title.contains("Completed") && e.title.contains("Flashcards")){
+                updateOneEvent(e, "Completed: ${map["topic"]} Flashcards", dateInCalendar);
+                print("Dah doi\n");
+             }}
 
             //If they haven't seen all of them set it to grey
              if(seenCards[map["topic"]]! < totalCards[map["topic"]]!) tColour = Color(0xFFD9D9D9);   
@@ -639,9 +648,11 @@ class HomePageState extends State<HomePage> {
 
         else if(dateInCalendar.isBefore(today) || dateInCalendar.isAtSameMomentAs(today)) {
           //Reschedule or set red
+           
            if (seenCards[map["topic"]]! == totalCards[map["topic"]]!){
             tColour = Color(0xFFD9D9D9);   
             nextReviewDate = dateInCalendar.add(Duration(days:dateToColourMap[topicCount![i]]!));
+            
             print("${map["topic"]}\n");
             print("next review is $nextReviewDate\n");
             print("Topic seen ${topicCount![i]} times so will try add ${dateToColourMap[topicCount![i]]} days till next review \n");
@@ -650,9 +661,10 @@ class HomePageState extends State<HomePage> {
             formattedDate = nextReviewDate
             .toString().substring(0,10);
             text = "0";
-            updateOneEvent(e, "Completed Deck: ${map["topic"]} ", dateInCalendar);
+            updateOneEvent(e, "Completed: ${map["topic"]} ", dateInCalendar);
             LastRevised.resetSeenCardsForTopic("${map["topic"]}");
             userData();
+            getTopics();
            }
            if (seenCards[map["topic"]] == null || seenCards[map["topic"]]! < totalCards[map["topic"]]!){
             tColour = Color(0xFFFF9595);   
