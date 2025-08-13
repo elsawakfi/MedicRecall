@@ -119,7 +119,7 @@ class NewLandingState extends State<NewLanding> {
         
           for (var event in eventsList!){
             String title = event.toString();  
-            if (title.contains("Mock")){
+            if (title.contains("Mock") && !title.contains("Completed")){
                   Timestamp? timestamp = data['date'] as Timestamp?;
                   if (timestamp != null) {
                       DateTime date = timestamp.toDate();
@@ -155,7 +155,7 @@ class NewLandingState extends State<NewLanding> {
         
           for (var event in eventsList!){
             String title = event.toString();  
-            if (title.contains("Flashcards")){
+            if (title.contains("Flashcards") && !title.contains('Completed')){
                   Timestamp? timestamp = data['date'] as Timestamp?;
                   if (timestamp != null) {
                       DateTime date = timestamp.toDate();
