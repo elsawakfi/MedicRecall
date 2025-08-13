@@ -89,15 +89,18 @@ dev_dependencies:
 flutter_native_splash:
   color: "#FFFFFF"
   color_dark: "#000000"
-  image: assets/app_logo2_removebg.png
+  image: assets/dashboard_assets/app_logo4.png
   android: true
   ios: true
-  android12: true
 
-flutter_icons:
-  android: "launcher_icon"
+flutter_launcher_icons:
+  android: true
   ios: true
-  image_path: "assets/app_logo2.png"
+  remove_alpha_ios: true
+  image_path: "assets/dashboard_assets/app_logo4.png"
+  web:
+    generate: true
+    image_path: "assets/dashboard_assets/app_logo4.png"
 
   # to update icon, flutter pub run flutter_launcher_icons:main
 

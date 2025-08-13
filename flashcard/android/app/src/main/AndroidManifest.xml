@@ -2,7 +2,7 @@
     package="com.example.flashcard_x">
    <application
         android:label="flashcard_x"
-        android:icon="@mipmap/launcher_icon">
+        android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
