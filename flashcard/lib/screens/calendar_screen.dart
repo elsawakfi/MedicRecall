@@ -4,6 +4,7 @@ import 'package:flashcard_x/screens/fullmock_landing.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
+import 'package:universal_html/html.dart';
 
 import 'package:url_launcher/url_launcher.dart' as launcher;
 import '../widgets/countdown_button.dart';
@@ -88,6 +89,7 @@ class CalendarStateO extends State<Calendar> {
   String? _isHovered;
    List<String> flashcards = [
     ];
+  bool _complete = false;
 
   //The CalendarFormat variable format allows the user to change their view of the calendar, into weekly, biweekly and monthly.
   // for some reason, events need to have their time as being midnight to be shown on the calendar. So need to set the today constant to be midnight today.
@@ -448,14 +450,26 @@ class CalendarStateO extends State<Calendar> {
             date = DateTime(date.year, date.month, date.day);
 
             List<String> events = eventsList.map((e) => e.toString()).toList();
-
-            selectedEvents[date] = events
-                .map((title) => Event(
-                      title: title,
-                      color: _getEventColor(title),
-                    ))
-                .toList();
+            for (String e in events){
+                if(date.isBefore(today)&& !e.contains("Completed")){
+                            selectedEvents[date] = events
+                                .map((title) => Event(
+                                      title: e,
+                                      color: const Color.fromARGB(255, 255, 0, 8),
+                                    ))
+                                .toList();}
+                else{
+                  selectedEvents[date] = events
+                                .map((title) => Event(
+                                      title: title,
+                                      color: _getEventColor(title),
+                                    ))
+                                .toList();
+                }
+                                
           }
+            }
+            
         }
       }
     } catch (e) {
@@ -465,7 +479,10 @@ class CalendarStateO extends State<Calendar> {
 
   Color _getEventColor(String title) {
     
-   
+    if (title.contains("Completed")){
+      return const Color.fromARGB(255, 0, 157, 50);
+    }
+    else{
     if (title == "Test Day") return const Color.fromARGB(255, 255, 89, 94);
     if (title.contains("Mini Mock")) return StudySessionManager.kMiniMockColor;
     if (title.contains("Full-sized Mock")) return StudySessionManager.kFullMockColor;
@@ -477,7 +494,7 @@ class CalendarStateO extends State<Calendar> {
     }
 
     return Color.fromARGB(200, 0, 0, 100);
-  }
+  }}
 
   //When creating a new revision plan we update the database with the revision topics and dates in the calendar
   Future<void> updateEventsToDB(User user) async {
@@ -513,7 +530,10 @@ class CalendarStateO extends State<Calendar> {
 
   String _getEventType(String title) {
     title = title.toLowerCase();
-    
+
+     if(title.contains('completed')){
+      return "completed";
+    }else{
     // The 5 main event types - using contains() to be more flexible
     if (title.contains('mini mock')) {
       return "mini_mock";
@@ -535,7 +555,7 @@ class CalendarStateO extends State<Calendar> {
     }
     // If it's not one of the 5 main events, show "feature not available"
     return "unknown";
-  }
+  }}
 
   void _showTestDayInfoDialog() {
     showDialog(
@@ -665,13 +685,25 @@ class CalendarStateO extends State<Calendar> {
         context,
         MaterialPageRoute(builder: (context) => const FullMockLanding()),
       );
-    } else {
+    } 
+    else if (eventType == 'completed'){
+        event.complete = true;
+        //updateOneEvent(event, event.title, selectedDay,complete: true);
+        _showFeatureNotAvailableDialog(
+          'You have already completed this event',
+          '',
+      );
+    }
+    
+    else {
       _showFeatureNotAvailableDialog(
         'Unknown Event Type',
         'This event type is not recognized.',
       );
     }
   }
+
+
 
   void _showFeatureNotAvailableDialog(String title, String message) {
     showDialog(
@@ -1066,7 +1098,7 @@ class CalendarStateO extends State<Calendar> {
   }
 
   // Function to show the labels dialog (pop-up)
-  void _showLabelsDialog(BuildContext context) {
+  void _showLabelsDialog(BuildContext context){ 
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -1090,24 +1122,28 @@ class CalendarStateO extends State<Calendar> {
               children: [
                 _buildLabelItem(
                     'Test Day', const Color.fromARGB(255, 255, 89, 94)),
-                const SizedBox(height: 20),
+                const SizedBox(height: 15),
                 _buildLabelItem(
                     'Mini Mock', StudySessionManager.kMiniMockColor),
-                const SizedBox(height: 20),
+                const SizedBox(height: 15),
                 _buildLabelItem(
                     'Full-Sized Mock', StudySessionManager.kFullMockColor),
-                const SizedBox(height: 20),
+                const SizedBox(height: 15),
                 _buildLabelItem('Official MRSA Practice Paper',
                     StudySessionManager.kOfficialPaperColor),
-                const SizedBox(height: 20),
+                const SizedBox(height: 15),
                 _buildLabelItem(
                     'Flashcards', StudySessionManager.kFlashcardColor),
-                const SizedBox(height: 20),
+                const SizedBox(height: 15),
                 _buildLabelItem('Official SJT Practice Paper',
                     StudySessionManager.kSJTPaperColor),
-                const SizedBox(height: 20),
+                const SizedBox(height: 15),
+                _buildLabelItem(
+                    'Completed Events',  Color.fromARGB(255, 0, 157, 50)),
+                const SizedBox(height: 15),
                 _buildLabelItem(
                     'Custom Events', Color.fromARGB(200, 0, 0, 100)),
+                
               ],
             ),
           ),
@@ -1128,6 +1164,74 @@ class CalendarStateO extends State<Calendar> {
           ],
         );
       },
+    );
+  }
+
+  void _showCompleteEventDialog (String title, String message,Event event,DateTime eventDate){
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFFE6EDF2),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(0),
+        ),
+        title: Text(
+          title,
+          style: const TextStyle(
+            color: Color.fromRGBO(21, 58, 103, 1),
+            fontSize: 21,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        content: Text(
+          message,
+          style: const TextStyle(
+            color: Color.fromRGBO(21, 58, 103, 1),
+            fontSize: 16,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              
+                    Navigator.pop(context);
+                    setState(() {
+                      loading = true;
+                    });
+                    String newTitle = event.title.replaceRange(0, 10, '');
+                    await updateOneEvent(event,newTitle,eventDate);
+                   
+                    setState(() {
+                     
+                      loading = false;  
+                    });
+                                                      },
+                                                  
+         
+            style: TextButton.styleFrom(
+              foregroundColor: const Color.fromARGB(255, 90, 138, 243),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              minimumSize: const Size(120, 45),
+            ),
+            child: const Text(
+              'Yes',
+              style: TextStyle(fontSize: 16),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(
+              foregroundColor: const Color.fromRGBO(243, 90, 90, 1),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              minimumSize: const Size(120, 45),
+            ),
+            child: const Text(
+              'No',
+              style: TextStyle(fontSize: 16),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1816,26 +1920,24 @@ class CalendarStateO extends State<Calendar> {
                                     (Event event) => Padding(
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 16.0, vertical: 8.0),
-                                      child: ListTile(
-                                        title: GestureDetector(
-                                          onTap: () =>
+                                      child: GestureDetector(
+                                        onTap: () =>
                                               _navigateToEventDetails(event),
-                                          child: MouseRegion(
+                                        child: MouseRegion(
                                             onEnter: (_) => setState(() =>
                                                 _isHovered = event.title),
                                             onExit: (_) => setState(
                                                 () => _isHovered = null),
-                                            child: Text(event.title,
-                                              style: TextStyle(
+                                         child: ListTile(
+                                          title: Text(event.title,
+                                          style: TextStyle(
                                                 color: Theme.of(context).textTheme.bodyMedium?.color,
                                                 fontWeight: FontWeight.w500,
-                                                decoration: _isHovered ==event.title
-                                                    ? TextDecoration.underline
-                                                    : TextDecoration.none,
+                                                // decoration: //_isHovered == event.title
+                                                    // ? TextDecoration.none
+                                                    // : TextDecoration.none, 
                                               ),
                                             ),
-                                          ),
-                                        ),
                                         leading: Container(
                                           width: 12,
                                           height: 12,
@@ -1844,7 +1946,9 @@ class CalendarStateO extends State<Calendar> {
                                             shape: BoxShape.circle,
                                           ),
                                         ),
-                                        tileColor: event.color.withOpacity(0.5),
+                                        tileColor: _isHovered == event.title
+                                            ? event.color.withOpacity(0.8)
+                                            : event.color.withOpacity(0.5),
                                         shape: RoundedRectangleBorder(
                                           borderRadius:
                                               BorderRadius.circular(8),
@@ -1854,6 +1958,44 @@ class CalendarStateO extends State<Calendar> {
                                         trailing: Row(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
+                                             Checkbox(
+                                              value: _getEventType(event.title) == "completed", 
+                                              onChanged: (bool? value) async{
+                                                if(_getEventType(event.title) == "flashcard") {
+                                                  _showFeatureNotAvailableDialog("Go to Flashcard Turor", "To complete flashcard study events, review them in the flashcard tutor");
+                                                  return;
+                                                  }
+                                                if(_getEventType(event.title) == "mini_mock"||_getEventType(event.title) == 'full_mock') {
+                                                  _showFeatureNotAvailableDialog("Go to mock page", "To complete ${event.title} use the mock page");
+                                                  return;
+                                                  }
+                                                
+                                                if (!event.complete && _getEventType(event.title) != 'completed' ){
+                                                  setState(() {
+                                                    loading = true;
+                                                    event.complete = true;
+                                                  });
+                                                  await updateOneEvent(event, "Completed: ${event.title}", selectedDay,complete: true);
+                                                  setState(() {
+                                                    loading = false;
+                                                  });
+                                                }else{
+                                                      if(event.title.contains("Official MSRA Practice Paper")||
+                                                         event.title.contains("Official SJT Practice Paper")){
+                                                      _showCompleteEventDialog("Mark event as incomplete?",
+                                                      "",
+                                                      event,
+                                                      selectedDay);
+                                                      }else{
+                                                        _showFeatureNotAvailableDialog("Unable to mark as incomplete", 
+                                                            "Once a mock or flashcard review session has been complete it cannot be unmarked");
+                                                      }
+                                                     
+                                                  
+                                                  
+                                                  
+                                                }
+                                            }),
                                             IconButton(
                                               icon: Icon(Icons.edit,
                                                   color: Theme.of(context)
@@ -1894,13 +2036,14 @@ class CalendarStateO extends State<Calendar> {
                                                   setState(() {});
                                                 },
                                               ),
-                                            )
+                                            ),
+                                           
                                           ],
                                         ),
                                       ),
                                     ),
                                   ),
-                                ],
+                              ))],
                               ),
                             ),
                           ),
@@ -1935,7 +2078,8 @@ class CalendarStateO extends State<Calendar> {
                                                 horizontal: 24, vertical: 12),
                                       ),
                                       icon: Icon(Icons.add,
-                                          size: isSmallScreen ? 32 : 25),
+                                          size: isSmallScreen ? 32 : 25,
+                                          color: Colors.white,),
                                       label: isSmallScreen
                                           ? SizedBox.shrink()
                                           : const Text(
@@ -1969,7 +2113,8 @@ class CalendarStateO extends State<Calendar> {
                                                 horizontal: 24, vertical: 12),
                                       ),
                                       icon: Icon(Icons.delete,
-                                          size: isSmallScreen ? 32 : 25),
+                                          size: isSmallScreen ? 32 : 25,
+                                          color: Colors.white,),
                                       label: isSmallScreen
                                           ? SizedBox.shrink()
                                           : const Text(
@@ -2033,14 +2178,18 @@ class CalendarStateO extends State<Calendar> {
     );
   }
 
+  
   Future<void> addSingleEvent(
-      DateTime date, String eventTitle, User user) async {
-    date = DateTime(date.year, date.month, date.day);
-
+      DateTime date, String eventTitle, User user, {bool completed = false}) async {
+    date = DateTime(date.year, date.month, date.day); 
     //The delete single event function updates the UI in real time so I just copied the structure of that function
     Event newEvent =
         Event(title: eventTitle, color: _getEventColor(eventTitle));
-
+    if (completed){
+      newEvent =
+        Event(title: eventTitle, color: _getEventColor(eventTitle),complete: true);
+    }
+    
     if (selectedEvents[date] == null) {
       selectedEvents[date] = [];
     }
@@ -2110,15 +2259,21 @@ class CalendarStateO extends State<Calendar> {
   }
 
   Future<void> updateOneEvent(
-      Event oldEvent, String newTitle, DateTime newDate) async {
+      Event oldEvent, String newTitle, DateTime newDate,{bool complete =false}) async {
     DateTime normalizedOldDate =
         DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
     DateTime normalizedNewDate =
         DateTime(newDate.year, newDate.month, newDate.day);
 
     // Remove old event from Firestore
+    await _loadExcludedDays();
+    if(revisionDays.contains(_getDayName(newDate.day))){
+      print("Whatever case this is\n");
+    }
     await deleteSingleEvent(normalizedOldDate, oldEvent.title, user);
-    await addSingleEvent(normalizedNewDate, newTitle, user);
+    if(complete) await addSingleEvent(normalizedNewDate, newTitle, user,completed: true);
+    else await addSingleEvent(normalizedNewDate, newTitle, user);
+    
 
     // Refresh UI
     setState(() {
@@ -2261,6 +2416,8 @@ class CalendarStateO extends State<Calendar> {
                 );
 
                 try {
+                 
+                  if(!revisionDays.contains(_getDayName((_selectedDate!.weekday)))){
                   if (event.title == "Test Day") {
                     // For Test Day events, use updateTestDay
                     await updateTestDay(_selectedDate!);
@@ -2268,6 +2425,8 @@ class CalendarStateO extends State<Calendar> {
                     // For other events, use updateOneEvent
                     await updateOneEvent(
                         event, _editEventController.text, _selectedDate!);
+                  }}else{
+                    throw Exception("Selected an Excluded Day\n");
                   }
 
                   // Close the loading dialog
@@ -2286,9 +2445,15 @@ class CalendarStateO extends State<Calendar> {
                     context: context,
                     builder: (BuildContext context) {
                       return AlertDialog(
-                        title: const Text('Error'),
+                        title:Text(e.toString()), 
+                        titleTextStyle: TextStyle(
+                          color: Colors.black,
+                        ),
                         content:
-                            Text('Failed to update event: ${e.toString()}'),
+                            Text('Failed to update event'),
+                        contentTextStyle: TextStyle(
+                          color: Colors.black
+                        ),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(),

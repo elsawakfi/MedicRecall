@@ -89,15 +89,18 @@ dev_dependencies:
 flutter_native_splash:
   color: "#FFFFFF"
   color_dark: "#000000"
-  image: assets/app_logo2_removebg.png
+  image: assets/newlogo.png
   android: true
   ios: true
-  android12: true
+
+android12: 
+    image: assets/newlogo.png
+    icon_background_color: "#ffffff"
 
 flutter_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/app_logo2.png"
+  image_path: "assets/app_logo4.png"
 
   # to update icon, flutter pub run flutter_launcher_icons:main
 
@@ -121,10 +124,10 @@ flutter:
     - assets/folder_icon.png
     - assets/google_logo.png
     - assets/btn_google_signin_dark_pressed_web@2x.png
-    - assets/app_logo2_removebg.png
+    - assets/newlogo.png
     - assets/app_logo3_removebg.png
     - assets/newlogo.png
-    - assets/app_logo2.png
+    - assets/dashboard_assets/app_logo4.png
     - assets/rating_image.png
     - assets/ranking_image.png
     - assets/graph.png

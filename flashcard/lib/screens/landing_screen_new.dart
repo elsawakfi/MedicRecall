@@ -119,12 +119,12 @@ class NewLandingState extends State<NewLanding> {
         
           for (var event in eventsList!){
             String title = event.toString();  
-            if (title.contains("Mock")){
+            if (title.contains("Mock") && !title.contains("Completed")){
                   Timestamp? timestamp = data['date'] as Timestamp?;
                   if (timestamp != null) {
                       DateTime date = timestamp.toDate();
                       date = DateTime(date.year, date.month, date.day);
-                      if (date.isBefore(finalDate) ){
+                      if (date.isBefore(finalDate) && (date.isAfter(todaysDate)|| date.isAtSameMomentAs(todaysDate))){
                           nextMock = title;
                           finalDate = date;
                      }
@@ -155,7 +155,7 @@ class NewLandingState extends State<NewLanding> {
         
           for (var event in eventsList!){
             String title = event.toString();  
-            if (title.contains("Flashcards")){
+            if (title.contains("Flashcards") && !title.contains('Completed')){
                   Timestamp? timestamp = data['date'] as Timestamp?;
                   if (timestamp != null) {
                       DateTime date = timestamp.toDate();
@@ -201,6 +201,7 @@ class NewLandingState extends State<NewLanding> {
       await getNextTopicForReview();
       await getNextMockForReview();
       await LastRevised.recordLogin();
+      await loadStreakData();
       // final nextTopic = await LastRevised.getNextTopicForReview();
       await getExamDate(); // Remove the assignment since it returns void
       await getTestDay();

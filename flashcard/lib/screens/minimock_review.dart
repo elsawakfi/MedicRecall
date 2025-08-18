@@ -1,3 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flashcard_x/screens/sign_in_screen.dart';
+import 'package:flashcard_x/widgets/event.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/drawer_widget2.dart';
 // import 'package:flashcard_x/screens/minimock_exams.dart';
@@ -44,6 +48,107 @@ class MiniMockReviewState extends State<MiniMockReview> {
   late TimerController _timerController;
   String _displayTime = '';
   late int remainingSeconds;
+  late Map<DateTime?, List<Event>> selectedEvents;
+  late Map<DateTime, List<Event>> allEvents;
+  late User user;
+  DateTime? testDay;
+  late CollectionReference _eventsCollectionRef;
+  late String? id;
+  CollectionReference users = FirebaseFirestore.instance.collection('users');
+  final CollectionReference _userCollectionRef =
+      FirebaseFirestore.instance.collection('users');
+  final FirebaseAuth auth = FirebaseAuth.instance;
+
+
+  Future<void> getUser() async {
+    
+    NavigatorState nav = Navigator.of(context);
+    if (auth.currentUser == null) {
+      var tmp = await auth.authStateChanges().first;
+      if (tmp == null) {
+        nav.push(MaterialPageRoute(
+          builder: (context) => const SignInScreen(),
+        ));
+      } else {
+        user = tmp;
+      }
+    } else {
+      user = auth.currentUser!;
+    }
+  }
+  
+  Future<void> getTestDay() async {
+    try {
+      QuerySnapshot querySnapshot =
+          await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
+
+      if (querySnapshot.docs.isEmpty) {
+        setState(() {
+         
+          testDay = null;
+        });
+        return;
+      }
+
+      var userFromDb = querySnapshot.docs.first;
+      Map<String, dynamic> data = userFromDb.data() as Map<String, dynamic>;
+
+      // Check if TestDay exists in Firestore document
+      if (data.containsKey("TestDay") && data["TestDay"] != null) {
+        setState(() {
+          testDay = DateTime.fromMicrosecondsSinceEpoch(
+              data["TestDay"].microsecondsSinceEpoch);
+        });
+      } else {
+        // No test day in database
+        setState(() {
+          testDay = null;
+        });
+      }
+    } catch (e) {
+      print("Error retrieving test day: $e");
+      setState(() {
+        testDay = null;
+      });
+    }
+  }
+
+  Future<void> userData() async {
+    QuerySnapshot querySnapshot =
+    await users.where("userID", isEqualTo: user.uid).get();
+    setState(() {
+      id = querySnapshot.docs.last.id;
+  });
+    
+    try{
+      _eventsCollectionRef =
+          FirebaseFirestore.instance.collection('users/$id/events');
+
+      var snapshots = await _eventsCollectionRef.get();
+      
+     
+       for (var doc in snapshots.docs) {
+        var data = doc.data() as Map<String, dynamic>;
+        if (data.containsKey('date') && data.containsKey('events') ) {
+          List<dynamic>? eventsList = data['events'] as List<dynamic>?;
+
+          for (var event in eventsList!){
+            String title = event.toString();          
+            if(title.contains("Mini Mock")) {
+                Timestamp? timestamp = data['date'] as Timestamp?;
+                  if (timestamp != null) {
+                DateTime date = timestamp.toDate();
+                date = DateTime(date.year, date.month, date.day);
+                List<String> events = eventsList.map((e) => e.toString()).toList();
+                selectedEvents[date] = events.map ((title) => Event(color: Colors.black, title: title)).toList();
+            }}
+            else{
+                continue;
+        }}}}
+        }catch(e){
+      print("Error loading events from DB: $e");
+    }
+  }
 
   Widget _buildQuestionButton(int questionNumber) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -113,9 +218,115 @@ class MiniMockReviewState extends State<MiniMockReview> {
     );
   }
 
+  Future<void> addSingleEvent (
+      DateTime date, String eventTitle, User user) async {
+    date = DateTime(date.year, date.month, date.day,0,0,0,0);
+   
+  DateTime today = DateTime.now();
+  
+  
+
+  Color color =  Colors.yellow; 
+
+  
+  
+    //The delete single event function updates the UI in real time so I just copied the structure of that function 
+    Event newEvent =  Event(
+                        title: eventTitle,
+                        color: color
+                        );
+    //cannot add a new revision date if the date is not empty
+    if (allEvents[date] == null) {
+      selectedEvents[date] = [];
+      allEvents[date] = [];
+      print("Adding event $eventTitle to $date\n");
+    
+    selectedEvents[date]?.add(newEvent);
+    // allEvents[date]?.add(newEvent);
+    QuerySnapshot querySnapshot = await _eventsCollectionRef
+        .where("date", isEqualTo: Timestamp.fromDate(date))
+        .get();
+
+     List<String> updatedEvents =
+        selectedEvents[date]?.map((e) => e.title).toList() ?? [];
+    
+    if (querySnapshot.docs.isNotEmpty) {
+    String docId = querySnapshot.docs.first.id;
+
+    // Update Firestore document
+    await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
+  } else {
+    // If no document exists, create a new one
+    DocumentReference newDoc = await _eventsCollectionRef.add({
+      "date": Timestamp.fromDate(date),
+      "events": [eventTitle] // Start with just the new event
+    });
+    
+    String newDocId = newDoc.id;
+    await _eventsCollectionRef.doc(newDocId).update({"events": updatedEvents});
+
+  }}
+ 
+    setState(() {});
+  }
+
+  Future<void> deleteSingleEvent(
+      DateTime date, String eventTitle, User user) async {
+    date = DateTime(date.year, date.month, date.day,0,0,0,0);
+
+    if (!selectedEvents.containsKey(date)) {
+      print("No events found for date: ${date.toString().split(' ')[0]}");
+      return;
+    }
+
+    selectedEvents[date]?.removeWhere((event) => event.title == eventTitle);
+
+    if (selectedEvents[date]?.isEmpty ?? false) {
+      selectedEvents.remove(date);
+    }
+
+    QuerySnapshot querySnapshot = await _eventsCollectionRef
+        .where("date", isEqualTo: Timestamp.fromDate(date))
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      String docId = querySnapshot.docs.first.id;
+      List<String> updatedEvents =
+          selectedEvents[date]?.map((e) => e.title).toList() ?? [];
+
+      if (updatedEvents.isEmpty) {
+        await _eventsCollectionRef
+            .doc(docId)
+            .delete(); // ❗ Ensure deletion happens
+      } else {
+        await _eventsCollectionRef.doc(docId).update({"events": updatedEvents});
+      }
+    }
+
+    setState(() {});
+  }
+
+   Future<void> updateOneEvent(
+      Event oldEvent, String newTitle, DateTime newDate) async {
+    DateTime normalizedDate =
+        DateTime(newDate.year, newDate.month, newDate.day,0,0,0,0);
+    // Remove old event from Firestore
+    await deleteSingleEvent(normalizedDate, oldEvent.title, user);
+    await addSingleEvent(normalizedDate, newTitle, user);
+  }
+
+  Future<void> getData()async{
+    await getUser();
+    await userData();
+    await getTestDay();
+  }
+  
   @override
-  void initState() {
+  void initState()  {
     super.initState();
+    selectedEvents = {};
+    allEvents = {};
+    getData();
     questionLength = widget.rankingLength + widget.multiChoiceLength;
     _displayTime = widget.displayTime;
     remainingSeconds = widget.remainingSeconds;
@@ -166,9 +377,26 @@ class MiniMockReviewState extends State<MiniMockReview> {
               child: const Text("Cancel"),
             ),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
+                Event e = Event(color:Color(0xFFB0FFC6),title: "Shouldn't add");
+                 DateTime? dateInCalendar = DateTime.now();
+                 DateTime? temp = testDay; 
                 Navigator.pop(context); // Close the dialog
-                widget.miniMockWidget.examEnd(); // Proceed with completion
+                widget.miniMockWidget.examEnd();  // Proceed with completion
+                
+                for (final entry in selectedEvents.entries){
+                  dateInCalendar = entry.key;
+                  if (dateInCalendar!.isBefore(temp!)){
+                    for (final event in entry.value){
+                        temp = dateInCalendar;
+                        e = event;
+                    }
+                }}
+                if(!e.title.contains("Completed:")){
+                  //if the mini mock has not been completed already, then add the completed flag
+                  await updateOneEvent(e, "Completed: ${e.title}", temp!);
+                  print("updated calendar?\n");//UPDATE CALENDAR 
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
