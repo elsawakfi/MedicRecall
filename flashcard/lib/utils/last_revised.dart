@@ -28,11 +28,13 @@ static Future<void> resetSeenCardsForTopic(String topicName) async {
   // Get all seen cards
   QuerySnapshot seenDocs = await seenRef.get();
 
-  // Filter and delete only those seen cards that match the topic
+  
+  
   for (var doc in seenDocs.docs) {
     String cardID = doc["cardID"];
     if (cardIDsToDelete.contains(cardID)) {
-      await seenRef.doc(doc.id).delete();
+     int timesSeen = (doc["timesSeen"]?? 0);
+     await seenRef.doc(doc.id).delete();
     }
   }
 
@@ -64,8 +66,10 @@ static Future<void> resetSeenCardsForTopic(String topicName) async {
 
     for (var doc in seen.docs) {
       DocumentSnapshot card = await flashcardRef.doc(doc["cardID"]).get();
+      
       if (card.exists) {
         Map<String, dynamic> data = card.data() as Map<String, dynamic>;
+        
         _incrementMap(seenCards, data["topic"].toString());
         _updateDate(dateLastRevised, data["topic"], doc["lastSeen"].toDate());
         _limitMin(timesSeen, data["topic"], doc["score"][0] ?? 0);
