@@ -107,6 +107,7 @@ class HomePageState extends State<HomePage> {
       var snapshots = await _eventsCollectionRef.get();
       
      
+      
       for (var doc in snapshots.docs) {
         var data = doc.data() as Map<String, dynamic>;
         if (data.containsKey('date') && data.containsKey('events') ) {
@@ -123,7 +124,9 @@ class HomePageState extends State<HomePage> {
                 allEvents[date] = events.map ((title) => Event(color: Colors.black, title: title)).toList();
             }}
             else{
-                  Timestamp? timestamp = data['date'] as Timestamp?;
+                
+                
+                Timestamp? timestamp = data['date'] as Timestamp?;
                   if (timestamp != null) {
                 DateTime date = timestamp.toDate();
                 date = DateTime(date.year, date.month, date.day);
@@ -132,6 +135,7 @@ class HomePageState extends State<HomePage> {
                     title: title,
                     color : Colors.yellow
                 )).toList(); 
+         
               }
         }
 
@@ -140,6 +144,8 @@ class HomePageState extends State<HomePage> {
         }
       }
       allEvents.addAll(selectedEvents);
+     
+
     } catch(e){
       print("Error loading events from DB: $e");
     }
@@ -601,22 +607,31 @@ class HomePageState extends State<HomePage> {
     final seen = seenCards[topic] ?? 0;
     final total = totalCards[topic] ?? 0;
     final isComplete = total > 0 && seen >= total;
-
+    List <(String,DateTime)> keyHolder = [];
     // determine current scheduled date for this topic (if any)
     DateTime? dateInCalendar;
     Event? existing;
+    int moreThanOne = 0;
     if (selectedEvents.isNotEmpty) {
-      for (final entry in selectedEvents.entries) {
-        for (final e in entry.value) {
+      for (var entry in selectedEvents.entries) {
+        for (var e in entry.value) {
           if (e.title.contains(topic)) {
-            dateInCalendar = DateTime(entry.key.year, entry.key.month, entry.key.day);
-            existing = e;
-            break;
+            moreThanOne++;
+            if (dateInCalendar != null && dateInCalendar.isAfter(DateTime(entry.key.year, entry.key.month, entry.key.day))){
+              dateInCalendar = DateTime(entry.key.year, entry.key.month, entry.key.day);
+              existing = e;
+            }
+            else if (dateInCalendar == null){
+              dateInCalendar = DateTime(entry.key.year, entry.key.month, entry.key.day);
+              existing = e;
+            }
           }
         }
-        if (dateInCalendar != null) break;
+        // if (dateInCalendar != null) break;
       }
     }
+
+    
 
     // compute “how long since last seen” and gap days map
     final idx = topicsUnorder.indexOf(topic);
@@ -655,17 +670,19 @@ class HomePageState extends State<HomePage> {
       final String nextTitle = "$topic Flashcards";
       final bool alreadyHasNext = selectedEvents[nextReview]
               ?.any((e) => e.title == nextTitle) ?? false;
-
-      if (!alreadyHasNext) {
-        // move “future” completion to today if needed
-        if (dateInCalendar != null && dateInCalendar.isAfter(today)) {
+      
+      
+      if (dateInCalendar != null && dateInCalendar.isAfter(today) && moreThanOne <= 1) {
           await updateOneEvent(existing!, "Completed: $topic ", today, oldDate: dateInCalendar);
           dateInCalendar = today;
         } else if (dateInCalendar != null) {
           await updateOneEvent(existing!, "Completed: $topic ", dateInCalendar!);
         }
-
-        await addSingleEvent(nextReview, nextTitle, user);
+      if (!alreadyHasNext) {
+        // move “future” completion to today if needed
+        if (moreThanOne <= 1){
+          await addSingleEvent(nextReview, nextTitle, user);
+        }
         // Reset seen on backend (once)
         await LastRevised.resetSeenCardsForTopic(topic);
         scheduledThisPass.add(topic);
