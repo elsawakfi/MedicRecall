@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flashcard_x/widgets/design_main.dart';
+import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
@@ -155,7 +156,7 @@ class _AddCardState extends State<AddCard> {
   Widget build(BuildContext context) {
     AddCard.navKey;
     return Scaffold(
-      appBar: DesignMain.appBarMain("Add Flashcard", context),
+              appBar: CustomAppBar(title: "Add Flashcard"),
       body: Visibility(
         visible: !loading,
         child: Column(
@@ -185,7 +186,7 @@ class _AddCardState extends State<AddCard> {
                         ),
                         decoration: const InputDecoration(
                           border: InputBorder.none,
-                          hintText: 'Questions',
+                          hintText: 'Question',
                           hintStyle: TextStyle(fontSize: 20),
                           contentPadding: EdgeInsets.zero,
                         ),
@@ -219,7 +220,7 @@ class _AddCardState extends State<AddCard> {
                         ),
                         decoration: const InputDecoration(
                           border: InputBorder.none,
-                          hintText: 'Answers',
+                          hintText: 'Answer',
                           hintStyle: TextStyle(fontSize: 20),
                           contentPadding: EdgeInsets.zero,
                         ),
@@ -246,6 +247,10 @@ class _AddCardState extends State<AddCard> {
                 elevation: 16,
                 style: const TextStyle(color: Colors.black),
                 underline: Container(height: 0),
+                hint: Text(
+                  'Category',
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
                 onChanged: (String? newValue) {
                   setState(() {
                     topic = newValue!;
@@ -278,6 +283,10 @@ class _AddCardState extends State<AddCard> {
                 elevation: 16,
                 style: const TextStyle(color: Colors.black),
                 underline: Container(height: 0),
+                hint: Text(
+                  'Sub-category',
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
                 onChanged: (String? newValue) {
                   setState(() {
                     subtopic = newValue!;
@@ -293,14 +302,43 @@ class _AddCardState extends State<AddCard> {
             ),
         
         const SizedBox(height: 24),
-        GFButton(
-        onPressed: uploadCard,
-        text: "Create",
-        icon: const Icon(Icons.keyboard_arrow_right_sharp),
-        shape: GFButtonShape.pills,
-        color: Colors.green,
-        textStyle: const TextStyle(fontSize: 18, color: Colors.white),
-),  ],
+        Container(
+          width: 200,
+          height: 60,
+                      child: GFButton(
+              onPressed: uploadCard,
+              text: "Create",
+              icon: IconTheme(
+                data: const IconThemeData(
+                  color: Colors.white,
+                ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: const Icon(
+                    Icons.keyboard_arrow_right_sharp,
+                    size: 28,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              shape: GFButtonShape.pills,
+              color: Colors.green,
+              textStyle: const TextStyle(
+                fontSize: 24, 
+                color: Colors.white, 
+                fontWeight: FontWeight.bold,
+                shadows: [
+                  Shadow(
+                    offset: Offset(1, 1),
+                    blurRadius: 2,
+                    color: Colors.black,
+                  ),
+                ],
+              ),
+            ),
+        ),  ],
         ),
       ),
     );
