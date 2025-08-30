@@ -162,7 +162,6 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
   @override
   void dispose(){
     _controller.dispose();
-    _loadingBar.bye();
     super.dispose();
   }
 
@@ -1031,12 +1030,6 @@ class WaitToFlipTimer extends StatefulWidget {
     controller.reset();
     controller.forward();
   }
-
-  void bye(){
-    controller.dispose();
-    
-  }
-
 }
 
 class _WaitToFlipTimerState extends State<WaitToFlipTimer> with TickerProviderStateMixin {
@@ -1058,11 +1051,11 @@ class _WaitToFlipTimerState extends State<WaitToFlipTimer> with TickerProviderSt
     );
   }
 
-  @override
-  void dispose() {
-    widget.controller.dispose();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   widget.controller.dispose();
+  //   super.dispose();
+  // }
 
 }
 

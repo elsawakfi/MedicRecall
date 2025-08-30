@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flashcard_x/utils/firebase_wrapper.dart';
+import 'package:universal_html/html.dart';
 
 class LastRevised {
 
@@ -69,7 +70,6 @@ static Future<void> resetSeenCardsForTopic(String topicName) async {
       
       if (card.exists) {
         Map<String, dynamic> data = card.data() as Map<String, dynamic>;
-        
         _incrementMap(seenCards, data["topic"].toString());
         _updateDate(dateLastRevised, data["topic"], doc["lastSeen"].toDate());
         _limitMin(timesSeen, data["topic"], doc["score"][0] ?? 0);
@@ -80,7 +80,7 @@ static Future<void> resetSeenCardsForTopic(String topicName) async {
         }
       }
     }
-                 
+    
     for (var doc in all.docs + userCards.docs) { // This loads all the cards during the dashboard screen loading process...
       if (doc.exists) {
         Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
@@ -90,7 +90,7 @@ static Future<void> resetSeenCardsForTopic(String topicName) async {
         }
       }
     }
-
+    
     return TopicStats(seenCards: seenCards, totalCards: totalCards, timesSeen: timesSeen, dateLastRevised: dateLastRevised);
 
   }
@@ -268,6 +268,7 @@ static Future<void> resetSeenCardsForTopic(String topicName) async {
   }
 
 }
+
 class TopicStats {
 
   final Map<String, int> seenCards;

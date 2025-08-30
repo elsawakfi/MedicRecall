@@ -591,22 +591,14 @@ class StudySessionManager {
       DateTime testDay,
       int daysUntilTest,
       Map<DateTime, List<Event>> generatedEvents,String topic) async{
-      
-                         DateTime scheduledDate = await findNearestFreeDate(
-                        nextReviewDate, 3, testDay, today, generatedEvents, userId);
-                    
                     // Only schedule if we found a valid date
-                        if (!scheduledDate.isAfter(testDay.subtract(const Duration(days: 1))) &&
-                            scheduledDate.isAfter(today) &&
-                            !await _isExcludedDay(scheduledDate, userId)) {
-                            
+                        if (!nextReviewDate.isAfter(testDay.subtract(const Duration(days: 1))) &&
+                            nextReviewDate.isAfter(today) &&
+                            !await _isExcludedDay(nextReviewDate, userId)) {
                           // Check if this date already has an event
-                          if (generatedEvents[scheduledDate] == null) {
-                            generatedEvents[scheduledDate] = [
+                            generatedEvents[nextReviewDate] = [
                               Event(title: "$topic Flashcards", color: kFlashcardColor)
                             ];
-
-                        }
                       }
   }
 
@@ -698,7 +690,7 @@ class StudySessionManager {
                       DateTime nextReviewDate = lastReviewDate.add(const Duration(days: 6));
                       
                       //Revised once 
-                      while(nextReviewDate.isBefore(testDay)){
+                     while(nextReviewDate.isBefore(testDay)){
                       await _scheduleNextReviewForTopic(
                           nextReviewDate, userId, today, testDay, daysUntilTest, generatedEvents, topic);
                       
@@ -726,10 +718,8 @@ class StudySessionManager {
                       //Revised five times 
                       await _scheduleNextReviewForTopic(
                           nextReviewDate, userId, today, testDay, daysUntilTest, generatedEvents, topic);
-
-                      break;
-                      
-                      }       
+     
+                     }            
               }
             } catch (e) {
               if (kDebugMode) {
