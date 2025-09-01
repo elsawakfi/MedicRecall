@@ -4,7 +4,7 @@ import 'package:flashcard_x/utils/authentication.dart';
 import 'package:flashcard_x/utils/string_validation.dart';
 import 'package:flutter/material.dart';
 
-import '../screens/landing_screen_new.dart';
+import '../screens/payment_screen.dart';
 
 
 
@@ -179,7 +179,7 @@ class _LoginFormState extends State<LoginForm> {
 
                           if (user != null && user.emailVerified) {
                             // if a user object is filled
-                            Navigator.pushReplacementNamed(context, NewLanding.id); //push replace page with homepage instance, with id, which is a string
+                            Navigator.pushReplacementNamed(context, PaymentScreen.id); // Navigate to payment screen
                           }else if (user != null){
                             navigator.pushReplacementNamed(VerifyEmailScreen.id);
                           }

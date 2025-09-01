@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../screens/landing_screen.dart';
 import '../screens/landing_screen_new.dart';
+import '../screens/payment_screen.dart';
 
 
 
@@ -45,7 +46,7 @@ class _GoogleSignInButtonState extends State<GoogleSignInButton> {
 
                     if (user != null) {
                       //Navigator.pushReplacementNamed(context, HomePage.id);
-                      navigator.pushReplacementNamed(NewLanding.id);
+                      navigator.pushReplacementNamed(PaymentScreen.id);
                       // pushReplacementNamed(context, Landing.id);
                     }
                   },
