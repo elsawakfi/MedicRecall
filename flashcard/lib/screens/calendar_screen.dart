@@ -199,6 +199,7 @@ class CalendarStateO extends State<Calendar> {
     await generateEvents(testDay, user);
     setState(() {});
   }
+  
 
   Future<void> generateStudySessions(User user) async {
     try {
@@ -223,6 +224,7 @@ class CalendarStateO extends State<Calendar> {
 
       // Generate study sessions using StudySessionManager
       var studySessions = await studySessionManager.generateStudySessions(user);
+     
 
       if (studySessions.isNotEmpty) {
         // Merge new study sessions with existing events
@@ -448,28 +450,52 @@ class CalendarStateO extends State<Calendar> {
           if (timestamp != null && eventsList != null) {
             DateTime date = timestamp.toDate();
             date = DateTime(date.year, date.month, date.day);
+            final List<String> titles = eventsList.map((e) => e.toString()).toList();
 
-            List<String> events = eventsList.map((e) => e.toString()).toList();
-            for (String e in events){
-                if(date.isBefore(today)&& !e.contains("Completed")){
-                            selectedEvents[date] = events
-                                .map((title) => Event(
-                                      title: e,
-                                      color: const Color.fromARGB(255, 255, 0, 8),
-                                    ))
-                                .toList();}
-                else{
-                  selectedEvents[date] = events
-                                .map((title) => Event(
-                                      title: title,
-                                      color: _getEventColor(title),
-                                    ))
-                                .toList();
-                }
-                                
-          }
+            // build Event objects for this doc (color per title)
+            final List<Event> eventsForThisDoc = titles.map((title) {
+              final bool isOverdueNotCompleted = date.isBefore(today) && !title.contains("Completed");
+              final Color color = isOverdueNotCompleted
+                  ? const Color.fromARGB(255, 255, 0, 8)
+                  : _getEventColor(title);
+              return Event(title: title, color: color);
+            }).toList();
+
+            // Merge into selectedEvents (do NOT replace the list)
+            final dst = selectedEvents.putIfAbsent(date, () => <Event>[]);
+
+            // fast dedupe by lowercased trimmed title
+            final existingTitles = dst.map((e) => e.title.trim().toLowerCase()).toSet();
+
+            for (final ev in eventsForThisDoc) {
+              final key = ev.title.trim().toLowerCase();
+              if (!existingTitles.contains(key)) {
+                dst.add(ev);
+                existingTitles.add(key);
+              }
             }
-            
+
+        //     List<String> events = eventsList.map((e) => e.toString()).toList();
+        //     for (String e in eventsList){
+        //         if(date.isBefore(today)&& !e.contains("Completed")){
+        //                     selectedEvents[date] = events
+        //                         .map((title) => Event(
+        //                               title: e,
+        //                               color: const Color.fromARGB(255, 255, 0, 8),
+        //                             ))
+        //                         .toList();}
+        //         else{
+        //           selectedEvents[date] = events
+        //                         .map((title) => Event(
+        //                               title: e.toString(),
+        //                               color: _getEventColor(e),
+        //                             ))
+        //                         .toList();
+        //         }
+                                
+        //   }
+            }
+             setState(() {});
         }
       }
     } catch (e) {
@@ -987,8 +1013,14 @@ class CalendarStateO extends State<Calendar> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("New Event"),
-        content: TextFormField(controller: _eventController),
+        title: const Text(
+          "New Event",
+          style: TextStyle(
+            color: Colors.black
+          ),),
+        content: TextFormField(controller: _eventController,
+        style: TextStyle(color: Colors.black),
+       ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -2033,7 +2065,6 @@ class CalendarStateO extends State<Calendar> {
                                                       selectedDay,
                                                       event.title,
                                                       user);
-                                                  setState(() {});
                                                 },
                                               ),
                                             ),
@@ -2225,13 +2256,21 @@ class CalendarStateO extends State<Calendar> {
   Future<void> deleteSingleEvent(
       DateTime date, String eventTitle, User user) async {
     date = DateTime(date.year, date.month, date.day);
-
+    setState(() {
+      loading = true;
+    });
     if (!selectedEvents.containsKey(date)) {
       print("No events found for date: ${date.toString().split(' ')[0]}");
       return;
     }
+    
 
-    selectedEvents[date]?.removeWhere((event) => event.title == eventTitle);
+    final idx = selectedEvents[date]!
+    .indexWhere((event) => event.title == eventTitle);
+
+    if (idx != -1) {
+      selectedEvents[date]!.removeAt(idx);
+    }
 
     if (selectedEvents[date]?.isEmpty ?? false) {
       selectedEvents.remove(date);
@@ -2255,7 +2294,9 @@ class CalendarStateO extends State<Calendar> {
       }
     }
 
-    setState(() {});
+    setState(() {
+      loading = false;
+    });
   }
 
   Future<void> updateOneEvent(
@@ -2271,8 +2312,8 @@ class CalendarStateO extends State<Calendar> {
       print("Whatever case this is\n");
     }
     await deleteSingleEvent(normalizedOldDate, oldEvent.title, user);
-    if(complete) await addSingleEvent(normalizedNewDate, newTitle, user,completed: true);
-    else await addSingleEvent(normalizedNewDate, newTitle, user);
+    if(complete) {await addSingleEvent(normalizedNewDate, newTitle, user,completed: true);}
+    else {await addSingleEvent(normalizedNewDate, newTitle, user);}
     
 
     // Refresh UI

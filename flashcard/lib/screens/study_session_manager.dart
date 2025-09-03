@@ -21,6 +21,7 @@ class StudySessionManager {
   final FirebaseAuth auth = FirebaseAuth.instance;
   late User user;
   late CollectionReference _eventsCollectionRef;
+  late List<(String,DateTime)> initialReviews = [];
 
   /// Retrieves timestamps of last seen topics for a user
   Future<List<Timestamp>?> getTimestamps(String userId) async {
@@ -303,13 +304,6 @@ class StudySessionManager {
         await _scheduleOfficialPapers(firstStudyDay, normalizedTestDay,
             daysUntilTest, repetitions, generatedEvents);
       }
-
-      // Schedule Flashcards
-      if (selectedResources.contains('Flashcards')) {
-        await _scheduleFlashcards(user.uid, today, normalizedTestDay,
-            daysUntilTest, generatedEvents);
-      }
-
       if (selectedResources.contains("Full-sized Mock Exam")) {
         final repetitions =
             (userData['fullSizedMockRepetitions'] as num?)?.toInt() ?? 1;
@@ -348,6 +342,15 @@ class StudySessionManager {
         
         await _scheduleSJTPaper(
             firstStudyDay, normalizedTestDay, daysUntilTest, generatedEvents, sjtRepetitions);
+      }
+
+      // Schedule Flashcards
+      if (selectedResources.contains('Flashcards')) {
+        await _scheduleFlashcards(user.uid, today, normalizedTestDay,
+            daysUntilTest, generatedEvents);
+        
+        await _scheduleAllFlashcards(userId, today, testDay, daysUntilTest, generatedEvents);
+        
       }
 
       return generatedEvents;
@@ -595,14 +598,20 @@ class StudySessionManager {
                         if (!nextReviewDate.isAfter(testDay.subtract(const Duration(days: 1))) &&
                             nextReviewDate.isAfter(today) &&
                             !await _isExcludedDay(nextReviewDate, userId)) {
-                          // Check if this date already has an event
-                            generatedEvents[nextReviewDate] = [
-                              Event(title: "$topic Flashcards", color: kFlashcardColor)
-                            ];
+                          
+                          generatedEvents.putIfAbsent(nextReviewDate, () => []);
+
+                          if (!generatedEvents[nextReviewDate]!
+                            .any((e) => e.title == "$topic Flashcards")) {
+                            generatedEvents[nextReviewDate]!.add(
+                            Event(title: "$topic Flashcards", color: kFlashcardColor),
+                          );
+                        }
+                           
+                            
                       }
   }
 
-  /// Schedule flashcard events
   Future<void> _scheduleFlashcards(
       String userId,
       DateTime today,
@@ -625,7 +634,6 @@ class StudySessionManager {
       
       // First collect all topics that need to be scheduled
       Set<String> allTopics = {};
-      List< (DateTime,String) > keyHolder =[];
       for (var doc in topicSnapshot.docs){
         Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
         String topic = data['topic'];
@@ -635,98 +643,86 @@ class StudySessionManager {
       // Schedule flashcards with consistent spacing
       DateTime currentTargetDate = today.add(const Duration(days: 1)); // Start one day after today
       
-     
-              for (final topic in allTopics) {
-                  
-                    // Skip if we're too close to the test day
-                    if (currentTargetDate.isAfter(testDay.subtract(const Duration(days: 1)))) {
-                      break;
-                    }
-                    
-                    // Find a suitable date that respects our spacing requirements
-                    DateTime scheduledDate = await findNearestFreeDate(
-                        currentTargetDate, 7, testDay, today, generatedEvents, userId,
-                        requiredSpacing: requiredSpacing);
-                    
-                    // Only schedule if we found a valid date
-                    if (!scheduledDate.isAfter(testDay.subtract(const Duration(days: 1))) &&
-                        scheduledDate.isAfter(today) &&
-                        !await _isExcludedDay(scheduledDate, userId)) {
-                        
-                      // Check if this date already has an event
-                      if (generatedEvents[scheduledDate] == null) {
-                        generatedEvents[scheduledDate] = [
-                          Event(title: "$topic Flashcards", color: kFlashcardColor)
-                        ];
-
-                        keyHolder.add((scheduledDate,topic));
-                        
-                        // Move to the next date with proper spacing
-                        
-                        currentTargetDate = scheduledDate.add(Duration(days: requiredSpacing + 1));
-
-                        
-                        if (kDebugMode) {
-                          print('Scheduled $topic on ${scheduledDate.toIso8601String()}, next target: ${currentTargetDate.toIso8601String()}');
-                        }
-                      } else {
-                        // This date already has another event, move to the next day
-                        currentTargetDate = scheduledDate.add(const Duration(days: 1));
-                      }
-                    } else {
-                      // If we couldn't find a date, move on to the next day
-                      currentTargetDate = currentTargetDate.add(const Duration(days: 1));
-                    }
-              }
-             
-              
-             
-             
+      for (final topic in allTopics) {
+        // Skip if we're too close to the test day
+        if (currentTargetDate.isAfter(testDay.subtract(const Duration(days: 1)))) {
+          break;
+        }
+        
+        // Find a suitable date that respects our spacing requirements
+        DateTime scheduledDate = await findNearestFreeDate(
+            currentTargetDate, 7, testDay, today, generatedEvents, userId,
+            requiredSpacing: requiredSpacing);
+        
+        // Only schedule if we found a valid date
+        if (!scheduledDate.isAfter(testDay.subtract(const Duration(days: 1))) &&
+            scheduledDate.isAfter(today) &&
+            !await _isExcludedDay(scheduledDate, userId)) {
             
-              for (final topic in allTopics) { 
-                     
-                      int index = keyHolder.indexWhere((rec)=> rec.$2 == topic);
-                      DateTime lastReviewDate = keyHolder[index].$1;
-                      DateTime nextReviewDate = lastReviewDate.add(const Duration(days: 6));
-                      
-                      //Revised once 
-                     while(nextReviewDate.isBefore(testDay)){
-                      await _scheduleNextReviewForTopic(
-                          nextReviewDate, userId, today, testDay, daysUntilTest, generatedEvents, topic);
-                      
-                      
-                      nextReviewDate = nextReviewDate.add(const Duration(days: 10));
-                      //Revised twice 
-                      
-                      await  _scheduleNextReviewForTopic(
-                          nextReviewDate, userId, today, testDay, daysUntilTest, generatedEvents, topic);
-                      
-                      nextReviewDate = nextReviewDate.add(const Duration(days: 16));
-                      //Revised thrice
-                      
-                       await _scheduleNextReviewForTopic(
-                          nextReviewDate, userId, today, testDay, daysUntilTest, generatedEvents, topic);
-                      
-                      nextReviewDate = nextReviewDate.add(const Duration(days: 24));
-                      //Revised four times 
-                     
-                      await _scheduleNextReviewForTopic(
-                          nextReviewDate, userId, today, testDay, daysUntilTest, generatedEvents, topic);
+          // Check if this date already has an event
+          if (generatedEvents[scheduledDate] == null) {
+            generatedEvents[scheduledDate] = [
+              Event(title: "$topic Flashcards", color: kFlashcardColor)
+            ];
 
-
-                      nextReviewDate = nextReviewDate.add(const Duration(days: 36));
-                      //Revised five times 
-                      await _scheduleNextReviewForTopic(
-                          nextReviewDate, userId, today, testDay, daysUntilTest, generatedEvents, topic);
-     
-                     }            
-              }
-            } catch (e) {
-              if (kDebugMode) {
-                print('Error processing flashcards: $e');
-              }
+            initialReviews.add((topic,scheduledDate));
+            
+            // Move to the next date with proper spacing
+            currentTargetDate = scheduledDate.add(Duration(days: requiredSpacing + 1));
+            
+            if (kDebugMode) {
+              print('Scheduled $topic on ${scheduledDate.toIso8601String()}, next target: ${currentTargetDate.toIso8601String()}');
             }
+          } else {
+            // This date already has another event, move to the next day
+            currentTargetDate = scheduledDate.add(const Duration(days: 1));
+          }
+        } else {
+          // If we couldn't find a date, move on to the next day
+          currentTargetDate = currentTargetDate.add(const Duration(days: 1));
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error processing flashcards: $e');
+      }
+    }
+    print("Initial reviews: $initialReviews");
   }
+
+  /// Schedule flashcard events
+  Future<void> _scheduleAllFlashcards(
+      String userId,
+      DateTime today,
+      DateTime testDay,
+      int daysUntilTest,
+      Map<DateTime, List<Event>> generatedEvents) async {
+      
+      List<int> spacing = [6,10,16,24,36];
+      for (var tuple in initialReviews){
+        DateTime nextReview = tuple.$2;
+        for (int i in spacing){
+          print("Next Review: $nextReview");
+          nextReview = nextReview.add(Duration(days: i));
+          if(nextReview.isAfter(testDay)){
+            break;
+          }
+          else{
+            generatedEvents.putIfAbsent(nextReview, () => []);
+
+            if (!generatedEvents[nextReview]!
+                .any((e) => e.title == "${tuple.$1} Flashcards")) {
+              generatedEvents[nextReview]!.add(
+                Event(title: "${tuple.$1} Flashcards", color: kFlashcardColor),
+              );
+            }
+             
+            }
+          }
+        }
+      }
+      
+  
 
   /// Save generated events to the database
   Future<void> saveStudySessionsToDB(

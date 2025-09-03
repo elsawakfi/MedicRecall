@@ -151,7 +151,7 @@ class FullMockReviewState extends State<FullMockReview> {
     }
   }
 
-  Future<void> addSingleEvent (
+ Future<void> addSingleEvent (
       DateTime date, String eventTitle, User user) async {
     date = DateTime(date.year, date.month, date.day,0,0,0,0);
    
@@ -168,10 +168,7 @@ class FullMockReviewState extends State<FullMockReview> {
                         title: eventTitle,
                         color: color
                         );
-    //cannot add a new revision date if the date is not empty
-    if (allEvents[date] == null) {
-      selectedEvents[date] = [];
-      allEvents[date] = [];
+    
       print("Adding event $eventTitle to $date\n");
     
     selectedEvents[date]?.add(newEvent);
@@ -198,7 +195,7 @@ class FullMockReviewState extends State<FullMockReview> {
     String newDocId = newDoc.id;
     await _eventsCollectionRef.doc(newDocId).update({"events": updatedEvents});
 
-  }}
+  }
  
     setState(() {});
   }
@@ -212,11 +209,17 @@ class FullMockReviewState extends State<FullMockReview> {
       return;
     }
 
-    selectedEvents[date]?.removeWhere((event) => event.title == eventTitle);
-
-    if (selectedEvents[date]?.isEmpty ?? false) {
-      selectedEvents.remove(date);
+    for(Event e in selectedEvents[date]!){
+      if (e.title == eventTitle){
+        selectedEvents[date]!.remove(e);
+      }
     }
+
+    // selectedEvents[date]?.removeWhere((event) => event.title == eventTitle);
+
+    // if (selectedEvents[date]?.isEmpty ?? false) {
+    //   selectedEvents.remove(date);
+    // }
 
     QuerySnapshot querySnapshot = await _eventsCollectionRef
         .where("date", isEqualTo: Timestamp.fromDate(date))
@@ -620,25 +623,28 @@ class FullMockReviewState extends State<FullMockReview> {
                                       width: 150,
                                       child: ElevatedButton.icon(
                                           onPressed: () async {
+                                           _showCompletionDialog(context);
                                             Event e = Event(color:Color(0xFFB0FFC6),title: "Shouldn't add");
-                                            DateTime? dateInCalendar = DateTime.now(); 
-                                            DateTime? temp = testDay;
-                                            
-                                            _showCompletionDialog(context);
+                                            DateTime? dateInCalendar = DateTime.now();
+                                            DateTime? temp = testDay; 
+                                      
+                                           
                                             
                                             for (final entry in selectedEvents.entries){
-                                                dateInCalendar = entry.key;
-                                                if (dateInCalendar!.isBefore(temp!)){
-                                                  temp = dateInCalendar;
-                                                  for (final event in entry.value){
+                                              dateInCalendar = entry.key;
+                                              if (dateInCalendar!.isBefore(temp!)){
+                                                for (final event in entry.value){
+                                                    if(event.title.contains("Full-sized Mock")){
+                                                    temp = dateInCalendar;
                                                     e = event;
-                                                    print(e.title);
                                                 }
                                                 }
-                                            }
+                                            }}
                                             if(!e.title.contains("Completed:")){
-                                            await updateOneEvent(e, "Completed: ${e.title}", temp!);
-                                            print("updated calendar?\n");}
+                                              //if the mini mock has not been completed already, then add the completed flag
+                                              await updateOneEvent(e, "Completed: ${e.title}", temp!);
+                                              print("updated calendar?\n");//UPDATE CALENDAR 
+                                            }
               
                                             //UPDATE CALENDAR
                                           },
