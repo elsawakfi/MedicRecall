@@ -70,6 +70,7 @@ class _PricingScreenState extends State<PricingScreen> {
                 style: TextStyle(
                   fontSize: 30,
                   fontWeight: FontWeight.w600,
+                  fontFamily: 'Lato',
                   color: Colors.white,
                 ),
               ),
@@ -79,6 +80,7 @@ class _PricingScreenState extends State<PricingScreen> {
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w300,
+                  fontFamily: 'Lato',
                   color: Colors.white,
                 ),
                 textAlign: TextAlign.center,
@@ -90,9 +92,41 @@ class _PricingScreenState extends State<PricingScreen> {
                     SizedBox(height: 100),
                     Card(
                       color: Colors.white,
-                      child: SizedBox(
-                        width: 100,
-                        height: 100,
+                      elevation: 15,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children:[
+                            SizedBox(height: 5),
+                            Text(
+                              "Monthly\nSubscription",
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontFamily: 'Lato',
+                                fontWeight: FontWeight.w900,
+                                fontSize: 24,
+                              ),
+                              textAlign: TextAlign.left,
+                            ),
+                            SizedBox(height: 5),
+                            Text(
+                              "£10 per month",
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontFamily: 'Lato',
+                                fontWeight: FontWeight.w700,
+                                fontSize: 16,
+                              ),
+                              textAlign: TextAlign.left,
+                            ),
+                            SizedBox(height: 10),
+                            IconButtonCustom(
+                              label: 'CHECKOUT',
+                              onPressed: () => _launchStripeWithUserId(),
+                            )
+                          ]
+                        ),
                       )
                     ),
                   ]
@@ -123,40 +157,39 @@ class IconButtonCustom extends StatelessWidget {
     //final theme = Theme.of(context);
     //final themeProvider = Provider.of<ThemeProvider>(context);
 
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 5.0),
-        child: ElevatedButton(
-          onPressed: onPressed,
-          style: ElevatedButton.styleFrom(
-            elevation: 4,
-            //backgroundColor: themeProvider.isDarkMode ? Colors.black : Color.fromRGBO(44, 44, 44, 1),
-            backgroundColor: Colors.black,
-            padding: EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 35.0),
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          elevation: 0,
+          //backgroundColor: themeProvider.isDarkMode ? Colors.black : Color.fromRGBO(44, 44, 44, 1),
+          backgroundColor: Colors.black,
+          padding: EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
           ),
-          child: Row(
-            children: [
-              SizedBox(width: 15), 
-              if (iconFilePath != null) ...[
-                Image.asset(
-                  width: 30,
-                  iconFilePath!,
-                ),
-              ],
-              Expanded(
-                child: Text(
-                label,
-                textAlign: TextAlign.center,
-                  style: textStyle1,
-                ),
-              ),
-            ]
-          ),
-          )
         ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (iconFilePath != null) ...[
+              Image.asset(
+                width: 30,
+                iconFilePath!,
+              ),
+            ],
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30.0),
+              child: Text(
+              label,
+              textAlign: TextAlign.center,
+                style: textStyle1,
+              ),
+            ),
+          ]
+        ),
+        )
       );
   }
 }
