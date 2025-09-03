@@ -22,6 +22,7 @@ class StudySessionManager {
   late User user;
   late CollectionReference _eventsCollectionRef;
   late List<(String,DateTime)> initialReviews = [];
+  List<String> excludedDays = [];
 
   /// Retrieves timestamps of last seen topics for a user
   Future<List<Timestamp>?> getTimestamps(String userId) async {
@@ -83,7 +84,7 @@ class StudySessionManager {
       var userData = querySnapshot.docs.last.data() as Map<String, dynamic>;
       if (!userData.containsKey('excludedDays')) return false;
 
-      List<String> excludedDays = List<String>.from(userData['excludedDays']);
+      excludedDays = List<String>.from(userData['excludedDays']);
       String dayName = _getDayName(date.weekday);
       return excludedDays.contains(dayName);
     } catch (e) {
@@ -687,7 +688,7 @@ class StudySessionManager {
         print('Error processing flashcards: $e');
       }
     }
-    print("Initial reviews: $initialReviews");
+   
   }
 
   /// Schedule flashcard events
@@ -697,17 +698,28 @@ class StudySessionManager {
       DateTime testDay,
       int daysUntilTest,
       Map<DateTime, List<Event>> generatedEvents) async {
-      
+      bool backOrFront = true;
       List<int> spacing = [6,10,16,24,36];
       for (var tuple in initialReviews){
         DateTime nextReview = tuple.$2;
         for (int i in spacing){
-          print("Next Review: $nextReview");
           nextReview = nextReview.add(Duration(days: i));
-          if(nextReview.isAfter(testDay)){
+          if(nextReview.isAfter(testDay) || nextReview.isAtSameMomentAs(testDay)){
             break;
           }
           else{
+            print(_getDayName(nextReview.weekday));
+           
+            if (excludedDays.contains(_getDayName(nextReview.weekday))){
+              print("Hit excluded day");
+              if(backOrFront){
+                nextReview = nextReview.subtract(Duration(days:1));
+                backOrFront = false;
+              }else{
+              nextReview = nextReview.add(Duration(days:1));
+              backOrFront = true;
+              }
+            }
             generatedEvents.putIfAbsent(nextReview, () => []);
 
             if (!generatedEvents[nextReview]!
