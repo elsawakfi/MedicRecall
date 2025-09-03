@@ -3,6 +3,7 @@ import 'package:flashcard_x/screens/dashboard_screen.dart';
 import 'package:flashcard_x/screens/landing_screen_new.dart';
 import 'package:flashcard_x/screens/mark_scheme.dart';
 import 'package:flashcard_x/screens/minimock_landing.dart';
+import 'package:flashcard_x/screens/pricing_screen.dart';
 import 'package:flashcard_x/screens/settings_screen.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flashcard_x/screens/fullmock_landing.dart';
@@ -119,6 +120,16 @@ class DrawMain2 extends StatelessWidget {
                       ),
                       icon: const Icon(Icons.star_rate),
                       title: 'Subscription',
+                    ),
+                    DrawerTile(
+                      onPressed: (){
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const PricingScreen()),
+                        );
+                      },
+                      icon: const Icon(Icons.add_box_outlined),
+                      title: 'Plans',
                     ),
                     DrawerTile(
                       onPressed: () {
