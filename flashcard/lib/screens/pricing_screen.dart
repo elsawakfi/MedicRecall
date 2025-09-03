@@ -90,45 +90,11 @@ class _PricingScreenState extends State<PricingScreen> {
                 child: Row(
                   children: [
                     SizedBox(height: 100),
-                    Card(
-                      color: Colors.white,
-                      elevation: 15,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children:[
-                            SizedBox(height: 5),
-                            Text(
-                              "Monthly\nSubscription",
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontFamily: 'Lato',
-                                fontWeight: FontWeight.w900,
-                                fontSize: 24,
-                              ),
-                              textAlign: TextAlign.left,
-                            ),
-                            SizedBox(height: 5),
-                            Text(
-                              "£10 per month",
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontFamily: 'Lato',
-                                fontWeight: FontWeight.w700,
-                                fontSize: 16,
-                              ),
-                              textAlign: TextAlign.left,
-                            ),
-                            SizedBox(height: 10),
-                            IconButtonCustom(
-                              label: 'CHECKOUT',
-                              onPressed: () => _launchStripeWithUserId(),
-                            )
-                          ]
-                        ),
-                      )
-                    ),
+                    PlanBox(
+                      planTitle: "Monthly Subscription",
+                      planCost: "£10 per month",
+                      onCheckout: () => _launchStripeWithUserId(),
+                    )
                   ]
                 ),
               )
@@ -191,5 +157,55 @@ class IconButtonCustom extends StatelessWidget {
         ),
         )
       );
+  }
+}
+
+class PlanBox extends StatelessWidget {
+  final Future<void> Function() onCheckout;
+  final String planTitle;
+  final String planCost;
+  const PlanBox({super.key, required this.onCheckout, required this.planTitle, required this.planCost});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Colors.white,
+      elevation: 15,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children:[
+            SizedBox(height: 5),
+            Text(
+              planTitle,
+              style: TextStyle(
+                color: Colors.black,
+                fontFamily: 'Lato',
+                fontWeight: FontWeight.w900,
+                fontSize: 24,
+              ),
+              textAlign: TextAlign.left,
+            ),
+            SizedBox(height: 5),
+            Text(
+              planCost,
+              style: TextStyle(
+                color: Colors.black,
+                fontFamily: 'Lato',
+                fontWeight: FontWeight.w700,
+                fontSize: 16,
+              ),
+              textAlign: TextAlign.left,
+            ),
+            SizedBox(height: 25),
+            IconButtonCustom(
+              label: 'CHECKOUT',
+              onPressed: onCheckout,
+            )
+          ]
+        ),
+      )
+    );
   }
 }
