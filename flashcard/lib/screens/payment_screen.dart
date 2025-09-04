@@ -33,7 +33,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }
 
   void _navigateToHome() async {
-    // Mark payment screen as seen
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool('payment_screen_seen', true);
     
@@ -52,78 +51,87 @@ class _PaymentScreenState extends State<PaymentScreen> {
     required VoidCallback onCheckout,
   }) {
     return Expanded(
-      child: AspectRatio(
-        aspectRatio: 1.05, // Width:Height = 1.05:1
-        child: Container(
-          padding: const EdgeInsets.all(15),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-          ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-          // First line - bold, 30px
-          Text(
-            title1,
-            textAlign: TextAlign.left,
-            style: const TextStyle(
-              fontSize: 30,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
-          // Second line - bold, 30px
-          Text(
-            title2,
-            textAlign: TextAlign.left,
-            style: const TextStyle(
-              fontSize: 30,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-          ),
-          const SizedBox(height: 30),
-          
-          Text(
-            price,
-            textAlign: TextAlign.left,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.normal,
-              color: Colors.black,
-            ),
-          ),
-            ],
-          ),
-      
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: onCheckout,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),
-              ),
-              child: const Text(
-                'CHECKOUT',
-                style: TextStyle(
-                  fontSize: 30,
-                  fontWeight: FontWeight.normal,
-                ),
+      child: Container(
+        height: 250, // Fixed height
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      title1,
+                      style: const TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      title2,
+                      style: const TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      price,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.normal,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
-        ],
-          ),
+            SizedBox(
+              width: double.infinity,
+              height: 40, // Fixed button height
+              child: ElevatedButton(
+                onPressed: onCheckout,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                ),
+                child: const FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    'CHECKOUT',
+                    style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -160,7 +168,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
           ),
         ),
         centerTitle: true,
-        automaticallyImplyLeading: false, // Remove back button
+        automaticallyImplyLeading: false,
       ),
       body: loading
           ? const Center(child: CircularProgressIndicator())
@@ -172,12 +180,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // Choose a plan title
                     const Text(
                       'Choose a plan',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize:42, // 36 * 2 = 72
+                        fontSize: 42,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
@@ -185,7 +192,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     
                     const SizedBox(height: 30),
                     
-                    // Money back guarantee text
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10),
                       child: Column(
@@ -194,7 +200,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                             'All plans come with a 100% money back guarantee. If you don\'t score above average',
                             textAlign: TextAlign.justify,
                             style: const TextStyle(
-                              fontSize: 25, 
+                              fontSize: 25,
                               color: Colors.white,
                               height: 1.5,
                             ),
@@ -204,7 +210,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                             'on the Professional Dilemmas Paper, we will give you a full refund.',
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontSize: 25, 
+                              fontSize: 25,
                               color: Colors.white,
                               height: 1.5,
                             ),
@@ -215,7 +221,6 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     
                     const SizedBox(height: 40),
                     
-                    // Subscription cards - horizontal layout
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -225,27 +230,21 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           price: '£10 per month',
                           onCheckout: _navigateToHome,
                         ),
-                        
-                        const SizedBox(width: 5),
-                        
+                        const SizedBox(width: 10),
                         _buildSubscriptionCard(
                           title1: '3-Month',
                           title2: 'Package',
                           price: '£20 one-off payment',
                           onCheckout: _navigateToHome,
                         ),
-                        
-                        const SizedBox(width: 5),
-                        
+                        const SizedBox(width: 10),
                         _buildSubscriptionCard(
                           title1: '6-Month',
                           title2: 'Package',
                           price: '£30 one-off Payment',
                           onCheckout: _navigateToHome,
                         ),
-                        
-                        const SizedBox(width: 5),
-                        
+                        const SizedBox(width: 10),
                         _buildSubscriptionCard(
                           title1: '12-Month',
                           title2: 'Package',
