@@ -63,6 +63,8 @@ class _RegistrationFormState extends State<RegistrationForm> {
               keyboardType: TextInputType.name,
               textInputAction: TextInputAction.next,
               decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.white,
                 prefixIcon: const Icon(
                   Icons.person,
                 ),
@@ -70,13 +72,13 @@ class _RegistrationFormState extends State<RegistrationForm> {
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20.0),
                   borderSide: const BorderSide(
-                      // color: Colors.blue,
-                      ),
+                    color: Colors.white,
+                  ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20.0),
                   borderSide: const BorderSide(
-                    // color: Colors.lightBlueAccent,
+                    color: Colors.white,
                     width: 2.0,
                   ),
                 ),
@@ -98,6 +100,8 @@ class _RegistrationFormState extends State<RegistrationForm> {
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.next,
               decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.white,
                 prefixIcon: const Icon(
                   Icons.email,
                 ),
@@ -105,13 +109,13 @@ class _RegistrationFormState extends State<RegistrationForm> {
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20.0),
                   borderSide: const BorderSide(
-                      // color: Colors.blue,
-                      ),
+                    color: Colors.white,
+                  ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20.0),
                   borderSide: const BorderSide(
-                    // color: Colors.lightBlueAccent,
+                    color: Colors.white,
                     width: 2.0,
                   ),
                 ),
@@ -134,6 +138,8 @@ class _RegistrationFormState extends State<RegistrationForm> {
               keyboardType: TextInputType.text,
               textInputAction: TextInputAction.done,
               decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.white,
                 prefixIcon: const Icon(
                   Icons.visibility_off,
                 ),
@@ -141,13 +147,13 @@ class _RegistrationFormState extends State<RegistrationForm> {
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20.0),
                   borderSide: const BorderSide(
-                      // color: Colors.blue,
-                      ),
+                    color: Colors.white,
+                  ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20.0),
                   borderSide: const BorderSide(
-                    // color: Colors.lightBlueAccent,
+                    color: Colors.white,
                     width: 2.0,
                   ),
                 ),
@@ -172,6 +178,8 @@ class _RegistrationFormState extends State<RegistrationForm> {
               keyboardType: TextInputType.text,
               textInputAction: TextInputAction.done,
               decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.white,
                 prefixIcon: const Icon(
                   Icons.visibility_off,
                 ),
@@ -179,11 +187,14 @@ class _RegistrationFormState extends State<RegistrationForm> {
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20.0),
                   borderSide: const BorderSide(
+                    color: Colors.white,
+                    width: 2.0,
                   ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20.0),
                   borderSide: const BorderSide(
+                    color: Colors.white,
                     width: 2.0,
                   ),
                 ),
@@ -225,9 +236,13 @@ class _RegistrationFormState extends State<RegistrationForm> {
 
                           if (user != null && user.emailVerified) {
                             // if a user object is filled
-                            Navigator.pushReplacementNamed(context, NewLanding.id); //push replace page with homepage instance, with id, which is a string
-                          }else if (user != null){
-                            navigator.pushReplacementNamed(VerifyEmailScreen.id);
+                            Navigator.pushReplacementNamed(
+                                context,
+                                NewLanding
+                                    .id); //push replace page with homepage instance, with id, which is a string
+                          } else if (user != null) {
+                            navigator
+                                .pushReplacementNamed(VerifyEmailScreen.id);
                           }
                         }
 
