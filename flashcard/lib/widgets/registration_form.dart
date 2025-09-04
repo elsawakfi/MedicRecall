@@ -30,6 +30,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
   final _password = TextEditingController();
 
   bool _isSigningUp = false;
+  bool _acceptedTerms = false;
   final _formkey = GlobalKey<FormState>();
 
   @override
@@ -202,8 +203,22 @@ class _RegistrationFormState extends State<RegistrationForm> {
             ),
           ),
           const SizedBox(height: 4),
-
-          const SizedBox(height: 20),
+          SizedBox(
+              width: 350,
+              child: CheckboxListTile(
+                value: _acceptedTerms,
+                onChanged: (value) {
+                  setState(() {
+                    _acceptedTerms = value ?? false;
+                  });
+                },
+                controlAffinity: ListTileControlAffinity.leading,
+                title: const Text(
+                  "By ticking this box, I agree to the Terms and Conditions",
+                  style: TextStyle(fontSize: 14),
+                ),
+              )),
+          const SizedBox(height: 10),
           _isSigningUp
               ? const Padding(
                   padding: EdgeInsets.all(16.0),
@@ -216,40 +231,42 @@ class _RegistrationFormState extends State<RegistrationForm> {
                   child: SizedBox(
                     width: 350, // match_parent
                     child: ElevatedButton.icon(
-                      onPressed: () async {
-                        widget.nameFocusNode.unfocus();
-                        widget.emailFocusNode.unfocus();
-                        widget.passwordFocusNode.unfocus();
+                      onPressed: _acceptedTerms
+                          ? () async {
+                              widget.nameFocusNode.unfocus();
+                              widget.emailFocusNode.unfocus();
+                              widget.passwordFocusNode.unfocus();
 
-                        setState(() {
-                          _isSigningUp = true;
-                        });
+                              setState(() {
+                                _isSigningUp = true;
+                              });
 
-                        if (_formkey.currentState!.validate()) {
-                          User? user = await Authentication
-                              .registerWithNameEmailPassword(
-                            context: context,
-                            name: _name.text,
-                            email: _email.text,
-                            password: _password.text,
-                          );
+                              if (_formkey.currentState!.validate()) {
+                                User? user = await Authentication
+                                    .registerWithNameEmailPassword(
+                                  context: context,
+                                  name: _name.text,
+                                  email: _email.text,
+                                  password: _password.text,
+                                );
 
-                          if (user != null && user.emailVerified) {
-                            // if a user object is filled
-                            Navigator.pushReplacementNamed(
-                                context,
-                                NewLanding
-                                    .id); //push replace page with homepage instance, with id, which is a string
-                          } else if (user != null) {
-                            navigator
-                                .pushReplacementNamed(VerifyEmailScreen.id);
-                          }
-                        }
+                                if (user != null && user.emailVerified) {
+                                  // if a user object is filled
+                                  Navigator.pushReplacementNamed(
+                                      context,
+                                      NewLanding
+                                          .id); //push replace page with homepage instance, with id, which is a string
+                                } else if (user != null) {
+                                  navigator.pushReplacementNamed(
+                                      VerifyEmailScreen.id);
+                                }
+                              }
 
-                        setState(() {
-                          _isSigningUp = false;
-                        });
-                      },
+                              setState(() {
+                                _isSigningUp = false;
+                              });
+                            }
+                          : null,
                       style: ElevatedButton.styleFrom(
                         minimumSize: const Size.fromHeight(50),
                         backgroundColor: Colors.green.shade300,
