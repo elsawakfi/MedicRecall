@@ -415,7 +415,7 @@ class _AddCardState extends State<AddCard> {
                     offset: const Offset(1, 1),
                     blurRadius: 2,
                   ),
-                ], // 文字描边效果
+                ],
               ),
             ),
         ),
