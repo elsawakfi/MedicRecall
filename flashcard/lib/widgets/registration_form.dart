@@ -4,7 +4,10 @@ import 'package:flashcard_x/screens/verify_email_screen.dart';
 import 'package:flashcard_x/utils/authentication.dart';
 import 'package:flashcard_x/utils/string_validation.dart';
 import 'package:flutter/material.dart';
-
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/gestures.dart';
 import '../screens/landing_screen.dart';
 import '../screens/landing_screen_new.dart';
 
@@ -204,21 +207,66 @@ class _RegistrationFormState extends State<RegistrationForm> {
           ),
           const SizedBox(height: 4),
           SizedBox(
-              width: 350,
-              child: CheckboxListTile(
-                value: _acceptedTerms,
-                onChanged: (value) {
-                  setState(() {
-                    _acceptedTerms = value ?? false;
-                  });
-                },
-                controlAffinity: ListTileControlAffinity.leading,
-                title: const Text(
-                  "By ticking this box, I agree to the Terms and Conditions",
-                  style: TextStyle(fontSize: 14),
+            width: 350,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Checkbox(
+                  value: _acceptedTerms,
+                  onChanged: (value) {
+                    setState(() {
+                      _acceptedTerms = value ?? false;
+                    });
+                  },
                 ),
-              )),
-          const SizedBox(height: 10),
+                Expanded(
+                  child: RichText(
+                    text: TextSpan(
+                      style: const TextStyle(color: Colors.white, fontSize: 14),
+                      children: [
+                        const TextSpan(
+                            text: "By ticking this box, I agree to our "),
+                        TextSpan(
+                          text: "Terms and Conditions",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            decoration: TextDecoration.underline,
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () async {
+                              final Uri url = Uri.parse(
+                                  "https://medicrecall.com/terms-and-conditions/");
+                              if (await canLaunchUrl(url)) {
+                                await launchUrl(url,
+                                    mode: LaunchMode.externalApplication);
+                              }
+                            },
+                        ),
+                        const TextSpan(text: " and "),
+                        TextSpan(
+                          text: "Privacy Policy.",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            decoration: TextDecoration.underline,
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () async {
+                              final Uri url = Uri.parse(
+                                  "https://medicrecall.com/privacy-policy/");
+                              if (await canLaunchUrl(url)) {
+                                await launchUrl(url,
+                                    mode: LaunchMode.externalApplication);
+                              }
+                            },
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
           _isSigningUp
               ? const Padding(
                   padding: EdgeInsets.all(16.0),
