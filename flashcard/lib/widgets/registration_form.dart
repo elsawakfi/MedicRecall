@@ -60,6 +60,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
             child: TextFormField(
               controller: _name,
               focusNode: widget.nameFocusNode,
+              style: const TextStyle(color: Colors.black),
               validator: (value) => StringValidation.validateName(
                 name: value,
               ),
@@ -97,6 +98,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
             child: TextFormField(
               controller: _email,
               focusNode: widget.emailFocusNode,
+              style: const TextStyle(color: Colors.black),
               validator: (value) => StringValidation.validateEmail(
                 email: value,
               ),
@@ -135,6 +137,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
               controller: _password,
               focusNode: widget.passwordFocusNode,
               obscureText: true,
+              style: const TextStyle(color: Colors.black),
               validator: (value) => StringValidation.validatePassword(
                 password: value,
               ),
@@ -170,6 +173,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
             height: 60,
             child: TextFormField(
               obscureText: true,
+              style: const TextStyle(color: Colors.black),
               validator: (value) {
                 if (value != _password.text) {
                   return 'Passwords do not match';
