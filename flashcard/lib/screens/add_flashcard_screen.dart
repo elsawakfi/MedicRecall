@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
-import 'package:flashcard_x/widgets/design_main.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
+
 
 class AddCard extends StatefulWidget {
   static final navKey = GlobalKey<NavigatorState>();
@@ -108,10 +108,17 @@ class _AddCardState extends State<AddCard> {
       subtopicsMap[data["topic"]] = tmp;
     }
 
-    topic = topics[0];
-    subtopics = subtopicsMap[topic]!;
-    if (subtopics.isNotEmpty) {
-      subtopic = subtopics[0];
+    // Initialize as empty to show hint text initially
+    if (!editCard) {
+      topic = "";
+      subtopic = "";
+      subtopics = [];
+    } else {
+      topic = topics[0];
+      subtopics = subtopicsMap[topic]!;
+      if (subtopics.isNotEmpty) {
+        subtopic = subtopics[0];
+      }
     }
     if (kDebugMode) {
       print(topics);
@@ -141,6 +148,17 @@ class _AddCardState extends State<AddCard> {
   }
 
   void uploadCard() {
+    // Validate that both category and sub-category are selected
+    if (topic.isEmpty || subtopic.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select both Category and Sub-category'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    
     if (editCard) {
       editCardDB();
     } else {
@@ -151,11 +169,55 @@ class _AddCardState extends State<AddCard> {
 
   get key => null;
 
+ 
+  PreferredSizeWidget _buildCustomAppBarWithBack(BuildContext context) {
+    final theme = Theme.of(context);
+    final isSmallScreen = MediaQuery.of(context).size.width < 600;
+
+    return AppBar(
+      elevation: 0,
+      title: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Stack(
+            children: [
+              Positioned(
+                top: 4,
+                child: Image.asset(
+                  'assets/dashboard_assets/app_logo4.png',
+                  fit: BoxFit.cover,
+                  height: isSmallScreen ? 28 : 34,
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.only(left: isSmallScreen ? 24 : 30),
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  "Add Flashcard",
+                  style: theme.appBarTheme.titleTextStyle?.copyWith(
+                    fontSize: isSmallScreen ? 18 : 23,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+      centerTitle: true,
+      leading: IconButton(
+        onPressed: () => Navigator.pop(context),
+        icon: const Icon(Icons.arrow_back),
+      ),
+      automaticallyImplyLeading: false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     AddCard.navKey;
     return Scaffold(
-      appBar: DesignMain.appBarMain("Add Flashcard", context),
+      appBar: _buildCustomAppBarWithBack(context),
       body: Visibility(
         visible: !loading,
         child: Column(
@@ -185,7 +247,7 @@ class _AddCardState extends State<AddCard> {
                         ),
                         decoration: const InputDecoration(
                           border: InputBorder.none,
-                          hintText: 'Questions',
+                          hintText: 'Question',
                           hintStyle: TextStyle(fontSize: 20),
                           contentPadding: EdgeInsets.zero,
                         ),
@@ -219,7 +281,7 @@ class _AddCardState extends State<AddCard> {
                         ),
                         decoration: const InputDecoration(
                           border: InputBorder.none,
-                          hintText: 'Answers',
+                          hintText: 'Answer',
                           hintStyle: TextStyle(fontSize: 20),
                           contentPadding: EdgeInsets.zero,
                         ),
@@ -234,30 +296,45 @@ class _AddCardState extends State<AddCard> {
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(12),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              width: 200,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              width: 240, // Increased by 20% (200 * 1.2 = 240)
               child: DropdownButton<String>(
                 isExpanded: true,
-                value: topic,
+                value: null, // Always null to show hint
                 dropdownColor: Colors.white,
-                 icon: const Icon(Icons.arrow_downward, color: Colors.black),
+                icon: const Icon(Icons.arrow_downward, color: Colors.black),
                 elevation: 16,
-                style: const TextStyle(color: Colors.black),
+                style: const TextStyle(color: Colors.black, fontSize: 18),
                 underline: Container(height: 0),
+                hint: Center(
+                  child: Text(
+                    topic.isEmpty ? 'Category' : topic,
+                    style: TextStyle(
+                      color: topic.isEmpty ? Colors.grey : Colors.black,
+                      fontSize: 18,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
                 onChanged: (String? newValue) {
                   setState(() {
                     topic = newValue!;
                     subtopics = subtopicsMap[topic]!;
-                    subtopic =
-                        subtopics.isNotEmpty ? subtopics[0] : '';
+                    subtopic = ''; // Reset to show hint text
                   });
                 },
                 items: topics
                     .map((value) => DropdownMenuItem<String>(
                           value: value,
-                          child: Text(value),
+                          child: Center(
+                            child: Text(
+                              value,
+                              style: const TextStyle(fontSize: 18),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
                         ))
                     .toList(),
               ),
@@ -265,42 +342,84 @@ class _AddCardState extends State<AddCard> {
           const SizedBox(height: 16),
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(4),
+                color: topic.isEmpty ? Colors.grey[100] : Colors.white,
+                borderRadius: BorderRadius.circular(12),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              width: 200,
-              child: DropdownButton<String>(
-                isExpanded: true,
-                value: subtopic,
-                dropdownColor: Colors.white,
-                icon: const Icon(Icons.arrow_downward, color: Colors.black),
-                elevation: 16,
-                style: const TextStyle(color: Colors.black),
-                underline: Container(height: 0),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    subtopic = newValue!;
-                  });
-                },
-                items: subtopics
-                    .map((value) => DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
-                        ))
-                    .toList(),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              width: 240, // Increased by 20% (200 * 1.2 = 240)
+              child: IgnorePointer(
+                ignoring: topic.isEmpty,
+                child: DropdownButton<String>(
+                  isExpanded: true,
+                  value: null, // Always null to show hint
+                  dropdownColor: Colors.white,
+                  icon: Icon(Icons.arrow_downward, 
+                           color: topic.isEmpty ? Colors.grey : Colors.black),
+                  elevation: 16,
+                  style: TextStyle(
+                    color: topic.isEmpty ? Colors.grey : Colors.black,
+                    fontSize: 18,
+                  ),
+                  underline: Container(height: 0),
+                  hint: Center(
+                    child: Text(
+                      subtopic.isEmpty ? 'Sub-category' : subtopic,
+                      style: TextStyle(
+                        color: subtopic.isEmpty ? Colors.grey : Colors.black,
+                        fontSize: 18,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  onChanged: topic.isEmpty ? null : (String? newValue) {
+                    if (newValue != null) {
+                      setState(() {
+                        subtopic = newValue;
+                      });
+                    }
+                  },
+                  items: subtopics.isEmpty 
+                      ? []
+                      : subtopics
+                          .map((value) => DropdownMenuItem<String>(
+                                value: value,
+                                child: Center(
+                                  child: Text(
+                                    value,
+                                    style: const TextStyle(fontSize: 18),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ))
+                          .toList(),
+                ),
               ),
             ),
         
-        const SizedBox(height: 24),
-        GFButton(
-        onPressed: uploadCard,
-        text: "Create",
-        icon: const Icon(Icons.keyboard_arrow_right_sharp),
-        shape: GFButtonShape.pills,
-        color: Colors.green,
-        textStyle: const TextStyle(fontSize: 18, color: Colors.white),
-),  ],
+        const SizedBox(height: 50), 
+        Transform.scale(
+            scale: 1.44, 
+            child: GFButton(
+              onPressed: uploadCard,
+              text: "Create",
+              icon: const Icon(Icons.keyboard_arrow_right_sharp),
+              shape: GFButtonShape.pills,
+              color: Colors.green,
+              textStyle: TextStyle(
+                fontSize: 18, 
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                shadows: [
+                  Shadow(
+                    color: Colors.black.withOpacity(0.8),
+                    offset: const Offset(1, 1),
+                    blurRadius: 2,
+                  ),
+                ],
+              ),
+            ),
+        ),
+      ],
         ),
       ),
     );
