@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flashcard_x/utils/firebase_wrapper.dart';
+import 'package:universal_html/html.dart';
 
 class LastRevised {
 
@@ -28,11 +29,13 @@ static Future<void> resetSeenCardsForTopic(String topicName) async {
   // Get all seen cards
   QuerySnapshot seenDocs = await seenRef.get();
 
-  // Filter and delete only those seen cards that match the topic
+  
+  
   for (var doc in seenDocs.docs) {
     String cardID = doc["cardID"];
     if (cardIDsToDelete.contains(cardID)) {
-      await seenRef.doc(doc.id).delete();
+     int timesSeen = (doc["timesSeen"]?? 0);
+     await seenRef.doc(doc.id).delete();
     }
   }
 
@@ -64,6 +67,7 @@ static Future<void> resetSeenCardsForTopic(String topicName) async {
 
     for (var doc in seen.docs) {
       DocumentSnapshot card = await flashcardRef.doc(doc["cardID"]).get();
+      
       if (card.exists) {
         Map<String, dynamic> data = card.data() as Map<String, dynamic>;
         _incrementMap(seenCards, data["topic"].toString());
@@ -76,7 +80,7 @@ static Future<void> resetSeenCardsForTopic(String topicName) async {
         }
       }
     }
-                 
+    
     for (var doc in all.docs + userCards.docs) { // This loads all the cards during the dashboard screen loading process...
       if (doc.exists) {
         Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
@@ -86,7 +90,7 @@ static Future<void> resetSeenCardsForTopic(String topicName) async {
         }
       }
     }
-
+    
     return TopicStats(seenCards: seenCards, totalCards: totalCards, timesSeen: timesSeen, dateLastRevised: dateLastRevised);
 
   }
@@ -264,6 +268,7 @@ static Future<void> resetSeenCardsForTopic(String topicName) async {
   }
 
 }
+
 class TopicStats {
 
   final Map<String, int> seenCards;

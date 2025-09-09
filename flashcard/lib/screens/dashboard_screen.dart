@@ -1,3 +1,6 @@
+// import 'dart:ffi';
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/calendar_screen.dart';
@@ -28,14 +31,36 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => HomePageState();
 }
 
+class TopicRow {
+  final String topic;
+  final String formattedDate; // "dd/MM/yyyy" or "N/A"
+  final Color color;          // tile color
+  final int seen;             // 0..total
+  final int total;
+  final bool isComplete;      // seen == total
+  final DateTime? calendarDate; // actual DateTime if scheduled
+  final List<String> subtopics;   // list of subtopic names
+  TopicRow({
+    required this.topic,
+    required this.formattedDate,
+    required this.color,
+    required this.seen,
+    required this.total,
+    required this.isComplete,
+    required this.calendarDate,
+     List<String>? subtopics,               // nullable or optional param
+  }) : subtopics = List<String>.from(subtopics ?? const []); // mutable copy
+}
+
 class HomePageState extends State<HomePage> {
   int? _hoveringIndex;
   late User user;
-  
+  List<TopicRow> _rows = [];
   late String? name;
   late String? id;
   late List<dynamic>? topicCount;
   List<dynamic>? topicLastSeen;
+  DateTime? _firstStudyDate;
   CollectionReference users = FirebaseWrapper.firestore().collection('users');
   final FirebaseAuth auth = FirebaseAuth.instance;
   bool loading = true;
@@ -43,7 +68,6 @@ class HomePageState extends State<HomePage> {
   Map<String, bool> checked = {};
   Map<String, int> seenCards = {};
   Map<String, int> totalCards = {};
-  late DateTime _firstStudyDate;
   late DateTime testDay;
   late Map<DateTime, List<Event>> selectedEvents;
   late Map<DateTime, List<Event>> allEvents;
@@ -83,7 +107,8 @@ class HomePageState extends State<HomePage> {
 
       var snapshots = await _eventsCollectionRef.get();
       
-     
+      
+      
       for (var doc in snapshots.docs) {
         var data = doc.data() as Map<String, dynamic>;
         if (data.containsKey('date') && data.containsKey('events') ) {
@@ -100,7 +125,9 @@ class HomePageState extends State<HomePage> {
                 allEvents[date] = events.map ((title) => Event(color: Colors.black, title: title)).toList();
             }}
             else{
-                  Timestamp? timestamp = data['date'] as Timestamp?;
+                
+                
+                Timestamp? timestamp = data['date'] as Timestamp?;
                   if (timestamp != null) {
                 DateTime date = timestamp.toDate();
                 date = DateTime(date.year, date.month, date.day);
@@ -117,22 +144,31 @@ class HomePageState extends State<HomePage> {
         }
       }
       allEvents.addAll(selectedEvents);
+     
+
     } catch(e){
       print("Error loading events from DB: $e");
     }
   }
 
-    Future<void> updateOneEvent(
-      Event oldEvent, String newTitle, DateTime newDate) async {
+  Future<void> updateOneEvent(
+      Event oldEvent, String newTitle, DateTime newDate, {DateTime? oldDate}) async {
     DateTime normalizedDate =
         DateTime(newDate.year, newDate.month, newDate.day,0,0,0,0);
     // Remove old event from Firestore
-    await deleteSingleEvent(normalizedDate, oldEvent.title, user);
+    if(oldDate != null){ 
+      DateTime normalizedOld =  DateTime(oldDate.year, oldDate.month, oldDate.day,0,0,0,0);
+      await deleteSingleEvent(normalizedOld, oldEvent.title, user);
+      
+    }else{
+      await deleteSingleEvent(normalizedDate, oldEvent.title, user);
+    }
+   
     await addSingleEvent(normalizedDate, newTitle, user,edit :true);
   }
 
 
-    Future<void> deleteSingleEvent(
+  Future<void> deleteSingleEvent(
       DateTime date, String eventTitle, User user) async {
     date = DateTime(date.year, date.month, date.day,0,0,0,0);
 
@@ -167,6 +203,7 @@ class HomePageState extends State<HomePage> {
 
     setState(() {});
   }
+  
   Future<List> getTopicsDatabase() async {
     List<dynamic> holderList = [];
 
@@ -220,7 +257,7 @@ class HomePageState extends State<HomePage> {
     }
   }
 
-    String _getDayName(int weekday) {
+  String _getDayName(int weekday) {
     switch (weekday) {
       case 1:
         return "Monday";
@@ -386,7 +423,7 @@ class HomePageState extends State<HomePage> {
       selectedEvents[date] = [];
       allEvents[date] = [];
       print("Adding event $eventTitle to $date\n");
-    
+    }
     selectedEvents[date]?.add(newEvent);
     allEvents[date]?.add(newEvent);
     QuerySnapshot querySnapshot = await _eventsCollectionRef
@@ -411,7 +448,7 @@ class HomePageState extends State<HomePage> {
     String newDocId = newDoc.id;
     await _eventsCollectionRef.doc(newDocId).update({"events": updatedEvents});
 
-  }}
+  }
  
     setState(() {});
   }
@@ -443,18 +480,13 @@ class HomePageState extends State<HomePage> {
     super.initState();
     setState(() {
       name = "loading...";
+      loading = true;
     });
     getData();
     setState(() {});
   }
 
-  @override didChangeDependencies(){
-    super.didChangeDependencies();
-    //waits for build function to complete and then calls back to call the condition checking function
-    WidgetsBinding.instance.addPostFrameCallback((_) async{
-      await userData();
-    });
-  }
+ 
   Future<void> getData() async {
     //DO NOT CHANGE THE ORDER OF THIS OTHERWISE PAGE WILL NOT BUILD
     setState((){
@@ -467,6 +499,7 @@ class HomePageState extends State<HomePage> {
     await getTopics();
     await userData();
     await getStats();
+    await _computeRows();
     
     setState(() {
       loading = false;
@@ -551,252 +584,310 @@ class HomePageState extends State<HomePage> {
       });
     }
     
+    
   }
 
-  //Formats the checkbox categories according to colour depending on whether the review date is due and how many flashcards have been seen.
-  List<Widget> makeCheckboxList() {
-    DateTime today = DateTime.now();
-    today = DateTime(today.year,today.month,today.day,0,0,0,0);
+
+  Future<void> _computeRows() async{
+    List<String> topicsUnorder = ["Team Working","Effective Communication","Acting Within Your Remit","Empathy and Sensitivity","Professional Integrity"
+    ,"Coping With Pressure","Confidentiality"];
+    final DateTime today = DateTime.now();
+    final List<TopicRow> newRows = [];
+  for (final map in topics) {
+    final topic = map["topic"] as String;
+    int seen = seenCards[topic] ?? 0;
+    int total = totalCards[topic] ?? 0;
+    final isComplete = total > 0 && seen >= total;
+    // determine current scheduled date for this topic (if any)
+    DateTime? dateInCalendar;
+    Event? existing;
+
     
-    List<Widget> value = [];
-    for (var i = 0; i < topics.length; i++) {
+    // if (selectedEvents.isNotEmpty) {
+    //   for (var entry in selectedEvents.entries) {
+    //     for (var e in entry.value) {
+    //       if (e.title.contains(topic)) {
+    //         if (dateInCalendar != null && 
+    //         DateTime(entry.key.year, entry.key.month, entry.key.day).isBefore(dateInCalendar) ){
+    //           dateInCalendar = DateTime(entry.key.year, entry.key.month, entry.key.day);
+    //           existing = e;
+    //         }
+    //         else if(dateInCalendar == null){
+    //            dateInCalendar = DateTime(entry.key.year, entry.key.month, entry.key.day);
+    //           existing = e;
+    //         }
+            
+    //       }
+    //     }
+       
+    //   }
+    // }
+    final allMatches = selectedEvents.entries
+        .expand((entry) => entry.value.map((e) => (date: entry.key, event: e)))
+        .where((pair) => pair.event.title.contains(topic));
+
+    if (allMatches.isNotEmpty) {
+      final earliest = allMatches.reduce((a, b) =>
+          a.date.isBefore(b.date) ? a : b);
+
+       dateInCalendar = DateTime(
+          earliest.date.year, earliest.date.month, earliest.date.day);
+       existing = earliest.event;
+    }
+    DateTime nextReview;
+    if(dateInCalendar != null){
+       nextReview = dateInCalendar;}
+
+    // compute “how long since last seen” and gap days map
+    final idx = topicsUnorder.indexOf(topic);
+    final daysSince = (Timestamp.now().seconds - topicLastSeen![idx].seconds) / (60 * 60 * 24);
    
-      var map = topics[i];
-      var text = seenCards[map["topic"]] == null
-          ? "0"
-          : seenCards[map["topic"].toString()].toString();
+    Color tileColor;
+    String dateText = "N/A";
+    if (dateInCalendar == null) {
+      tileColor = const Color(0xFFD9D9D9);
+    } else if ((seen == 0) && (dateInCalendar.isBefore(today) || dateInCalendar.isAtSameMomentAs(today))) {
+      tileColor = const Color(0xFFFF9595);
+      dateText = DateFormat('dd/MM/yyyy').format(dateInCalendar);
+    } else {
+      // recently reviewed vs grey
+      tileColor = (daysSince <= 2.0) ? const Color(0xFFB0FFC6) : const Color(0xFFD9D9D9);
+      dateText = DateFormat('dd/MM/yyyy').format(dateInCalendar);
+    }
 
-      //Number of days since topic was last revised is converted from seconds to days as an int
-      var howLongAgoRevisedDays = (Timestamp.now().seconds - topicLastSeen![i].seconds) / (60 * 60 * 24);
+    // if complete -> schedule next (idempotent & NO UI rebuilds here)
+    if (isComplete) {
+      
+        print("Updating to complete\n");
+        await updateOneEvent(existing!, "Completed: $topic ", dateInCalendar!);
+        
+        // Reset seen on backend (once)
+        await LastRevised.resetSeenCardsForTopic(topic);
+      // set presentation for complete state
+        tileColor = const Color(0xFFB0FFC6);
+        dateText = DateFormat('dd/MM/yyyy').format(dateInCalendar!);
+    }
 
-      //A mapping of how many times the topics been seen to what the next review date gap should be. After 7 times it stays at 128 days.
-      
-      //CHANGE THIS FORMULA FOR to DR. Harris' new one
-      Map<int, int> dateToColourMap = {0: ((howLongAgoRevisedDays.ceil()*4)+1), 1: 6, 2: 10, 3: 16, 4: 24, 5: 36};
-      
-      
-      
-      // MaterialColor topicColour = Colors.green;
-      Color tColour = Color(0xFFB0FFC6); // green
-      if (topicCount![i]>(dateToColourMap.length-1)){
-        topicCount![i]=dateToColourMap.length-1;
-      }
-      int nextReviewDateMilliseconds = (((dateToColourMap[topicCount![i]]! * 24 * 60 * 60) + topicLastSeen![i].seconds) * 1000).toInt();
-      DateTime nextReviewDate = DateTime.fromMillisecondsSinceEpoch(nextReviewDateMilliseconds, isUtc: true).toLocal();
-      nextReviewDate = DateTime(nextReviewDate.year, nextReviewDate.month,nextReviewDate.day,0,0,0,0);
-      String formattedDate = DateFormat('dd/MM/yyy').format(nextReviewDate); 
-      DateTime? dateInCalendar;
-      bool notInCalendar = true;
-      Event e = Event(color:Color(0xFFB0FFC6),title: "Shouldn't add"); 
-      
-      
-      //Only go through the flashcard events with "selectedEvents" instead of allEvents
-      userData();
-      if (selectedEvents.isNotEmpty ){
-        for (final entry in selectedEvents.entries){
-        for (final event in entry.value){
-          if (event.title.contains(map["topic"])){
-            formattedDate = entry.key.toString();
-            dateInCalendar = entry.key;
-            formattedDate = formattedDate.substring(0,10);
-            notInCalendar = false;
-            e = event;
+    final List<String> subs = (map["subtopics"] as List?)
+        ?.map((e) => e.toString())
+        .toList() 
+    ?? const [];
+
+    newRows.add(TopicRow(
+      topic: topic,
+      formattedDate: dateText,
+      color: tileColor,
+      seen: seen,
+      total: total,
+      isComplete: isComplete,
+      calendarDate: dateInCalendar,
+      subtopics: subs,
+    ));
+  }
+
+  if (!mounted) return;
+  setState(() => _rows = newRows);
+  }
+
+  Future<void> _recomputeRowsAndMaybeSchedule() async {
+  List<String> topicsUnorder = ["Team Working","Effective Communication","Acting Within Your Remit","Empathy and Sensitivity","Professional Integrity"
+    ,"Coping With Pressure","Confidentiality"];
+  final DateTime today = DateTime.now();
+  final List<TopicRow> newRows = [];
+
+  // guard set to avoid double scheduling within a run
+  final Set<String> scheduledThisPass = {};
+
+  for (final map in topics) {
+    final topic = map["topic"] as String;
+    final seen = seenCards[topic] ?? 0;
+    final total = totalCards[topic] ?? 0;
+    final isComplete = total > 0 && seen >= total;
+    // determine current scheduled date for this topic (if any)
+    DateTime? dateInCalendar;
+    Event? existing;
+    if (selectedEvents.isNotEmpty) {
+      for (var entry in selectedEvents.entries) {
+        for (var e in entry.value) {
+          if (e.title.contains(topic)) {
+            dateInCalendar = DateTime(entry.key.year, entry.key.month, entry.key.day);
+            existing = e;
+            
           }
         }
-        }
-        
-        if (notInCalendar){
-          formattedDate = "N/A";
-          tColour = Color(0xFFD9D9D9);
-        }
-        else{
-         //If the user hasn't seen any cards and it is past the revision date set it red
-      //Otherwise set it to grey
-      if (seenCards[map["topic"]] == null || seenCards[map["topic"]] == 0){
-        if (dateInCalendar!.isBefore(today) || dateInCalendar!.isAtSameMomentAs(today)){
-         tColour = Color(0xFFFF9595); 
-        }
-        else{
-           tColour = Color(0xFFD9D9D9);
-
-        }
-        if (e.title.contains("Completed") && e.title.contains("Flashcards")){
-            updateOneEvent(e, "Completed: ${map["topic"]} ", dateInCalendar);
-        }
-
-
+        if (dateInCalendar != null) break;
       }
-      //if the user has seen some of the cards 
-      else  {
+    }
 
-        //If the revision date is in the future 
-        if (dateInCalendar!.isAfter(today)) {
-             
-             //If the user has seen all the cards set to green
-             if (seenCards[map["topic"]]! == totalCards[map["topic"]]! ) {
-             
-              tColour = Color(0xFFB0FFC6); 
-              formattedDate = "Completed";
-              if (!e.title.contains("Completed") && e.title.contains("Flashcards")){
-                updateOneEvent(e, "Completed: ${map["topic"]} Flashcards", dateInCalendar);
-                print("Dah doi\n");
-             }}
+    // compute “how long since last seen” and gap days map
+    final idx = topicsUnorder.indexOf(topic);
+    final daysSince = (Timestamp.now().seconds - topicLastSeen![idx].seconds) / (60 * 60 * 24);
+    final Map<int,int> gap = {
+      0: (daysSince.ceil() * 4) + 1,
+      1: 6, 2: 10, 3: 16, 4: 24, 5: 36
+    };
+    final int count = (topicCount![idx] as int).clamp(0, gap.length - 1);
+    final int gapDays = gap[count] ?? ((daysSince.ceil() * 4) + 1); // 1 day default if key missing
+    final DateTime nextReview = (dateInCalendar ?? today).add(Duration(days: gapDays));
+   
 
-            //If they haven't seen all of them set it to grey
-             if(seenCards[map["topic"]]! < totalCards[map["topic"]]!) tColour = Color(0xFFD9D9D9);   
+    // decide color + date text (pure)
+    Color tileColor;
+    String dateText = "N/A";
+    if (dateInCalendar == null) {
+      tileColor = const Color(0xFFD9D9D9);
+    } else if ((seen == 0) && (dateInCalendar.isBefore(today) || dateInCalendar.isAtSameMomentAs(today))) {
+      tileColor = const Color(0xFFFF9595);
+      dateText = DateFormat('dd/MM/yyyy').format(dateInCalendar);
+    } else {
+      // recently reviewed vs grey
+      tileColor = (daysSince <= 2.0) ? const Color(0xFFB0FFC6) : const Color(0xFFD9D9D9);
+      dateText = DateFormat('dd/MM/yyyy').format(dateInCalendar);
+    }
+
+    // if complete -> schedule next (idempotent & NO UI rebuilds here)
+    if (isComplete && !scheduledThisPass.contains(topic)) {
+      // 1) mark today as “Completed: …” if needed
+      // 2) add next “<topic> Flashcards” ONLY if it does not already exist on that date
+      // 3) reset seen for topic (server) — but do NOT call userData/getStats here
+      // 4) finally, update local presentation: set tile green + next date
+
+      // IDENTITY / IDEMPOTENCY CHECKS
+      final String nextTitle = "$topic Flashcards";
+      final bool alreadyHasNext = selectedEvents[nextReview]
+              ?.any((e) => e.title == nextTitle) ?? false;
+
+      if (!alreadyHasNext) {
+        // move “future” completion to today if needed
+        if (dateInCalendar != null && dateInCalendar.isAfter(today)) {
+          await updateOneEvent(existing!, "Completed: $topic ", today, oldDate: dateInCalendar);
+          dateInCalendar = today;
+        } else if (dateInCalendar != null) {
+          await updateOneEvent(existing!, "Completed: $topic ", dateInCalendar!);
+        }
+
+        await addSingleEvent(nextReview, nextTitle, user);
+        // Reset seen on backend (once)
+        await LastRevised.resetSeenCardsForTopic(topic);
+        scheduledThisPass.add(topic);
       }
 
-        else if(dateInCalendar.isBefore(today) || dateInCalendar.isAtSameMomentAs(today)) {
-          //Reschedule or set red
-           
-           if (seenCards[map["topic"]]! == totalCards[map["topic"]]!){
-            tColour = Color(0xFFD9D9D9);   
-            nextReviewDate = dateInCalendar.add(Duration(days:dateToColourMap[topicCount![i]]!));
-            
-            print("${map["topic"]}\n");
-            print("next review is $nextReviewDate\n");
-            print("Topic seen ${topicCount![i]} times so will try add ${dateToColourMap[topicCount![i]]} days till next review \n");
-            addSingleEvent(nextReviewDate,
-              "${map["topic"]} Flashcards", user);
-            formattedDate = nextReviewDate
-            .toString().substring(0,10);
-            text = "0";
-            updateOneEvent(e, "Completed: ${map["topic"]} ", dateInCalendar);
-            LastRevised.resetSeenCardsForTopic("${map["topic"]}");
-            userData();
-            getTopics();
-           }
-           if (seenCards[map["topic"]] == null || seenCards[map["topic"]]! < totalCards[map["topic"]]!){
-            tColour = Color(0xFFFF9595);   
-           }
-        
-        } }}}
-      else{
-          formattedDate = "N/A";
-          //dateInCalendar = today;
-          tColour = Color(0xFFD9D9D9);
-        }
- value.add(
-    Padding(
-      padding: const EdgeInsets.only(bottom: 8, left: 15, right: 15),
-      child: MouseRegion(
-        onEnter: (_) => setState(() => _hoveringIndex = i),
-        onExit: (_) => setState(() => _hoveringIndex = null),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: ExpansionTile(
-                 onExpansionChanged: (expanded) {
-                 if (expanded) {
-                  setState(() {
-                    _hoveringIndex = null; // hide message once expanded
-                  });
-                }
-              },
-                trailing: Text(
-                  "$text / ${totalCards[map["topic"].toString()]}",
-                  style: const TextStyle(color: Colors.black),
-                ),
-                backgroundColor: tColour,
-                collapsedBackgroundColor: tColour,
-                textColor: Colors.black,
-                title: Text(
-                  "${map["topic"]}",
-                  style: const TextStyle(color: Colors.black),
-                ),
-                leading: Checkbox(
-                  side: const BorderSide(color: Colors.black, width: 1.5),
-                  key: i == 0 ? const ValueKey("Checkbox") : UniqueKey(),
-                  value: checked[map["topic"]],
-                  onChanged: (bool? value) {
-                    
-                    setState(() {
-                      checked[map["topic"]] = value!;
-                      for (var subtopic in map["subtopics"]) {
-                        checked[subtopic.toString()] = value;
-                      }
-                    });
+      // set presentation for complete state
+      tileColor = const Color(0xFFB0FFC6);
+      dateText = DateFormat('dd/MM/yyyy').format(nextReview);
+    }
+
+    final List<String> subs = (map["subtopics"] as List?)
+        ?.map((e) => e.toString())
+        .toList() 
+    ?? const [];
+
+    newRows.add(TopicRow(
+      topic: topic,
+      formattedDate: dateText,
+      color: tileColor,
+      seen: seen,
+      total: total,
+      isComplete: isComplete,
+      calendarDate: dateInCalendar,
+      subtopics: subs,
+    ));
+  }
+
+  if (!mounted) return;
+  setState(() => _rows = newRows);
+}
+
+
+  List<Widget> makeCheckboxListFromRows() {
+  final List<Widget> tiles = [];
+  for (int i = 0; i < _rows.length; i++) {
+    final row = _rows[i];
+
+    tiles.add(
+      Padding(
+        padding: const EdgeInsets.only(bottom: 8, left: 15, right: 15),
+        child: MouseRegion(
+          onEnter: (_) => setState(() => _hoveringIndex = i),
+          onExit:  (_) => setState(() => _hoveringIndex = null),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: ExpansionTile(
+                  onExpansionChanged: (expanded) {
+                    if (expanded) setState(() => _hoveringIndex = null);
                   },
+                  trailing: Text(
+                    "${row.seen} / ${row.total}",
+                    style: const TextStyle(color: Colors.black),
+                  ),
+                  backgroundColor: row.color,
+                  collapsedBackgroundColor: row.color,
+                  textColor: Colors.black,
+                  title: Text(row.topic, style: const TextStyle(color: Colors.black)),
+                  leading: Checkbox(
+                    side: const BorderSide(color: Colors.black, width: 1.5),
+                    value: checked[row.topic] ?? false,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        checked[row.topic] = value ?? false;
+                        for (final s in row.subtopics) {
+                          checked[s] = value ?? false;
+                        }
+                      });
+                    },
+                  ),
+                  subtitle: Row(
+                    children: [
+                      const Text("Next Review Date: ", style: TextStyle(color: Colors.black)),
+                      Text(row.formattedDate, style: const TextStyle(color: Colors.black)),
+                    ],
+                  ),
+                  children: row.subtopics.map((s) {
+                    final subSeen  = seenCards[s] ?? 0;
+                    final subTotal = totalCards[s] ?? 0;
+                    return CheckboxListTile(
+                      side: const BorderSide(color: Colors.black, width: 1.5),
+                      secondary: Text("$subSeen / $subTotal", style: const TextStyle(color: Colors.black)),
+                      value: checked[s] ?? false,
+                      controlAffinity: ListTileControlAffinity.leading,
+                      contentPadding: const EdgeInsets.fromLTRB(62, 0, 62, 0),
+                      onChanged: (bool? v) {
+                        setState(() {
+                          checked[s] = v ?? false;
+                          // keep the parent in sync
+                          checked[row.topic] = row.subtopics.every((t) => checked[t] == true);
+                        });
+                      },
+                      title: Text(s, style: const TextStyle(color: Colors.black)),
+                    );
+                  }).toList(),
                 ),
-                subtitle: Row(
-                  children: [
-                    const Text("Next Review Date: ",
-                        style: TextStyle(color: Colors.black)),
-                    Text(
-                      formattedDate,
-                      style: const TextStyle(color: Colors.black),
-                    ),
-                  ],
-                ),
-                children: makeCheckbox(map),
               ),
-            ),
 
-            // ✅ Show hover text only for the hovered item
-            if (_hoveringIndex == i)
-              IgnorePointer(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.85),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Text(
-                    "Click to view subtopics",
-                    style: TextStyle(color: Colors.white),
+              if (_hoveringIndex == i)
+                IgnorePointer(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.85),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Text("Click to view subtopics", style: TextStyle(color: Colors.white)),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
-    ),
-  );
-    }
-    return value;
+    );
   }
+  return tiles;
+}
 
-  List<CheckboxListTile> makeCheckbox(Map<String, dynamic> data) {
-    List<CheckboxListTile> value = [];
-    for (var subtopic in data["subtopics"]) {
-      var text = seenCards[subtopic] == null
-          ? "0"
-          : seenCards[subtopic.toString()].toString();
-      value.add(CheckboxListTile(
-        side: const BorderSide(
-            color: Colors.black,
-            width: 1.5),
-        secondary: Text(
-          "$text / ${totalCards[subtopic.toString()]}",
-          style: const TextStyle(color: Colors.black),
-        ),
-        value: checked[subtopic.toString()],
-        controlAffinity: ListTileControlAffinity.leading,
-        contentPadding: const EdgeInsets.fromLTRB(62, 0, 62, 0),
-        onChanged: (bool? value) {
-          setState(() {
-            checked[subtopic.toString()] = value!;
-          });
-          bool allSelected = true;
-          for (var subtopic in data["subtopics"]) {
-            if (checked[subtopic.toString()] == false) {
-              allSelected = false;
-            }
-          }
-          setState(() {
-            checked[data["topic"]] = allSelected;
-          });
-        },
-        title: Text(
-          subtopic.toString(),
-          style: const TextStyle(color: Colors.black),
-        ),
-      ));
-    }
-    return value;
-  }
+
 
   void explanationBox() {
     showDialog(
@@ -864,7 +955,7 @@ class HomePageState extends State<HomePage> {
       Container(
         margin: const EdgeInsets.only(left: 30.0, right: 30.0),
         child: Column(
-          children: makeCheckboxList(),
+          children: makeCheckboxListFromRows(),
         ),
       ),
 
@@ -968,7 +1059,7 @@ class HomePageState extends State<HomePage> {
     );
   }
 
-  void reviseCards() {
+  Future<void> reviseCards()async {
     List<String> selectedSubtopics = [];
 
     for (var key in checked.keys) {
@@ -978,7 +1069,7 @@ class HomePageState extends State<HomePage> {
     }
 
     if (selectedSubtopics.isNotEmpty) {
-      Navigator.push(
+      await Navigator.push(
         context,
         ExpandRoute(
             page: AboveEverything(
@@ -987,6 +1078,18 @@ class HomePageState extends State<HomePage> {
               // choice: choice,
             )),
       );
+      if (!mounted) return;
+          setState(() {
+            name = "loading";
+            loading = true;
+          });  
+          await getStats();
+          await getData();
+                              // or only the pieces you need
+        
+          setState((){
+            loading = false;
+          });
     } else {
 
       //If no topics selected, alert box is shown

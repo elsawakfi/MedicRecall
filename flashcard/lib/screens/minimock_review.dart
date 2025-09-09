@@ -235,10 +235,7 @@ class MiniMockReviewState extends State<MiniMockReview> {
                         title: eventTitle,
                         color: color
                         );
-    //cannot add a new revision date if the date is not empty
-    if (allEvents[date] == null) {
-      selectedEvents[date] = [];
-      allEvents[date] = [];
+    
       print("Adding event $eventTitle to $date\n");
     
     selectedEvents[date]?.add(newEvent);
@@ -265,7 +262,7 @@ class MiniMockReviewState extends State<MiniMockReview> {
     String newDocId = newDoc.id;
     await _eventsCollectionRef.doc(newDocId).update({"events": updatedEvents});
 
-  }}
+  }
  
     setState(() {});
   }
@@ -279,11 +276,17 @@ class MiniMockReviewState extends State<MiniMockReview> {
       return;
     }
 
-    selectedEvents[date]?.removeWhere((event) => event.title == eventTitle);
-
-    if (selectedEvents[date]?.isEmpty ?? false) {
-      selectedEvents.remove(date);
+    for(Event e in selectedEvents[date]!){
+      if (e.title == eventTitle){
+        selectedEvents[date]!.remove(e);
+      }
     }
+
+    // selectedEvents[date]?.removeWhere((event) => event.title == eventTitle);
+
+    // if (selectedEvents[date]?.isEmpty ?? false) {
+    //   selectedEvents.remove(date);
+    // }
 
     QuerySnapshot querySnapshot = await _eventsCollectionRef
         .where("date", isEqualTo: Timestamp.fromDate(date))
@@ -388,8 +391,10 @@ class MiniMockReviewState extends State<MiniMockReview> {
                   dateInCalendar = entry.key;
                   if (dateInCalendar!.isBefore(temp!)){
                     for (final event in entry.value){
+                        if(event.title.contains("Mini Mock")){
                         temp = dateInCalendar;
                         e = event;
+                    }
                     }
                 }}
                 if(!e.title.contains("Completed:")){

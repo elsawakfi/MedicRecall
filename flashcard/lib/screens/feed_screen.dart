@@ -105,6 +105,7 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
 
   bool flippable = false;
   late DateTime firstSeen;
+  
 
   final FirebaseAuth auth = FirebaseAuth.instance;
   final CollectionReference _userCollectionRef =
@@ -113,8 +114,8 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
   late List<Map<String, dynamic>> flashcards;
   final MrAbsorbyManager mrManager = MrAbsorbyManager();
   final MrContManager mrCont = MrContManager();
-  late AnimationController _controller;
-  late WaitToFlipTimer _loadingBar; 
+  late final AnimationController _controller;
+  late final WaitToFlipTimer _loadingBar; 
 
   _FeedState(this.subtopics, this.count);
   late String title;
@@ -156,6 +157,12 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
       _loadingBar.go();
     });
     super.initState();
+  }
+
+  @override
+  void dispose(){
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -1023,7 +1030,6 @@ class WaitToFlipTimer extends StatefulWidget {
     controller.reset();
     controller.forward();
   }
-
 }
 
 class _WaitToFlipTimerState extends State<WaitToFlipTimer> with TickerProviderStateMixin {
@@ -1045,11 +1051,11 @@ class _WaitToFlipTimerState extends State<WaitToFlipTimer> with TickerProviderSt
     );
   }
 
-  @override
-  void dispose() {
-    widget.controller.dispose();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   widget.controller.dispose();
+  //   super.dispose();
+  // }
 
 }
 
