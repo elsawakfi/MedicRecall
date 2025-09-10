@@ -80,35 +80,12 @@ class HomePageState extends State<HomePage> {
   double spacing = 16;
 
 
-  Future<void> userData() async {
-  //This function, retrieves all the necessary data for the flashcard tutor. 
-  //The important part is getting the events from the database and only storing the events that have a flashcard
-  //Study session scheduled in
-    QuerySnapshot querySnapshot =
-    await users.where("userID", isEqualTo: user.uid).get();
-    setState(() {
-      name = querySnapshot.docs.last["name"];
-      id = querySnapshot.docs.last.id;
-      topicCount = querySnapshot.docs.last["topicCount"];
-      topicLastSeen = querySnapshot.docs.last["topicLastSeen"];
-      try {
-        testDay = querySnapshot.docs.last['TestDay'].toDate();
-      }catch (e){
-        // If testDay hasn't been set, assign a default value
-        testDay = DateTime.now();
-      }
-      _firstStudyDate = DateTime.fromMicrosecondsSinceEpoch(
-          querySnapshot.docs.last["firstStudyDay"].microsecondsSinceEpoch);
-    });
-    
-    try{
+  Future<void> getflashcardEvents() async{
+     try{
       _eventsCollectionRef =
           FirebaseFirestore.instance.collection('users/$id/events');
 
       var snapshots = await _eventsCollectionRef.get();
-      
-      
-      
       for (var doc in snapshots.docs) {
         var data = doc.data() as Map<String, dynamic>;
         if (data.containsKey('date') && data.containsKey('events') ) {
@@ -144,11 +121,34 @@ class HomePageState extends State<HomePage> {
         }
       }
       allEvents.addAll(selectedEvents);
-     
 
     } catch(e){
       print("Error loading events from DB: $e");
     }
+
+  }
+
+
+  Future<void> userData() async {
+  //This function, retrieves all the necessary data for the flashcard tutor. 
+  //The important part is getting the events from the database and only storing the events that have a flashcard
+  //Study session scheduled in
+    QuerySnapshot querySnapshot =
+    await users.where("userID", isEqualTo: user.uid).get();
+    setState(() {
+      name = querySnapshot.docs.last["name"];
+      id = querySnapshot.docs.last.id;
+      topicCount = querySnapshot.docs.last["topicCount"];
+      topicLastSeen = querySnapshot.docs.last["topicLastSeen"];
+      try {
+        testDay = querySnapshot.docs.last['TestDay'].toDate();
+      }catch (e){
+        // If testDay hasn't been set, assign a default value
+        testDay = DateTime.now();
+      }
+      _firstStudyDate = DateTime.fromMicrosecondsSinceEpoch(
+          querySnapshot.docs.last["firstStudyDay"].microsecondsSinceEpoch);
+    });
   }
 
   Future<void> updateOneEvent(
@@ -498,6 +498,7 @@ class HomePageState extends State<HomePage> {
     await getUser();
     await getTopics();
     await userData();
+    await getflashcardEvents();
     await getStats();
     await _computeRows();
     
@@ -601,27 +602,6 @@ class HomePageState extends State<HomePage> {
     // determine current scheduled date for this topic (if any)
     DateTime? dateInCalendar;
     Event? existing;
-
-    
-    // if (selectedEvents.isNotEmpty) {
-    //   for (var entry in selectedEvents.entries) {
-    //     for (var e in entry.value) {
-    //       if (e.title.contains(topic)) {
-    //         if (dateInCalendar != null && 
-    //         DateTime(entry.key.year, entry.key.month, entry.key.day).isBefore(dateInCalendar) ){
-    //           dateInCalendar = DateTime(entry.key.year, entry.key.month, entry.key.day);
-    //           existing = e;
-    //         }
-    //         else if(dateInCalendar == null){
-    //            dateInCalendar = DateTime(entry.key.year, entry.key.month, entry.key.day);
-    //           existing = e;
-    //         }
-            
-    //       }
-    //     }
-       
-    //   }
-    // }
     final allMatches = selectedEvents.entries
         .expand((entry) => entry.value.map((e) => (date: entry.key, event: e)))
         .where((pair) => pair.event.title.contains(topic));
@@ -656,7 +636,7 @@ class HomePageState extends State<HomePage> {
     }
 
     // if complete -> schedule next (idempotent & NO UI rebuilds here)
-    if (isComplete) {
+    if (isComplete){
       
         print("Updating to complete\n");
         await updateOneEvent(existing!, "Completed: $topic ", dateInCalendar!);
@@ -684,6 +664,8 @@ class HomePageState extends State<HomePage> {
       subtopics: subs,
     ));
   }
+  setState(() {
+  });
 
   if (!mounted) return;
   setState(() => _rows = newRows);
@@ -1034,6 +1016,16 @@ class HomePageState extends State<HomePage> {
     return widgets;
   }
 
+  @override 
+  void didChangeDependencies(){
+     super.didChangeDependencies();
+     WidgetsBinding.instance.addPostFrameCallback((_) async{
+       await userData();
+        await getflashcardEvents();
+        await _computeRows();
+    });
+  }
+
   //Shows an alert box
   AlertDialog alertDialogue() {
     return AlertDialog(
@@ -1078,18 +1070,23 @@ class HomePageState extends State<HomePage> {
               // choice: choice,
             )),
       );
-      if (!mounted) return;
-          setState(() {
+      setState(() {
             name = "loading";
             loading = true;
+            
           });  
-          await getStats();
-          await getData();
-                              // or only the pieces you need
-        
+          await getflashcardEvents();
+          await _computeRows();
+          
           setState((){
             loading = false;
           });
+      if (!mounted){
+        print("Not mason\n");
+        return;
+        
+        }
+          
     } else {
 
       //If no topics selected, alert box is shown

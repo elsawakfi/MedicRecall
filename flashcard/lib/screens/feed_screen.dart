@@ -499,19 +499,21 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
     }
   }
 
-  void goHome(List<String> subtopics, int count) {
+  void goHome(List<String> subtopics, int count) async {
     if (flashcards.isEmpty) {
       debugPrint("Card deck empty.\n Your score is $score");
     } else {
       count++;
-      Navigator.push(
-        context,
-        ExpandRoute(
-            page: Feed(
-          subtopics: subtopics,
-          count: count,
-        )),
-      );
+      Navigator.pop(context);
+      // await Navigator.push(
+      //   context,
+      //   ExpandRoute(
+      //       page: Feed(
+      //     subtopics: subtopics,
+      //     count: count,
+      //   )),
+      // );
+      
     }
   }
 
@@ -1033,13 +1035,15 @@ class WaitToFlipTimer extends StatefulWidget {
 }
 
 class _WaitToFlipTimerState extends State<WaitToFlipTimer> with TickerProviderStateMixin {
-
-  @override
+  late VoidCallback _listener;
+  
+   @override
   void initState() {
-    widget.controller.addListener((){
-      setState((){});
-    });
     super.initState();
+    _listener = () {
+      if (mounted) setState(() {});
+    };
+    widget.controller.addListener(_listener);
   }
 
   @override
@@ -1051,11 +1055,11 @@ class _WaitToFlipTimerState extends State<WaitToFlipTimer> with TickerProviderSt
     );
   }
 
-  // @override
-  // void dispose() {
-  //   widget.controller.dispose();
-  //   super.dispose();
-  // }
+  @override
+  void dispose() {
+    widget.controller.removeListener(_listener);
+    super.dispose();
+  }
 
 }
 
