@@ -374,50 +374,50 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
               child: const CircularProgressIndicator(),
             )),
             // --------------------- END OF FLASHCARD INFORMATION SCREENS ------------------
-            Center(
-                child: Visibility(
-              visible: finished,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  //After completion, display:
-                  Text(
-                    "Congrats!",
-                    style: TextStyle(fontSize: 38).copyWith(color: Colors.white),
-                  ),
-                  const SizedBox(height: 40),
-                  Visibility(
-                    visible: true,
-                    child: Text(
-                        "You have no more cards to revise.",
-                        style: TextStyle(fontSize: 38).copyWith(color: Colors.white)
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-                  Material(
-                    shape: const CircleBorder(),
-                    color: Theme.of(context).colorScheme.primary,
-                    elevation: 4,
-                    child: InkWell(
-                      onTap: home,
-                      borderRadius: BorderRadius.circular(50),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Tooltip(
-                          message: "Go Back",
-                          child: Icon(
-                            Icons.arrow_back,
-                            size: 32,
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          ),
-                        ),
-                      ),
-                    ),
-                  )
+            // Center(
+            //     child: Visibility(
+            //   visible: finished,
+            //   child: Column(
+            //     mainAxisAlignment: MainAxisAlignment.center,
+            //     children: [
+            //       //After completion, display:
+            //       Text(
+            //         "Congrats!",
+            //         style: TextStyle(fontSize: 38).copyWith(color: Colors.white),
+            //       ),
+            //       const SizedBox(height: 40),
+            //       Visibility(
+            //         visible: true,
+            //         child: Text(
+            //             "You have no more cards to revise.",
+            //             style: TextStyle(fontSize: 38).copyWith(color: Colors.white)
+            //         ),
+            //       ),
+            //       const SizedBox(height: 40),
+            //       Material(
+            //         shape: const CircleBorder(),
+            //         color: Theme.of(context).colorScheme.primary,
+            //         elevation: 4,
+            //         child: InkWell(
+            //           onTap: home,
+            //           borderRadius: BorderRadius.circular(50),
+            //           child: Padding(
+            //             padding: const EdgeInsets.all(16),
+            //             child: Tooltip(
+            //               message: "Go Back",
+            //               child: Icon(
+            //                 Icons.arrow_back,
+            //                 size: 32,
+            //                 color: Theme.of(context).colorScheme.onPrimary,
+            //               ),
+            //             ),
+            //           ),
+            //         ),
+            //       )
 
-                ],
-              ),
-            )),
+            //     ],
+            //   ),
+            // )),
 
           ],
         ),

@@ -667,10 +667,9 @@ class StudySessionManager {
         if (currentTargetDate.isAfter(testDay.subtract(const Duration(days: 1)))) {
           break;
         }
-        
         // Find a suitable date that respects our spacing requirements
         DateTime scheduledDate = currentTargetDate;
-        if(excludedDays.contains(_getDayName(scheduledDate.weekday))){
+        while(excludedDays.contains(_getDayName(scheduledDate.weekday))){
           scheduledDate = scheduledDate.add(const Duration(days: 1));
         }
         // Only schedule if we found a valid date
@@ -753,7 +752,7 @@ class StudySessionManager {
               }
               }}
 
-            if(generatedEvents[nextReview] != null && generatedEvents[nextReview]!.length == 2){
+            if(generatedEvents[nextReview] != null && generatedEvents[nextReview]!.length == 3){
             
              nextReview = nextReview.add(Duration(days:1));
                 

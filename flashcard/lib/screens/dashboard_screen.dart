@@ -93,7 +93,7 @@ class HomePageState extends State<HomePage> {
           
           for (var event in eventsList!){
             String title = event.toString();          
-            if(!title.contains("Flashcards")) {
+            if((!title.contains("Flashcards")) || title.contains("Completed")) {
                 Timestamp? timestamp = data['date'] as Timestamp?;
                   if (timestamp != null) {
                 DateTime date = timestamp.toDate();
@@ -102,8 +102,6 @@ class HomePageState extends State<HomePage> {
                 allEvents[date] = events.map ((title) => Event(color: Colors.black, title: title)).toList();
             }}
             else{
-                
-                
                 Timestamp? timestamp = data['date'] as Timestamp?;
                   if (timestamp != null) {
                 DateTime date = timestamp.toDate();
@@ -601,22 +599,34 @@ class HomePageState extends State<HomePage> {
     final isComplete = total > 0 && seen >= total;
     // determine current scheduled date for this topic (if any)
     DateTime? dateInCalendar;
+    DateTime? nextReview;
     Event? existing;
     final allMatches = selectedEvents.entries
-        .expand((entry) => entry.value.map((e) => (date: entry.key, event: e)))
-        .where((pair) => pair.event.title.contains(topic));
+    .expand((entry) => entry.value.map((e) => (date: entry.key, event: e)))
+    .where((pair) => pair.event.title.contains(topic))
+    .toList();
 
-    if (allMatches.isNotEmpty) {
-      final earliest = allMatches.reduce((a, b) =>
-          a.date.isBefore(b.date) ? a : b);
+     
+      allMatches.sort((a, b) => a.date.compareTo(b.date));
 
-       dateInCalendar = DateTime(
-          earliest.date.year, earliest.date.month, earliest.date.day);
-       existing = earliest.event;
-    }
-    DateTime nextReview;
-    if(dateInCalendar != null){
-       nextReview = dateInCalendar;}
+      if (allMatches.isNotEmpty) {
+        final earliest = allMatches.first;   // earliest
+        final secondEarliest = allMatches.length > 1 ? allMatches[1] : null; // 2nd earliest
+
+        dateInCalendar = DateTime(
+            earliest.date.year, earliest.date.month, earliest.date.day);
+        existing = earliest.event;
+
+        if (secondEarliest != null) {
+          nextReview = DateTime(
+              secondEarliest.date.year, secondEarliest.date.month, secondEarliest.date.day);
+        }
+        else{
+          nextReview = dateInCalendar;
+        }
+      }
+    
+    
 
     // compute “how long since last seen” and gap days map
     final idx = topicsUnorder.indexOf(topic);
@@ -626,12 +636,12 @@ class HomePageState extends State<HomePage> {
     String dateText = "N/A";
     if (dateInCalendar == null) {
       tileColor = const Color(0xFFD9D9D9);
-    } else if ((seen == 0) && (dateInCalendar.isBefore(today) || dateInCalendar.isAtSameMomentAs(today))) {
+    } else if ((dateInCalendar.isBefore(today) || dateInCalendar.isAtSameMomentAs(today))) {
       tileColor = const Color(0xFFFF9595);
       dateText = DateFormat('dd/MM/yyyy').format(dateInCalendar);
     } else {
       // recently reviewed vs grey
-      tileColor = (daysSince <= 2.0) ? const Color(0xFFB0FFC6) : const Color(0xFFD9D9D9);
+      tileColor = (daysSince <= 5.0) ? const Color(0xFFB0FFC6) : const Color(0xFFD9D9D9);
       dateText = DateFormat('dd/MM/yyyy').format(dateInCalendar);
     }
 
@@ -645,7 +655,7 @@ class HomePageState extends State<HomePage> {
         await LastRevised.resetSeenCardsForTopic(topic);
       // set presentation for complete state
         tileColor = const Color(0xFFB0FFC6);
-        dateText = DateFormat('dd/MM/yyyy').format(dateInCalendar!);
+        dateText = DateFormat('dd/MM/yyyy').format(nextReview!);
     }
 
     final List<String> subs = (map["subtopics"] as List?)
@@ -968,9 +978,11 @@ class HomePageState extends State<HomePage> {
                     foregroundColor: Colors.white,
               ),
 
-              onPressed: () {
+              onPressed: () async {
                 // reviseCards("revise");
-                reviseCards();
+                await reviseCards();
+                
+
               },
 
               child: const Padding(
@@ -1016,16 +1028,6 @@ class HomePageState extends State<HomePage> {
     return widgets;
   }
 
-  @override 
-  void didChangeDependencies(){
-     super.didChangeDependencies();
-     WidgetsBinding.instance.addPostFrameCallback((_) async{
-       await userData();
-        await getflashcardEvents();
-        await _computeRows();
-    });
-  }
-
   //Shows an alert box
   AlertDialog alertDialogue() {
     return AlertDialog(
@@ -1062,25 +1064,15 @@ class HomePageState extends State<HomePage> {
 
     if (selectedSubtopics.isNotEmpty) {
       await Navigator.push(
-        context,
-        ExpandRoute(
-            page: AboveEverything(
-              subtopics: selectedSubtopics,
-              count: 1,
-              // choice: choice,
-            )),
-      );
-      setState(() {
-            name = "loading";
-            loading = true;
-            
-          });  
-          await getflashcardEvents();
-          await _computeRows();
-          
-          setState((){
-            loading = false;
-          });
+                context,
+                ExpandRoute(page: AboveEverything(subtopics: selectedSubtopics, count: 1)),
+              ).then((_) async {
+                // Refresh data after returning
+                setState(() => loading = true);
+                await getData();
+                setState(() => loading = false);
+              });
+      
       if (!mounted){
         print("Not mason\n");
         return;
