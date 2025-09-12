@@ -79,6 +79,47 @@ class HomePageState extends State<HomePage> {
 
   double spacing = 16;
 
+  Future<void> flashcardBullshit()async{
+    final CollectionReference flashy =
+      FirebaseFirestore.instance.collection('flashcards');
+      var snapshots = await flashy.get();
+      Map <String,int> letsSee = {};
+      int count = 0;
+      
+      for (var doc in snapshots.docs){
+        var data = doc.data() as Map<String,dynamic>;
+        
+       
+         
+            // if (data["subtopic"] == "Maintaining Patient Focus" || 
+            //     data["subtopic"] == "Acting with Sensitivity" ||
+            //     data["subtopic"] == "Mental Capacity Act" ){
+            //     print(data["topic"]);
+            //     count++;
+            // }
+
+            if (data["subtopic"] == "Maintaining Patient Focus" ){
+              // await flashy.doc(doc.id).update({"subtopic": "Confidentiality (Subtopic)"});
+              // print(data["topic"].toString().compareTo("Empathy and Sensitivity"));
+            }
+
+
+
+            //  await flashy.doc(doc.id).update({"subtopic": "Maintaining Patient Focus"});
+            
+          //   if (!letsSee.containsKey(data["subtopic"])){
+          //   letsSee.addAll({data["subtopic"] : 1});
+
+          // }else{
+          //   letsSee.update(data["subtopic"], (value)=> letsSee[data["subtopic"]]! +1);
+          // }
+        
+
+        
+          }
+        //   print(count);
+        // print(letsSee);
+  }
 
   Future<void> getflashcardEvents() async{
      try{
@@ -208,6 +249,11 @@ class HomePageState extends State<HomePage> {
     CollectionReference topicRef =
     FirebaseWrapper.firestore().collection("topics");
     QuerySnapshot topicSnapshot = await topicRef.orderBy('order').get();
+    QuerySnapshot topicSnapshotUnordered = await topicRef.get();
+    for (var doc in topicSnapshotUnordered.docs ){
+      var data = doc.data() as Map<String, dynamic>;
+      topicNames.add(data["topic"]);
+    }
     List<Map<String, dynamic>> holder = [];
     Map<String, bool> holderChecked = {};
     for (var doc in topicSnapshot.docs) {
@@ -468,7 +514,7 @@ class HomePageState extends State<HomePage> {
       setState(() {
         topics = holderList[0];
         checked = holderList[1];
-        topicNames = topics.map((e) => '${e['topic']} Flashcards').toList();
+        
       });
     }
   }
@@ -499,6 +545,7 @@ class HomePageState extends State<HomePage> {
     await getflashcardEvents();
     await getStats();
     await _computeRows();
+    await flashcardBullshit();
     
     setState(() {
       loading = false;
@@ -588,8 +635,6 @@ class HomePageState extends State<HomePage> {
 
 
   Future<void> _computeRows() async{
-    List<String> topicsUnorder = ["Team Working","Effective Communication","Acting Within Your Remit","Empathy and Sensitivity","Professional Integrity"
-    ,"Coping With Pressure","Confidentiality"];
     final DateTime today = DateTime.now();
     final List<TopicRow> newRows = [];
   for (final map in topics) {
@@ -629,8 +674,10 @@ class HomePageState extends State<HomePage> {
     
 
     // compute “how long since last seen” and gap days map
-    final idx = topicsUnorder.indexOf(topic);
+    final idx = topicNames.indexOf(topic);
     final daysSince = (Timestamp.now().seconds - topicLastSeen![idx].seconds) / (60 * 60 * 24);
+      
+ 
    
     Color tileColor;
     String dateText = "N/A";
@@ -641,7 +688,7 @@ class HomePageState extends State<HomePage> {
       dateText = DateFormat('dd/MM/yyyy').format(dateInCalendar);
     } else {
       // recently reviewed vs grey
-      tileColor = (daysSince <= 5.0) ? const Color(0xFFB0FFC6) : const Color(0xFFD9D9D9);
+      tileColor = (daysSince <= 7.0) ? const Color(0xFFB0FFC6) : const Color(0xFFD9D9D9);
       dateText = DateFormat('dd/MM/yyyy').format(dateInCalendar);
     }
 
@@ -682,8 +729,6 @@ class HomePageState extends State<HomePage> {
   }
 
   Future<void> _recomputeRowsAndMaybeSchedule() async {
-  List<String> topicsUnorder = ["Team Working","Effective Communication","Acting Within Your Remit","Empathy and Sensitivity","Professional Integrity"
-    ,"Coping With Pressure","Confidentiality"];
   final DateTime today = DateTime.now();
   final List<TopicRow> newRows = [];
 
@@ -712,7 +757,7 @@ class HomePageState extends State<HomePage> {
     }
 
     // compute “how long since last seen” and gap days map
-    final idx = topicsUnorder.indexOf(topic);
+    final idx = topicNames.indexOf(topic);
     final daysSince = (Timestamp.now().seconds - topicLastSeen![idx].seconds) / (60 * 60 * 24);
     final Map<int,int> gap = {
       0: (daysSince.ceil() * 4) + 1,
@@ -1061,6 +1106,8 @@ class HomePageState extends State<HomePage> {
         selectedSubtopics.add(key);
       }
     }
+
+    print(selectedSubtopics);
 
     if (selectedSubtopics.isNotEmpty) {
       await Navigator.push(
