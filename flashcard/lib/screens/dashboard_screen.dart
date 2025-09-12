@@ -79,47 +79,7 @@ class HomePageState extends State<HomePage> {
 
   double spacing = 16;
 
-  Future<void> flashcardBullshit()async{
-    final CollectionReference flashy =
-      FirebaseFirestore.instance.collection('flashcards');
-      var snapshots = await flashy.get();
-      Map <String,int> letsSee = {};
-      int count = 0;
-      
-      for (var doc in snapshots.docs){
-        var data = doc.data() as Map<String,dynamic>;
-        
-       
-         
-            // if (data["subtopic"] == "Maintaining Patient Focus" || 
-            //     data["subtopic"] == "Acting with Sensitivity" ||
-            //     data["subtopic"] == "Mental Capacity Act" ){
-            //     print(data["topic"]);
-            //     count++;
-            // }
 
-            if (data["subtopic"] == "Maintaining Patient Focus" ){
-              // await flashy.doc(doc.id).update({"subtopic": "Confidentiality (Subtopic)"});
-              // print(data["topic"].toString().compareTo("Empathy and Sensitivity"));
-            }
-
-
-
-            //  await flashy.doc(doc.id).update({"subtopic": "Maintaining Patient Focus"});
-            
-          //   if (!letsSee.containsKey(data["subtopic"])){
-          //   letsSee.addAll({data["subtopic"] : 1});
-
-          // }else{
-          //   letsSee.update(data["subtopic"], (value)=> letsSee[data["subtopic"]]! +1);
-          // }
-        
-
-        
-          }
-        //   print(count);
-        // print(letsSee);
-  }
 
   Future<void> getflashcardEvents() async{
      try{
@@ -545,7 +505,7 @@ class HomePageState extends State<HomePage> {
     await getflashcardEvents();
     await getStats();
     await _computeRows();
-    await flashcardBullshit();
+
     
     setState(() {
       loading = false;
