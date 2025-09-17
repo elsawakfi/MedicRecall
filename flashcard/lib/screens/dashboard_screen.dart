@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/calendar_screen.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flashcard_x/screens/study_session_manager.dart';
+import 'package:flashcard_x/utils/algo.dart';
 import 'package:flashcard_x/utils/firebase_wrapper.dart';
 import 'package:flashcard_x/utils/last_revised.dart';
 import 'package:flashcard_x/utils/theme_provider.dart';
@@ -73,6 +74,7 @@ class HomePageState extends State<HomePage> {
   late Map<DateTime, List<Event>> allEvents;
   late CollectionReference _eventsCollectionRef;
   late List<String> topicNames = [];
+  late List<int> topicScores = [];
   final CollectionReference _userCollectionRef =
       FirebaseFirestore.instance.collection('users');
   StudySessionManager studySessionManager = StudySessionManager();
@@ -139,6 +141,7 @@ class HomePageState extends State<HomePage> {
       id = querySnapshot.docs.last.id;
       topicCount = querySnapshot.docs.last["topicCount"];
       topicLastSeen = querySnapshot.docs.last["topicLastSeen"];
+      
       try {
         testDay = querySnapshot.docs.last['TestDay'].toDate();
       }catch (e){
@@ -457,8 +460,6 @@ class HomePageState extends State<HomePage> {
     setState(() {});
   }
 
-
-
 //Get all events from database, iterate over events and look for which date a flashcard topic has been scheduled 
   Future<void> getTopics() async {
     if (mounted) {
@@ -477,6 +478,14 @@ class HomePageState extends State<HomePage> {
         
       });
     }
+   
+    topicScores = [];
+    for (final map in topics){
+      List<String> subtopics = map["subtopics"];
+      int score = (await Algo().getScore(user.uid, subtopics))!;
+      topicScores.add(score);
+    }
+   
   }
 
   @override
@@ -505,16 +514,12 @@ class HomePageState extends State<HomePage> {
     await getflashcardEvents();
     await getStats();
     await _computeRows();
-
-    
     setState(() {
       loading = false;
     });
     
     
   }
-
-  
 
   @override
   Widget build(BuildContext context) {
@@ -593,15 +598,18 @@ class HomePageState extends State<HomePage> {
     
   }
 
-
   Future<void> _computeRows() async{
     final DateTime today = DateTime.now();
     final List<TopicRow> newRows = [];
+  
   for (final map in topics) {
+    
     final topic = map["topic"] as String;
+    final idx = topicNames.indexOf(topic);
     int seen = seenCards[topic] ?? 0;
     int total = totalCards[topic] ?? 0;
-    final isComplete = total > 0 && seen >= total;
+    int score = topicScores[(map["order"]-1)];
+    final isComplete = (total > 0 && seen >= total) && score == total;
     // determine current scheduled date for this topic (if any)
     DateTime? dateInCalendar;
     DateTime? nextReview;
@@ -634,9 +642,9 @@ class HomePageState extends State<HomePage> {
     
 
     // compute “how long since last seen” and gap days map
-    final idx = topicNames.indexOf(topic);
+    
     final daysSince = (Timestamp.now().seconds - topicLastSeen![idx].seconds) / (60 * 60 * 24);
-      
+    
  
    
     Color tileColor;
@@ -648,7 +656,7 @@ class HomePageState extends State<HomePage> {
       dateText = DateFormat('dd/MM/yyyy').format(dateInCalendar);
     } else {
       // recently reviewed vs grey
-      tileColor = (daysSince <= 7.0) ? const Color(0xFFB0FFC6) : const Color(0xFFD9D9D9);
+      tileColor = (daysSince <= 36) ? const Color(0xFFB0FFC6) : const Color(0xFFD9D9D9);
       dateText = DateFormat('dd/MM/yyyy').format(dateInCalendar);
     }
 
@@ -656,13 +664,17 @@ class HomePageState extends State<HomePage> {
     if (isComplete){
       
         print("Updating to complete\n");
+        if(dateInCalendar == null){
+            tileColor = const Color(0xFFB0FFC6);
+        }
+        else{
         await updateOneEvent(existing!, "Completed: $topic ", dateInCalendar!);
         
         // Reset seen on backend (once)
         await LastRevised.resetSeenCardsForTopic(topic);
       // set presentation for complete state
         tileColor = const Color(0xFFB0FFC6);
-        dateText = DateFormat('dd/MM/yyyy').format(nextReview!);
+        dateText = DateFormat('dd/MM/yyyy').format(nextReview!);}
     }
 
     final List<String> subs = (map["subtopics"] as List?)
@@ -674,16 +686,14 @@ class HomePageState extends State<HomePage> {
       topic: topic,
       formattedDate: dateText,
       color: tileColor,
-      seen: seen,
+      seen: score,
       total: total,
       isComplete: isComplete,
       calendarDate: dateInCalendar,
       subtopics: subs,
     ));
   }
-  setState(() {
-  });
-
+  
   if (!mounted) return;
   setState(() => _rows = newRows);
   }
@@ -883,9 +893,6 @@ class HomePageState extends State<HomePage> {
   }
   return tiles;
 }
-
-
-
   void explanationBox() {
     showDialog(
       context: context,
@@ -985,7 +992,7 @@ class HomePageState extends State<HomePage> {
 
               onPressed: () async {
                 // reviseCards("revise");
-                await reviseCards();
+                reviseCards();
                 
 
               },
@@ -1066,9 +1073,6 @@ class HomePageState extends State<HomePage> {
         selectedSubtopics.add(key);
       }
     }
-
-    print(selectedSubtopics);
-
     if (selectedSubtopics.isNotEmpty) {
       await Navigator.push(
                 context,
@@ -1076,12 +1080,14 @@ class HomePageState extends State<HomePage> {
               ).then((_) async {
                 // Refresh data after returning
                 setState(() => loading = true);
-                await getData();
+                await userData();
+                await getTopics();
+                await getStats();
+                await _computeRows();
                 setState(() => loading = false);
               });
       
       if (!mounted){
-        print("Not mason\n");
         return;
         
         }

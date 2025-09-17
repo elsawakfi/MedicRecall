@@ -460,7 +460,7 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
       await resetTimesSeen();
     }
     score = (await Algo().getScore(user.uid, subtopics))!;
-
+    // print("score from feed_screen: $score");
     if (length != 0) {
       getCardDeck();
 
@@ -826,7 +826,7 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
           .where((element) => subtopicStrings.contains(element))
           .toList();
       List<int> indicesMap = [];
-
+     
       for (var subtopic in intersection) {
         int index = subtopicStrings.indexOf(subtopic);
         indicesMap.add(index);
@@ -836,6 +836,7 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
         totalCards = topics[i]["subtopicLength"][index] + totalCards;
       }
     }
+    
 
     if (filteredCards.length == totalCards) {
       exists = true;
@@ -850,14 +851,24 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
         QuerySnapshot querySnapshot = await _flashcardsSeenRef
             .where("cardID", isEqualTo: flashcards[i]["id"])
             .get();
-        var data = querySnapshot.docs.first.data() as Map<String, dynamic>;
 
-        // Retrieve timesSeen and gotRight value from the cards
-        var gotRight = data["gotRight"];
-
-        if (!gotRight) {
-          wrongCardExist = true;
+        if (querySnapshot.docs.isNotEmpty) {
+          var data = querySnapshot.docs.first.data() as Map<String, dynamic>;
+          var gotRight = data["gotRight"];
+          if (!gotRight) {
+            wrongCardExist = true;
+          }
+        } else {
+          print("No documents found for cardID: ${flashcards[i]["id"]}");
         }
+        // var data = querySnapshot.docs.first.data() as Map<String, dynamic>;
+
+        // // Retrieve timesSeen and gotRight value from the cards
+        // var gotRight = data["gotRight"];
+
+        // if (!gotRight) {
+        //   wrongCardExist = true;
+        // }
       }
 
       if (!wrongCardExist) {

@@ -730,33 +730,44 @@ class StudySessionManager {
             break;
           }
           else{
-            if (excludedDays.contains(_getDayName(nextReview.weekday))){
-              int separation = 1 + Random().nextInt(getReviewInterval(daysUntilTest));
-              if(generatedEvents[nextReview.subtract(Duration(days:separation))] == null){
-                nextReview = nextReview.subtract(Duration(days:separation));
-              }
-              else if(generatedEvents[nextReview.add(Duration(days:separation))] == null){
-                   nextReview = nextReview.add(Duration(days:separation));
-              }
-              else{
 
-              if(
-              (generatedEvents[nextReview.subtract(Duration(days:separation))]!.length 
-                <
-              generatedEvents[nextReview.add(Duration(days:separation))]!.length)
-                 || 
-              generatedEvents[nextReview.subtract(Duration(days:separation))] == null){
-                nextReview = nextReview.subtract(Duration(days:separation));
-              }else{
-              nextReview = nextReview.add(Duration(days:separation));
-              }
-              }}
+            //While nextReview is not good
+            //Not good 1. Too many events 2. Excluded Day 
+            bool notGood = (excludedDays.contains(_getDayName(nextReview.weekday)) ||
+                          generatedEvents[nextReview]?.length == 3) && nextReview.isBefore(testDay);
 
-            if(generatedEvents[nextReview] != null && generatedEvents[nextReview]!.length == 3){
-            
-             nextReview = nextReview.add(Duration(days:1));
-                
+            while (notGood){
+               nextReview = nextReview.add(Duration(days:1));
+               notGood = (excludedDays.contains(_getDayName(nextReview.weekday)) ||
+                          generatedEvents[nextReview]?.length == 3) && nextReview.isBefore(testDay);
             }
+            // if (excludedDays.contains(_getDayName(nextReview.weekday))){
+            //   int separation = 1 + Random().nextInt(getReviewInterval(daysUntilTest));
+            //   if(generatedEvents[nextReview.subtract(Duration(days:separation))] == null){
+            //     nextReview = nextReview.subtract(Duration(days:separation));
+            //   }
+            //   else if(generatedEvents[nextReview.add(Duration(days:separation))] == null){
+            //        nextReview = nextReview.add(Duration(days:separation));
+            //   }
+            //   else{
+
+            //   if(
+            //   (generatedEvents[nextReview.subtract(Duration(days:separation))]!.length 
+            //     <
+            //   generatedEvents[nextReview.add(Duration(days:separation))]!.length)
+            //      || 
+            //   generatedEvents[nextReview.subtract(Duration(days:separation))] == null){
+            //     nextReview = nextReview.subtract(Duration(days:separation));
+            //   }else{
+            //   nextReview = nextReview.add(Duration(days:separation));
+            //   }
+            //   }}
+
+            // if(generatedEvents[nextReview] != null && generatedEvents[nextReview]!.length == 3){
+            
+            //  nextReview = nextReview.add(Duration(days:1));
+                
+            // }
             generatedEvents.putIfAbsent(nextReview, () => []);
 
             if (!generatedEvents[nextReview]!
