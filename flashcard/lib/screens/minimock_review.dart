@@ -394,7 +394,7 @@ class MiniMockReviewState extends State<MiniMockReview> {
                     }
                     }
                 }}
-                if(!e.title.contains("Completed:")){
+                if(!e.title.contains("Completed:") && !e.title.contains("Shouldn't add")){
                   //if the mini mock has not been completed already, then add the completed flag
                   await updateOneEvent(e, "Completed: ${e.title}", temp!);
                   print("updated calendar?\n");//UPDATE CALENDAR 
