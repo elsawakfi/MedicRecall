@@ -2025,7 +2025,9 @@ class CalendarStateO extends State<Calendar> {
                                                   });
                                                 }else{
                                                       if(event.title.contains("Official MSRA Practice Paper")||
-                                                         event.title.contains("Official SJT Practice Paper")){
+                                                         event.title.contains("Official SJT Practice Paper") 
+                                                         || event.title.contains("Full-sized Mock") ||
+                                                         event.title.contains("Mini Mock")){
                                                       _showCompleteEventDialog("Mark event as incomplete?",
                                                       "",
                                                       event,
