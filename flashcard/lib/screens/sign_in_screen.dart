@@ -3,6 +3,7 @@ import 'package:flashcard_x/utils/authentication.dart';
 import 'package:flashcard_x/widgets/google_sign_in_button.dart';
 import 'package:flashcard_x/widgets/login_form.dart';
 import 'package:flutter/material.dart';
+import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flashcard_x/screens/reset_password_screen.dart';
 
 class SignInScreen extends StatefulWidget {
@@ -35,25 +36,23 @@ class SignInScreenState extends State<SignInScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
+      appBar: CustomAppBar(title: "MedicRecall"),
       body: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Image.asset(
-              'assets/dashboard_assets/app_logo4.png',
-              height: 130,
-              ),
-              const SizedBox(height: 20),
-              Text("MedicRecall",
-                style: textStyle1.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  fontSize: 45,
-              )),
-              const SizedBox(height: 20),
+              const SizedBox(height: 50),
+              Text("Sign In",
+                  style: textStyle1.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    fontSize: 45,
+                  )),
+              const SizedBox(height: 60),
               FutureBuilder(
                 future: Authentication.initializeFirebase(context: context),
                 builder: (context, snapshot) {
@@ -75,7 +74,8 @@ class SignInScreenState extends State<SignInScreen> {
               const SizedBox(height: 20),
               GestureDetector(
                 onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => const ForgotPassword()));
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => const ForgotPassword()));
                 },
                 child: const Text(
                   "Forgot Password?",
@@ -91,27 +91,25 @@ class SignInScreenState extends State<SignInScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("Don't have an account? Click here to ",
+                  const Text(
+                    "Don't have an account? Click here to ",
                     style: TextStyle(
-                    fontFamily: 'Lato',
-                    fontSize: 18,
-                    fontWeight: FontWeight.normal,
-                    color: Colors.white,
-                  ),
+                      fontFamily: 'Lato',
+                      fontSize: 18,
+                      fontWeight: FontWeight.normal,
+                      color: Colors.white,
+                    ),
                   ),
                   GestureDetector(
                     onTap: () {
                       Navigator.pushReplacementNamed(context, SignUpScreen.id);
                     },
-                    child: const Text(
-                      "Sign Up",
+                    child: const Text("Sign Up",
                         style: TextStyle(
-                        fontFamily: 'Lato',
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white
-                      )
-                    ),
+                            fontFamily: 'Lato',
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white)),
                   ),
                 ],
               ),
