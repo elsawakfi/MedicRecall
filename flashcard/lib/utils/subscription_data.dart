@@ -38,7 +38,7 @@ class SubscriptionData {
   factory SubscriptionData.fromMap(Map<String, dynamic> map) {
     return SubscriptionData(
       type: map['subscriptionType'] ?? 'free',
-      status: map['subscriptionStatus'] ?? 'active',  // ✅ Use "status", not "active"
+      status: map['subscriptionStatus'] ?? 'active',
       expiryDate: map['subscriptionExpiryDate'] != null 
           ? (map['subscriptionExpiryDate'] as Timestamp).toDate() 
           : null,
