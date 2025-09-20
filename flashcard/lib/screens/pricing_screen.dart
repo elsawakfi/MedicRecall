@@ -38,7 +38,8 @@ class _PricingScreenState extends State<PricingScreen> {
 
   Future<void> _launchStripeWithUserId() async {
     final String userId = _getCurrentUserId();
-    final String baseUrl = 'https://billing.stripe.com/p/login/test_eVqfZa8B98iU5BM7ir4ko00';
+    final String baseUrl = 'https://buy.stripe.com/test_dRm3co8B9dDe2pAfOX4ko01';
+    //https://buy.stripe.com/test_dRm3co8B9dDe2pAfOX4ko01
     final String urlWithUserId = '$baseUrl?client_reference_id=$userId';
 
     final Uri uri = Uri.parse(urlWithUserId);
@@ -57,18 +58,18 @@ class _PricingScreenState extends State<PricingScreen> {
     }
     return Scaffold(
       appBar: CustomAppBar(
-        title: 'Plan',
+        title: 'MedicRecall',
       ),
       body: Align(
         alignment: Alignment.topCenter,
         child: SingleChildScrollView(
           child: Column(
             children: [
-              SizedBox(height: 25),
+              SizedBox(height: 35),
               Text(
                 "Choose a Plan",
                 style: TextStyle(
-                  fontSize: 30,
+                  fontSize: 36,
                   fontWeight: FontWeight.w600,
                   fontFamily: 'Lato',
                   color: Colors.white,
@@ -76,7 +77,7 @@ class _PricingScreenState extends State<PricingScreen> {
               ),
               SizedBox(height: 25),
               Text(
-                "All plans come with a 100% money back guarantee.\nIf you don't score above average on the Professional Dilemmas Paper, we will give you a full refund.",
+                "All of our plans come with our 100% Money Back Guarantee!\nIf you don’t score in the top 50% of applicants on the Professional Dilemmas paper after using our platform, we will give you a full refund.",
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w300,
@@ -85,17 +86,39 @@ class _PricingScreenState extends State<PricingScreen> {
                 ),
                 textAlign: TextAlign.center,
               ),
+              SizedBox(height: 50),
               Padding(
                 padding: const EdgeInsets.all(20.0),
-                child: Row(
-                  children: [
-                    SizedBox(height: 100),
-                    PlanBox(
-                      planTitle: "Monthly Subscription",
-                      planCost: "£10 per month",
-                      onCheckout: () => _launchStripeWithUserId(),
-                    )
-                  ]
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal, 
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      PlanBox(
+                        planTitle: "Monthly Subscription",
+                        planCost: "£10 per month",
+                        onCheckout: () => _launchStripeWithUserId(),
+                      ),
+                      SizedBox(width: 5),
+                      PlanBox(
+                        planTitle: "3-Month Package",
+                        planCost: "£20 one-off payment",
+                        onCheckout: () => _launchStripeWithUserId(),
+                      ),
+                      SizedBox(width: 5),
+                      PlanBox(
+                        planTitle: "6-Month Package",
+                        planCost: "£30 one-off payment",
+                        onCheckout: () => _launchStripeWithUserId(),
+                      ),
+                      SizedBox(width: 5),
+                      PlanBox(
+                        planTitle: "12-Month Package",
+                        planCost: "£40 one-off payment",
+                        onCheckout: () => _launchStripeWithUserId(),
+                      ),
+                    ],
+                  ),
                 ),
               )
             ],
@@ -161,6 +184,7 @@ class IconButtonCustom extends StatelessWidget {
 }
 
 class PlanBox extends StatelessWidget {
+  // PlanBox widget takes title, cost and checkout function
   final Future<void> Function() onCheckout;
   final String planTitle;
   final String planCost;
@@ -168,44 +192,47 @@ class PlanBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: Colors.white,
-      elevation: 15,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children:[
-            SizedBox(height: 5),
-            Text(
-              planTitle,
-              style: TextStyle(
-                color: Colors.black,
-                fontFamily: 'Lato',
-                fontWeight: FontWeight.w900,
-                fontSize: 24,
+    return SizedBox(
+      width: 300,
+      child: Card(
+        color: Colors.white,
+        elevation: 10,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 12.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children:[
+              SizedBox(height: 5),
+              Text(
+                planTitle,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontFamily: 'Lato',
+                  fontWeight: FontWeight.w900,
+                  fontSize: 24,
+                ),
+                textAlign: TextAlign.left,
               ),
-              textAlign: TextAlign.left,
-            ),
-            SizedBox(height: 5),
-            Text(
-              planCost,
-              style: TextStyle(
-                color: Colors.black,
-                fontFamily: 'Lato',
-                fontWeight: FontWeight.w700,
-                fontSize: 16,
+              SizedBox(height: 5),
+              Text(
+                planCost,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontFamily: 'Lato',
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                ),
+                textAlign: TextAlign.left,
               ),
-              textAlign: TextAlign.left,
-            ),
-            SizedBox(height: 25),
-            IconButtonCustom(
-              label: 'CHECKOUT',
-              onPressed: onCheckout,
-            )
-          ]
-        ),
-      )
+              SizedBox(height: 35),
+              IconButtonCustom(
+                label: 'CHECKOUT',
+                onPressed: onCheckout,
+              )
+            ]
+          ),
+        )
+      ),
     );
   }
 }
