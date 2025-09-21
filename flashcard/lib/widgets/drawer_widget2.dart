@@ -1,14 +1,12 @@
 //import 'package:flashcard_x/screens/dash_screen.dart';
 import 'package:flashcard_x/screens/dashboard_screen.dart';
 import 'package:flashcard_x/screens/landing_screen_new.dart';
-import 'package:flashcard_x/screens/mark_scheme.dart';
+import 'package:flashcard_x/draft/mark_scheme.dart';
 import 'package:flashcard_x/screens/minimock_landing.dart';
-import 'package:flashcard_x/screens/pricing_screen.dart';
 import 'package:flashcard_x/screens/settings_screen.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flashcard_x/screens/fullmock_landing.dart';
 import 'package:flashcard_x/screens/fullmock_landing.dart';
-import 'package:flashcard_x/screens/subscription_screen.dart';
 //import 'package:flashcard_x/screens/streaks_page.dart';
 import 'package:flashcard_x/utils/authentication.dart';
 import 'package:flashcard_x/utils/page_transition.dart';
@@ -52,15 +50,21 @@ class DrawMain2 extends StatelessWidget {
                     ),
                     DrawerTile(
                       onPressed: () {
-                        Navigator.push(
+                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => SubtopicChoice(
-                              flashcardSet: "Medical Topics",
-                              subtopics: ["Cardiology", "Neurology", "Endocrinology", "Respiratory"],
+                            builder: (context) => const HomePage(title: "Flashcard Tutor"),
                             ),
-                          ),
-                        );
+                          );
+                        // Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(
+                        //     builder: (context) => SubtopicChoice(
+                        //       flashcardSet: "Medical Topics",
+                        //       subtopics: ["Cardiology", "Neurology", "Endocrinology", "Respiratory"],
+                        //     ),
+                        //   ),
+                        // );
                       },
                       icon: const Icon(Icons.rate_review_outlined),
                       title: "Flashcard Tutor",
@@ -85,7 +89,7 @@ class DrawMain2 extends StatelessWidget {
                       icon: const Icon(Icons.fact_check),
                       title: 'Full-Sized Mock',
                     ),
-                    DrawerTile(
+                    /*DrawerTile(
                       onPressed: () {
                         Navigator.push(
                           context,
@@ -94,7 +98,7 @@ class DrawMain2 extends StatelessWidget {
                       },
                       icon: const Icon(Icons.check_box_outlined),
                       title: "Mark Scheme",
-                    ),
+                    ),*/
                     DrawerTile(
                       onPressed: (){
                         Navigator.push(
@@ -112,24 +116,6 @@ class DrawMain2 extends StatelessWidget {
                       ),
                       icon: const Icon(Icons.calendar_month_outlined),
                       title: 'Study Schedule',
-                    ),
-                    DrawerTile(
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const SubscriptionScreen()),
-                      ),
-                      icon: const Icon(Icons.star_rate),
-                      title: 'Subscription',
-                    ),
-                    DrawerTile(
-                      onPressed: (){
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const PricingScreen()),
-                        );
-                      },
-                      icon: const Icon(Icons.add_box_outlined),
-                      title: 'Plans',
                     ),
                     DrawerTile(
                       onPressed: () {

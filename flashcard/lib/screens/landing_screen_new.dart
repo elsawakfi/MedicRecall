@@ -8,12 +8,13 @@ import 'package:flashcard_x/screens/faq.dart';
 import 'package:flashcard_x/screens/flashcard_editor_screen.dart';
 import 'package:flashcard_x/screens/minimock_landing.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flashcard_x/widgets/event.dart';
 import 'package:flutter/material.dart';
 import 'feedback_screen.dart';
 import 'fullmock_landing.dart';
 import 'landing_service.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
-import 'mark_scheme.dart';
+//import '../draft/mark_scheme.dart';
 import 'package:flashcard_x/screens/settings_screen.dart' as setting;
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -23,8 +24,7 @@ import 'dart:async';
 import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flashcard_x/widgets/drawer_widget2.dart';
 import 'package:flashcard_x/widgets/countdown_button.dart';
-import 'package:flashcard_x/screens/subtopic_choice_screen.dart';
-import 'package:flashcard_x/utils/subscription_service.dart';
+// import 'package:flashcard_x/screens/subtopic_choice_screen.dart';
 
 // VARIABLES THAT MUST BE CONNECTED TO THE DATABASE
 // nextTopicForReview
@@ -61,6 +61,7 @@ class NewLandingState extends State<NewLanding> {
   DateTime todaysDate = DateTime.now().copyWith(hour: 0, minute: 0, second: 0, millisecond: 0, microsecond: 0);
   int numberOfDecksRevised = 0;
   int howManyDaysInARow = 0;
+  String nextMock = "N/A"; 
 
     // FETCHES DATA FROM FIREBASE AND UPDATES THE STATE
   Future<void> loadStreakData() async {
@@ -89,49 +90,129 @@ class NewLandingState extends State<NewLanding> {
   //   if (mounted) setState(() {});
   // }
 
+   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    //waits for build function to complete and then calls back to call the condition checking function
+    WidgetsBinding.instance.addPostFrameCallback((_)async{
+      await getTestDay();
+    });
+  }
+
   // ----- Retrieve information for the dashboard -----
+   Future<void> getNextMockForReview() async {
+  QuerySnapshot querySnapshot =
+    await users.where("userID", isEqualTo: user?.uid).get();
+    String id = querySnapshot.docs.last.id;
+
+    late CollectionReference _eventsCollectionRef =
+          FirebaseFirestore.instance.collection('users/$id/events');
+
+      var snapshots = await _eventsCollectionRef.get();
+      
+     
+      DateTime finalDate = DateTime(_examDate!.year, _examDate!.month,_examDate!.day); 
+      for (var doc in snapshots.docs) {
+        var data = doc.data() as Map<String, dynamic>;
+        if (data.containsKey('date') && data.containsKey('events') ) {
+          List<dynamic>? eventsList = data['events'] as List<dynamic>?;
+        
+          for (var event in eventsList!){
+            String title = event.toString();  
+            if (title.contains("Mock") && !title.contains("Completed")){
+                  Timestamp? timestamp = data['date'] as Timestamp?;
+                  if (timestamp != null) {
+                      DateTime date = timestamp.toDate();
+                      date = DateTime(date.year, date.month, date.day);
+                      if (date.isBefore(finalDate) && (date.isAfter(todaysDate)|| date.isAtSameMomentAs(todaysDate))){
+                          nextMock = title;
+                          finalDate = date;
+                     }
+                        else continue;
+              }
+        }
+
+
+            }
+        }}}
+  
   Future<void> getNextTopicForReview() async {
-    TopicStats stats = await LastRevised.getStats(includeSubtopics: false);
-    Map<String, DateTime> nextReviewDatesMap = LastRevised.nextReviewDateByTopic(stats);
-    String nextTopic = nextReviewDatesMap.keys.first;
-    DateTime nextReviewDate = nextReviewDatesMap.values.first;
+  QuerySnapshot querySnapshot =
+    await users.where("userID", isEqualTo: user?.uid).get();
+    String id = querySnapshot.docs.last.id;
 
-    for (String topicID in nextReviewDatesMap.keys) {
-      if (nextReviewDatesMap[topicID]!.isBefore(nextReviewDate)) {
-        nextTopic = topicID;
-        nextReviewDate = nextReviewDatesMap[topicID]!;
-      }
-    }
+    late CollectionReference _eventsCollectionRef =
+          FirebaseFirestore.instance.collection('users/$id/events');
 
-    if (mounted) {
-      setState(() {
-        nextTopicForReview = nextTopic;
-      });
-    }
+      var snapshots = await _eventsCollectionRef.get();
+      
+     
+      DateTime finalDate = DateTime(_examDate!.year, _examDate!.month,_examDate!.day); 
+      for (var doc in snapshots.docs) {
+        var data = doc.data() as Map<String, dynamic>;
+        if (data.containsKey('date') && data.containsKey('events') ) {
+          List<dynamic>? eventsList = data['events'] as List<dynamic>?;
+        
+          for (var event in eventsList!){
+            String title = event.toString();  
+            if (title.contains("Flashcards") && !title.contains('Completed')){
+                  Timestamp? timestamp = data['date'] as Timestamp?;
+                  if (timestamp != null) {
+                      DateTime date = timestamp.toDate();
+                      date = DateTime(date.year, date.month, date.day);
+                      if (date.isBefore(finalDate) ){
+                          nextTopicForReview = title;
+                          finalDate = date;
+                     }
+                        else continue;
+              }
+        }
+
+
+            }
+        }}
+
+    // TopicStats stats = await LastRevised.getStats(includeSubtopics: false);
+    // Map<String, DateTime> nextReviewDatesMap = LastRevised.nextReviewDateByTopic(stats);
+    // String nextTopic = nextReviewDatesMap.keys.first;
+    // DateTime nextReviewDate = nextReviewDatesMap.values.first;
+
+    // for (String topicID in nextReviewDatesMap.keys) {
+    //   if (nextReviewDatesMap[topicID]!.isBefore(nextReviewDate)) {
+    //     nextTopic = topicID;
+    //     nextReviewDate = nextReviewDatesMap[topicID]!;
+    //   }
+    // }
+
+    // if (mounted) {
+    //   setState(() {
+    //     nextTopicForReview = nextTopic;
+    //   });
+    // }
 
   }
 
   @override
   void initState() {
     super.initState();
-    _initLanding();
-  }
-
-  Future<void> _initLanding() async {
-    await subscriptionService.loadSubscription();
     landingService.onLanding = true;
+    getTestDay();
     getUser().then( (_) async {
+      await getNextTopicForReview();
+      await getNextMockForReview();
       await LastRevised.recordLogin();
-      final nextTopic = await LastRevised.getNextTopicForReview();
+      await loadStreakData();
+      // final nextTopic = await LastRevised.getNextTopicForReview();
       await getExamDate(); // Remove the assignment since it returns void
-
+      await getTestDay();
       // Update the state with the fetched data
-      if (mounted) {
-        setState(() {
-          this.nextTopicForReview = nextTopic;
-          // Remove this.examDate = examDate; since getExamDate() returns void
-        });
-      }
+      // if (mounted) {
+      //   setState(() {
+      //     this.nextTopicForReview = nextTopic;
+      //     // Remove this.examDate = examDate; since getExamDate() returns void
+      //   });
+      // }
+      await getNextTopicForReview();
     });
   }
 
@@ -194,6 +275,12 @@ class NewLandingState extends State<NewLanding> {
         if (mounted) setState(() {});
       }
     }
+  }
+
+    int _calculateDaysUntilExam(DateTime examDate) {
+    final now = DateTime.now();
+    final difference = examDate.difference(now);
+    return difference.inDays + 1; // Ensure "today" counts as a day
   }
 
   Future<void> getFirstStudyDay() async {
@@ -293,7 +380,9 @@ class NewLandingState extends State<NewLanding> {
 
   @override
   Widget build(BuildContext context) {
+    
     buildCount++;
+    
     return Scaffold(  
         floatingActionButton: const CustomFloatingButton(),
         floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
@@ -327,12 +416,9 @@ class NewLandingState extends State<NewLanding> {
                         await Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => SubtopicChoice(
-                              flashcardSet: "Medical Topics",
-                              subtopics: ["Cardiology", "Neurology", "Endocrinology", "Respiratory"],
+                            builder: (context) => const HomePage(title: "Flashcard Tutor"),
                             ),
-                          ),
-                        );
+                          );
                       }
                     ),
                   ),
@@ -340,7 +426,7 @@ class NewLandingState extends State<NewLanding> {
                   Expanded(
                     child: DashboardBoxRight(
                       title: 'Next Mock Exam:',
-                      subtitle: 'Official Paper 1',
+                      subtitle: nextMock,
                         onPressed1: () async {
                           landingService.onLanding = false;
                           await Navigator.push(
@@ -368,12 +454,12 @@ class NewLandingState extends State<NewLanding> {
 
               // STUDY SCHEDULE AND CREATE NEW FLASHCARDS ICON BUTTONS
               Row(children: [
-                IconButtonCustom(
+                _IconButton(
                   label: 'Study Schedule',
                   iconFilePath: 'assets/dashboard_assets/calendar.png',
                   onPressed: () => triggerSignIn('Calendar'),
                 ),
-                IconButtonCustom(
+                _IconButton(
                   label: 'Create New Flashcards',
                   iconFilePath: 'assets/dashboard_assets/plus.png',
                   onPressed: () => triggerSignIn('FlashcardEditor'),
@@ -408,22 +494,30 @@ class NewLandingState extends State<NewLanding> {
                                 style: textStyleBlack,
                               ),
                             ]),
-
-                          SizedBox(height: 2),
                           Row(children: [
-                            StatisticsWidget(title: "Streak Count", iconFilePath: 'assets/dashboard_assets/fire.png', iconHeight: 55, displayedValue: howManyDaysInARow),
-                            SizedBox(width: 10),
-                            StatisticsWidget(title: "Total Days Revised", iconFilePath: 'assets/dashboard_assets/clock.png', iconHeight: 40, displayedValue: numberOfDecksRevised),
-                            SizedBox(width: 10),
-                            StatisticsWidget(
+                            Expanded(
+                            child: StatisticsWidget(title: "Streak Count", iconFilePath: 'assets/dashboard_assets/fire.png', iconHeight: 55, displayedValue: howManyDaysInARow),
+                            ),
+                            Expanded(
+                              child: StatisticsWidget(title: "Total Days Revised", iconFilePath: 'assets/dashboard_assets/clock.png', iconHeight: 40, displayedValue: numberOfDecksRevised),
+                            ),
+                            Expanded(
+                              child: StatisticsWidget(
                               title: "Exam Countdown", iconFilePath: 'assets/dashboard_assets/calendar.png', iconHeight: 45,
                               // displayedValue: localExamDate != null
                               // ? (localExamDate.isAfter(todaysDate)
                               //   ? localExamDate.difference(todaysDate).inDays
                               //   : 0)
                               // : -1
-                              displayedValue: 1, // PLACEHOLDER
-                            ),
+                              displayedValue: _examDate != null ? _calculateDaysUntilExam(_examDate!) : 0 , // PLACEHOLDER
+                              onPressed: (){
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                        builder: (context) => Calendar()),
+                                       );
+                              } ,
+                            )),
                           ]),
                         ])
                       )
@@ -438,7 +532,7 @@ class NewLandingState extends State<NewLanding> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  IconButtonCustom(
+                  _IconButton(
                     label: 'How does MedicRecall work?',
                     onPressed: () async {
                       await Navigator.push(
@@ -449,7 +543,7 @@ class NewLandingState extends State<NewLanding> {
                       );
                     },
                   ),
-                  IconButtonCustom(
+                  _IconButton(
                     label: 'Frequently asked Questions',
                     onPressed: () async {
                       await Navigator.push(
@@ -460,7 +554,7 @@ class NewLandingState extends State<NewLanding> {
                       );
                     },
                   ),
-                  IconButtonCustom(
+                  _IconButton(
                     label: 'Give us Feedback',
                     onPressed: () async {
                       landingService.onLanding = false;
@@ -600,9 +694,9 @@ class NewLandingState extends State<NewLanding> {
   }
 }
 
-class IconButtonCustom extends StatelessWidget {
+class _IconButton extends StatelessWidget {
   
-  const IconButtonCustom({super.key, 
+  const _IconButton({super.key, 
     required this.label,
     required this.onPressed,
     this.iconFilePath,
@@ -690,7 +784,7 @@ class DashboardBoxLeft extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 4.0),
                 child: Row(
                   children: [
-                    IconButtonCustom(
+                    _IconButton(
                       label: 'Flashcard Tutor',
                       iconFilePath: 'assets/dashboard_assets/trending_up.png',
                       onPressed: onPressed,
@@ -781,12 +875,12 @@ class DashboardBoxRight extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 4.0),
                 child: Row(
                   children: [
-                    IconButtonCustom(
+                    _IconButton(
                       label: 'Full-Sized Mock',
                       iconFilePath: 'assets/dashboard_assets/play_circle.png',
                       onPressed: onPressed1,
                     ),
-                    IconButtonCustom(
+                    _IconButton(
                       label: 'Mini Mock',
                       iconFilePath: 'assets/dashboard_assets/target.png',
                       onPressed: onPressed2,
@@ -847,17 +941,22 @@ class StatisticsWidget extends StatelessWidget {
     required this.iconFilePath,
     required this.displayedValue,
     required this.iconHeight,
+    this.onPressed,
+   
+
   });
 
   final String title;
   final String iconFilePath;
   final int displayedValue;
   final int iconHeight;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Expanded(
+     return GestureDetector(
+      onTap: onPressed, 
       child: Card(
         color: Colors.black,
         child: Padding(

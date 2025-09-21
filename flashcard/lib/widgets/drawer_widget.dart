@@ -4,7 +4,7 @@ import 'package:flashcard_x/screens/faq.dart';
 import 'package:flashcard_x/screens/feedback_screen.dart';
 import 'package:flashcard_x/screens/landing_screen.dart';
 import 'package:flashcard_x/screens/landing_screen_new.dart';
-import 'package:flashcard_x/screens/mark_scheme.dart';
+import 'package:flashcard_x/draft/mark_scheme.dart';
 import 'package:flashcard_x/screens/minimock_landing.dart';
 import 'package:flashcard_x/screens/settings_screen.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
@@ -74,14 +74,14 @@ class DrawMain extends StatelessWidget {
               );
             },
         ),
-        ListTile(
+        /*ListTile(
             key: const ValueKey('Mark Scheme'),
             leading: const Icon(Icons.check),
             title: const Text('Mark Scheme'),
             onTap: () => Navigator.push(
                   context,
                   MoveRightRoute(page: const UMS()),
-                )),
+                )),*/
         ListTile(
             key: const ValueKey('Flashcard Editor'),
             leading: const Icon(Icons.rate_review),

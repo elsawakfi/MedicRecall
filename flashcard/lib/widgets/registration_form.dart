@@ -4,7 +4,10 @@ import 'package:flashcard_x/screens/verify_email_screen.dart';
 import 'package:flashcard_x/utils/authentication.dart';
 import 'package:flashcard_x/utils/string_validation.dart';
 import 'package:flutter/material.dart';
-
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/gestures.dart';
 import '../screens/landing_screen.dart';
 import '../screens/landing_screen_new.dart';
 
@@ -30,6 +33,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
   final _password = TextEditingController();
 
   bool _isSigningUp = false;
+  bool _acceptedTerms = false;
   final _formkey = GlobalKey<FormState>();
 
   @override
@@ -56,6 +60,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
             child: TextFormField(
               controller: _name,
               focusNode: widget.nameFocusNode,
+              style: const TextStyle(color: Colors.black),
               validator: (value) => StringValidation.validateName(
                 name: value,
               ),
@@ -63,6 +68,8 @@ class _RegistrationFormState extends State<RegistrationForm> {
               keyboardType: TextInputType.name,
               textInputAction: TextInputAction.next,
               decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.white,
                 prefixIcon: const Icon(
                   Icons.person,
                 ),
@@ -70,13 +77,13 @@ class _RegistrationFormState extends State<RegistrationForm> {
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20.0),
                   borderSide: const BorderSide(
-                      // color: Colors.blue,
-                      ),
+                    color: Colors.white,
+                  ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20.0),
                   borderSide: const BorderSide(
-                    // color: Colors.lightBlueAccent,
+                    color: Colors.white,
                     width: 2.0,
                   ),
                 ),
@@ -91,6 +98,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
             child: TextFormField(
               controller: _email,
               focusNode: widget.emailFocusNode,
+              style: const TextStyle(color: Colors.black),
               validator: (value) => StringValidation.validateEmail(
                 email: value,
               ),
@@ -98,6 +106,8 @@ class _RegistrationFormState extends State<RegistrationForm> {
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.next,
               decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.white,
                 prefixIcon: const Icon(
                   Icons.email,
                 ),
@@ -105,13 +115,13 @@ class _RegistrationFormState extends State<RegistrationForm> {
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20.0),
                   borderSide: const BorderSide(
-                      // color: Colors.blue,
-                      ),
+                    color: Colors.white,
+                  ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20.0),
                   borderSide: const BorderSide(
-                    // color: Colors.lightBlueAccent,
+                    color: Colors.white,
                     width: 2.0,
                   ),
                 ),
@@ -127,6 +137,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
               controller: _password,
               focusNode: widget.passwordFocusNode,
               obscureText: true,
+              style: const TextStyle(color: Colors.black),
               validator: (value) => StringValidation.validatePassword(
                 password: value,
               ),
@@ -134,6 +145,8 @@ class _RegistrationFormState extends State<RegistrationForm> {
               keyboardType: TextInputType.text,
               textInputAction: TextInputAction.done,
               decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.white,
                 prefixIcon: const Icon(
                   Icons.visibility_off,
                 ),
@@ -141,13 +154,13 @@ class _RegistrationFormState extends State<RegistrationForm> {
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20.0),
                   borderSide: const BorderSide(
-                      // color: Colors.blue,
-                      ),
+                    color: Colors.white,
+                  ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20.0),
                   borderSide: const BorderSide(
-                    // color: Colors.lightBlueAccent,
+                    color: Colors.white,
                     width: 2.0,
                   ),
                 ),
@@ -160,6 +173,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
             height: 60,
             child: TextFormField(
               obscureText: true,
+              style: const TextStyle(color: Colors.black),
               validator: (value) {
                 if (value != _password.text) {
                   return 'Passwords do not match';
@@ -172,6 +186,8 @@ class _RegistrationFormState extends State<RegistrationForm> {
               keyboardType: TextInputType.text,
               textInputAction: TextInputAction.done,
               decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.white,
                 prefixIcon: const Icon(
                   Icons.visibility_off,
                 ),
@@ -179,11 +195,14 @@ class _RegistrationFormState extends State<RegistrationForm> {
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20.0),
                   borderSide: const BorderSide(
+                    color: Colors.white,
+                    width: 2.0,
                   ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20.0),
                   borderSide: const BorderSide(
+                    color: Colors.white,
                     width: 2.0,
                   ),
                 ),
@@ -191,7 +210,66 @@ class _RegistrationFormState extends State<RegistrationForm> {
             ),
           ),
           const SizedBox(height: 4),
-
+          SizedBox(
+            width: 350,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Checkbox(
+                  value: _acceptedTerms,
+                  onChanged: (value) {
+                    setState(() {
+                      _acceptedTerms = value ?? false;
+                    });
+                  },
+                ),
+                Expanded(
+                  child: RichText(
+                    text: TextSpan(
+                      style: const TextStyle(color: Colors.white, fontSize: 14),
+                      children: [
+                        const TextSpan(
+                            text: "By ticking this box, I agree to our "),
+                        TextSpan(
+                          text: "Terms and Conditions",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            decoration: TextDecoration.underline,
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () async {
+                              final Uri url = Uri.parse(
+                                  "https://medicrecall.com/terms-and-conditions/");
+                              if (await canLaunchUrl(url)) {
+                                await launchUrl(url,
+                                    mode: LaunchMode.externalApplication);
+                              }
+                            },
+                        ),
+                        const TextSpan(text: " and "),
+                        TextSpan(
+                          text: "Privacy Policy.",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            decoration: TextDecoration.underline,
+                          ),
+                          recognizer: TapGestureRecognizer()
+                            ..onTap = () async {
+                              final Uri url = Uri.parse(
+                                  "https://medicrecall.com/privacy-policy/");
+                              if (await canLaunchUrl(url)) {
+                                await launchUrl(url,
+                                    mode: LaunchMode.externalApplication);
+                              }
+                            },
+                        )
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: 20),
           _isSigningUp
               ? const Padding(
@@ -205,36 +283,42 @@ class _RegistrationFormState extends State<RegistrationForm> {
                   child: SizedBox(
                     width: 350, // match_parent
                     child: ElevatedButton.icon(
-                      onPressed: () async {
-                        widget.nameFocusNode.unfocus();
-                        widget.emailFocusNode.unfocus();
-                        widget.passwordFocusNode.unfocus();
+                      onPressed: _acceptedTerms
+                          ? () async {
+                              widget.nameFocusNode.unfocus();
+                              widget.emailFocusNode.unfocus();
+                              widget.passwordFocusNode.unfocus();
 
-                        setState(() {
-                          _isSigningUp = true;
-                        });
+                              setState(() {
+                                _isSigningUp = true;
+                              });
 
-                        if (_formkey.currentState!.validate()) {
-                          User? user = await Authentication
-                              .registerWithNameEmailPassword(
-                            context: context,
-                            name: _name.text,
-                            email: _email.text,
-                            password: _password.text,
-                          );
+                              if (_formkey.currentState!.validate()) {
+                                User? user = await Authentication
+                                    .registerWithNameEmailPassword(
+                                  context: context,
+                                  name: _name.text,
+                                  email: _email.text,
+                                  password: _password.text,
+                                );
 
-                          if (user != null && user.emailVerified) {
-                            // if a user object is filled
-                            Navigator.pushReplacementNamed(context, NewLanding.id); //push replace page with homepage instance, with id, which is a string
-                          }else if (user != null){
-                            navigator.pushReplacementNamed(VerifyEmailScreen.id);
-                          }
-                        }
+                                if (user != null && user.emailVerified) {
+                                  // if a user object is filled
+                                  Navigator.pushReplacementNamed(
+                                      context,
+                                      NewLanding
+                                          .id); //push replace page with homepage instance, with id, which is a string
+                                } else if (user != null) {
+                                  navigator.pushReplacementNamed(
+                                      VerifyEmailScreen.id);
+                                }
+                              }
 
-                        setState(() {
-                          _isSigningUp = false;
-                        });
-                      },
+                              setState(() {
+                                _isSigningUp = false;
+                              });
+                            }
+                          : null,
                       style: ElevatedButton.styleFrom(
                         minimumSize: const Size.fromHeight(50),
                         backgroundColor: Colors.green.shade300,
