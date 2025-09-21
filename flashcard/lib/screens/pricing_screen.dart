@@ -2,10 +2,12 @@ import 'package:flashcard_x/widgets/app_bar_title.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flashcard_x/utils/subscription_service.dart';
+import 'package:flashcard_x/utils/stripe_utils.dart';
 import 'package:flashcard_x/widgets/stripe_pricing_table.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/landing_screen_new.dart';
+
 
 
 
@@ -36,7 +38,7 @@ class _PricingScreenState extends State<PricingScreen> {
   return FirebaseAuth.instance.currentUser?.uid ?? '';
   }
 
-  Future<void> _launchStripeWithUserId() async {
+  Future<void> launchStripeWithUserId() async {
     final String userId = _getCurrentUserId();
     final String baseUrl = 'https://buy.stripe.com/test_dRm3co8B9dDe2pAfOX4ko01';
     //https://buy.stripe.com/test_dRm3co8B9dDe2pAfOX4ko01
@@ -60,7 +62,23 @@ class _PricingScreenState extends State<PricingScreen> {
       appBar: CustomAppBar(
         title: 'MedicRecall',
       ),
-      body: Align(
+      body: subscriptionService.isPaid ? const PaidScreen() : const FreeScreen(),
+      );
+}
+
+}
+
+class FreeScreen extends StatefulWidget {
+  const FreeScreen({super.key});
+
+  @override
+  State<FreeScreen> createState() => _FreeScreenState();
+}
+
+class _FreeScreenState extends State<FreeScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return Align(
         alignment: Alignment.topCenter,
         child: SingleChildScrollView(
           child: Column(
@@ -97,25 +115,25 @@ class _PricingScreenState extends State<PricingScreen> {
                       PlanBox(
                         planTitle: "Monthly Subscription",
                         planCost: "£10 per month",
-                        onCheckout: () => _launchStripeWithUserId(),
+                        onCheckout: () => StripeUtils.launchStripeWithUserId(),
                       ),
                       SizedBox(width: 5),
                       PlanBox(
                         planTitle: "3-Month Package",
                         planCost: "£20 one-off payment",
-                        onCheckout: () => _launchStripeWithUserId(),
+                        onCheckout: () => StripeUtils.launchStripeWithUserId(),
                       ),
                       SizedBox(width: 5),
                       PlanBox(
                         planTitle: "6-Month Package",
                         planCost: "£30 one-off payment",
-                        onCheckout: () => _launchStripeWithUserId(),
+                        onCheckout: () => StripeUtils.launchStripeWithUserId(),
                       ),
                       SizedBox(width: 5),
                       PlanBox(
                         planTitle: "12-Month Package",
                         planCost: "£40 one-off payment",
-                        onCheckout: () => _launchStripeWithUserId(),
+                        onCheckout: () => StripeUtils.launchStripeWithUserId(),
                       ),
                     ],
                   ),
@@ -124,10 +142,43 @@ class _PricingScreenState extends State<PricingScreen> {
             ],
           ),
         )
-      ),
+      );
+  }
+}
+
+class PaidScreen extends StatefulWidget {
+  const PaidScreen({super.key});
+
+  @override
+  State<PaidScreen> createState() => _PaidScreenState();
+}
+
+class _PaidScreenState extends State<PaidScreen> {
+  
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.topCenter,
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            SizedBox(height: 50),
+            Text(
+              "You are already subscribed to the paid plan.",
+              style: TextStyle(
+                fontSize: 18,
+              )
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 15),
+            ),
+          ],
+        ),
+      )
     );
+  }
 }
-}
+
 
 class IconButtonCustom extends StatelessWidget {
   

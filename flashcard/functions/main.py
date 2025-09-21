@@ -324,9 +324,14 @@ def stripe_webhook(req: https_fn.Request) -> https_fn.Response:
         invoice = event['data']['object']
         user_id = invoice.get("client_reference_id")
         subscription_id = invoice.get("subscription")
+        stripe_customer_id = invoice.get("customer")
         
         print(f"user_id: {user_id}, subscription_id: {subscription_id}")
         if user_id and subscription_id:
+            stripe.Customer.modify(
+                stripe_customer_id,
+                metadata={'user_id': user_id}
+            )
             subscription = stripe.Subscription.retrieve(subscription_id)
             price = subscription['items']['data'][0]['price']
             interval = price['recurring']['interval']
@@ -357,6 +362,8 @@ def stripe_webhook(req: https_fn.Request) -> https_fn.Response:
                             "subscriptionType": "paid",
                             "subscriptionStatus": "active",
                             "subscriptionExpiryDate": new_expiry
-                        }
+                        },
                     })
+            print(f"stripe customer id: {stripe_customer_id}, user id: {user_id}.")
+            
     return https_fn.Response("Webhook received", status=200)
