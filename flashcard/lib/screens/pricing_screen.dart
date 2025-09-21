@@ -115,25 +115,25 @@ class _FreeScreenState extends State<FreeScreen> {
                       PlanBox(
                         planTitle: "Monthly Subscription",
                         planCost: "£10 per month",
-                        onCheckout: () => StripeUtils.launchStripeWithUserId(),
+                        onCheckout: () => StripeUtils.launchStripeWithUserId(1),
                       ),
                       SizedBox(width: 5),
                       PlanBox(
                         planTitle: "3-Month Package",
                         planCost: "£20 one-off payment",
-                        onCheckout: () => StripeUtils.launchStripeWithUserId(),
+                        onCheckout: () => StripeUtils.launchStripeWithUserId(3),
                       ),
                       SizedBox(width: 5),
                       PlanBox(
                         planTitle: "6-Month Package",
                         planCost: "£30 one-off payment",
-                        onCheckout: () => StripeUtils.launchStripeWithUserId(),
+                        onCheckout: () => StripeUtils.launchStripeWithUserId(6),
                       ),
                       SizedBox(width: 5),
                       PlanBox(
                         planTitle: "12-Month Package",
                         planCost: "£40 one-off payment",
-                        onCheckout: () => StripeUtils.launchStripeWithUserId(),
+                        onCheckout: () => StripeUtils.launchStripeWithUserId(12),
                       ),
                     ],
                   ),
@@ -280,6 +280,54 @@ class PlanBox extends StatelessWidget {
                 label: 'CHECKOUT',
                 onPressed: onCheckout,
               )
+            ]
+          ),
+        )
+      ),
+    );
+  }
+}
+
+class PlanBoxFree extends StatelessWidget {
+  // PlanBox widget takes title, cost and checkout function
+  final String planTitle;
+  final String planCost;
+  const PlanBoxFree({super.key, required this.planTitle, required this.planCost});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 300,
+      child: Card(
+        color: Colors.white,
+        elevation: 10,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 12.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children:[
+              SizedBox(height: 5),
+              Text(
+                planTitle,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontFamily: 'Lato',
+                  fontWeight: FontWeight.w900,
+                  fontSize: 24,
+                ),
+                textAlign: TextAlign.left,
+              ),
+              SizedBox(height: 5),
+              Text(
+                planCost,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontFamily: 'Lato',
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                ),
+                textAlign: TextAlign.left,
+              ),
             ]
           ),
         )
