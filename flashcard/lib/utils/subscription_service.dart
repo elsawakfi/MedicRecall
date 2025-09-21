@@ -137,6 +137,7 @@ class SubscriptionService {
             .doc(querySnapshot.docs.first.id)
             .update({
           "subscription": _subscription.toMap(),
+          "stripeID": null
         });
       }
     } catch (e) {
