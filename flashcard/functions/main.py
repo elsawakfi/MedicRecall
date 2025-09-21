@@ -4,7 +4,7 @@
 import statistics
 from firebase_functions import https_fn, firestore_fn
 from firebase_admin import firestore, initialize_app
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta,timezone
 import os.path
 import stripe
 import json
@@ -348,11 +348,11 @@ def stripe_webhook(req: https_fn.Request) -> https_fn.Response:
                     current_data = doc.to_dict().get("subscription", {})
                     current_expiry = current_data.get("subscriptionExpiryDate")
 
-                    start_date = datetime.now()
+                    start_date = datetime.now(timezone.utc)
 
                     if current_expiry:
-                        current_expiry = current_expiry.datetime
-                        start_date = max(datetime.now(), current_expiry)
+                        current_expiry = current_expiry
+                        start_date = max(datetime.now(timezone.utc), current_expiry)
                     
                     # extend expiry date
                     new_expiry = start_date + timedelta(days = 30 * months_to_add)

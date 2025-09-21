@@ -34,23 +34,11 @@ class SubscriptionService {
         if (userData.containsKey("subscription")) {
           _subscription = SubscriptionData.fromMap(userData["subscription"]);
           print("${_subscription.type} and ${_subscription.status}");
-    //       await FirebaseFirestore.instance
-    //       .collection('users').doc(user.uid).update({"subscription":{
-    //       "subscriptionExpiryDate":Timestamp.fromDate(DateTime.now().add(Duration(days: 1))),
-    //       "subscriptionStatus": "active",
-    //       "subscriptionType": "paid"
-      
-    // }});
+          
         } else {
           _subscription = SubscriptionData.free();
            print("${_subscription.type} and ${_subscription.status}");
-    //        await FirebaseFirestore.instance
-    //       .collection('users').doc(user.uid).update({"subscription":{
-    //       "subscriptionExpiryDate":Timestamp.fromDate(DateTime.now().add(Duration(days: 1))),
-    //       "subscriptionStatus": "active",
-    //       "subscriptionType": "paid"
-      
-    // }});
+
         }
         
         // Check if subscription has expired

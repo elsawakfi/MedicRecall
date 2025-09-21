@@ -17,7 +17,6 @@ import 'package:provider/provider.dart';
 import '../screens/calendar_screen.dart';
 import '../screens/flashcard_editor_screen.dart';
 import 'package:flashcard_x/screens/subtopic_choice_screen.dart';
-import 'package:flashcard_x/screens/subscription_screen.dart';
 
 class DrawMain2 extends StatelessWidget {
   const DrawMain2({super.key});
@@ -131,17 +130,17 @@ class DrawMain2 extends StatelessWidget {
                     ]),
               ),
             ),
-            DrawerTile(
-              icon: const Icon(Icons.subscriptions_rounded),
-              title: 'Subscription',
-              onPressed: () {
-                        Navigator.push(
-                          context,
-                          MoveRightRoute(page: const SubscriptionScreen()),
-                        );
-                      },
+            // DrawerTile(
+            //   icon: const Icon(Icons.subscriptions_rounded),
+            //   title: 'Subscription',
+            //   onPressed: () {
+            //             Navigator.push(
+            //               context,
+            //               MoveRightRoute(page: const SubscriptionScreen()),
+            //             );
+            //           },
 
-            ),
+            // ),
             DrawerTile(
               icon: const Icon(Icons.logout),
               title: 'Logout',

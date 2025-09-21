@@ -211,7 +211,7 @@ class NewLandingState extends State<NewLanding> {
     landingService.onLanding = true;
     getTestDay();
     getUser().then( (_) async {
-      await _loadSub();
+      await getUser();
       await getNextTopicForReview();
       await getNextMockForReview();
       await LastRevised.recordLogin();
@@ -227,6 +227,7 @@ class NewLandingState extends State<NewLanding> {
       //   });
       // }
       await getNextTopicForReview();
+      await _loadSub();
     });
     
   }
@@ -247,7 +248,6 @@ class NewLandingState extends State<NewLanding> {
     } else {
       user = auth.currentUser!;
     }
-    
   }
 
     Future<void> checkTestDay() async {
@@ -597,7 +597,7 @@ class NewLandingState extends State<NewLanding> {
           )
         )
       )    
-    ) : const PricingScreen();
+    ): const PricingScreen();
    
    }
 
