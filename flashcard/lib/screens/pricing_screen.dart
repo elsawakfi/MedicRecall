@@ -170,8 +170,35 @@ class _PaidScreenState extends State<PaidScreen> {
               )
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 15),
-            ),
+                padding: const EdgeInsets.all(20.0),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal, 
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      PlanBoxViewOnly(
+                        planTitle: "Monthly Subscription",
+                        planCost: "£10 per month",
+                      ),
+                      SizedBox(width: 5),
+                      PlanBoxViewOnly(
+                        planTitle: "3-Month Package",
+                        planCost: "£20 one-off payment",
+                      ),
+                      SizedBox(width: 5),
+                      PlanBoxViewOnly(
+                        planTitle: "6-Month Package",
+                        planCost: "£30 one-off payment",
+                      ),
+                      SizedBox(width: 5),
+                      PlanBoxViewOnly(
+                        planTitle: "12-Month Package",
+                        planCost: "£40 one-off payment",
+                      ),
+                    ],
+                  ),
+                ),
+              )
           ],
         ),
       )
@@ -288,11 +315,11 @@ class PlanBox extends StatelessWidget {
   }
 }
 
-class PlanBoxFree extends StatelessWidget {
+class PlanBoxViewOnly extends StatelessWidget {
   // PlanBox widget takes title, cost and checkout function
   final String planTitle;
   final String planCost;
-  const PlanBoxFree({super.key, required this.planTitle, required this.planCost});
+  const PlanBoxViewOnly({super.key, required this.planTitle, required this.planCost});
 
   @override
   Widget build(BuildContext context) {
@@ -328,6 +355,7 @@ class PlanBoxFree extends StatelessWidget {
                 ),
                 textAlign: TextAlign.left,
               ),
+              SizedBox(height: 30)
             ]
           ),
         )
