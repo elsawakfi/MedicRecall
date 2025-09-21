@@ -87,8 +87,7 @@ class CalendarStateO extends State<Calendar> {
   final TextEditingController _eventController = TextEditingController();
   bool testDayBool = false;
   String? _isHovered;
-   List<String> flashcards = [
-    ];
+  List<String> flashcards = [];
   bool _complete = false;
 
   //The CalendarFormat variable format allows the user to change their view of the calendar, into weekly, biweekly and monthly.
@@ -199,7 +198,6 @@ class CalendarStateO extends State<Calendar> {
     await generateEvents(testDay, user);
     setState(() {});
   }
-  
 
   Future<void> generateStudySessions(User user) async {
     try {
@@ -224,7 +222,6 @@ class CalendarStateO extends State<Calendar> {
 
       // Generate study sessions using StudySessionManager
       var studySessions = await studySessionManager.generateStudySessions(user);
-     
 
       if (studySessions.isNotEmpty) {
         // Merge new study sessions with existing events
@@ -264,19 +261,18 @@ class CalendarStateO extends State<Calendar> {
     }
   }
 
-
-  Future <void> getFlashcards() async{
-    CollectionReference topicRef = FirebaseFirestore.instance.collection('topics');
-    QuerySnapshot allTopics=
-      await topicRef.get();
-    for (var doc in allTopics.docs){
-        Map<String,dynamic> data = doc.data() as Map<String,dynamic>;
-        flashcards.add(data["topic"]);    
-        }
+  Future<void> getFlashcards() async {
+    CollectionReference topicRef =
+        FirebaseFirestore.instance.collection('topics');
+    QuerySnapshot allTopics = await topicRef.get();
+    for (var doc in allTopics.docs) {
+      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+      flashcards.add(data["topic"]);
+    }
   }
+
   // DATABASE FUNCTIONS:
   Future<void> getUser() async {
-    
     NavigatorState nav = Navigator.of(context);
     if (auth.currentUser == null) {
       var tmp = await auth.authStateChanges().first;
@@ -450,11 +446,13 @@ class CalendarStateO extends State<Calendar> {
           if (timestamp != null && eventsList != null) {
             DateTime date = timestamp.toDate();
             date = DateTime(date.year, date.month, date.day);
-            final List<String> titles = eventsList.map((e) => e.toString()).toList();
+            final List<String> titles =
+                eventsList.map((e) => e.toString()).toList();
 
             // build Event objects for this doc (color per title)
             final List<Event> eventsForThisDoc = titles.map((title) {
-              final bool isOverdueNotCompleted = date.isBefore(today) && !title.contains("Completed");
+              final bool isOverdueNotCompleted =
+                  date.isBefore(today) && !title.contains("Completed");
               final Color color = isOverdueNotCompleted
                   ? const Color.fromARGB(255, 255, 0, 8)
                   : _getEventColor(title);
@@ -465,7 +463,8 @@ class CalendarStateO extends State<Calendar> {
             final dst = selectedEvents.putIfAbsent(date, () => <Event>[]);
 
             // fast dedupe by lowercased trimmed title
-            final existingTitles = dst.map((e) => e.title.trim().toLowerCase()).toSet();
+            final existingTitles =
+                dst.map((e) => e.title.trim().toLowerCase()).toSet();
 
             for (final ev in eventsForThisDoc) {
               final key = ev.title.trim().toLowerCase();
@@ -475,27 +474,27 @@ class CalendarStateO extends State<Calendar> {
               }
             }
 
-        //     List<String> events = eventsList.map((e) => e.toString()).toList();
-        //     for (String e in eventsList){
-        //         if(date.isBefore(today)&& !e.contains("Completed")){
-        //                     selectedEvents[date] = events
-        //                         .map((title) => Event(
-        //                               title: e,
-        //                               color: const Color.fromARGB(255, 255, 0, 8),
-        //                             ))
-        //                         .toList();}
-        //         else{
-        //           selectedEvents[date] = events
-        //                         .map((title) => Event(
-        //                               title: e.toString(),
-        //                               color: _getEventColor(e),
-        //                             ))
-        //                         .toList();
-        //         }
-                                
-        //   }
-            }
-             setState(() {});
+            //     List<String> events = eventsList.map((e) => e.toString()).toList();
+            //     for (String e in eventsList){
+            //         if(date.isBefore(today)&& !e.contains("Completed")){
+            //                     selectedEvents[date] = events
+            //                         .map((title) => Event(
+            //                               title: e,
+            //                               color: const Color.fromARGB(255, 255, 0, 8),
+            //                             ))
+            //                         .toList();}
+            //         else{
+            //           selectedEvents[date] = events
+            //                         .map((title) => Event(
+            //                               title: e.toString(),
+            //                               color: _getEventColor(e),
+            //                             ))
+            //                         .toList();
+            //         }
+
+            //   }
+          }
+          setState(() {});
         }
       }
     } catch (e) {
@@ -504,23 +503,27 @@ class CalendarStateO extends State<Calendar> {
   }
 
   Color _getEventColor(String title) {
-    
-    if (title.contains("Completed")){
+    if (title.contains("Completed")) {
       return const Color.fromARGB(255, 0, 157, 50);
-    }
-    else{
-    if (title == "Test Day") return const Color.fromARGB(255, 255, 89, 94);
-    if (title.contains("Mini Mock")) return StudySessionManager.kMiniMockColor;
-    if (title.contains("Full-sized Mock")) return StudySessionManager.kFullMockColor;
-    if (title.contains("Official MSRA Practice Paper")) return StudySessionManager.kOfficialPaperColor;
-    if (title.contains("Official SJT Practice Paper")) return StudySessionManager.kSJTPaperColor;
+    } else {
+      if (title == "Test Day") return const Color.fromARGB(255, 255, 89, 94);
+      if (title.contains("Mini Mock"))
+        return StudySessionManager.kMiniMockColor;
+      if (title.contains("Full-sized Mock"))
+        return StudySessionManager.kFullMockColor;
+      if (title.contains("Official MSRA Practice Paper"))
+        return StudySessionManager.kOfficialPaperColor;
+      if (title.contains("Official SJT Practice Paper"))
+        return StudySessionManager.kSJTPaperColor;
 
-    for (String flashcard in flashcards) {
-      if (title.contains(flashcard)) return StudySessionManager.kFlashcardColor;
-    }
+      for (String flashcard in flashcards) {
+        if (title.contains(flashcard))
+          return StudySessionManager.kFlashcardColor;
+      }
 
-    return Color.fromARGB(200, 0, 0, 100);
-  }}
+      return Color.fromARGB(200, 0, 0, 100);
+    }
+  }
 
   //When creating a new revision plan we update the database with the revision topics and dates in the calendar
   Future<void> updateEventsToDB(User user) async {
@@ -557,31 +560,32 @@ class CalendarStateO extends State<Calendar> {
   String _getEventType(String title) {
     title = title.toLowerCase();
 
-     if(title.contains('completed')){
+    if (title.contains('completed')) {
       return "completed";
-    }else{
-    // The 5 main event types - using contains() to be more flexible
-    if (title.contains('mini mock')) {
-      return "mini_mock";
+    } else {
+      // The 5 main event types - using contains() to be more flexible
+      if (title.contains('mini mock')) {
+        return "mini_mock";
+      }
+      if (title.contains('full-sized mock') || title.contains('full mock')) {
+        return "full_mock";
+      }
+      if (title.contains('flashcards')) {
+        return "flashcard";
+      }
+      if (title.contains('official msra practice paper')) {
+        return "official_msra_paper";
+      }
+      if (title.contains('official sjt practice paper')) {
+        return "official_sjt_paper";
+      }
+      if (title.contains('test day')) {
+        return "test_day";
+      }
+      // If it's not one of the 5 main events, show "feature not available"
+      return "unknown";
     }
-    if (title.contains('full-sized mock') || title.contains('full mock')) {
-      return "full_mock";
-    }
-    if (title.contains('flashcards')) {
-      return "flashcard";
-    }
-    if (title.contains('official msra practice paper')) {
-      return "official_msra_paper";
-    }
-    if (title.contains('official sjt practice paper')) {
-      return "official_sjt_paper";
-    }
-    if (title.contains('test day')) {
-      return "test_day";
-    }
-    // If it's not one of the 5 main events, show "feature not available"
-    return "unknown";
-  }}
+  }
 
   void _showTestDayInfoDialog() {
     showDialog(
@@ -711,25 +715,20 @@ class CalendarStateO extends State<Calendar> {
         context,
         MaterialPageRoute(builder: (context) => const FullMockLanding()),
       );
-    } 
-    else if (eventType == 'completed'){
-        event.complete = true;
-        //updateOneEvent(event, event.title, selectedDay,complete: true);
-        _showFeatureNotAvailableDialog(
-          'You have already completed this event',
-          '',
+    } else if (eventType == 'completed') {
+      event.complete = true;
+      //updateOneEvent(event, event.title, selectedDay,complete: true);
+      _showFeatureNotAvailableDialog(
+        'You have already completed this event',
+        '',
       );
-    }
-    
-    else {
+    } else {
       _showFeatureNotAvailableDialog(
         'Unknown Event Type',
         'This event type is not recognized.',
       );
     }
   }
-
-
 
   void _showFeatureNotAvailableDialog(String title, String message) {
     showDialog(
@@ -1015,12 +1014,17 @@ class CalendarStateO extends State<Calendar> {
       builder: (context) => AlertDialog(
         title: const Text(
           "New Event",
-          style: TextStyle(
-            color: Colors.black
-          ),),
-        content: TextFormField(controller: _eventController,
-        style: TextStyle(color: Colors.black),
-       ),
+          style: TextStyle(color: Colors.black),
+        ),
+        content: TextFormField(
+          controller: _eventController,
+          style: TextStyle(color: Colors.black),
+          decoration: InputDecoration(
+            border: OutlineInputBorder(),
+            filled: true,
+            fillColor: Colors.grey.shade200,
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -1130,7 +1134,7 @@ class CalendarStateO extends State<Calendar> {
   }
 
   // Function to show the labels dialog (pop-up)
-  void _showLabelsDialog(BuildContext context){ 
+  void _showLabelsDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -1171,11 +1175,10 @@ class CalendarStateO extends State<Calendar> {
                     StudySessionManager.kSJTPaperColor),
                 const SizedBox(height: 15),
                 _buildLabelItem(
-                    'Completed Events',  Color.fromARGB(255, 0, 157, 50)),
+                    'Completed Events', Color.fromARGB(255, 0, 157, 50)),
                 const SizedBox(height: 15),
                 _buildLabelItem(
                     'Custom Events', Color.fromARGB(200, 0, 0, 100)),
-                
               ],
             ),
           ),
@@ -1199,7 +1202,8 @@ class CalendarStateO extends State<Calendar> {
     );
   }
 
-  void _showCompleteEventDialog (String title, String message,Event event,DateTime eventDate){
+  void _showCompleteEventDialog(
+      String title, String message, Event event, DateTime eventDate) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -1225,21 +1229,17 @@ class CalendarStateO extends State<Calendar> {
         actions: [
           TextButton(
             onPressed: () async {
-              
-                    Navigator.pop(context);
-                    setState(() {
-                      loading = true;
-                    });
-                    String newTitle = event.title.replaceRange(0, 10, '');
-                    await updateOneEvent(event,newTitle,eventDate);
-                   
-                    setState(() {
-                     
-                      loading = false;  
-                    });
-                                                      },
-                                                  
-         
+              Navigator.pop(context);
+              setState(() {
+                loading = true;
+              });
+              String newTitle = event.title.replaceRange(0, 10, '');
+              await updateOneEvent(event, newTitle, eventDate);
+
+              setState(() {
+                loading = false;
+              });
+            },
             style: TextButton.styleFrom(
               foregroundColor: const Color.fromARGB(255, 90, 138, 243),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -1271,7 +1271,7 @@ class CalendarStateO extends State<Calendar> {
   Widget build(BuildContext context) {
     bool isSmallScreen = MediaQuery.of(context).size.width < 600;
     return Scaffold(
-        drawer: const DrawMain2(),
+      drawer: const DrawMain2(),
       appBar: CustomAppBar(
         title: 'Study Schedule',
         mobileTitle: 'Schedule',
@@ -1770,13 +1770,16 @@ class CalendarStateO extends State<Calendar> {
                                               format = _format;
                                             });
                                           },
-                                          startingDayOfWeek: StartingDayOfWeek.monday,
+                                          startingDayOfWeek:
+                                              StartingDayOfWeek.monday,
                                           daysOfWeekVisible: true,
                                           daysOfWeekHeight: 40.0,
                                           daysOfWeekStyle: DaysOfWeekStyle(
                                             // decoration:
                                             decoration: BoxDecoration(
-                                              color: Theme.of(context).shadowColor.withOpacity(0.4),
+                                              color: Theme.of(context)
+                                                  .shadowColor
+                                                  .withOpacity(0.4),
                                               border: Border(
                                                 bottom: BorderSide(
                                                   color: Colors.white
@@ -1789,13 +1792,19 @@ class CalendarStateO extends State<Calendar> {
                                             weekdayStyle: TextStyle(
                                               fontWeight: FontWeight.bold,
                                               fontSize: 17.0,
-                                              color: Theme.of(context).textTheme.bodyMedium?.color, // Changed to white for dark mode
+                                              color: Theme.of(context)
+                                                  .textTheme
+                                                  .bodyMedium
+                                                  ?.color, // Changed to white for dark mode
                                             ),
                                             // Style for weekend names
                                             weekendStyle: TextStyle(
                                               fontWeight: FontWeight.bold,
                                               fontSize: 17.0,
-                                              color: Theme.of(context).textTheme.titleLarge?.color,
+                                              color: Theme.of(context)
+                                                  .textTheme
+                                                  .titleLarge
+                                                  ?.color,
                                             ),
                                           ),
                                           onDaySelected: (DateTime selectDay,
@@ -1835,13 +1844,19 @@ class CalendarStateO extends State<Calendar> {
                                             // Make default days more visible on dark background
                                             defaultTextStyle: TextStyle(
                                               fontSize: 16,
-                                              color: Theme.of(context).textTheme.titleSmall?.color,
+                                              color: Theme.of(context)
+                                                  .textTheme
+                                                  .titleSmall
+                                                  ?.color,
                                               fontWeight: FontWeight.w500,
                                             ),
                                             // Make weekend days match default days
                                             weekendTextStyle: TextStyle(
                                               fontSize: 16,
-                                              color: Theme.of(context).textTheme.titleSmall?.color,
+                                              color: Theme.of(context)
+                                                  .textTheme
+                                                  .titleSmall
+                                                  ?.color,
                                               fontWeight: FontWeight.w500,
                                             ),
                                             // Improve visibility of outside days
@@ -1947,134 +1962,182 @@ class CalendarStateO extends State<Calendar> {
                                   ),
                                   const SizedBox(height: 20),
                                   ..._getEventsfromDay(selectedDay).map(
-                                    //This block of code will need to be re run if we are to have live updates,
-                                    //This is necessary for both the add and edit event functions
-                                    (Event event) => Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 16.0, vertical: 8.0),
-                                      child: GestureDetector(
-                                        onTap: () =>
-                                              _navigateToEventDetails(event),
-                                        child: MouseRegion(
-                                            onEnter: (_) => setState(() =>
-                                                _isHovered = event.title),
-                                            onExit: (_) => setState(
-                                                () => _isHovered = null),
-                                         child: ListTile(
-                                          title: Text(event.title,
-                                          style: TextStyle(
-                                                color: Theme.of(context).textTheme.bodyMedium?.color,
-                                                fontWeight: FontWeight.w500,
-                                                // decoration: //_isHovered == event.title
-                                                    // ? TextDecoration.none
-                                                    // : TextDecoration.none, 
-                                              ),
-                                            ),
-                                        leading: Container(
-                                          width: 12,
-                                          height: 12,
-                                          decoration: BoxDecoration(
-                                            color: event.color,
-                                            shape: BoxShape.circle,
-                                          ),
-                                        ),
-                                        tileColor: _isHovered == event.title
-                                            ? event.color.withOpacity(0.8)
-                                            : event.color.withOpacity(0.5),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                        ),
-                                        contentPadding: EdgeInsets.symmetric(
-                                            horizontal: 16, vertical: 8),
-                                        trailing: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                             Checkbox(
-                                              value: _getEventType(event.title) == "completed", 
-                                              onChanged: (bool? value) async{
-                                                if(_getEventType(event.title) == "flashcard") {
-                                                  _showFeatureNotAvailableDialog("Go to Flashcard Turor", "To complete flashcard study events, review them in the flashcard tutor");
-                                                  return;
-                                                  }
-                                                if(_getEventType(event.title) == "mini_mock"||_getEventType(event.title) == 'full_mock') {
-                                                  _showFeatureNotAvailableDialog("Go to mock page", "To complete ${event.title} use the mock page");
-                                                  return;
-                                                  }
-                                                
-                                                if (!event.complete && _getEventType(event.title) != 'completed' ){
-                                                  setState(() {
-                                                    loading = true;
-                                                    event.complete = true;
-                                                  });
-                                                  await updateOneEvent(event, "Completed: ${event.title}", selectedDay,complete: true);
-                                                  setState(() {
-                                                    loading = false;
-                                                  });
-                                                }else{
-                                                      if(event.title.contains("Official MSRA Practice Paper")||
-                                                         event.title.contains("Official SJT Practice Paper")){
-                                                      _showCompleteEventDialog("Mark event as incomplete?",
-                                                      "",
-                                                      event,
-                                                      selectedDay);
-                                                      }else{
-                                                        _showFeatureNotAvailableDialog("Unable to mark as incomplete", 
-                                                            "Once a mock or flashcard review session has been complete it cannot be unmarked");
-                                                      }
-                                                     
-                                                  
-                                                  
-                                                  
-                                                }
-                                            }),
-                                            IconButton(
-                                              icon: Icon(Icons.edit,
-                                                  color: Theme.of(context)
-                                                      .textTheme
-                                                      .bodyMedium
-                                                      ?.color),
-                                              onPressed: () => _editEventDate(
-                                                  context, event),
-                                            ),
-                                            const SizedBox(width: 10),
-                                            IconButton(
-                                              icon: Icon(Icons.link,
-                                                  color: Theme.of(context)
-                                                      .textTheme
-                                                      .bodyMedium
-                                                      ?.color),
-                                              onPressed: () =>
+                                      //This block of code will need to be re run if we are to have live updates,
+                                      //This is necessary for both the add and edit event functions
+                                      (Event event) => Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 16.0,
+                                                vertical: 8.0),
+                                            child: GestureDetector(
+                                              onTap: () =>
                                                   _navigateToEventDetails(
                                                       event),
-                                            ),
-                                            const SizedBox(width: 10),
-                                            Container(
-                                              decoration: BoxDecoration(
-                                                color: Colors
-                                                    .redAccent, // Background color
-                                                shape: BoxShape
-                                                    .circle, // Makes it a round button
+                                              child: MouseRegion(
+                                                onEnter: (_) => setState(() =>
+                                                    _isHovered = event.title),
+                                                onExit: (_) => setState(
+                                                    () => _isHovered = null),
+                                                child: ListTile(
+                                                  title: Text(
+                                                    event.title,
+                                                    style: TextStyle(
+                                                      color: Theme.of(context)
+                                                          .textTheme
+                                                          .bodyMedium
+                                                          ?.color,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      // decoration: //_isHovered == event.title
+                                                      // ? TextDecoration.none
+                                                      // : TextDecoration.none,
+                                                    ),
+                                                  ),
+                                                  leading: Container(
+                                                    width: 12,
+                                                    height: 12,
+                                                    decoration: BoxDecoration(
+                                                      color: event.color,
+                                                      shape: BoxShape.circle,
+                                                    ),
+                                                  ),
+                                                  tileColor:
+                                                      _isHovered == event.title
+                                                          ? event.color
+                                                              .withOpacity(0.8)
+                                                          : event.color
+                                                              .withOpacity(0.5),
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8),
+                                                  ),
+                                                  contentPadding:
+                                                      EdgeInsets.symmetric(
+                                                          horizontal: 16,
+                                                          vertical: 8),
+                                                  trailing: Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      Checkbox(
+                                                          value: _getEventType(
+                                                                  event
+                                                                      .title) ==
+                                                              "completed",
+                                                          onChanged: (bool?
+                                                              value) async {
+                                                            if (_getEventType(
+                                                                    event
+                                                                        .title) ==
+                                                                "flashcard") {
+                                                              _showFeatureNotAvailableDialog(
+                                                                  "Go to Flashcard Turor",
+                                                                  "To complete flashcard study events, review them in the flashcard tutor");
+                                                              return;
+                                                            }
+                                                            if (_getEventType(event
+                                                                        .title) ==
+                                                                    "mini_mock" ||
+                                                                _getEventType(event
+                                                                        .title) ==
+                                                                    'full_mock') {
+                                                              _showFeatureNotAvailableDialog(
+                                                                  "Go to mock page",
+                                                                  "To complete ${event.title} use the mock page");
+                                                              return;
+                                                            }
+
+                                                            if (!event
+                                                                    .complete &&
+                                                                _getEventType(event
+                                                                        .title) !=
+                                                                    'completed') {
+                                                              setState(() {
+                                                                loading = true;
+                                                                event.complete =
+                                                                    true;
+                                                              });
+                                                              await updateOneEvent(
+                                                                  event,
+                                                                  "Completed: ${event.title}",
+                                                                  selectedDay,
+                                                                  complete:
+                                                                      true);
+                                                              setState(() {
+                                                                loading = false;
+                                                              });
+                                                            } else {
+                                                              if (event.title
+                                                                      .contains(
+                                                                          "Official MSRA Practice Paper") ||
+                                                                  event.title
+                                                                      .contains(
+                                                                          "Official SJT Practice Paper")) {
+                                                                _showCompleteEventDialog(
+                                                                    "Mark event as incomplete?",
+                                                                    "",
+                                                                    event,
+                                                                    selectedDay);
+                                                              } else {
+                                                                _showFeatureNotAvailableDialog(
+                                                                    "Unable to mark as incomplete",
+                                                                    "Once a mock or flashcard review session has been complete it cannot be unmarked");
+                                                              }
+                                                            }
+                                                          }),
+                                                      IconButton(
+                                                        icon: Icon(Icons.edit,
+                                                            color: Theme.of(
+                                                                    context)
+                                                                .textTheme
+                                                                .bodyMedium
+                                                                ?.color),
+                                                        onPressed: () =>
+                                                            _editEventDate(
+                                                                context, event),
+                                                      ),
+                                                      const SizedBox(width: 10),
+                                                      IconButton(
+                                                        icon: Icon(Icons.link,
+                                                            color: Theme.of(
+                                                                    context)
+                                                                .textTheme
+                                                                .bodyMedium
+                                                                ?.color),
+                                                        onPressed: () =>
+                                                            _navigateToEventDetails(
+                                                                event),
+                                                      ),
+                                                      const SizedBox(width: 10),
+                                                      Container(
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          color: Colors
+                                                              .redAccent, // Background color
+                                                          shape: BoxShape
+                                                              .circle, // Makes it a round button
+                                                        ),
+                                                        child: IconButton(
+                                                          icon: Icon(
+                                                              Icons
+                                                                  .delete_outlined,
+                                                              color:
+                                                                  Colors.white),
+                                                          onPressed: () async {
+                                                            await deleteSingleEvent(
+                                                                selectedDay,
+                                                                event.title,
+                                                                user);
+                                                          },
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
                                               ),
-                                              child: IconButton(
-                                                icon: Icon(
-                                                    Icons.delete_outlined,
-                                                    color: Colors.white),
-                                                onPressed: () async {
-                                                  await deleteSingleEvent(
-                                                      selectedDay,
-                                                      event.title,
-                                                      user);
-                                                },
-                                              ),
                                             ),
-                                           
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                              ))],
+                                          ))
+                                ],
                               ),
                             ),
                           ),
@@ -2104,13 +2167,18 @@ class CalendarStateO extends State<Calendar> {
                                                     BorderRadius.circular(20)),
                                         padding: isSmallScreen
                                             ? EdgeInsets.only(
-                                                left: 20, right: 12, top: 20, bottom: 20)
+                                                left: 20,
+                                                right: 12,
+                                                top: 20,
+                                                bottom: 20)
                                             : EdgeInsets.symmetric(
                                                 horizontal: 24, vertical: 12),
                                       ),
-                                      icon: Icon(Icons.add,
-                                          size: isSmallScreen ? 32 : 25,
-                                          color: Colors.white,),
+                                      icon: Icon(
+                                        Icons.add,
+                                        size: isSmallScreen ? 32 : 25,
+                                        color: Colors.white,
+                                      ),
                                       label: isSmallScreen
                                           ? SizedBox.shrink()
                                           : const Text(
@@ -2139,13 +2207,18 @@ class CalendarStateO extends State<Calendar> {
                                                     BorderRadius.circular(20)),
                                         padding: isSmallScreen
                                             ? EdgeInsets.only(
-                                                left: 20, right: 12, top: 20, bottom: 20)
+                                                left: 20,
+                                                right: 12,
+                                                top: 20,
+                                                bottom: 20)
                                             : EdgeInsets.symmetric(
                                                 horizontal: 24, vertical: 12),
                                       ),
-                                      icon: Icon(Icons.delete,
-                                          size: isSmallScreen ? 32 : 25,
-                                          color: Colors.white,),
+                                      icon: Icon(
+                                        Icons.delete,
+                                        size: isSmallScreen ? 32 : 25,
+                                        color: Colors.white,
+                                      ),
                                       label: isSmallScreen
                                           ? SizedBox.shrink()
                                           : const Text(
@@ -2209,18 +2282,17 @@ class CalendarStateO extends State<Calendar> {
     );
   }
 
-  
-  Future<void> addSingleEvent(
-      DateTime date, String eventTitle, User user, {bool completed = false}) async {
-    date = DateTime(date.year, date.month, date.day); 
+  Future<void> addSingleEvent(DateTime date, String eventTitle, User user,
+      {bool completed = false}) async {
+    date = DateTime(date.year, date.month, date.day);
     //The delete single event function updates the UI in real time so I just copied the structure of that function
     Event newEvent =
         Event(title: eventTitle, color: _getEventColor(eventTitle));
-    if (completed){
-      newEvent =
-        Event(title: eventTitle, color: _getEventColor(eventTitle),complete: true);
+    if (completed) {
+      newEvent = Event(
+          title: eventTitle, color: _getEventColor(eventTitle), complete: true);
     }
-    
+
     if (selectedEvents[date] == null) {
       selectedEvents[date] = [];
     }
@@ -2263,10 +2335,9 @@ class CalendarStateO extends State<Calendar> {
       print("No events found for date: ${date.toString().split(' ')[0]}");
       return;
     }
-    
 
-    final idx = selectedEvents[date]!
-    .indexWhere((event) => event.title == eventTitle);
+    final idx =
+        selectedEvents[date]!.indexWhere((event) => event.title == eventTitle);
 
     if (idx != -1) {
       selectedEvents[date]!.removeAt(idx);
@@ -2299,8 +2370,8 @@ class CalendarStateO extends State<Calendar> {
     });
   }
 
-  Future<void> updateOneEvent(
-      Event oldEvent, String newTitle, DateTime newDate,{bool complete =false}) async {
+  Future<void> updateOneEvent(Event oldEvent, String newTitle, DateTime newDate,
+      {bool complete = false}) async {
     DateTime normalizedOldDate =
         DateTime(selectedDay.year, selectedDay.month, selectedDay.day);
     DateTime normalizedNewDate =
@@ -2308,13 +2379,15 @@ class CalendarStateO extends State<Calendar> {
 
     // Remove old event from Firestore
     await _loadExcludedDays();
-    if(revisionDays.contains(_getDayName(newDate.day))){
+    if (revisionDays.contains(_getDayName(newDate.day))) {
       print("Whatever case this is\n");
     }
     await deleteSingleEvent(normalizedOldDate, oldEvent.title, user);
-    if(complete) {await addSingleEvent(normalizedNewDate, newTitle, user,completed: true);}
-    else {await addSingleEvent(normalizedNewDate, newTitle, user);}
-    
+    if (complete) {
+      await addSingleEvent(normalizedNewDate, newTitle, user, completed: true);
+    } else {
+      await addSingleEvent(normalizedNewDate, newTitle, user);
+    }
 
     // Refresh UI
     setState(() {
@@ -2457,16 +2530,17 @@ class CalendarStateO extends State<Calendar> {
                 );
 
                 try {
-                 
-                  if(!revisionDays.contains(_getDayName((_selectedDate!.weekday)))){
-                  if (event.title == "Test Day") {
-                    // For Test Day events, use updateTestDay
-                    await updateTestDay(_selectedDate!);
+                  if (!revisionDays
+                      .contains(_getDayName((_selectedDate!.weekday)))) {
+                    if (event.title == "Test Day") {
+                      // For Test Day events, use updateTestDay
+                      await updateTestDay(_selectedDate!);
+                    } else {
+                      // For other events, use updateOneEvent
+                      await updateOneEvent(
+                          event, _editEventController.text, _selectedDate!);
+                    }
                   } else {
-                    // For other events, use updateOneEvent
-                    await updateOneEvent(
-                        event, _editEventController.text, _selectedDate!);
-                  }}else{
                     throw Exception("Selected an Excluded Day\n");
                   }
 
@@ -2486,15 +2560,12 @@ class CalendarStateO extends State<Calendar> {
                     context: context,
                     builder: (BuildContext context) {
                       return AlertDialog(
-                        title:Text(e.toString()), 
+                        title: Text(e.toString()),
                         titleTextStyle: TextStyle(
                           color: Colors.black,
                         ),
-                        content:
-                            Text('Failed to update event'),
-                        contentTextStyle: TextStyle(
-                          color: Colors.black
-                        ),
+                        content: Text('Failed to update event'),
+                        contentTextStyle: TextStyle(color: Colors.black),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.of(context).pop(),
