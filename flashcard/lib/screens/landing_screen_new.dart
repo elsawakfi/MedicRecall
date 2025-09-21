@@ -9,6 +9,8 @@ import 'package:flashcard_x/screens/flashcard_editor_screen.dart';
 import 'package:flashcard_x/screens/minimock_landing.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flashcard_x/widgets/event.dart';
+import 'package:flashcard_x/screens/pricing_screen.dart';
+import 'package:flashcard_x/utils/subscription_service.dart';
 import 'package:flutter/material.dart';
 import 'feedback_screen.dart';
 import 'fullmock_landing.dart';
@@ -62,7 +64,17 @@ class NewLandingState extends State<NewLanding> {
   int numberOfDecksRevised = 0;
   int howManyDaysInARow = 0;
   String nextMock = "N/A"; 
+  bool _isPaid = false;
+  bool _loading = true;
 
+
+  Future<void> _loadSub() async {
+    await subscriptionService.loadSubscription();
+    setState(() {
+      _isPaid = subscriptionService.isPaid;
+      _loading = false;
+    });
+  }
     // FETCHES DATA FROM FIREBASE AND UPDATES THE STATE
   Future<void> loadStreakData() async {
     StreakStats streakStats = await LastRevised.loadStreakStats();
@@ -96,6 +108,7 @@ class NewLandingState extends State<NewLanding> {
     //waits for build function to complete and then calls back to call the condition checking function
     WidgetsBinding.instance.addPostFrameCallback((_)async{
       await getTestDay();
+      await _loadSub();
     });
   }
 
@@ -198,6 +211,7 @@ class NewLandingState extends State<NewLanding> {
     landingService.onLanding = true;
     getTestDay();
     getUser().then( (_) async {
+      await _loadSub();
       await getNextTopicForReview();
       await getNextMockForReview();
       await LastRevised.recordLogin();
@@ -214,6 +228,7 @@ class NewLandingState extends State<NewLanding> {
       // }
       await getNextTopicForReview();
     });
+    
   }
 
   Future<void> getUser() async {
@@ -232,6 +247,7 @@ class NewLandingState extends State<NewLanding> {
     } else {
       user = auth.currentUser!;
     }
+    
   }
 
     Future<void> checkTestDay() async {
@@ -382,8 +398,17 @@ class NewLandingState extends State<NewLanding> {
   Widget build(BuildContext context) {
     
     buildCount++;
+    if (_loading){
+      {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+    }
     
-    return Scaffold(  
+    return _isPaid ?  
+    
+    Scaffold(  
         floatingActionButton: const CustomFloatingButton(),
         floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
       //title: "User Dashboard",
@@ -572,8 +597,9 @@ class NewLandingState extends State<NewLanding> {
           )
         )
       )    
-    );
-  }
+    ) : const PricingScreen();
+   
+   }
 
   Future<void> triggerSignIn(String screen) async {
     NavigatorState nav = Navigator.of(context);
