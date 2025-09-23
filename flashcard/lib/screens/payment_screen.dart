@@ -35,7 +35,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   void _navigateToHome() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool('payment_screen_seen', true);
-    
+
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
@@ -159,9 +159,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 child: Text(
                   "Payment",
                   style: Theme.of(context).appBarTheme.titleTextStyle?.copyWith(
-                    fontSize: 23,
-                    fontWeight: FontWeight.bold,
-                  ),
+                        fontSize: 23,
+                        fontWeight: FontWeight.bold,
+                      ),
                 ),
               ),
             ],
@@ -175,7 +175,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
           : Container(
               width: double.infinity,
               child: SingleChildScrollView(
-                padding: const EdgeInsets.only(top: 40, left: 20, right: 20, bottom: 20),
+                padding: const EdgeInsets.only(
+                    top: 40, left: 20, right: 20, bottom: 20),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -189,24 +190,24 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         color: Colors.white,
                       ),
                     ),
-                    
                     const SizedBox(height: 30),
-                    
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10),
                       child: Column(
                         children: [
-                          Text(
-                            'All plans come with a 100% money back guarantee. If you don\'t score above average',
-                            textAlign: TextAlign.justify,
-                            style: const TextStyle(
-                              fontSize: 25,
-                              color: Colors.white,
-                              height: 1.5,
+                          Text.rich(
+                            TextSpan(
+                              text:
+                                  'All plans come with a 100% money back guarantee. If you don\'t score above average on the Professional Dilemmas Paper, we will give you a full refund.',
+                              style: const TextStyle(
+                                fontSize: 25,
+                                color: Colors.white,
+                              ),
                             ),
+                            textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 12),
-                          const Text(
+                          /*const Text(
                             'on the Professional Dilemmas Paper, we will give you a full refund.',
                             textAlign: TextAlign.center,
                             style: TextStyle(
@@ -214,13 +215,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
                               color: Colors.white,
                               height: 1.5,
                             ),
-                          ),
+                          ),*/
                         ],
                       ),
                     ),
-                    
                     const SizedBox(height: 40),
-                    
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
