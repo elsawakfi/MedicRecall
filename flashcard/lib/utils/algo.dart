@@ -1,7 +1,7 @@
 // this is where we decide the order and what cards are shows to the user
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+ List<int> scores = [];
 class Algo {
   bool containsCard(String cardID, List<Map<String, dynamic>> cards) {
     for (var card in cards) {
@@ -13,6 +13,11 @@ class Algo {
     }
     return false; //otherwise
   }
+
+  Future<int> getTopicScore(int index) async{
+    return scores[index];
+  }
+
 
   int weight(Map<String, dynamic> a) {
     return ifTheyGetItWrong(a) * whenToShowNext(a);
@@ -55,7 +60,7 @@ class Algo {
     QuerySnapshot seenCards = await flashcardsSeenRef.get();
 
     List<Future<DocumentSnapshot>> futures = [];
-    List<int> scores = [];
+    // List<int> scores = [];
     List<Timestamp> lastSeen = [];
     List<int> timesSeen = [];
     List<bool> gotRight = [];
@@ -226,11 +231,14 @@ class Algo {
     var flashcards = await getFlashcards(userID);
     int? score = 0;
     for (var flashcard in flashcards) {
+      
       if ((subtopics.contains(flashcard["subtopic"]) ||
-          subtopics.contains(flashcard["topic"]) &&
-              flashcard["subtopic"] == "") && flashcard["timesSeen"] < 2 && flashcard["gotRight"] == true) {
+          (subtopics.contains(flashcard["topic"]) &&
+              flashcard["subtopic"] == ""))  && flashcard["gotRight"] == true) {
+        
         score = score! + 1;
       }
+      
     }
     return score;
   }

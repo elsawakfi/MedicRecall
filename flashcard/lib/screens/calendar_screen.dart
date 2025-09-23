@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/fullmock_landing.dart';
+import 'package:flashcard_x/utils/last_revised.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
@@ -452,7 +453,9 @@ class CalendarStateO extends State<Calendar> {
             // build Event objects for this doc (color per title)
             final List<Event> eventsForThisDoc = titles.map((title) {
               final bool isOverdueNotCompleted =
-                  date.isBefore(today) && !title.contains("Completed");
+                  (date.isBefore(today) && !title.contains("Completed")) ||
+                      (title.contains("Flashcards") &&
+                          date.isAtSameMomentAs(today));
               final Color color = isOverdueNotCompleted
                   ? const Color.fromARGB(255, 255, 0, 8)
                   : _getEventColor(title);
@@ -787,7 +790,20 @@ class CalendarStateO extends State<Calendar> {
         return;
       }
 
+      Timestamp aLongTimeAgo = Timestamp.fromDate(DateTime(1999, 1, 1));
+
       String id = u.docs.last.id;
+      await _userCollectionRef.doc(id).update({
+        "topicLastSeen": [
+          aLongTimeAgo,
+          aLongTimeAgo,
+          aLongTimeAgo,
+          aLongTimeAgo,
+          aLongTimeAgo,
+          aLongTimeAgo,
+          aLongTimeAgo
+        ]
+      });
       _eventsCollectionRef =
           FirebaseFirestore.instance.collection('users/$id/events');
 
@@ -820,6 +836,10 @@ class CalendarStateO extends State<Calendar> {
       // Apply updates if there are any
       if (updates.isNotEmpty) {
         await _userCollectionRef.doc(id).update(updates);
+      }
+
+      for (var flashcard in flashcards) {
+        await LastRevised.resetSeenCardsForTopic(flashcard);
       }
 
       // Reset local state
@@ -2067,12 +2087,16 @@ class CalendarStateO extends State<Calendar> {
                                                                 loading = false;
                                                               });
                                                             } else {
-                                                              if (event.title
-                                                                      .contains(
-                                                                          "Official MSRA Practice Paper") ||
+                                                              if (event.title.contains("Official MSRA Practice Paper") ||
                                                                   event.title
                                                                       .contains(
-                                                                          "Official SJT Practice Paper")) {
+                                                                          "Official SJT Practice Paper") ||
+                                                                  event.title
+                                                                      .contains(
+                                                                          "Full-sized Mock") ||
+                                                                  event.title
+                                                                      .contains(
+                                                                          "Mini Mock")) {
                                                                 _showCompleteEventDialog(
                                                                     "Mark event as incomplete?",
                                                                     "",

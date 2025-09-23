@@ -133,16 +133,19 @@ class MiniMockReviewState extends State<MiniMockReview> {
           List<dynamic>? eventsList = data['events'] as List<dynamic>?;
 
           for (var event in eventsList!){
-            String title = event.toString();          
-            if(title.contains("Mini Mock")) {
-                Timestamp? timestamp = data['date'] as Timestamp?;
+            Timestamp? timestamp = data['date'] as Timestamp?;
                   if (timestamp != null) {
                 DateTime date = timestamp.toDate();
                 date = DateTime(date.year, date.month, date.day);
                 List<String> events = eventsList.map((e) => e.toString()).toList();
+            String title = event.toString();   
+            allEvents[date] = events.map ((title) => Event(color: Colors.black, title: title)).toList();
+            if(title.contains("Mini Mock") && !title.contains("Completed")) {
+                
                 selectedEvents[date] = events.map ((title) => Event(color: Colors.black, title: title)).toList();
             }}
             else{
+            
                 continue;
         }}}}
         }catch(e){
@@ -218,34 +221,34 @@ class MiniMockReviewState extends State<MiniMockReview> {
     );
   }
 
-  Future<void> addSingleEvent (
-      DateTime date, String eventTitle, User user) async {
+ Future<void> addSingleEvent (
+      DateTime date, String eventTitle, User user,{bool edit = false}) async {
     date = DateTime(date.year, date.month, date.day,0,0,0,0);
    
   DateTime today = DateTime.now();
-  
-  
-
   Color color =  Colors.yellow; 
 
-  
+  if (edit == true) color = Colors.black;
   
     //The delete single event function updates the UI in real time so I just copied the structure of that function 
     Event newEvent =  Event(
                         title: eventTitle,
                         color: color
                         );
-    
+    //cannot add a new revision date if the date is not empty
+    if (allEvents[date] == null) {
+      selectedEvents[date] = [];
+      allEvents[date] = [];
       print("Adding event $eventTitle to $date\n");
-    
+    }
     selectedEvents[date]?.add(newEvent);
-    // allEvents[date]?.add(newEvent);
+    allEvents[date]?.add(newEvent);
     QuerySnapshot querySnapshot = await _eventsCollectionRef
         .where("date", isEqualTo: Timestamp.fromDate(date))
         .get();
 
      List<String> updatedEvents =
-        selectedEvents[date]?.map((e) => e.title).toList() ?? [];
+        allEvents[date]?.map((e) => e.title).toList() ?? [];
     
     if (querySnapshot.docs.isNotEmpty) {
     String docId = querySnapshot.docs.first.id;
@@ -271,22 +274,16 @@ class MiniMockReviewState extends State<MiniMockReview> {
       DateTime date, String eventTitle, User user) async {
     date = DateTime(date.year, date.month, date.day,0,0,0,0);
 
-    if (!selectedEvents.containsKey(date)) {
+    if (!allEvents.containsKey(date)) {
       print("No events found for date: ${date.toString().split(' ')[0]}");
       return;
     }
 
-    for(Event e in selectedEvents[date]!){
-      if (e.title == eventTitle){
-        selectedEvents[date]!.remove(e);
-      }
+    allEvents[date]?.removeWhere((event) => event.title == eventTitle);
+
+    if (allEvents[date]?.isEmpty ?? false) {
+      allEvents.remove(date);
     }
-
-    // selectedEvents[date]?.removeWhere((event) => event.title == eventTitle);
-
-    // if (selectedEvents[date]?.isEmpty ?? false) {
-    //   selectedEvents.remove(date);
-    // }
 
     QuerySnapshot querySnapshot = await _eventsCollectionRef
         .where("date", isEqualTo: Timestamp.fromDate(date))
@@ -295,7 +292,7 @@ class MiniMockReviewState extends State<MiniMockReview> {
     if (querySnapshot.docs.isNotEmpty) {
       String docId = querySnapshot.docs.first.id;
       List<String> updatedEvents =
-          selectedEvents[date]?.map((e) => e.title).toList() ?? [];
+          allEvents[date]?.map((e) => e.title).toList() ?? [];
 
       if (updatedEvents.isEmpty) {
         await _eventsCollectionRef
@@ -315,7 +312,7 @@ class MiniMockReviewState extends State<MiniMockReview> {
         DateTime(newDate.year, newDate.month, newDate.day,0,0,0,0);
     // Remove old event from Firestore
     await deleteSingleEvent(normalizedDate, oldEvent.title, user);
-    await addSingleEvent(normalizedDate, newTitle, user);
+    await addSingleEvent(normalizedDate, newTitle, user,edit: true );
   }
 
   Future<void> getData()async{
@@ -397,7 +394,7 @@ class MiniMockReviewState extends State<MiniMockReview> {
                     }
                     }
                 }}
-                if(!e.title.contains("Completed:")){
+                if(!e.title.contains("Completed:") && !e.title.contains("Shouldn't add")){
                   //if the mini mock has not been completed already, then add the completed flag
                   await updateOneEvent(e, "Completed: ${e.title}", temp!);
                   print("updated calendar?\n");//UPDATE CALENDAR 
