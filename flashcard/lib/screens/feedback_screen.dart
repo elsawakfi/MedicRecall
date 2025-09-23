@@ -16,55 +16,7 @@ class FeedbackScreen extends StatelessWidget {
         body: SafeArea(
             child: Padding(
                 padding: const EdgeInsets.all(16),
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Expanded(
-                          child: SingleChildScrollView(
-                              child: Center(
-                                  child: Column(
-                        children: const [
-                            EmbeddedForm()
-                          // Text.rich(TextSpan(
-                          //     style: const TextStyle(
-                          //         fontSize: 27, color: Colors.black),
-                          //     children: [
-                          //       const TextSpan(
-                          //         style: TextStyle(
-                          //             fontSize: 27, color: Colors.black),
-                          //         text: "We would love to hear from you!\n",
-                          //       ),
-                          //       const TextSpan(
-                          //           style: TextStyle(
-                          //               fontSize: 27, color: Colors.black),
-                          //           text:
-                          //               "Please send your feedback and suggestions "),
-                          //       TextSpan(
-                          //           style: const TextStyle(
-                          //               color: Colors.blue,
-                          //               decoration: TextDecoration.underline),
-                          //           //make link blue and underline
-                          //           text: "here",
-                          //           recognizer: TapGestureRecognizer()
-                          //             ..onTap = () async {
-                          //               //on tap code here, you can navigate to other page or URL
-                          //               String url =
-                          //                   "https://docs.google.com/forms/d/e/1FAIpQLSf10CDlLeFpaONtjS1pU0qcEsdQPfngeXh70-hhZpXUGCQDqA/viewform?usp=sf_link";
-                          //               var urllaunchable =
-                          //                   await canLaunchUrlString(
-                          //                       url); //canLaunch is from url_launcher package
-                          //               if (urllaunchable) {
-                          //                 await launchUrlString(
-                          //                     url); //launch is from url_launcher package to launch URL
-                          //               } else {
-                          //                 if (kDebugMode) {
-                          //                   print("URL can't be launched.");
-                          //                 }
-                          //               }
-                          //             }),
-                          //     ])),
-                        ],
-                      )))),
-                    ]))));
+                  child: Center(
+                    child: EmbeddedForm()))));
   }
 }

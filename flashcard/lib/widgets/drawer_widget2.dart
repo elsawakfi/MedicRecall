@@ -130,6 +130,17 @@ class DrawMain2 extends StatelessWidget {
                     ]),
               ),
             ),
+            // DrawerTile(
+            //   icon: const Icon(Icons.subscriptions_rounded),
+            //   title: 'Subscription',
+            //   onPressed: () {
+            //             Navigator.push(
+            //               context,
+            //               MoveRightRoute(page: const SubscriptionScreen()),
+            //             );
+            //           },
+
+            // ),
             DrawerTile(
               icon: const Icon(Icons.logout),
               title: 'Logout',
