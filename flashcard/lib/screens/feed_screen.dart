@@ -374,50 +374,50 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
               child: const CircularProgressIndicator(),
             )),
             // --------------------- END OF FLASHCARD INFORMATION SCREENS ------------------
-            Center(
-                child: Visibility(
-              visible: finished,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  //After completion, display:
-                  Text(
-                    "Congrats!",
-                    style: TextStyle(fontSize: 38).copyWith(color: Colors.white),
-                  ),
-                  const SizedBox(height: 40),
-                  Visibility(
-                    visible: true,
-                    child: Text(
-                        "You have no more cards to revise.",
-                        style: TextStyle(fontSize: 38).copyWith(color: Colors.white)
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-                  Material(
-                    shape: const CircleBorder(),
-                    color: Theme.of(context).colorScheme.primary,
-                    elevation: 4,
-                    child: InkWell(
-                      onTap: home,
-                      borderRadius: BorderRadius.circular(50),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Tooltip(
-                          message: "Go Back",
-                          child: Icon(
-                            Icons.arrow_back,
-                            size: 32,
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          ),
-                        ),
-                      ),
-                    ),
-                  )
+            // Center(
+            //     child: Visibility(
+            //   visible: finished,
+            //   child: Column(
+            //     mainAxisAlignment: MainAxisAlignment.center,
+            //     children: [
+            //       //After completion, display:
+            //       Text(
+            //         "Congrats!",
+            //         style: TextStyle(fontSize: 38).copyWith(color: Colors.white),
+            //       ),
+            //       const SizedBox(height: 40),
+            //       Visibility(
+            //         visible: true,
+            //         child: Text(
+            //             "You have no more cards to revise.",
+            //             style: TextStyle(fontSize: 38).copyWith(color: Colors.white)
+            //         ),
+            //       ),
+            //       const SizedBox(height: 40),
+            //       Material(
+            //         shape: const CircleBorder(),
+            //         color: Theme.of(context).colorScheme.primary,
+            //         elevation: 4,
+            //         child: InkWell(
+            //           onTap: home,
+            //           borderRadius: BorderRadius.circular(50),
+            //           child: Padding(
+            //             padding: const EdgeInsets.all(16),
+            //             child: Tooltip(
+            //               message: "Go Back",
+            //               child: Icon(
+            //                 Icons.arrow_back,
+            //                 size: 32,
+            //                 color: Theme.of(context).colorScheme.onPrimary,
+            //               ),
+            //             ),
+            //           ),
+            //         ),
+            //       )
 
-                ],
-              ),
-            )),
+            //     ],
+            //   ),
+            // )),
 
           ],
         ),
@@ -460,7 +460,7 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
       await resetTimesSeen();
     }
     score = (await Algo().getScore(user.uid, subtopics))!;
-
+    // print("score from feed_screen: $score");
     if (length != 0) {
       getCardDeck();
 
@@ -499,19 +499,21 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
     }
   }
 
-  void goHome(List<String> subtopics, int count) {
+  void goHome(List<String> subtopics, int count) async {
     if (flashcards.isEmpty) {
       debugPrint("Card deck empty.\n Your score is $score");
     } else {
       count++;
-      Navigator.push(
-        context,
-        ExpandRoute(
-            page: Feed(
-          subtopics: subtopics,
-          count: count,
-        )),
-      );
+      Navigator.pop(context);
+      // await Navigator.push(
+      //   context,
+      //   ExpandRoute(
+      //       page: Feed(
+      //     subtopics: subtopics,
+      //     count: count,
+      //   )),
+      // );
+      
     }
   }
 
@@ -824,7 +826,7 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
           .where((element) => subtopicStrings.contains(element))
           .toList();
       List<int> indicesMap = [];
-
+     
       for (var subtopic in intersection) {
         int index = subtopicStrings.indexOf(subtopic);
         indicesMap.add(index);
@@ -834,6 +836,7 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
         totalCards = topics[i]["subtopicLength"][index] + totalCards;
       }
     }
+    
 
     if (filteredCards.length == totalCards) {
       exists = true;
@@ -848,14 +851,24 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
         QuerySnapshot querySnapshot = await _flashcardsSeenRef
             .where("cardID", isEqualTo: flashcards[i]["id"])
             .get();
-        var data = querySnapshot.docs.first.data() as Map<String, dynamic>;
 
-        // Retrieve timesSeen and gotRight value from the cards
-        var gotRight = data["gotRight"];
-
-        if (!gotRight) {
-          wrongCardExist = true;
+        if (querySnapshot.docs.isNotEmpty) {
+          var data = querySnapshot.docs.first.data() as Map<String, dynamic>;
+          var gotRight = data["gotRight"];
+          if (!gotRight) {
+            wrongCardExist = true;
+          }
+        } else {
+          print("No documents found for cardID: ${flashcards[i]["id"]}");
         }
+        // var data = querySnapshot.docs.first.data() as Map<String, dynamic>;
+
+        // // Retrieve timesSeen and gotRight value from the cards
+        // var gotRight = data["gotRight"];
+
+        // if (!gotRight) {
+        //   wrongCardExist = true;
+        // }
       }
 
       if (!wrongCardExist) {
@@ -1033,13 +1046,15 @@ class WaitToFlipTimer extends StatefulWidget {
 }
 
 class _WaitToFlipTimerState extends State<WaitToFlipTimer> with TickerProviderStateMixin {
-
-  @override
+  late VoidCallback _listener;
+  
+   @override
   void initState() {
-    widget.controller.addListener((){
-      setState((){});
-    });
     super.initState();
+    _listener = () {
+      if (mounted) setState(() {});
+    };
+    widget.controller.addListener(_listener);
   }
 
   @override
@@ -1051,11 +1066,11 @@ class _WaitToFlipTimerState extends State<WaitToFlipTimer> with TickerProviderSt
     );
   }
 
-  // @override
-  // void dispose() {
-  //   widget.controller.dispose();
-  //   super.dispose();
-  // }
+  @override
+  void dispose() {
+    widget.controller.removeListener(_listener);
+    super.dispose();
+  }
 
 }
 
