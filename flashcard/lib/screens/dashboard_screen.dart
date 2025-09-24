@@ -508,15 +508,20 @@ class HomePageState extends State<HomePage> {
       allEvents = {};
       loading = true;
     });
+ 
     await getUser();
-    await getTopics();
-    await userData();
-    await getflashcardEvents();
-    await getStats();
+
+    await Future.wait(
+    [userData(),
+     getTopics(),
+     getflashcardEvents(),
+     getStats(),
+     ]);
+    
     await _computeRows();
-    setState(() {
-      loading = false;
-    });
+     
+   
+    
     
     
   }
@@ -696,6 +701,7 @@ class HomePageState extends State<HomePage> {
   
   if (!mounted) return;
   setState(() => _rows = newRows);
+  setState(() => loading = false);
   }
 
   Future<void> _recomputeRowsAndMaybeSchedule() async {
