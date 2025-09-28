@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/dashboard_screen.dart';
+import 'package:flashcard_x/screens/landing_screen_new.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flashcard_x/utils/algo.dart';
 import 'package:flashcard_x/utils/firebase_wrapper.dart';
@@ -91,9 +92,11 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
   final int count;
   late int flashcardIndex;
   int length = 10;
+  int length_ = 10;
   int preCardval = 2;
   int selectedValue1 = 2;
   int score = 0;
+  int sessionScore = 0;
   int completedFlashcards = 0;
 
   late bool loading;
@@ -362,11 +365,6 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
                 ],
               )
             ),
-
-            
-          
-            
-
             // --------------------------------- LOADING BAR ------------------------
             Center(
                 child: Visibility(
@@ -500,19 +498,48 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
   }
 
   void goHome(List<String> subtopics, int count) async {
-    if (flashcards.isEmpty) {
+    print("Flash length: $length and Score: $sessionScore");
+    if (flashcards.isEmpty || length == sessionScore) {
+      print("Flashcards empty\n");
       debugPrint("Card deck empty.\n Your score is $score");
+      
+      showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text("Deck Completed!"),
+                        titleTextStyle: TextStyle(
+                          color: Colors.black,
+                        ),
+                        content: Text('Your score is $score. \nRedirecting to Homepage'),
+                        contentTextStyle: TextStyle(color: Colors.black),
+                        // actions: [
+                        //   TextButton(
+                        //     onPressed: () => Navigator.of(context).pop(),
+                        //     child: const Text('OK'),
+                        //   ),
+                        // ],
+                      );});
+
+      await Future.delayed(const Duration(seconds: 2));
+
+      Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const NewLanding()),
+      (route) => false,
+    );
     } else {
+      print("Flashcards not empty\n");
       count++;
       Navigator.pop(context);
-      // await Navigator.push(
-      //   context,
-      //   ExpandRoute(
-      //       page: Feed(
-      //     subtopics: subtopics,
-      //     count: count,
-      //   )),
-      // );
+      await Navigator.push(
+        context,
+        ExpandRoute(
+            page: Feed(
+          subtopics: subtopics,
+          count: count,
+        )),
+      );
       
     }
   }
@@ -740,6 +767,8 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
   }
 
   Future<void> updateSeenCorrect() async {
+    sessionScore++;
+    print("Session Score: $sessionScore");
     if (!finished) {
       if (flashcardIndex + 1 == length) {
         updateTopicCountAndTopicLastSeen();
@@ -763,6 +792,7 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
           "score": [1],
           "gotRight": true
         });
+       
       } else {
         var timesSeen = querySnapshot.docs.first["timesSeen"];
         var tempId = querySnapshot.docs.first.id;
@@ -776,6 +806,7 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
           "score": cardScore,
           "gotRight": true
         });
+        
       }
     }
 
@@ -845,12 +876,13 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
     bool wrongCardExist = false;
 
     List<dynamic> topicScore = userSnapshot.docs.last["topicScore"];
-
     if (exists) {
       for (int i = 0; i < flashcards.length; i++) {
         QuerySnapshot querySnapshot = await _flashcardsSeenRef
             .where("cardID", isEqualTo: flashcards[i]["id"])
             .get();
+
+          
 
         if (querySnapshot.docs.isNotEmpty) {
           var data = querySnapshot.docs.first.data() as Map<String, dynamic>;

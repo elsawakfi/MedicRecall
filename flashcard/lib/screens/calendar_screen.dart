@@ -793,7 +793,8 @@ class CalendarStateO extends State<Calendar> {
       Timestamp aLongTimeAgo = Timestamp.fromDate(DateTime(1999, 1, 1));
 
       String id = u.docs.last.id;
-      await _userCollectionRef.doc(id).update({
+      await
+          _userCollectionRef.doc(id).update({
         "topicLastSeen": [
           aLongTimeAgo,
           aLongTimeAgo,
@@ -804,6 +805,13 @@ class CalendarStateO extends State<Calendar> {
           aLongTimeAgo
         ]
       });
+
+       CollectionReference flashcardsSeenRef = FirebaseFirestore.instance
+        .collection("users/${user.uid}/flashcardsSeen");
+    await flashcardsSeenRef.doc().delete();
+
+   
+      
       _eventsCollectionRef =
           FirebaseFirestore.instance.collection('users/$id/events');
 
@@ -814,6 +822,9 @@ class CalendarStateO extends State<Calendar> {
       for (var doc in snapshots.docs) {
         await doc.reference.delete();
       }
+      
+     
+  
 
       // Update user document to remove TestDay and excludedDays
       var userFromDb = u.docs.first;
@@ -839,6 +850,7 @@ class CalendarStateO extends State<Calendar> {
       }
 
       for (var flashcard in flashcards) {
+        
         await LastRevised.resetSeenCardsForTopic(flashcard);
       }
 

@@ -34,7 +34,6 @@ static Future<void> resetSeenCardsForTopic(String topicName) async {
   for (var doc in seenDocs.docs) {
     String cardID = doc["cardID"];
     if (cardIDsToDelete.contains(cardID)) {
-     int timesSeen = (doc["timesSeen"]?? 0);
      await seenRef.doc(doc.id).delete();
     }
   }
