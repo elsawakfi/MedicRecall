@@ -34,6 +34,8 @@ class _RegistrationFormState extends State<RegistrationForm> {
 
   bool _isSigningUp = false;
   bool _acceptedTerms = false;
+  bool _isPasswordVisible = false;
+  bool _isConfirmPasswordVisible = false;
   final _formkey = GlobalKey<FormState>();
 
   @override
@@ -74,6 +76,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
                   Icons.person,
                 ),
                 hintText: 'Enter Name',
+                hintStyle: TextStyle(color: const Color.fromARGB(255, 173, 173, 173)),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20.0),
                   borderSide: const BorderSide(
@@ -112,6 +115,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
                   Icons.email,
                 ),
                 hintText: 'Enter Email',
+                hintStyle: TextStyle(color: const Color.fromARGB(255, 173, 173, 173)),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20.0),
                   borderSide: const BorderSide(
@@ -136,7 +140,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
             child: TextFormField(
               controller: _password,
               focusNode: widget.passwordFocusNode,
-              obscureText: true,
+              obscureText: !_isPasswordVisible,
               style: const TextStyle(color: Colors.black),
               validator: (value) => StringValidation.validatePassword(
                 password: value,
@@ -148,9 +152,20 @@ class _RegistrationFormState extends State<RegistrationForm> {
                 filled: true,
                 fillColor: Colors.white,
                 prefixIcon: const Icon(
-                  Icons.visibility_off,
+                  Icons.lock_outline,
+                ),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isPasswordVisible = !_isPasswordVisible;
+                    });
+                  },
                 ),
                 hintText: 'Enter Password',
+                hintStyle: TextStyle(color: const Color.fromARGB(255, 173, 173, 173)),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20.0),
                   borderSide: const BorderSide(
@@ -172,7 +187,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
             width: 350,
             height: 60,
             child: TextFormField(
-              obscureText: true,
+              obscureText: !_isConfirmPasswordVisible,
               style: const TextStyle(color: Colors.black),
               validator: (value) {
                 if (value != _password.text) {
@@ -189,9 +204,20 @@ class _RegistrationFormState extends State<RegistrationForm> {
                 filled: true,
                 fillColor: Colors.white,
                 prefixIcon: const Icon(
-                  Icons.visibility_off,
+                  Icons.lock_outline,
+                ),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _isConfirmPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
+                    });
+                  },
                 ),
                 hintText: 'Confirm Password',
+                hintStyle: TextStyle(color: const Color.fromARGB(255, 173, 173, 173)),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20.0),
                   borderSide: const BorderSide(
