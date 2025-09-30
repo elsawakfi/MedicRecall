@@ -11,6 +11,7 @@ import 'package:flashcard_x/screens/fullmock_landing.dart';
 //import 'package:flashcard_x/screens/streaks_page.dart';
 import 'package:flashcard_x/utils/authentication.dart';
 import 'package:flashcard_x/utils/page_transition.dart';
+import 'package:flashcard_x/utils/subscription_service.dart';
 import 'package:flashcard_x/utils/theme_provider.dart';
 import 'package:flutter/material.dart';
 //import 'package:flashcard_x/screens/exam_declaration.dart';
@@ -44,13 +45,18 @@ class DrawMain2 extends StatelessWidget {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
+                    subscriptionService.isPaid
+                    ?
                     DrawerTile(
                       onPressed: () => _navigateToPage(context, NewLanding()),
                       icon: const Icon(Icons.home_outlined),
                       title: "Home",
-                    ),
+                    ): const SizedBox.shrink(),
+                    subscriptionService.isPaid
+                         ?
                     DrawerTile(
                       onPressed: () {
+                        
                          Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -69,7 +75,9 @@ class DrawMain2 extends StatelessWidget {
                       },
                       icon: const Icon(Icons.rate_review_outlined),
                       title: "Flashcard Tutor",
-                    ),
+                    ): const SizedBox.shrink(),
+                    subscriptionService.isPaid
+                         ?
                     DrawerTile(
                       onPressed: () {
                         Navigator.push(
@@ -79,7 +87,9 @@ class DrawMain2 extends StatelessWidget {
                       },  
                       icon: const Icon(Icons.fact_check),
                       title: 'Mini-Mocks',
-                    ),
+                    ): const SizedBox.shrink(),
+                    subscriptionService.isPaid
+                         ?
                     DrawerTile(
                       onPressed: () {
                         Navigator.push(
@@ -89,7 +99,7 @@ class DrawMain2 extends StatelessWidget {
                       },
                       icon: const Icon(Icons.fact_check),
                       title: 'Full-Sized Mock',
-                    ),
+                    ): const SizedBox.shrink(),
                     /*DrawerTile(
                       onPressed: () {
                         Navigator.push(
@@ -100,6 +110,8 @@ class DrawMain2 extends StatelessWidget {
                       icon: const Icon(Icons.check_box_outlined),
                       title: "Mark Scheme",
                     ),*/
+                    subscriptionService.isPaid
+                         ?
                     DrawerTile(
                       onPressed: (){
                         Navigator.push(
@@ -109,7 +121,9 @@ class DrawMain2 extends StatelessWidget {
                       },
                       icon: const Icon(Icons.add_box_outlined),
                       title: 'Create Cards',
-                    ),
+                    ): const SizedBox.shrink(),
+                     subscriptionService.isPaid
+                         ?
                     DrawerTile(
                       onPressed: () => Navigator.push(
                         context,
@@ -117,7 +131,9 @@ class DrawMain2 extends StatelessWidget {
                       ),
                       icon: const Icon(Icons.calendar_month_outlined),
                       title: 'Study Schedule',
-                    ),
+                    ): const SizedBox.shrink(),
+                    subscriptionService.isPaid
+                         ?
                     DrawerTile(
                       onPressed: () {
                         Navigator.push(
@@ -127,7 +143,7 @@ class DrawMain2 extends StatelessWidget {
                       },
                       icon: const Icon(Icons.settings),
                       title: 'Settings',
-                    )
+                    ): const SizedBox.shrink(),
                     ]),
               ),
             ),
