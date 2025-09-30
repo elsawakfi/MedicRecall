@@ -11,11 +11,10 @@ class StripeUtils {
 
     HashMap<int, String> urls = HashMap.from({
       1 : "https://buy.stripe.com/test_cNidR28B99mY1lwauD4ko06",//"https://buy.stripe.com/test_5kQ7sE9FdeHi4xI32b4ko02",
-      3 : "https://buy.stripe.com/test_7sY3co7x5gPq9S21Y74ko03",
-      6 : "https://buy.stripe.com/test_3cI5kw3gPcza7JU46f4ko04",
-      12 : "https://buy.stripe.com/test_9B63coeZx2YAe8ifOX4ko05"
+     3 : "https://buy.stripe.com/test_cNi28sd4dfaS6wCb2G1sQ02", //changed to dr.harris'
+      6 : "https://buy.stripe.com/test_cNicN6aW5geW9IOfiW1sQ01", //changed to dr. harris' stripe
+      12 : "https://buy.stripe.com/test_4gM3cwggp0fYaMS4Ei1sQ03" //changed to dr.harris'
     });
-
     final String baseUrl = urls[months]!;
     final String userId = _getCurrentUserId();
     //final String baseUrl = 'https://buy.stripe.com/test_dRm3co8B9dDe2pAfOX4ko01';

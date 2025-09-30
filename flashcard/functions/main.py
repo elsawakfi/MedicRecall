@@ -238,68 +238,8 @@ from flask import Request
 import stripe
 import json
 
-stripe.api_key = 'sk_test_51RlQDO2ftVRKaOw9LKEV2Df1Kl4BdeHoUBLZvhsoig5oJaiKJGnsd0cmmlJ3StRmJrJmmmxOl4IQn8zPRmlmmh8j00cxnaGBL9'  # Your Stripe key
-endpoint_secret = 'whsec_5PcLIXJ4Wrzp3OXVAwpqME0BX1bfCEzq'
-
-# @https_fn.on_request()
-# def stripe_webhook(req: https_fn.Request) -> https_fn.Response:
-#     db = firestore.Client()
-#     payload = req.get_data(as_text=False)
-#     sig_header = req.headers.get("stripe-signature")
-
-#     try:
-#         print("PAYLOAD VALID")
-#         event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
-#         print(f"Received event type: {event['type']}")
-#     except ValueError as e:
-#         print('!! Invalid payload', str(e))
-#         return https_fn.Response("Invalid payload", status=400)
-#     except stripe.error.SignatureVerificationError as e:
-#         print('!! Invalid signature', str(e))
-#         return https_fn.Response("Invalid signature", status=400)
-
-#     # Handle event types
-#     if event['type'] == 'invoice.payment_succeeded':
-#         session = event['data']['object']
-#         #print(f"Payment for {session['amount']} succeeded.")
-#         #user_id = session.get('metadata', {}).get('user_id')
-#         user_id = session.get("client_reference_id")
-#         subscription_id = session.get('subscription_id')
-#         subscription = stripe.Subscription.retrieve(subscription_id)
-#         price = subscription['items']['data'][0]['price']
-#         interval = price['recurring']['interval']
-#         interval_count = price['recurring'].get('interval_count', 1)
-#         monthsToAdd = 0
-
-#         if interval == "month":
-#             monthsToAdd = interval_count
-#         elif interval == "year":
-#             monthsToAdd = 12 * interval_count
-#         else:
-#             monthsToAdd = 0
-#             print(f"❓ Unknown interval")
-        
-#         expiry_date = datetime.now() + timedelta(days=30 * monthsToAdd)
-#         if user_id:
-#             users_ref = db.collection("users")
-#             query = users_ref.where("userId", "==", user_id).get()
-#             for doc in query:
-#                 doc.reference.update({
-#                     "subscription": {
-#                         "subscriptionType": "paid",
-#                         "subscriptionStatus": "active",
-#                         "subscriptionExpiryDate": expiry_date,
-#                     }
-#                 })
-#                 print(f"Updated subscription for user {user_id}")
-#             else:
-#                 print("No user_id found in payment data.")
-#     elif event['type'] == 'checkout.session.completed':
-#         print("✅ Payment method attached.")
-#     else:
-#         print(f"❓ Unhandled event type: {event['type']}")
-
-#     return https_fn.Response("Webhook received", status=200)
+stripe.api_key = 'sk_test_51RjYJGJRBLxROQTkzqF32OAcv4F3hIs8eGNlCSsDnLbWi5RKNNMW4X8v0cnYcupYWpXSLeQhK6lfLr0DBFckAeRu00seVGcn25'  # Your Stripe key
+endpoint_secret = 'whsec_Her14t9w303zj5NzZIXkMrGeFr2dJ6dT'
 
 @https_fn.on_request()
 def stripe_webhook(req: https_fn.Request) -> https_fn.Response:
@@ -323,39 +263,36 @@ def stripe_webhook(req: https_fn.Request) -> https_fn.Response:
     if event['type'] == "checkout.session.completed":
         invoice = event['data']['object']
         user_id = invoice.get("client_reference_id")
-        subscription_id = invoice.get("subscription")
-        stripe_customer_id = invoice.get("customer")
-        
-        print(f"user_id: {user_id}, subscription_id: {subscription_id}")
-        if user_id and subscription_id:
-            stripe.Customer.modify(
-                stripe_customer_id,
-                metadata={'user_id': user_id}
-            )
-            subscription = stripe.Subscription.retrieve(subscription_id)
-            price = subscription['items']['data'][0]['price']
-            interval = price['recurring']['interval']
-            interval_count = price['recurring'].get("interval_count", 1)
-            print("Inside user_id and subscription_id condition")
-            months_to_add = interval_count if interval == "month" else 12 * interval_count
-
-            # load existing subscription expiry (if exists)
+        payment_email = event['data']['object']['customer_details']['email']
+        pmc_id = event['data']['object']['payment_method_configuration_details']['id']
+        status = event['data']['object']['payment_status']
+        amount = invoice.get("amount_total")
+        print(f"payment email: {payment_email}")
+        print(f"amount_total : {amount}")
+        print(f"status: {status}")
+        print(f"pmc_id: {pmc_id}")
+        if amount == 2000:
+            x = 3
+        if amount == 3000:
+            x = 6
+        if amount == 4000:
+            x = 12
+        print(f"{x} month membership")
+        if user_id and status== "paid":
             users_ref = db.collection("users")
             query = users_ref.where("userID", "==", user_id).get()
-
             if query:
                 for doc in query:
                     current_data = doc.to_dict().get("subscription", {})
+                    current_status = current_data.get("subscriptionType")
                     current_expiry = current_data.get("subscriptionExpiryDate")
-
                     start_date = datetime.now(timezone.utc)
-
                     if current_expiry:
                         current_expiry = current_expiry
                         start_date = max(datetime.now(timezone.utc), current_expiry)
                     
                     # extend expiry date
-                    new_expiry = start_date + timedelta(days = 30 * months_to_add)
+                    new_expiry = start_date + timedelta(days = 30 * x)
 
                     doc.reference.update({
                         "subscription": {
@@ -364,6 +301,9 @@ def stripe_webhook(req: https_fn.Request) -> https_fn.Response:
                             "subscriptionExpiryDate": new_expiry
                         },
                     })
-            print(f"stripe customer id: {stripe_customer_id}, user id: {user_id}.")
-            
+                    #store the payment email and pmc incase we want to find this user using other webhooks
+                    doc.reference.update({
+                        "stripeID": payment_email,
+                        "pmc_id": pmc_id
+                    })
     return https_fn.Response("Webhook received", status=200)

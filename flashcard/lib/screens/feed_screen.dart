@@ -174,6 +174,18 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
     SwipingDeck deck = displayDeck();
     updateFirstSeen();
 
+    if(finished && !cards.isNotEmpty){
+       Future.delayed(Duration(seconds: 1), () {
+        goHome(subtopics, count);
+      });
+      return const SizedBox.shrink();
+       }
+
+    // Return empty widget so nothing else builds
+   
+      
+    
+
     return Scaffold(
         drawer: const DrawMain2(),
         appBar: CustomAppBar(
@@ -502,7 +514,6 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
     if (flashcards.isEmpty || length == sessionScore) {
       print("Flashcards empty\n");
       debugPrint("Card deck empty.\n Your score is $score");
-      
       showDialog(
                     context: context,
                     builder: (BuildContext context) {
@@ -511,23 +522,22 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
                         titleTextStyle: TextStyle(
                           color: Colors.black,
                         ),
-                        content: Text('Your score is $score. \nRedirecting to Homepage'),
-                        contentTextStyle: TextStyle(color: Colors.black),
-                        // actions: [
-                        //   TextButton(
-                        //     onPressed: () => Navigator.of(context).pop(),
-                        //     child: const Text('OK'),
-                        //   ),
-                        // ],
-                      );});
+                        actions: 
+                        <Widget>[
+                      IconButton(
+                        onPressed: () {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(builder: (context) => const NewLanding()),
+                            (route) => false,
+                          ); // Close the alert dialog
+                        },
+                        icon :const Icon(Icons.home_outlined,color: Colors.black,),
+                    
+                                    )]);});
 
       await Future.delayed(const Duration(seconds: 2));
-
-      Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => const NewLanding()),
-      (route) => false,
-    );
+      
     } else {
       print("Flashcards not empty\n");
       count++;
@@ -725,10 +735,10 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
 
     var databaseFlashcards = await Algo().getFlashcards(user.uid);
     List<dynamic> topicList = [];
-    List<int?> score = [];
+    List<int?> scores = [];
 
     for (var i = 0; i < containsTopic.length; i++) {
-      score.add(0);
+      scores.add(0);
 
       if (containsTopic[i] == true) {
         topicList.add(topics[i]["topic"]);
@@ -745,7 +755,7 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
     for (var flashcard in databaseFlashcards) {
       if (topicList.contains(flashcard["topic"]) && flashcard["gotRight"] == true) {
         var topicListIndex = topicList.indexOf(flashcard["topic"]);
-        score[topicListIndex] = (score[topicListIndex] ?? 0) + 1;
+        scores[topicListIndex] = (scores[topicListIndex] ?? 0) + 1;
       }
     }
 
@@ -754,7 +764,7 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
       totalCards.add(0);
       if (containsTopic[i]) {
         totalCards[i] = flashcards.where((flashcard) => flashcard["topic"] == topics[i]["topic"]).length;
-        if (totalCards[i] <= score[i]) {
+        if (totalCards[i] <= scores[i]) {
           topicCount[i] = topicCount[i] + 1;
           topicLastSeen[i] = Timestamp.now();
         }

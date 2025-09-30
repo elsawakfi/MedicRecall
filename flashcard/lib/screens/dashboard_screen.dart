@@ -75,6 +75,7 @@ class HomePageState extends State<HomePage> {
   late CollectionReference _eventsCollectionRef;
   late List<String> topicNames = [];
   late List<int> topicScores = [];
+  late Map<String, dynamic>? topicData; 
   final CollectionReference _userCollectionRef =
       FirebaseFirestore.instance.collection('users');
   StudySessionManager studySessionManager = StudySessionManager();
@@ -207,44 +208,81 @@ class HomePageState extends State<HomePage> {
 
     setState(() {});
   }
-  
-  Future<List> getTopicsDatabase() async {
-    List<dynamic> holderList = [];
 
-    CollectionReference topicRef =
-    FirebaseWrapper.firestore().collection("topics");
-    QuerySnapshot topicSnapshot = await topicRef.orderBy('order').get();
-    QuerySnapshot topicSnapshotUnordered = await topicRef.get();
-    
-    for (var doc in topicSnapshotUnordered.docs ){
-      var data = doc.data() as Map<String, dynamic>;
-      topicNames.add(data["topic"]);
-    }
-    List<Map<String, dynamic>> holder = [];
-    Map<String, bool> holderChecked = {};
-    for (var doc in topicSnapshot.docs) {
-      holder.add(Map<String, dynamic>.from(doc.data() as Map<String, dynamic>));
-      holder.last["color"] = Color(int.parse(holder.last["color"]));
-      holderChecked[holder.last["topic"].toString()] = false;
+  Future<Map<String, dynamic>> getTopicsDatabase() async {
+  final topicRef = FirebaseWrapper.firestore().collection("topics");
+  final snapshot = await topicRef.get();
 
-      if (holder.last["subtopics"] == null) {
-        // if subtopic field is empty
-        List<String> tempSubtopics = [];
-        holder.last["subtopics"] = tempSubtopics;
-      } else {
-        List<String> tempSubtopics = [];
-        for (var subtopic in holder.last["subtopics"]) {
-          tempSubtopics.add(subtopic.toString());
-          holderChecked[subtopic.toString()] = false;
-        }
-        holder.last["subtopics"] = tempSubtopics;
+  List<Map<String, dynamic>> unordered = [];
+  Map<String, bool> holderChecked = {};
+
+  for (var doc in snapshot.docs) {
+    final data = Map<String, dynamic>.from(doc.data() as Map<String, dynamic>);
+    data["color"] = Color(int.parse(data["color"]));
+
+    // Ensure subtopics is always a List<String>
+    List<String> tempSubtopics = [];
+    if (data["subtopics"] != null) {
+      for (var subtopic in data["subtopics"]) {
+        tempSubtopics.add(subtopic.toString());
+        holderChecked[subtopic.toString()] = false;
       }
     }
-    holderList.add(holder);
-    holderList.add(holderChecked);
+    data["subtopics"] = tempSubtopics;
+    unordered.add(data);
+    topicNames.add(data["topic"]);
 
-    return holderList;
+    holderChecked[data["topic"].toString()] = false;
   }
+
+  // Build ordered list without extra query
+  List<Map<String, dynamic>> ordered = List.from(unordered);
+  ordered.sort((a, b) => (a["order"] as int).compareTo(b["order"] as int));
+
+  return {
+    "unordered": unordered,
+    "ordered": ordered,
+    "checked": holderChecked,
+  };
+}
+  
+  // Future<List> getTopicsDatabase() async {
+  //   List<dynamic> holderList = [];
+
+  //   CollectionReference topicRef =
+  //   FirebaseWrapper.firestore().collection("topics");
+  //   QuerySnapshot topicSnapshot = await topicRef.orderBy('order').get();
+  //   QuerySnapshot topicSnapshotUnordered = await topicRef.get();
+    
+  //   for (var doc in topicSnapshotUnordered.docs ){
+  //     var data = doc.data() as Map<String, dynamic>;
+  //     topicNames.add(data["topic"]);
+  //   }
+  //   List<Map<String, dynamic>> holder = [];
+  //   Map<String, bool> holderChecked = {};
+  //   for (var doc in topicSnapshot.docs) {
+  //     holder.add(Map<String, dynamic>.from(doc.data() as Map<String, dynamic>));
+  //     holder.last["color"] = Color(int.parse(holder.last["color"]));
+  //     holderChecked[holder.last["topic"].toString()] = false;
+
+  //     if (holder.last["subtopics"] == null) {
+  //       // if subtopic field is empty
+  //       List<String> tempSubtopics = [];
+  //       holder.last["subtopics"] = tempSubtopics;
+  //     } else {
+  //       List<String> tempSubtopics = [];
+  //       for (var subtopic in holder.last["subtopics"]) {
+  //         tempSubtopics.add(subtopic.toString());
+  //         holderChecked[subtopic.toString()] = false;
+  //       }
+  //       holder.last["subtopics"] = tempSubtopics;
+  //     }
+  //   }
+  //   holderList.add(holder);
+  //   holderList.add(holderChecked);
+
+  //   return holderList;
+  // }
   
   
   
@@ -306,33 +344,55 @@ class HomePageState extends State<HomePage> {
     setState(() {});
   }
 
+
+Future<void> getTopics() async {
+  if (mounted) {
+    setState(() => loading = true);
+  }
+
+  topicData = await getTopicsDatabase();
+
+  if (mounted) {
+    setState(() {
+      topics = topicData!["ordered"];   // or "unordered" depending on use case
+      checked = topicData!["checked"];
+    });
+  }
+
+  topicScores = [];
+  for (final map in topics) {
+    List<String> subtopics = map["subtopics"];
+    int score = (await Algo().getScore(user.uid, subtopics))!;
+    topicScores.add(score);
+  }
+}
 //Get all events from database, iterate over events and look for which date a flashcard topic has been scheduled 
-  Future<void> getTopics() async {
-    if (mounted) {
-      setState(() {
-        loading = true;
-      });
-    }
+  // Future<void> getTopics() async {
+  //   if (mounted) {
+  //     setState(() {
+  //       loading = true;
+  //     });
+  //   }
     
-    var holderList = await getTopicsDatabase();
+  //   var holderList = await getTopicsDatabase();
     
 
-    if (mounted) {
-      setState(() {
-        topics = holderList[0];
-        checked = holderList[1];
+  //   if (mounted) {
+  //     setState(() {
+  //       topics = holderList[0];
+  //       checked = holderList[1];
         
-      });
-    }
+  //     });
+  //   }
    
-    topicScores = [];
-    for (final map in topics){
-      List<String> subtopics = map["subtopics"];
-      int score = (await Algo().getScore(user.uid, subtopics))!;
-      topicScores.add(score);
-    }
+  //   topicScores = [];
+  //   for (final map in topics){
+  //     List<String> subtopics = map["subtopics"];
+  //     int score = (await Algo().getScore(user.uid, subtopics))!;
+  //     topicScores.add(score);
+  //   }
    
-  }
+  // }
 
   @override
   void initState() {
@@ -368,13 +428,11 @@ class HomePageState extends State<HomePage> {
     [getTopics(),
      getflashcardEvents(),
      getStats()]);
+
     await _computeRows();
      setState((){
       loading = false;
     });
- 
-    
-    
   }
 
   @override
@@ -464,15 +522,13 @@ class HomePageState extends State<HomePage> {
   Future<void> _computeRows() async{
     final DateTime today = DateTime.now();
     final List<TopicRow> newRows = [];
-  
   for (final map in topics) {
-    
     final topic = map["topic"] as String;
     final idx = topicNames.indexOf(topic);
     int seen = seenCards[topic] ?? 0;
     int total = totalCards[topic] ?? 0;
     int score = topicScores[(map["order"]-1)];
-    final isComplete = (total > 0 && seen >= total)&& score == total;
+    final isComplete = (total > 0 && seen >= total) && (score >= (total-2));
     // determine current scheduled date for this topic (if any)
     DateTime? dateInCalendar;
     DateTime? nextReview;
