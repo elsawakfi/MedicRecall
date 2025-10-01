@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/dashboard_screen.dart';
+import 'package:flashcard_x/screens/landing_screen_new.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flashcard_x/utils/algo.dart';
 import 'package:flashcard_x/utils/firebase_wrapper.dart';
@@ -91,9 +92,11 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
   final int count;
   late int flashcardIndex;
   int length = 10;
+  int length_ = 10;
   int preCardval = 2;
   int selectedValue1 = 2;
   int score = 0;
+  int sessionScore = 0;
   int completedFlashcards = 0;
 
   late bool loading;
@@ -170,6 +173,18 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
     Feed.navKey;
     SwipingDeck deck = displayDeck();
     updateFirstSeen();
+
+    if(finished && !cards.isNotEmpty){
+       Future.delayed(Duration(seconds: 1), () {
+        goHome(subtopics, count);
+      });
+      return const SizedBox.shrink();
+       }
+
+    // Return empty widget so nothing else builds
+   
+      
+    
 
     return Scaffold(
         drawer: const DrawMain2(),
@@ -362,11 +377,6 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
                 ],
               )
             ),
-
-            
-          
-            
-
             // --------------------------------- LOADING BAR ------------------------
             Center(
                 child: Visibility(
@@ -500,19 +510,46 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
   }
 
   void goHome(List<String> subtopics, int count) async {
-    if (flashcards.isEmpty) {
+    print("Flash length: $length and Score: $sessionScore");
+    if (flashcards.isEmpty || length == sessionScore) {
+      print("Flashcards empty\n");
       debugPrint("Card deck empty.\n Your score is $score");
+      showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text("Deck Completed!"),
+                        titleTextStyle: TextStyle(
+                          color: Colors.black,
+                        ),
+                        actions: 
+                        <Widget>[
+                      IconButton(
+                        onPressed: () {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(builder: (context) => const NewLanding()),
+                            (route) => false,
+                          ); // Close the alert dialog
+                        },
+                        icon :const Icon(Icons.home_outlined,color: Colors.black,),
+                    
+                                    )]);});
+
+      await Future.delayed(const Duration(seconds: 2));
+      
     } else {
+      print("Flashcards not empty\n");
       count++;
       Navigator.pop(context);
-      // await Navigator.push(
-      //   context,
-      //   ExpandRoute(
-      //       page: Feed(
-      //     subtopics: subtopics,
-      //     count: count,
-      //   )),
-      // );
+      await Navigator.push(
+        context,
+        ExpandRoute(
+            page: Feed(
+          subtopics: subtopics,
+          count: count,
+        )),
+      );
       
     }
   }
@@ -698,10 +735,10 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
 
     var databaseFlashcards = await Algo().getFlashcards(user.uid);
     List<dynamic> topicList = [];
-    List<int?> score = [];
+    List<int?> scores = [];
 
     for (var i = 0; i < containsTopic.length; i++) {
-      score.add(0);
+      scores.add(0);
 
       if (containsTopic[i] == true) {
         topicList.add(topics[i]["topic"]);
@@ -718,7 +755,7 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
     for (var flashcard in databaseFlashcards) {
       if (topicList.contains(flashcard["topic"]) && flashcard["gotRight"] == true) {
         var topicListIndex = topicList.indexOf(flashcard["topic"]);
-        score[topicListIndex] = (score[topicListIndex] ?? 0) + 1;
+        scores[topicListIndex] = (scores[topicListIndex] ?? 0) + 1;
       }
     }
 
@@ -727,7 +764,7 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
       totalCards.add(0);
       if (containsTopic[i]) {
         totalCards[i] = flashcards.where((flashcard) => flashcard["topic"] == topics[i]["topic"]).length;
-        if (totalCards[i] <= score[i]) {
+        if (totalCards[i] <= scores[i]) {
           topicCount[i] = topicCount[i] + 1;
           topicLastSeen[i] = Timestamp.now();
         }
@@ -740,6 +777,8 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
   }
 
   Future<void> updateSeenCorrect() async {
+    sessionScore++;
+    print("Session Score: $sessionScore");
     if (!finished) {
       if (flashcardIndex + 1 == length) {
         updateTopicCountAndTopicLastSeen();
@@ -763,6 +802,7 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
           "score": [1],
           "gotRight": true
         });
+       
       } else {
         var timesSeen = querySnapshot.docs.first["timesSeen"];
         var tempId = querySnapshot.docs.first.id;
@@ -776,6 +816,7 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
           "score": cardScore,
           "gotRight": true
         });
+        
       }
     }
 
@@ -845,12 +886,13 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
     bool wrongCardExist = false;
 
     List<dynamic> topicScore = userSnapshot.docs.last["topicScore"];
-
     if (exists) {
       for (int i = 0; i < flashcards.length; i++) {
         QuerySnapshot querySnapshot = await _flashcardsSeenRef
             .where("cardID", isEqualTo: flashcards[i]["id"])
             .get();
+
+          
 
         if (querySnapshot.docs.isNotEmpty) {
           var data = querySnapshot.docs.first.data() as Map<String, dynamic>;

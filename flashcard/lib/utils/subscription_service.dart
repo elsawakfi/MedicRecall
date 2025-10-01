@@ -16,11 +16,13 @@ class SubscriptionService {
   SubscriptionData get subscription => _subscription;
   String get subscriptionType => _subscription.type;
   String get subscriptionStatus => _subscription.status;
+  DateTime? get subscriptionExpiry => _subscription.expiryDate;
 
   // Load subscription from Firebase
   Future<void> loadSubscription() async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
+    print(user.uid);
 
     try {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
@@ -141,7 +143,8 @@ class SubscriptionService {
             .doc(querySnapshot.docs.first.id)
             .update({
           "subscription": _subscription.toMap(),
-          "stripeID": null
+          "stripeID": null,
+          "pmc_id": null
         });
       }
     } catch (e) {

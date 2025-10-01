@@ -69,7 +69,9 @@ class NewLandingState extends State<NewLanding> {
 
 
   Future<void> _loadSub() async {
+    print("Loading subscription\n\n");
     await subscriptionService.loadSubscription();
+    print("Subscription: ${subscriptionService.isPaid}");
     setState(() {
       _isPaid = subscriptionService.isPaid;
       _loading = false;

@@ -61,7 +61,7 @@ class HomePageState extends State<HomePage> {
   late String? id;
   late List<dynamic>? topicCount;
   List<dynamic>? topicLastSeen;
-  DateTime? _firstStudyDate;
+  // DateTime? _firstStudyDate;
   CollectionReference users = FirebaseWrapper.firestore().collection('users');
   final FirebaseAuth auth = FirebaseAuth.instance;
   bool loading = true;
@@ -75,6 +75,7 @@ class HomePageState extends State<HomePage> {
   late CollectionReference _eventsCollectionRef;
   late List<String> topicNames = [];
   late List<int> topicScores = [];
+  late Map<String, dynamic>? topicData; 
   final CollectionReference _userCollectionRef =
       FirebaseFirestore.instance.collection('users');
   StudySessionManager studySessionManager = StudySessionManager();
@@ -97,13 +98,15 @@ class HomePageState extends State<HomePage> {
           for (var event in eventsList!){
             String title = event.toString();          
             if((!title.contains("Flashcards")) || title.contains("Completed")) {
-                Timestamp? timestamp = data['date'] as Timestamp?;
-                  if (timestamp != null) {
-                DateTime date = timestamp.toDate();
-                date = DateTime(date.year, date.month, date.day);
-                List<String> events = eventsList.map((e) => e.toString()).toList();
-                allEvents[date] = events.map ((title) => Event(color: Colors.black, title: title)).toList();
-            }}
+                continue;
+            //     Timestamp? timestamp = data['date'] as Timestamp?;
+            //       if (timestamp != null) {
+            //     DateTime date = timestamp.toDate();
+            //     date = DateTime(date.year, date.month, date.day);
+            //     List<String> events = eventsList.map((e) => e.toString()).toList();
+            //     allEvents[date] = events.map ((title) => Event(color: Colors.black, title: title)).toList();
+            // }
+            }
             else{
                 Timestamp? timestamp = data['date'] as Timestamp?;
                   if (timestamp != null) {
@@ -148,8 +151,8 @@ class HomePageState extends State<HomePage> {
         // If testDay hasn't been set, assign a default value
         testDay = DateTime.now();
       }
-      _firstStudyDate = DateTime.fromMicrosecondsSinceEpoch(
-          querySnapshot.docs.last["firstStudyDay"].microsecondsSinceEpoch);
+      // _firstStudyDate = DateTime.fromMicrosecondsSinceEpoch(
+          // querySnapshot.docs.last["firstStudyDay"].microsecondsSinceEpoch);
     });
   }
 
@@ -205,216 +208,97 @@ class HomePageState extends State<HomePage> {
 
     setState(() {});
   }
+
+  Future<Map<String, dynamic>> getTopicsDatabase() async {
+  final topicRef = FirebaseWrapper.firestore().collection("topics");
+  final snapshot = await topicRef.get();
+
+  List<Map<String, dynamic>> unordered = [];
+  Map<String, bool> holderChecked = {};
+
+  for (var doc in snapshot.docs) {
+    final data = Map<String, dynamic>.from(doc.data() as Map<String, dynamic>);
+    data["color"] = Color(int.parse(data["color"]));
+
+    // Ensure subtopics is always a List<String>
+    List<String> tempSubtopics = [];
+    if (data["subtopics"] != null) {
+      for (var subtopic in data["subtopics"]) {
+        tempSubtopics.add(subtopic.toString());
+        holderChecked[subtopic.toString()] = false;
+      }
+    }
+    data["subtopics"] = tempSubtopics;
+    unordered.add(data);
+    topicNames.add(data["topic"]);
+
+    holderChecked[data["topic"].toString()] = false;
+  }
+
+  // Build ordered list without extra query
+  List<Map<String, dynamic>> ordered = List.from(unordered);
+  ordered.sort((a, b) => (a["order"] as int).compareTo(b["order"] as int));
+
+  return {
+    "unordered": unordered,
+    "ordered": ordered,
+    "checked": holderChecked,
+  };
+}
   
-  Future<List> getTopicsDatabase() async {
-    List<dynamic> holderList = [];
+  // Future<List> getTopicsDatabase() async {
+  //   List<dynamic> holderList = [];
 
-    CollectionReference topicRef =
-    FirebaseWrapper.firestore().collection("topics");
-    QuerySnapshot topicSnapshot = await topicRef.orderBy('order').get();
-    QuerySnapshot topicSnapshotUnordered = await topicRef.get();
-    for (var doc in topicSnapshotUnordered.docs ){
-      var data = doc.data() as Map<String, dynamic>;
-      topicNames.add(data["topic"]);
-    }
-    List<Map<String, dynamic>> holder = [];
-    Map<String, bool> holderChecked = {};
-    for (var doc in topicSnapshot.docs) {
-      holder.add(Map<String, dynamic>.from(doc.data() as Map<String, dynamic>));
-      holder.last["color"] = Color(int.parse(holder.last["color"]));
-      holderChecked[holder.last["topic"].toString()] = false;
+  //   CollectionReference topicRef =
+  //   FirebaseWrapper.firestore().collection("topics");
+  //   QuerySnapshot topicSnapshot = await topicRef.orderBy('order').get();
+  //   QuerySnapshot topicSnapshotUnordered = await topicRef.get();
+    
+  //   for (var doc in topicSnapshotUnordered.docs ){
+  //     var data = doc.data() as Map<String, dynamic>;
+  //     topicNames.add(data["topic"]);
+  //   }
+  //   List<Map<String, dynamic>> holder = [];
+  //   Map<String, bool> holderChecked = {};
+  //   for (var doc in topicSnapshot.docs) {
+  //     holder.add(Map<String, dynamic>.from(doc.data() as Map<String, dynamic>));
+  //     holder.last["color"] = Color(int.parse(holder.last["color"]));
+  //     holderChecked[holder.last["topic"].toString()] = false;
 
-      if (holder.last["subtopics"] == null) {
-        // if subtopic field is empty
-        List<String> tempSubtopics = [];
-        holder.last["subtopics"] = tempSubtopics;
-      } else {
-        List<String> tempSubtopics = [];
-        for (var subtopic in holder.last["subtopics"]) {
-          tempSubtopics.add(subtopic.toString());
-          holderChecked[subtopic.toString()] = false;
-        }
-        holder.last["subtopics"] = tempSubtopics;
-      }
-    }
-    holderList.add(holder);
-    holderList.add(holderChecked);
+  //     if (holder.last["subtopics"] == null) {
+  //       // if subtopic field is empty
+  //       List<String> tempSubtopics = [];
+  //       holder.last["subtopics"] = tempSubtopics;
+  //     } else {
+  //       List<String> tempSubtopics = [];
+  //       for (var subtopic in holder.last["subtopics"]) {
+  //         tempSubtopics.add(subtopic.toString());
+  //         holderChecked[subtopic.toString()] = false;
+  //       }
+  //       holder.last["subtopics"] = tempSubtopics;
+  //     }
+  //   }
+  //   holderList.add(holder);
+  //   holderList.add(holderChecked);
 
-    return holderList;
-  }
+  //   return holderList;
+  // }
   
   
-  Future<bool> _isExcludedDay(DateTime date, String userId) async {
-    try {
-      QuerySnapshot querySnapshot =
-          await _userCollectionRef.where("userID", isEqualTo: userId).get();
-      if (querySnapshot.docs.isEmpty) return false;
-
-      var userData = querySnapshot.docs.last.data() as Map<String, dynamic>;
-      if (!userData.containsKey('excludedDays')) return false;
-
-      List<String> excludedDays = List<String>.from(userData['excludedDays']);
-      String dayName = _getDayName(date.weekday);
-      return excludedDays.contains(dayName);
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error checking excluded day: $e');
-      }
-      return false;
-    }
-  }
-
-  String _getDayName(int weekday) {
-    switch (weekday) {
-      case 1:
-        return "Monday";
-      case 2:
-        return "Tuesday";
-      case 3:
-        return "Wednesday";
-      case 4:
-        return "Thursday";
-      case 5:
-        return "Friday";
-      case 6:
-        return "Saturday";
-      case 7:
-        return "Sunday";
-      default:
-        return "";
-    }
-  }
-
-
-  Future<DateTime> findNearestFreeDate(
-      DateTime targetDate,
-      int maxDaysToMove,
-      DateTime testDay,
-      DateTime today,
-      Map<DateTime, List<Event>> generatedEvents,
-      String userId,
-      {int requiredSpacing = 0}) async {
-    // First check if the target date is already available
-    if (generatedEvents[targetDate] == null &&
-        !await _isExcludedDay(targetDate, userId)) {
-      return targetDate;
-    }
-
-    // Try to find a date forward (preferred direction)
-    DateTime nextDate = targetDate;
-    int daysForward = 0;
-    while (nextDate.isBefore(testDay) && daysForward < maxDaysToMove) {
-      nextDate = nextDate.add(const Duration(days: 1));
-      daysForward++;
-      
-      // Check if this date respects both availability and required spacing
-      if (generatedEvents[nextDate] == null &&
-          !await _isExcludedDay(nextDate, userId)) {
-        // If we need to maintain spacing, check adjacent days
-        if (requiredSpacing > 0) {
-          bool hasAdjacentEvent = false;
-          
-          // Check days before based on spacing
-          for (int i = 1; i <= requiredSpacing; i++) {
-            DateTime checkDate = nextDate.subtract(Duration(days: i));
-            if (generatedEvents[checkDate] != null) {
-              hasAdjacentEvent = true;
-              break;
-            }
-          }
-          
-          // Check days after based on spacing
-          if (!hasAdjacentEvent) {
-            for (int i = 1; i <= requiredSpacing; i++) {
-              DateTime checkDate = nextDate.add(Duration(days: i));
-              if (checkDate.isAfter(testDay)) break;
-              if (generatedEvents[checkDate] != null) {
-                hasAdjacentEvent = true;
-                break;
-              }
-            }
-          }
-          
-          if (!hasAdjacentEvent) {
-            return nextDate;
-          }
-          // Continue searching if this date doesn't meet spacing requirements
-          continue;
-        }
-        
-        return nextDate;
-      }
-    }
-
-    // If no future date found within maxDaysToMove, try searching backward
-    DateTime prevDate = targetDate;
-    int daysBackward = 0;
-    while (prevDate.isAfter(today) && daysBackward < maxDaysToMove) {
-      prevDate = prevDate.subtract(const Duration(days: 1));
-      daysBackward++;
-      
-      // Check if this date respects both availability and required spacing
-      if (generatedEvents[prevDate] == null &&
-          !await _isExcludedDay(prevDate, userId)) {
-        // If we need to maintain spacing, check adjacent days
-        if (requiredSpacing > 0) {
-          bool hasAdjacentEvent = false;
-          
-          // Check days before based on spacing
-          for (int i = 1; i <= requiredSpacing; i++) {
-            DateTime checkDate = prevDate.subtract(Duration(days: i));
-            if (checkDate.isBefore(today)) break;
-            if (generatedEvents[checkDate] != null) {
-              hasAdjacentEvent = true;
-              break;
-            }
-          }
-          
-          // Check days after based on spacing
-          if (!hasAdjacentEvent) {
-            for (int i = 1; i <= requiredSpacing; i++) {
-              DateTime checkDate = prevDate.add(Duration(days: i));
-              if (generatedEvents[checkDate] != null) {
-                hasAdjacentEvent = true;
-                break;
-              }
-            }
-          }
-          
-          if (!hasAdjacentEvent) {
-            return prevDate;
-          }
-          // Continue searching if this date doesn't meet spacing requirements
-          continue;
-        }
-        
-        return prevDate;
-      }
-    }
-
-    // If we reach here, try the start date itself as a last resort
-    if (generatedEvents[today] == null &&
-        !await _isExcludedDay(today, userId)) {
-      return today;
-    }
-
-    // If absolutely no valid date found, return the original target date
-    // The calling methods will need to check if this date is actually usable
-    return targetDate;
-  }
+  
 
 
  Future<void> addSingleEvent (
       DateTime date, String eventTitle, User user,{bool edit = false}) async {
     date = DateTime(date.year, date.month, date.day,0,0,0,0);
    
-  DateTime today = DateTime.now();
+  // DateTime today = DateTime.now();
   
-  if (edit == false){
+  // if (edit == false){
 
-  date = await findNearestFreeDate(date, 5, testDay, today, allEvents, user.uid);
+  // date = await findNearestFreeDate(date, 5, testDay, today, allEvents, user.uid);
  
-  }
+  // }
 
   Color color =  Colors.yellow; 
 
@@ -460,33 +344,55 @@ class HomePageState extends State<HomePage> {
     setState(() {});
   }
 
+
+Future<void> getTopics() async {
+  if (mounted) {
+    setState(() => loading = true);
+  }
+
+  topicData = await getTopicsDatabase();
+
+  if (mounted) {
+    setState(() {
+      topics = topicData!["ordered"];   // or "unordered" depending on use case
+      checked = topicData!["checked"];
+    });
+  }
+
+  topicScores = [];
+  for (final map in topics) {
+    List<String> subtopics = map["subtopics"];
+    int score = (await Algo().getScore(user.uid, subtopics))!;
+    topicScores.add(score);
+  }
+}
 //Get all events from database, iterate over events and look for which date a flashcard topic has been scheduled 
-  Future<void> getTopics() async {
-    if (mounted) {
-      setState(() {
-        loading = true;
-      });
-    }
+  // Future<void> getTopics() async {
+  //   if (mounted) {
+  //     setState(() {
+  //       loading = true;
+  //     });
+  //   }
     
-    var holderList = await getTopicsDatabase();
+  //   var holderList = await getTopicsDatabase();
     
 
-    if (mounted) {
-      setState(() {
-        topics = holderList[0];
-        checked = holderList[1];
+  //   if (mounted) {
+  //     setState(() {
+  //       topics = holderList[0];
+  //       checked = holderList[1];
         
-      });
-    }
+  //     });
+  //   }
    
-    topicScores = [];
-    for (final map in topics){
-      List<String> subtopics = map["subtopics"];
-      int score = (await Algo().getScore(user.uid, subtopics))!;
-      topicScores.add(score);
-    }
+  //   topicScores = [];
+  //   for (final map in topics){
+  //     List<String> subtopics = map["subtopics"];
+  //     int score = (await Algo().getScore(user.uid, subtopics))!;
+  //     topicScores.add(score);
+  //   }
    
-  }
+  // }
 
   @override
   void initState() {
@@ -508,21 +414,34 @@ class HomePageState extends State<HomePage> {
       allEvents = {};
       loading = true;
     });
+ 
+    // await getUser();
+    // await getTopics();
+    // await userData();
+    // await getflashcardEvents();
+    // await getStats();
+    // await _computeRows();
+
     await getUser();
-    await getTopics();
-    await userData();
-    await getflashcardEvents();
-    await getStats();
+
+    await Future.wait(
+    [getTopics(),
+     getflashcardEvents(),
+     getStats()]);
+
     await _computeRows();
-    setState(() {
+     setState((){
       loading = false;
     });
-    
-    
   }
 
   @override
   Widget build(BuildContext context) {
+    if (loading) {
+    return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    } 
     return Scaffold(
       drawer: const DrawMain2(),
       appBar: CustomAppBar(
@@ -572,44 +491,44 @@ class HomePageState extends State<HomePage> {
      
      
 
-    setState(() {
+   setState(() {
       name = querySnapshot.docs.last["name"];
       id = querySnapshot.docs.last.id;
       topicCount = querySnapshot.docs.last["topicCount"];
       topicLastSeen = querySnapshot.docs.last["topicLastSeen"];
-      loading = false;
+      
+      try {
+        testDay = querySnapshot.docs.last['TestDay'].toDate();
+      }catch (e){
+        // If testDay hasn't been set, assign a default value
+        testDay = DateTime.now();
+      }
+      // _firstStudyDate = DateTime.fromMicrosecondsSinceEpoch(
+      //     querySnapshot.docs.last["firstStudyDay"].microsecondsSinceEpoch);
     });
   }
 
   Future<void> getStats() async {
-    setState(() {
-      loading = true;
-    });
-
     TopicStats stats = await LastRevised.getStats();
     if (mounted) {
       setState(() {
         totalCards = stats.totalCards;
         seenCards = stats.seenCards;
-        loading = false;
+       
       });
     }
-    
-    
   }
 
   Future<void> _computeRows() async{
     final DateTime today = DateTime.now();
     final List<TopicRow> newRows = [];
-  
   for (final map in topics) {
-    
     final topic = map["topic"] as String;
     final idx = topicNames.indexOf(topic);
     int seen = seenCards[topic] ?? 0;
     int total = totalCards[topic] ?? 0;
     int score = topicScores[(map["order"]-1)];
-    final isComplete = (total > 0 && seen >= total) && score == total;
+    final isComplete = (total > 0 && seen >= total) && (score >= (total-2));
     // determine current scheduled date for this topic (if any)
     DateTime? dateInCalendar;
     DateTime? nextReview;
@@ -686,7 +605,7 @@ class HomePageState extends State<HomePage> {
       topic: topic,
       formattedDate: dateText,
       color: tileColor,
-      seen: score,
+      seen: seen,
       total: total,
       isComplete: isComplete,
       calendarDate: dateInCalendar,
@@ -696,115 +615,10 @@ class HomePageState extends State<HomePage> {
   
   if (!mounted) return;
   setState(() => _rows = newRows);
+  
   }
 
-  Future<void> _recomputeRowsAndMaybeSchedule() async {
-  final DateTime today = DateTime.now();
-  final List<TopicRow> newRows = [];
-
-  // guard set to avoid double scheduling within a run
-  final Set<String> scheduledThisPass = {};
-
-  for (final map in topics) {
-    final topic = map["topic"] as String;
-    final seen = seenCards[topic] ?? 0;
-    final total = totalCards[topic] ?? 0;
-    final isComplete = total > 0 && seen >= total;
-    // determine current scheduled date for this topic (if any)
-    DateTime? dateInCalendar;
-    Event? existing;
-    if (selectedEvents.isNotEmpty) {
-      for (var entry in selectedEvents.entries) {
-        for (var e in entry.value) {
-          if (e.title.contains(topic)) {
-            dateInCalendar = DateTime(entry.key.year, entry.key.month, entry.key.day);
-            existing = e;
-            
-          }
-        }
-        if (dateInCalendar != null) break;
-      }
-    }
-
-    // compute “how long since last seen” and gap days map
-    final idx = topicNames.indexOf(topic);
-    final daysSince = (Timestamp.now().seconds - topicLastSeen![idx].seconds) / (60 * 60 * 24);
-    final Map<int,int> gap = {
-      0: (daysSince.ceil() * 4) + 1,
-      1: 6, 2: 10, 3: 16, 4: 24, 5: 36
-    };
-    final int count = (topicCount![idx] as int).clamp(0, gap.length - 1);
-    final int gapDays = gap[count] ?? ((daysSince.ceil() * 4) + 1); // 1 day default if key missing
-    final DateTime nextReview = (dateInCalendar ?? today).add(Duration(days: gapDays));
-   
-
-    // decide color + date text (pure)
-    Color tileColor;
-    String dateText = "N/A";
-    if (dateInCalendar == null) {
-      tileColor = const Color(0xFFD9D9D9);
-    } else if ((seen == 0) && (dateInCalendar.isBefore(today) || dateInCalendar.isAtSameMomentAs(today))) {
-      tileColor = const Color(0xFFFF9595);
-      dateText = DateFormat('dd/MM/yyyy').format(dateInCalendar);
-    } else {
-      // recently reviewed vs grey
-      tileColor = (daysSince <= 2.0) ? const Color(0xFFB0FFC6) : const Color(0xFFD9D9D9);
-      dateText = DateFormat('dd/MM/yyyy').format(dateInCalendar);
-    }
-
-    // if complete -> schedule next (idempotent & NO UI rebuilds here)
-    if (isComplete && !scheduledThisPass.contains(topic)) {
-      // 1) mark today as “Completed: …” if needed
-      // 2) add next “<topic> Flashcards” ONLY if it does not already exist on that date
-      // 3) reset seen for topic (server) — but do NOT call userData/getStats here
-      // 4) finally, update local presentation: set tile green + next date
-
-      // IDENTITY / IDEMPOTENCY CHECKS
-      final String nextTitle = "$topic Flashcards";
-      final bool alreadyHasNext = selectedEvents[nextReview]
-              ?.any((e) => e.title == nextTitle) ?? false;
-
-      if (!alreadyHasNext) {
-        // move “future” completion to today if needed
-        if (dateInCalendar != null && dateInCalendar.isAfter(today)) {
-          await updateOneEvent(existing!, "Completed: $topic ", today, oldDate: dateInCalendar);
-          dateInCalendar = today;
-        } else if (dateInCalendar != null) {
-          await updateOneEvent(existing!, "Completed: $topic ", dateInCalendar!);
-        }
-
-        await addSingleEvent(nextReview, nextTitle, user);
-        // Reset seen on backend (once)
-        await LastRevised.resetSeenCardsForTopic(topic);
-        scheduledThisPass.add(topic);
-      }
-
-      // set presentation for complete state
-      tileColor = const Color(0xFFB0FFC6);
-      dateText = DateFormat('dd/MM/yyyy').format(nextReview);
-    }
-
-    final List<String> subs = (map["subtopics"] as List?)
-        ?.map((e) => e.toString())
-        .toList() 
-    ?? const [];
-
-    newRows.add(TopicRow(
-      topic: topic,
-      formattedDate: dateText,
-      color: tileColor,
-      seen: seen,
-      total: total,
-      isComplete: isComplete,
-      calendarDate: dateInCalendar,
-      subtopics: subs,
-    ));
-  }
-
-  if (!mounted) return;
-  setState(() => _rows = newRows);
-}
-
+  
 
   List<Widget> makeCheckboxListFromRows() {
   final List<Widget> tiles = [];
@@ -1076,14 +890,11 @@ class HomePageState extends State<HomePage> {
     if (selectedSubtopics.isNotEmpty) {
       await Navigator.push(
                 context,
-                ExpandRoute(page: AboveEverything(subtopics: selectedSubtopics, count: 1)),
+                ExpandRoute(page: AboveEverything(subtopics: selectedSubtopics, count: 0)),
               ).then((_) async {
                 // Refresh data after returning
                 setState(() => loading = true);
-                await userData();
-                await getTopics();
-                await getStats();
-                await _computeRows();
+                await getData(); 
                 setState(() => loading = false);
               });
       
@@ -1103,5 +914,274 @@ class HomePageState extends State<HomePage> {
       );
     }
   }
-}
 
+
+
+// Future<bool> _isExcludedDay(DateTime date, String userId) async {
+  //   try {
+  //     QuerySnapshot querySnapshot =
+  //         await _userCollectionRef.where("userID", isEqualTo: userId).get();
+  //     if (querySnapshot.docs.isEmpty) return false;
+
+  //     var userData = querySnapshot.docs.last.data() as Map<String, dynamic>;
+  //     if (!userData.containsKey('excludedDays')) return false;
+
+  //     List<String> excludedDays = List<String>.from(userData['excludedDays']);
+  //     String dayName = _getDayName(date.weekday);
+  //     return excludedDays.contains(dayName);
+  //   } catch (e) {
+  //     if (kDebugMode) {
+  //       print('Error checking excluded day: $e');
+  //     }
+  //     return false;
+  //   }
+  // }
+
+  // String _getDayName(int weekday) {
+  //   switch (weekday) {
+  //     case 1:
+  //       return "Monday";
+  //     case 2:
+  //       return "Tuesday";
+  //     case 3:
+  //       return "Wednesday";
+  //     case 4:
+  //       return "Thursday";
+  //     case 5:
+  //       return "Friday";
+  //     case 6:
+  //       return "Saturday";
+  //     case 7:
+  //       return "Sunday";
+  //     default:
+  //       return "";
+  //   }
+  // }
+
+
+
+
+  // Future<DateTime> findNearestFreeDate(
+  //     DateTime targetDate,
+  //     int maxDaysToMove,
+  //     DateTime testDay,
+  //     DateTime today,
+  //     Map<DateTime, List<Event>> generatedEvents,
+  //     String userId,
+  //     {int requiredSpacing = 0}) async {
+  //   // First check if the target date is already available
+  //   if (generatedEvents[targetDate] == null &&
+  //       !await _isExcludedDay(targetDate, userId)) {
+  //     return targetDate;
+  //   }
+
+  //   // Try to find a date forward (preferred direction)
+  //   DateTime nextDate = targetDate;
+  //   int daysForward = 0;
+  //   while (nextDate.isBefore(testDay) && daysForward < maxDaysToMove) {
+  //     nextDate = nextDate.add(const Duration(days: 1));
+  //     daysForward++;
+      
+  //     // Check if this date respects both availability and required spacing
+  //     if (generatedEvents[nextDate] == null &&
+  //         !await _isExcludedDay(nextDate, userId)) {
+  //       // If we need to maintain spacing, check adjacent days
+  //       if (requiredSpacing > 0) {
+  //         bool hasAdjacentEvent = false;
+          
+  //         // Check days before based on spacing
+  //         for (int i = 1; i <= requiredSpacing; i++) {
+  //           DateTime checkDate = nextDate.subtract(Duration(days: i));
+  //           if (generatedEvents[checkDate] != null) {
+  //             hasAdjacentEvent = true;
+  //             break;
+  //           }
+  //         }
+          
+  //         // Check days after based on spacing
+  //         if (!hasAdjacentEvent) {
+  //           for (int i = 1; i <= requiredSpacing; i++) {
+  //             DateTime checkDate = nextDate.add(Duration(days: i));
+  //             if (checkDate.isAfter(testDay)) break;
+  //             if (generatedEvents[checkDate] != null) {
+  //               hasAdjacentEvent = true;
+  //               break;
+  //             }
+  //           }
+  //         }
+          
+  //         if (!hasAdjacentEvent) {
+  //           return nextDate;
+  //         }
+  //         // Continue searching if this date doesn't meet spacing requirements
+  //         continue;
+  //       }
+        
+  //       return nextDate;
+  //     }
+  //   }
+
+  //   // If no future date found within maxDaysToMove, try searching backward
+  //   DateTime prevDate = targetDate;
+  //   int daysBackward = 0;
+  //   while (prevDate.isAfter(today) && daysBackward < maxDaysToMove) {
+  //     prevDate = prevDate.subtract(const Duration(days: 1));
+  //     daysBackward++;
+      
+  //     // Check if this date respects both availability and required spacing
+  //     if (generatedEvents[prevDate] == null &&
+  //         !await _isExcludedDay(prevDate, userId)) {
+  //       // If we need to maintain spacing, check adjacent days
+  //       if (requiredSpacing > 0) {
+  //         bool hasAdjacentEvent = false;
+          
+  //         // Check days before based on spacing
+  //         for (int i = 1; i <= requiredSpacing; i++) {
+  //           DateTime checkDate = prevDate.subtract(Duration(days: i));
+  //           if (checkDate.isBefore(today)) break;
+  //           if (generatedEvents[checkDate] != null) {
+  //             hasAdjacentEvent = true;
+  //             break;
+  //           }
+  //         }
+          
+  //         // Check days after based on spacing
+  //         if (!hasAdjacentEvent) {
+  //           for (int i = 1; i <= requiredSpacing; i++) {
+  //             DateTime checkDate = prevDate.add(Duration(days: i));
+  //             if (generatedEvents[checkDate] != null) {
+  //               hasAdjacentEvent = true;
+  //               break;
+  //             }
+  //           }
+  //         }
+          
+  //         if (!hasAdjacentEvent) {
+  //           return prevDate;
+  //         }
+  //         // Continue searching if this date doesn't meet spacing requirements
+  //         continue;
+  //       }
+        
+  //       return prevDate;
+  //     }
+  //   }
+
+  //   // If we reach here, try the start date itself as a last resort
+  //   if (generatedEvents[today] == null &&
+  //       !await _isExcludedDay(today, userId)) {
+  //     return today;
+  //   }
+
+  //   // If absolutely no valid date found, return the original target date
+  //   // The calling methods will need to check if this date is actually usable
+  //   return targetDate;
+  // }
+//  Future<void> _recomputeRowsAndMaybeSchedule() async {
+//   final DateTime today = DateTime.now();
+//   final List<TopicRow> newRows = [];
+
+//   // guard set to avoid double scheduling within a run
+//   final Set<String> scheduledThisPass = {};
+
+//   for (final map in topics) {
+//     final topic = map["topic"] as String;
+//     final seen = seenCards[topic] ?? 0;
+//     final total = totalCards[topic] ?? 0;
+//     final isComplete = total > 0 && seen >= total;
+//     // determine current scheduled date for this topic (if any)
+//     DateTime? dateInCalendar;
+//     Event? existing;
+//     if (selectedEvents.isNotEmpty) {
+//       for (var entry in selectedEvents.entries) {
+//         for (var e in entry.value) {
+//           if (e.title.contains(topic)) {
+//             dateInCalendar = DateTime(entry.key.year, entry.key.month, entry.key.day);
+//             existing = e;
+            
+//           }
+//         }
+//         if (dateInCalendar != null) break;
+//       }
+//     }
+
+//     // compute “how long since last seen” and gap days map
+//     final idx = topicNames.indexOf(topic);
+//     final daysSince = (Timestamp.now().seconds - topicLastSeen![idx].seconds) / (60 * 60 * 24);
+//     final Map<int,int> gap = {
+//       0: (daysSince.ceil() * 4) + 1,
+//       1: 6, 2: 10, 3: 16, 4: 24, 5: 36
+//     };
+//     final int count = (topicCount![idx] as int).clamp(0, gap.length - 1);
+//     final int gapDays = gap[count] ?? ((daysSince.ceil() * 4) + 1); // 1 day default if key missing
+//     final DateTime nextReview = (dateInCalendar ?? today).add(Duration(days: gapDays));
+   
+
+//     // decide color + date text (pure)
+//     Color tileColor;
+//     String dateText = "N/A";
+//     if (dateInCalendar == null) {
+//       tileColor = const Color(0xFFD9D9D9);
+//     } else if ((seen == 0) && (dateInCalendar.isBefore(today) || dateInCalendar.isAtSameMomentAs(today))) {
+//       tileColor = const Color(0xFFFF9595);
+//       dateText = DateFormat('dd/MM/yyyy').format(dateInCalendar);
+//     } else {
+//       // recently reviewed vs grey
+//       tileColor = (daysSince <= 2.0) ? const Color(0xFFB0FFC6) : const Color(0xFFD9D9D9);
+//       dateText = DateFormat('dd/MM/yyyy').format(dateInCalendar);
+//     }
+
+//     // if complete -> schedule next (idempotent & NO UI rebuilds here)
+//     if (isComplete && !scheduledThisPass.contains(topic)) {
+//       // 1) mark today as “Completed: …” if needed
+//       // 2) add next “<topic> Flashcards” ONLY if it does not already exist on that date
+//       // 3) reset seen for topic (server) — but do NOT call userData/getStats here
+//       // 4) finally, update local presentation: set tile green + next date
+
+//       // IDENTITY / IDEMPOTENCY CHECKS
+//       final String nextTitle = "$topic Flashcards";
+//       final bool alreadyHasNext = selectedEvents[nextReview]
+//               ?.any((e) => e.title == nextTitle) ?? false;
+
+//       if (!alreadyHasNext) {
+//         // move “future” completion to today if needed
+//         if (dateInCalendar != null && dateInCalendar.isAfter(today)) {
+//           await updateOneEvent(existing!, "Completed: $topic ", today, oldDate: dateInCalendar);
+//           dateInCalendar = today;
+//         } else if (dateInCalendar != null) {
+//           await updateOneEvent(existing!, "Completed: $topic ", dateInCalendar!);
+//         }
+
+//         await addSingleEvent(nextReview, nextTitle, user);
+//         // Reset seen on backend (once)
+//         await LastRevised.resetSeenCardsForTopic(topic);
+//         scheduledThisPass.add(topic);
+//       }
+
+//       // set presentation for complete state
+//       tileColor = const Color(0xFFB0FFC6);
+//       dateText = DateFormat('dd/MM/yyyy').format(nextReview);
+//     }
+
+//     final List<String> subs = (map["subtopics"] as List?)
+//         ?.map((e) => e.toString())
+//         .toList() 
+//     ?? const [];
+
+//     newRows.add(TopicRow(
+//       topic: topic,
+//       formattedDate: dateText,
+//       color: tileColor,
+//       seen: seen,
+//       total: total,
+//       isComplete: isComplete,
+//       calendarDate: dateInCalendar,
+//       subtopics: subs,
+//     ));
+//   }
+
+//   if (!mounted) return;
+//   setState(() => _rows = newRows);
+// }
+
+}

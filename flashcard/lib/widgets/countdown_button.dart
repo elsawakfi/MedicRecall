@@ -879,10 +879,31 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
                         'sjtRepetitions': sjtRepetitions,
                       });
 
+                      Timestamp aLongTimeAgo = Timestamp.fromDate(DateTime(1999, 1, 1));
+
+      
+                      await
+                          _userCollectionRef.doc(id).update({
+                        "topicLastSeen": [
+                          aLongTimeAgo,
+                          aLongTimeAgo,
+                          aLongTimeAgo,
+                          aLongTimeAgo,
+                          aLongTimeAgo,
+                          aLongTimeAgo,
+                          aLongTimeAgo
+                        ]
+                      });
+
+                      CollectionReference flashcardsSeenRef = FirebaseFirestore.instance
+                          .collection("users/$id/flashcardsSeen");
+                      await flashcardsSeenRef.doc().delete();
+
                       if (context.mounted) {
                         final BuildContext rootContext = context;
                         Navigator.of(context).pop();
                         _generateAndViewSchedule(context, rootContext: rootContext, popParentDialog: false);
+
                       }
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(

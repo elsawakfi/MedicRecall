@@ -1,9 +1,11 @@
 import 'package:flashcard_x/widgets/app_bar_title.dart';
+import 'package:flashcard_x/widgets/drawer_widget2.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flashcard_x/utils/subscription_service.dart';
 import 'package:flashcard_x/utils/stripe_utils.dart';
 import 'package:flashcard_x/widgets/stripe_pricing_table.dart';
+import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/landing_screen_new.dart';
@@ -59,6 +61,7 @@ class _PricingScreenState extends State<PricingScreen> {
       );
     }
     return Scaffold(
+      drawer: const DrawMain2(),
       appBar: CustomAppBar(
         title: 'MedicRecall',
       ),
@@ -113,12 +116,6 @@ class _FreeScreenState extends State<FreeScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       PlanBox(
-                        planTitle: "Monthly Subscription",
-                        planCost: "£10 per month",
-                        onCheckout: () => StripeUtils.launchStripeWithUserId(1),
-                      ),
-                      SizedBox(width: 5),
-                      PlanBox(
                         planTitle: "3-Month Package",
                         planCost: "£20 one-off payment",
                         onCheckout: () => StripeUtils.launchStripeWithUserId(3),
@@ -164,7 +161,7 @@ class _PaidScreenState extends State<PaidScreen> {
           children: [
             SizedBox(height: 50),
             Text(
-              "You are already subscribed to the paid plan.",
+              "You are already subscribed to the paid plan. Your plan expires on ${DateFormat("d MMMM y").format(subscriptionService.subscriptionExpiry!)}",
               style: TextStyle(
                 fontSize: 18,
               )
@@ -176,11 +173,6 @@ class _PaidScreenState extends State<PaidScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      PlanBoxViewOnly(
-                        planTitle: "Monthly Subscription",
-                        planCost: "£10 per month",
-                      ),
-                      SizedBox(width: 5),
                       PlanBoxViewOnly(
                         planTitle: "3-Month Package",
                         planCost: "£20 one-off payment",
