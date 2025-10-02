@@ -68,13 +68,21 @@ static Future<void> resetSeenCardsForTopic(String topicName) async {
       DocumentSnapshot card = await flashcardRef.doc(doc["cardID"]).get();
       
       if (card.exists) {
+        
         Map<String, dynamic> data = card.data() as Map<String, dynamic>;
+        var lastSeen = doc["lastSeen"];
+
+        if (lastSeen != null) {
+          lastSeen = lastSeen.toDate();
+        } else{
+          lastSeen = null; // or handle default
+        }
         _incrementMap(seenCards, data["topic"].toString());
-        _updateDate(dateLastRevised, data["topic"], doc["lastSeen"].toDate());
+        _updateDate(dateLastRevised, data["topic"], lastSeen);
         _limitMin(timesSeen, data["topic"], doc["score"][0] ?? 0);
         if (data["subtopic"] != "" && includeSubtopics) {
           _incrementMap(seenCards, data["subtopic"].toString());
-          _updateDate(dateLastRevised, data["subtopic"], doc["lastSeen"].toDate());
+          _updateDate(dateLastRevised, data["subtopic"], lastSeen);
           _limitMin(timesSeen, data["subtopic"], doc["score"][0] ?? 0);
         }
       }
@@ -179,7 +187,8 @@ static Future<void> resetSeenCardsForTopic(String topicName) async {
   }
 
 
-  static void _updateDate(Map<String, DateTime> map, String key, DateTime newDate) {
+  static void _updateDate(Map<String, DateTime> map, String key, DateTime? newDate) {
+    if (newDate == null) return;
     if (map[key] == null) {
       map[key] = newDate;
     } else {
