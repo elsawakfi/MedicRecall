@@ -336,7 +336,7 @@ class _RegistrationFormState extends State<RegistrationForm> {
                                           .id); //push replace page with homepage instance, with id, which is a string
                                 } else if (user != null) {
                                   navigator.pushReplacementNamed(
-                                      VerifyEmailScreen.id);
+                                      NewLanding.id);
                                 }
                               }
 
