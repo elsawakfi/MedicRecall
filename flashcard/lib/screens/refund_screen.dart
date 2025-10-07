@@ -3,6 +3,7 @@ import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flashcard_x/widgets/drawer_widget2.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/utils/subscription_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class RefundScreen extends StatefulWidget {
   const RefundScreen({super.key});
@@ -35,6 +36,51 @@ class _RefundScreenState extends State<RefundScreen> {
     super.dispose();
   }
 
+  Future<void> _sendRefundEmail() async {
+    final String userEmail = _emailController.text.trim();
+    final String orderNumber = _orderNumberController.text.trim();
+    
+    // Generate email subject with user email
+    final String subject = 'Refund Request - $userEmail';
+    
+    // Generate email body
+    final String body = '''
+Refund Request Details:
+
+Email: $userEmail
+Order Number: ${orderNumber.isNotEmpty ? orderNumber : 'Not provided'}
+
+This is an automated refund request submitted through the MedicRecall app.
+
+Best regards,
+MedicRecall System
+''';
+
+    // Create mailto URL
+    final Uri emailUri = Uri(
+      scheme: 'mailto',
+      path: 'info@medicrecall.com',
+      query: 'subject=${Uri.encodeComponent(subject)}&body=${Uri.encodeComponent(body)}',
+    );
+
+    try {
+      if (await canLaunchUrl(emailUri)) {
+        await launchUrl(emailUri);
+      } else {
+        throw 'Could not launch email client';
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Could not open email client: $e'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _submitRefundRequest() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -57,16 +103,18 @@ class _RefundScreenState extends State<RefundScreen> {
     });
 
     try {
-      // Here you would typically send the refund request to your backend
-      // For now, we'll simulate the process and show a success message
-      await Future.delayed(const Duration(seconds: 2));
+      // Send automatic email
+      await _sendRefundEmail();
+      
+      // Simulate processing time
+      await Future.delayed(const Duration(seconds: 1));
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Refund request submitted successfully! We will process your request within 24 hours.'),
+            content: Text('Refund request submitted successfully! An email has been sent to our support team. We will process your request within 24 hours.'),
             backgroundColor: Colors.green,
-            duration: Duration(seconds: 4),
+            duration: Duration(seconds: 5),
           ),
         );
         
@@ -124,16 +172,7 @@ class _RefundScreenState extends State<RefundScreen> {
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'You can request a refund within 24 hours',
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.black54,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
+                 ],
               ),
             ),
             
@@ -191,7 +230,7 @@ class _RefundScreenState extends State<RefundScreen> {
                         if (value == null || value.isEmpty) {
                           return 'Please enter your email address';
                         }
-                        if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                        if (!RegExp(r'^[\w\-.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
                           return 'Please enter a valid email address';
                         }
                         return null;

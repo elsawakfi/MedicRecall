@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import '../screens/calendar_screen.dart';
 import '../screens/flashcard_editor_screen.dart';
 import 'package:flashcard_x/screens/refund_screen.dart';
+import 'package:flashcard_x/screens/suggestion_screen.dart';
 
 class DrawMain2 extends StatelessWidget {
   const DrawMain2({super.key});
@@ -161,6 +162,18 @@ class DrawMain2 extends StatelessWidget {
                         Navigator.push(
                           context,
                           MoveRightRoute(page: const RefundScreen()),
+                        );
+                      },
+
+            ),
+            DrawerTile(
+              icon: const Icon(Icons.lightbulb_outlined),
+              title: 'Suggestions',
+              backgroundColor: Colors.blue,
+              onPressed: () {
+                        Navigator.push(
+                          context,
+                          MoveRightRoute(page: const SuggestionScreen()),
                         );
                       },
 
