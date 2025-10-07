@@ -169,7 +169,7 @@ class DrawMain2 extends StatelessWidget {
             DrawerTile(
               icon: const Icon(Icons.lightbulb_outlined),
               title: 'Suggestions',
-              backgroundColor: Colors.blue,
+              backgroundColor: Colors.green,
               onPressed: () {
                         Navigator.push(
                           context,
