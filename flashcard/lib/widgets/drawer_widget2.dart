@@ -1,24 +1,21 @@
 //import 'package:flashcard_x/screens/dash_screen.dart';
 import 'package:flashcard_x/screens/dashboard_screen.dart';
 import 'package:flashcard_x/screens/landing_screen_new.dart';
-import 'package:flashcard_x/draft/mark_scheme.dart';
 import 'package:flashcard_x/screens/minimock_landing.dart';
 import 'package:flashcard_x/screens/pricing_screen.dart';
 import 'package:flashcard_x/screens/settings_screen.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flashcard_x/screens/fullmock_landing.dart';
-import 'package:flashcard_x/screens/fullmock_landing.dart';
 //import 'package:flashcard_x/screens/streaks_page.dart';
 import 'package:flashcard_x/utils/authentication.dart';
 import 'package:flashcard_x/utils/page_transition.dart';
 import 'package:flashcard_x/utils/subscription_service.dart';
-import 'package:flashcard_x/utils/theme_provider.dart';
 import 'package:flutter/material.dart';
 //import 'package:flashcard_x/screens/exam_declaration.dart';
-import 'package:provider/provider.dart';
 import '../screens/calendar_screen.dart';
 import '../screens/flashcard_editor_screen.dart';
-import 'package:flashcard_x/screens/subtopic_choice_screen.dart';
+import 'package:flashcard_x/screens/refund_screen.dart';
+import 'package:flashcard_x/screens/suggestion_screen.dart';
 
 class DrawMain2 extends StatelessWidget {
   const DrawMain2({super.key});
@@ -32,7 +29,6 @@ class DrawMain2 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Drawer(
       //backgroundColor: theme.dialogTheme.backgroundColor,
       backgroundColor: Colors.black,
@@ -159,6 +155,30 @@ class DrawMain2 extends StatelessWidget {
 
             ),
             DrawerTile(
+              icon: const Icon(Icons.money_off_rounded),
+              title: 'Refund',
+              backgroundColor: Colors.orange,
+              onPressed: () {
+                        Navigator.push(
+                          context,
+                          MoveRightRoute(page: const RefundScreen()),
+                        );
+                      },
+
+            ),
+            DrawerTile(
+              icon: const Icon(Icons.lightbulb_outlined),
+              title: 'Suggestions',
+              backgroundColor: Colors.green,
+              onPressed: () {
+                        Navigator.push(
+                          context,
+                          MoveRightRoute(page: const SuggestionScreen()),
+                        );
+                      },
+
+            ),
+            DrawerTile(
               icon: const Icon(Icons.logout),
               title: 'Logout',
               backgroundColor: Colors.red,
@@ -198,7 +218,6 @@ class DrawerTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final themeProvider = Provider.of<ThemeProvider>(context);
 
     final bcolor = backgroundColor ?? theme.colorScheme.primary;
     // The .withGreen() stuff is kinda hacky but actually looks ok...
