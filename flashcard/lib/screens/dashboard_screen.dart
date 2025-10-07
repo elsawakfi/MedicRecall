@@ -528,7 +528,7 @@ Future<void> getTopics() async {
     int seen = seenCards[topic] ?? 0;
     int total = totalCards[topic] ?? 0;
     int score = topicScores[(map["order"]-1)];
-    final isComplete = (total > 0 && seen >= total) && (score >= (total-2));
+    final isComplete = (total > 0 && seen >= total) && (score >= total);
     // determine current scheduled date for this topic (if any)
     DateTime? dateInCalendar;
     DateTime? nextReview;

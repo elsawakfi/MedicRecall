@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flashcard_x/screens/verify_email_screen.dart';
 import 'package:flashcard_x/utils/authentication.dart';
 import 'package:flashcard_x/utils/string_validation.dart';
@@ -181,7 +182,7 @@ class _LoginFormState extends State<LoginForm> {
                             // if a user object is filled
                             Navigator.pushReplacementNamed(context, NewLanding.id); //push replace page with homepage instance, with id, which is a string
                           }else if (user != null){
-                            navigator.pushReplacementNamed(VerifyEmailScreen.id);
+                            navigator.pushReplacementNamed(NewLanding.id);
                           }
                         }
 

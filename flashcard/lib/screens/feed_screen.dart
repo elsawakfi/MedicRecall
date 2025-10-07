@@ -98,7 +98,7 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
   int score = 0;
   int sessionScore = 0;
   int completedFlashcards = 0;
-
+  
   late bool loading;
   bool flipped = false;
   bool finished = false;
@@ -455,15 +455,14 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
 
   Future<void> getData() async {
     await getUser();
-
     // if (choice == "revise") {
     //   flashcards = await Algo().getCards(subtopics, user.uid);
     // } else if (choice == "new") {
     //   flashcards = await Algo().newCards(subtopics, user.uid);
     // }
-
     flashcards = await Algo().newCards(subtopics, user.uid);
     var oldCards = await Algo().getCards(subtopics, user.uid);
+    oldCards = oldCards.where((c) => c["gotRight"] != true).toList(); //Crucial line of code
     flashcards.addAll(oldCards);
     length = flashcards.length; //length = The total number of cards
     if (length > 0) {
@@ -487,7 +486,7 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
   }
 
   //When answered correctly
-  void nextCardRight() {
+  void nextCardRight() async {
     if (kDebugMode) {
       //print(flashcards.length);
     }
@@ -503,6 +502,10 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
       completedCardsNotifier.value++;
       score++;
       updateSeenCorrect();
+      // setState(() {
+      //   flashcards.removeAt(flashcardIndex);
+      //   flashcardIndex -= 1; // adjust index so next card lines up correctly
+      // });
       mrManager.doRigamarole();
       mrCont.doRigamarole();
       _loadingBar.go();
@@ -555,7 +558,7 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
   }
 
   //When answering incorrectly
-  void nextCardLeft() {
+  void nextCardLeft() async {
     if (!loading) {
       flashcardIndex += 1; //Get next card
       flipped = false;
@@ -1082,8 +1085,10 @@ class WaitToFlipTimer extends StatefulWidget {
   State<WaitToFlipTimer> createState() => _WaitToFlipTimerState();
 
   void go() {
+    if (controller != null ) {
     controller.reset();
     controller.forward();
+   }
   }
 }
 
