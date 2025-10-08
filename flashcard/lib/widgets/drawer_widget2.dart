@@ -140,13 +140,10 @@ class DrawMain2 extends StatelessWidget {
                       icon: const Icon(Icons.settings),
                       title: 'Settings',
                     ): const SizedBox.shrink(),
-                    ]),
-              ),
-            ),
-            DrawerTile(
-              icon: const Icon(Icons.subscriptions_rounded),
-              title: 'My Plan',
-              onPressed: () {
+                     DrawerTile(
+                icon: const Icon(Icons.subscriptions_rounded),
+                title: 'My Plan',
+                onPressed: () {
                         Navigator.push(
                           context,
                           MoveRightRoute(page: const PricingScreen()),
@@ -154,30 +151,34 @@ class DrawMain2 extends StatelessWidget {
                       },
 
             ),
-            DrawerTile(
-              icon: const Icon(Icons.money_off_rounded),
-              title: 'Refund',
-              backgroundColor: Colors.orange,
-              onPressed: () {
-                        Navigator.push(
-                          context,
-                          MoveRightRoute(page: const RefundScreen()),
-                        );
-                      },
-
+                    ]),
+              ),
             ),
-            DrawerTile(
-              icon: const Icon(Icons.lightbulb_outlined),
-              title: 'Suggestions',
-              backgroundColor: Colors.green,
-              onPressed: () {
-                        Navigator.push(
-                          context,
-                          MoveRightRoute(page: const SuggestionScreen()),
-                        );
-                      },
+           
+            // DrawerTile(
+            //   icon: const Icon(Icons.money_off_rounded),
+            //   title: 'Refund',
+            //   backgroundColor: Colors.orange,
+            //   onPressed: () {
+            //             Navigator.push(
+            //               context,
+            //               MoveRightRoute(page: const RefundScreen()),
+            //             );
+            //           },
 
-            ),
+            // ),
+            // DrawerTile(
+            //   icon: const Icon(Icons.lightbulb_outlined),
+            //   title: 'Suggestions',
+            //   backgroundColor: Colors.green,
+            //   onPressed: () {
+            //             Navigator.push(
+            //               context,
+            //               MoveRightRoute(page: const SuggestionScreen()),
+            //             );
+            //           },
+
+            // ),
             DrawerTile(
               icon: const Icon(Icons.logout),
               title: 'Logout',
