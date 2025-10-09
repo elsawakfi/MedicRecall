@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:getwidget/getwidget.dart';
 
 
 class AddCard extends StatefulWidget {
@@ -396,28 +395,27 @@ class _AddCardState extends State<AddCard> {
               ),
             ),
         
-        const SizedBox(height: 50), 
-        Transform.scale(
-            scale: 1.44, 
-            child: GFButton(
-              onPressed: uploadCard,
-              text: "Create",
-              icon: const Icon(Icons.keyboard_arrow_right_sharp),
-              shape: GFButtonShape.pills,
-              color: Colors.green,
-              textStyle: TextStyle(
-                fontSize: 18, 
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                shadows: [
-                  Shadow(
-                    color: Colors.black.withOpacity(0.8),
-                    offset: const Offset(1, 1),
-                    blurRadius: 2,
-                  ),
-                ],
+        const SizedBox(height: 50),
+        Center(
+          child: ElevatedButton(
+            onPressed: uploadCard,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.black,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
               ),
             ),
+            child: const Text(
+              "Create",
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ),
         ),
       ],
         ),
