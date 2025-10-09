@@ -211,7 +211,7 @@ class _PaidScreenState extends State<PaidScreen> {
                       fontSize: 20,
                       fontFamily: 'Lato',
                       fontWeight: FontWeight.w300,
-                      color: Colors.black,
+                      color: Colors.white,
                     ),
                     children: [
                       TextSpan(text: "Visit our "),
@@ -238,7 +238,7 @@ class _PaidScreenState extends State<PaidScreen> {
                               fontSize: 20,
                               fontFamily: 'Lato',
                               fontWeight: FontWeight.w300,
-                              color: Colors.blue,
+                              color: Colors.white,
                               decoration: TextDecoration.underline,
                             ),
                           ),
