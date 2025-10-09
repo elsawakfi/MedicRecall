@@ -202,13 +202,53 @@ class _PaidScreenState extends State<PaidScreen> {
               ),
                 textAlign: TextAlign.center,),
              SizedBox(height: 25),
-              Text(
-              "Visit our Terms and Conditions page for more information on how to claim our 24-Hour free trial and Money Back Guarantee. ",
-              style: TextStyle(
-                fontSize: 20,
-                fontFamily: 'Lato',
-                fontWeight: FontWeight.w300,
-              ), textAlign: TextAlign.center,)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontFamily: 'Lato',
+                      fontWeight: FontWeight.w300,
+                      color: Colors.black,
+                    ),
+                    children: [
+                      TextSpan(text: "Visit our "),
+                      WidgetSpan(
+                        child: GestureDetector(
+                          onTap: () async {
+                            final Uri url = Uri.parse('https://medicrecall.com/terms-and-conditions/');
+                            if (await canLaunchUrl(url)) {
+                              await launchUrl(url, mode: LaunchMode.externalApplication);
+                            } else {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Could not open Terms and Conditions page'),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                          child: Text(
+                            "Terms and Conditions",
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontFamily: 'Lato',
+                              fontWeight: FontWeight.w300,
+                              color: Colors.blue,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                      ),
+                      TextSpan(text: " page for more information on how to claim our 24-Hour free trial and Money Back Guarantee."),
+                    ],
+                  ),
+                ),
+              )
           ],
         ),
       )
@@ -261,7 +301,11 @@ class IconButtonCustom extends StatelessWidget {
               child: Text(
               label,
               textAlign: TextAlign.center,
-                style: textStyle1,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ]
