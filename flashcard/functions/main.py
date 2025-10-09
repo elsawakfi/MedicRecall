@@ -264,13 +264,11 @@ def stripe_webhook(req: https_fn.Request) -> https_fn.Response:
         invoice = event['data']['object']
         user_id = invoice.get("client_reference_id")
         payment_email = event['data']['object']['customer_details']['email']
-        pmc_id = event['data']['object']['payment_method_configuration_details']['id']
         status = event['data']['object']['payment_status']
         amount = invoice.get("amount_total")
         print(f"payment email: {payment_email}")
         print(f"amount_total : {amount}")
         print(f"status: {status}")
-        print(f"pmc_id: {pmc_id}")
         if amount == 2000:
             x = 3
         if amount == 3000:
@@ -293,7 +291,6 @@ def stripe_webhook(req: https_fn.Request) -> https_fn.Response:
                     
                     # extend expiry date
                     new_expiry = start_date + timedelta(days = 30 * x)
-
                     doc.reference.update({
                         "subscription": {
                             "subscriptionType": "paid",
@@ -304,6 +301,5 @@ def stripe_webhook(req: https_fn.Request) -> https_fn.Response:
                     #store the payment email and pmc incase we want to find this user using other webhooks
                     doc.reference.update({
                         "stripeID": payment_email,
-                        "pmc_id": pmc_id
                     })
     return https_fn.Response("Webhook received", status=200)

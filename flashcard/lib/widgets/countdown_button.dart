@@ -72,7 +72,7 @@ class CustomFloatingButtonState extends State<CustomFloatingButton> {
         DateTime savedTime = timestamp.toDate();
         DateTime currentTime = DateTime.now();
 
-        if (currentTime.difference(savedTime).inMinutes >= 1) {
+        if (currentTime.difference(savedTime).inMinutes >= 60) {
           await FirebaseFirestore.instance
               .collection('users')
               .doc(user.uid)

@@ -57,6 +57,7 @@ dependencies:
   # ^5.0.0
 
   font_awesome_flutter: ^10.4.0
+  web: ^1.0.0
 
 
 

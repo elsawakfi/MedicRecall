@@ -96,9 +96,9 @@ class _FreeScreenState extends State<FreeScreen> {
                   color: Colors.white,
                 ),
               ),
-              SizedBox(height: 25),
+              SizedBox(height: 35),
               Text(
-                "All of our plans come with our 100% Money Back Guarantee!\nIf you don’t score in the top 50% of applicants on the Professional Dilemmas paper after using our platform, we will give you a full refund.",
+                "All our plans come with a *24-hour Free Trial and **Money Back Guarantee",
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w300,
@@ -107,7 +107,7 @@ class _FreeScreenState extends State<FreeScreen> {
                 ),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 50),
+              SizedBox(height: 10),
               Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: SingleChildScrollView(
@@ -135,12 +135,36 @@ class _FreeScreenState extends State<FreeScreen> {
                     ],
                   ),
                 ),
-              )
+              ),
+              SizedBox(height: 25),
+              Text(
+               "*24-hour Free Trial: Cancel your subscription within 24 hours and receive a refund."
+                  ,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w300,
+                  fontFamily: 'Lato',
+                  color: Colors.white,
+                ),
+                textAlign: TextAlign.center,),
+                SizedBox(height: 10),
+              Text(
+               "**Money Back Guarantee: Receive a full refund if you do not score above average in the PD paper."
+                  ,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w300,
+                  fontFamily: 'Lato',
+                  color: Colors.white,
+                ),
+                textAlign: TextAlign.center,)
             ],
           ),
         )
       );
   }
+  // 
+                
 }
 
 class PaidScreen extends StatefulWidget {
@@ -159,34 +183,68 @@ class _PaidScreenState extends State<PaidScreen> {
       child: SingleChildScrollView(
         child: Column(
           children: [
-            SizedBox(height: 50),
+            SizedBox(height: 15),
             Text(
-              "You are already subscribed to the paid plan. Your plan expires on ${DateFormat("d MMMM y").format(subscriptionService.subscriptionExpiry!)}",
+              "My Plan: ",
               style: TextStyle(
-                fontSize: 18,
-              )
+                fontSize: 36,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Lato',
+              ),
             ),
-            Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal, 
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+            SizedBox(height: 25),
+            Text(
+              "Your subscription expires on: ${DateFormat("d MMMM y").format(subscriptionService.subscriptionExpiry!)}",
+              style: TextStyle(
+                fontSize: 20,
+                fontFamily: 'Lato',
+                fontWeight: FontWeight.w300,
+              ),
+                textAlign: TextAlign.center,),
+             SizedBox(height: 25),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontFamily: 'Lato',
+                      fontWeight: FontWeight.w300,
+                      color: Colors.white,
+                    ),
                     children: [
-                      PlanBoxViewOnly(
-                        planTitle: "3-Month Package",
-                        planCost: "£20 one-off payment",
+                      TextSpan(text: "Visit our "),
+                      WidgetSpan(
+                        child: GestureDetector(
+                          onTap: () async {
+                            final Uri url = Uri.parse('https://medicrecall.com/terms-and-conditions/');
+                            if (await canLaunchUrl(url)) {
+                              await launchUrl(url, mode: LaunchMode.externalApplication);
+                            } else {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Could not open Terms and Conditions page'),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                          child: Text(
+                            "Terms and Conditions",
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontFamily: 'Lato',
+                              fontWeight: FontWeight.w300,
+                              color: Colors.white,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
                       ),
-                      SizedBox(width: 5),
-                      PlanBoxViewOnly(
-                        planTitle: "6-Month Package",
-                        planCost: "£30 one-off payment",
-                      ),
-                      SizedBox(width: 5),
-                      PlanBoxViewOnly(
-                        planTitle: "12-Month Package",
-                        planCost: "£40 one-off payment",
-                      ),
+                      TextSpan(text: " page for more information on how to claim our 24-Hour free trial and Money Back Guarantee."),
                     ],
                   ),
                 ),
@@ -243,7 +301,11 @@ class IconButtonCustom extends StatelessWidget {
               child: Text(
               label,
               textAlign: TextAlign.center,
-                style: textStyle1,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ]
