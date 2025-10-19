@@ -67,7 +67,7 @@ class Flashcard extends StatelessWidget {
           // home: _home(),
           initialRoute: _home(),
           routes: {
-            VerifyEmailScreen.id: (context) => const VerifyEmailScreen(),
+            // VerifyEmailScreen.id: (context) => const VerifyEmailScreen(),
             SignInScreen.id: (context) => const SignInScreen(),
             SignUpScreen.id: (context) => const SignUpScreen(),
             HomePage.id: (context) => const HomePage(title: "Medicine Upload"),
@@ -80,7 +80,7 @@ class Flashcard extends StatelessWidget {
   String _home() {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return SignInScreen.id;
-    if (!user.emailVerified) return VerifyEmailScreen.id;
+    // if (!user.emailVerified) return VerifyEmailScreen.id;
     return NewLanding.id;
   }
 }
