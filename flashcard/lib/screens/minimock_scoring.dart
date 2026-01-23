@@ -181,6 +181,7 @@ Future<void> fetchAverageScore() async {
       maxScore = tempMaxScore;
       totalScore = totalScore;
     });
+    print(" Max Score: $maxScore");
     _updateScore(totalScore);
   }
 
