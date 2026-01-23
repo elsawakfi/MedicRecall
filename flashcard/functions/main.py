@@ -238,9 +238,12 @@ from flask import Request
 import stripe
 import json
 
-stripe.api_key = 'sk_test_51RjYJGJRBLxROQTkzqF32OAcv4F3hIs8eGNlCSsDnLbWi5RKNNMW4X8v0cnYcupYWpXSLeQhK6lfLr0DBFckAeRu00seVGcn25'  # Your Stripe key
-endpoint_secret = 'whsec_Her14t9w303zj5NzZIXkMrGeFr2dJ6dT'
-
+# publishable_key = 'pk_live_51RjYJGJRBLxROQTkrzTdRB4J0BMANu1ZKM7f4y5hi8EKbvOjt04TAhf2FDxZT4nDFNhWIrYni5e2Mh5GIQ32Irg000A8NDm3zK'
+stripe.api_key = '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'
+# test api key stripe.api_key = 'sk_test_51RjYJGJRBLxROQTkzqF32OAcv4F3hIs8eGNlCSsDnLbWi5RKNNMW4X8v0cnYcupYWpXSLeQhK6lfLr0DBFckAeRu00seVGcn25'  # Your Stripe key
+# endpoint_secret = 'whsec_Her14t9w303zj5NzZIXkMrGeFr2dJ6dT' test endpoint
+endpoint_secret = 'whsec_Tt8cqHtfBFBxcyI0gFrN6pgyGF5yUTGH' #live endpoint 
+paymentLink = {3:"plink_1SL9xCJRBLxROQTk8MWafhWM",6:"plink_1SL9xFJRBLxROQTk5WazG0og",12:"plink_1SL9x6JRBLxROQTkNKKHEWvR"}
 @https_fn.on_request()
 def stripe_webhook(req: https_fn.Request) -> https_fn.Response:
     db = firestore.Client()
@@ -262,6 +265,12 @@ def stripe_webhook(req: https_fn.Request) -> https_fn.Response:
     print(f"event type: {event['type']}")
     if event['type'] == "checkout.session.completed":
         invoice = event['data']['object']
+        payment_link_id = invoice.get("payment_link")
+        discounts = invoice.get("discounts", [])
+        reverse_lookup = {v: k for k, v in paymentLink.items()}
+        product_id = reverse_lookup.get(payment_link_id)
+        print(f"Payment Link ID: {payment_link_id}")
+        print(f"Discount applied: {discounts}")
         user_id = invoice.get("client_reference_id")
         payment_email = event['data']['object']['customer_details']['email']
         status = event['data']['object']['payment_status']
@@ -269,11 +278,11 @@ def stripe_webhook(req: https_fn.Request) -> https_fn.Response:
         print(f"payment email: {payment_email}")
         print(f"amount_total : {amount}")
         print(f"status: {status}")
-        if amount == 2000:
+        if amount == 2000 or (product_id == 3 and discounts):
             x = 3
-        if amount == 3000:
+        if amount == 3000 or (product_id == 6 and discounts):
             x = 6
-        if amount == 4000:
+        if amount == 4000 or (product_id == 12 and discounts):
             x = 12
         print(f"{x} month membership")
         if user_id and status== "paid":
