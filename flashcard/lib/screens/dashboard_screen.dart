@@ -1,15 +1,15 @@
 // import 'dart:ffi';
-import 'dart:math';
+// import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flashcard_x/screens/calendar_screen.dart';
+// import 'package:flashcard_x/screens/calendar_screen.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flashcard_x/screens/study_session_manager.dart';
 import 'package:flashcard_x/utils/algo.dart';
 import 'package:flashcard_x/utils/firebase_wrapper.dart';
 import 'package:flashcard_x/utils/last_revised.dart';
-import 'package:flashcard_x/utils/theme_provider.dart';
+// import 'package:flashcard_x/utils/theme_provider.dart';
 import '../widgets/drawer_widget2.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flashcard_x/widgets/event.dart';
@@ -17,7 +17,7 @@ import 'package:flashcard_x/widgets/indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/screens/feed_screen.dart';
 import '../widgets/countdown_button.dart';
-import 'package:provider/provider.dart';
+// import 'package:provider/provider.dart';
 import '../utils/page_transition.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/foundation.dart';
@@ -849,6 +849,85 @@ Future<void> getTopics() async {
         ],
       ),
       const SizedBox(height: 20),
+    ];
+
+    return widgets;
+  }
+
+  List<Widget> makeMobileColumn() {
+    List<Widget> widgets = [
+      const SizedBox(height: 10),
+      Wrap(
+        alignment: WrapAlignment.center,
+        spacing: 8,
+        runSpacing: 8,
+        children: <Widget>[
+          Indicator(color: Color.fromRGBO(0xFA, 0xFA, 0xFA, 1), text: "Unseen"),
+          Indicator(color: Color.fromRGBO(0xFF, 0x95, 0x95, 1), text: "Needs Review"),
+          Indicator(color: Color.fromRGBO(0xB0, 0xFF, 0xC6, 1), text: "Recently Reviewed"),
+
+        ],
+
+
+      ),
+
+      const SizedBox(height: 40),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Column(
+          children: makeCheckboxListFromRows(),
+        ),
+      ),
+
+      // const SizedBox(height: 20),
+      Padding(
+  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+  child: Row(
+    children: [
+      // Revise button - left side
+      Expanded(
+        child: TextButton(
+          key: const ValueKey("Revise"),
+          style: TextButton.styleFrom(
+            backgroundColor: Colors.black,
+            foregroundColor: Colors.white,
+            textStyle: const TextStyle(fontSize: 25),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(40),
+            ),
+          ),
+          onPressed: reviseCards,
+          child: const Padding(
+            padding: EdgeInsets.symmetric(vertical: 12),
+            child: Text('Revise', textAlign: TextAlign.center),
+          ),
+        ),
+      ),
+
+      const SizedBox(width: 12), // spacing between buttons
+
+      // Explanation button - right side
+      SizedBox(
+        height: 52, // match the height of the revise button
+        child: TextButton(
+          style: TextButton.styleFrom(
+            backgroundColor: Colors.black,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          onPressed: explanationBox,
+          child: const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            child: Icon(Icons.question_mark, color: Colors.white),
+          ),
+        ),
+      ),
+    ],
+  ),
+),
+const SizedBox(height: 20),
     ];
 
     return widgets;

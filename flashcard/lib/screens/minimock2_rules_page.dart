@@ -57,7 +57,7 @@ class MiniMock2RulesState extends State<MiniMock2Rules> {
         children: [
           Center(
             child:  Text(
-              'MedicRecall Mini-Mock 1 Exam Instructions: \n',
+              'MedicRecall Mini-Mock 2 Exam Instructions: \n',
               style: TextStyle(fontSize: AdaptiveTextSize().getadaptiveTextSize(context, 27), fontWeight: FontWeight.bold, color: Colors.black),
               textAlign: TextAlign.center,
             ),

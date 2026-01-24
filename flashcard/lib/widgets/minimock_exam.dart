@@ -223,6 +223,7 @@ class MiniMockExamState extends State<MiniMockExam> {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 600;
     return PopScope(
         canPop: true,
         child: Scaffold(

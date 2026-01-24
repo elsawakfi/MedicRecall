@@ -160,21 +160,27 @@ class MiniMockLandingState extends State<MiniMockLanding> {
                 height: 55,
                 width: 960, // Set a fixed width for the button
                 child: ElevatedButton.icon(
-                  onPressed: halfway! ? () {
+                  onPressed: 
+                  // halfway! ? 
+                  () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (context) => const MiniMock2Rules(),
                       ),
                     );
                   }
-                  : null,
+                  // : null,
+                  ,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     elevation: 10,
                     padding: const EdgeInsets.symmetric(vertical: 15),
                   ),
                   icon: Icon(
-                    halfway! ? Icons.lock_open_sharp: Icons.lock_clock_sharp,
+                    // halfway! ? 
+                    Icons.lock_open_sharp,
+                    
+                    // : Icons.lock_clock_sharp,
                     size: 30,
                     color: Colors.black,
                   ),
@@ -244,7 +250,9 @@ void _helpPopup(BuildContext context){
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
-                'To use the mini-mocks please first set an exam date using the \'Set Your Exam Date\' button.\nThe first mini-mock is unlocked immediately whilst the second one is unlocked halfway\nthrough your revision schedule, as seen on the calendar.\nTo start a mini-mock please click one of the unlocked options.',
+                'To use the mini-mocks please first set an exam date using the \'Set Your Exam Date\' button.\nThe first and second mini-mocks are unlocked immediately,'
+                'however, as indicated on the\nstudy schedule it is suggested that you attempt the second mini-mock halfway\nthrough your revision schedule.\n'
+                'To start a mini-mock please click one of the unlocked options.',
                 style: TextStyle(color: Color.fromRGBO(21, 58, 103, 1), fontSize: 16),
                 softWrap: true,
               )

@@ -8,7 +8,7 @@ import 'package:flashcard_x/screens/faq.dart';
 import 'package:flashcard_x/screens/flashcard_editor_screen.dart';
 import 'package:flashcard_x/screens/minimock_landing.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flashcard_x/widgets/event.dart';
+// import 'package:flashcard_x/widgets/event.dart';
 import 'package:flashcard_x/screens/pricing_screen.dart';
 import 'package:flashcard_x/utils/subscription_service.dart';
 import 'package:flutter/material.dart';
@@ -17,13 +17,13 @@ import 'fullmock_landing.dart';
 import 'landing_service.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
 //import '../draft/mark_scheme.dart';
-import 'package:flashcard_x/screens/settings_screen.dart' as setting;
-import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+// import 'package:flashcard_x/screens/settings_screen.dart' as setting;
+// import 'package:flutter/material.dart';
+// import 'package:url_launcher/url_launcher.dart';
 import 'package:flashcard_x/utils/last_revised.dart';
 import 'package:flashcard_x/utils/firebase_wrapper.dart';
 import 'dart:async';
-import 'package:flashcard_x/widgets/app_bar.dart';
+// import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flashcard_x/widgets/drawer_widget2.dart';
 import 'package:flashcard_x/widgets/countdown_button.dart';
 // import 'package:flashcard_x/screens/subtopic_choice_screen.dart';
@@ -398,7 +398,7 @@ class NewLandingState extends State<NewLanding> {
 
   @override
   Widget build(BuildContext context) {
-    
+    final isMobile = MediaQuery.of(context).size.width < 600;
     buildCount++;
     if (_loading){
       {
@@ -419,7 +419,192 @@ class NewLandingState extends State<NewLanding> {
         title: 'MedicRecall',
         mobileTitle: 'MedicRecall',
       ),
-      body: Padding(
+      body: 
+      
+      isMobile
+      ?Padding(padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(height: 20),
+
+              // TOP LEFT AND RIGHT WIDGETS (FLASHCARD TUTOR AND MOCK EXAMS)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+        
+                    DashboardBoxLeft(
+                      title: 'Next Flashcard Deck for review:',
+                      subtitle: nextTopicForReview != null
+                          ? "$nextTopicForReview"
+                          : "No topics scheduled.",
+                      buttonText: 'Start Now',
+                      onPressed: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const HomePage(title: "Flashcard Tutor"),
+                            ),
+                          );
+                      }
+                    ),
+                  SizedBox(height: 16),
+                  DashboardBoxRight(
+                      title: 'Next Mock Exam:',
+                      subtitle: nextMock,
+                        onPressed1: () async {
+                          landingService.onLanding = false;
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const FullMockLanding(),
+                            ),
+                          );
+                        },
+                        onPressed2: () async {
+                          landingService.onLanding = false;
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const MiniMockLanding(),
+                            ),
+                          );
+                        },
+                    ),
+                
+                ]
+              ),
+
+              SizedBox(height: 20),
+
+              // STUDY SCHEDULE AND CREATE NEW FLASHCARDS ICON BUTTONS
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                _MobileIconButton(
+                  label: 'Study Schedule',
+                  iconFilePath: 'assets/dashboard_assets/calendar.png',
+                  onPressed: () => triggerSignIn('Calendar'),
+                ),
+                SizedBox(height: 16),
+                _MobileIconButton(
+                  label: 'Create New Flashcards',
+                  iconFilePath: 'assets/dashboard_assets/plus.png',
+                  onPressed: () => triggerSignIn('FlashcardEditor'),
+                ),
+              ],
+              ),
+
+              SizedBox(height: 20),
+
+              // 3 STATISTICS WIDGETS
+              Column(
+                children: [
+                   Card(
+                      color: AppColours.almostWhite,
+                      child: Padding(
+                        padding: EdgeInsetsDirectional.symmetric(horizontal: 20.0, vertical: 15.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+
+                            Row(mainAxisAlignment: MainAxisAlignment.start,
+                            children:[
+                              SizedBox(width: 15),
+                              Image.asset(
+                                'assets/dashboard_assets/bar_chart.png',
+                                height: 18,
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                "Statistics",
+                                style: textStyleBlack,
+                              ),
+                            ]),
+                          Column(
+                            children: [
+                          StatisticsWidget(title: "Streak Count", iconFilePath: 'assets/dashboard_assets/fire.png', iconHeight: 55, displayedValue: howManyDaysInARow),
+                          SizedBox(height: 15),
+                          StatisticsWidget(title: "Total Days Revised", iconFilePath: 'assets/dashboard_assets/clock.png', iconHeight: 40, displayedValue: numberOfDecksRevised),
+                          SizedBox(height: 15),  
+                          StatisticsWidget(
+                              title: "Exam Countdown", iconFilePath: 'assets/dashboard_assets/calendar.png', iconHeight: 45,
+                              // displayedValue: localExamDate != null
+                              // ? (localExamDate.isAfter(todaysDate)
+                              //   ? localExamDate.difference(todaysDate).inDays
+                              //   : 0)
+                              // : -1
+                              displayedValue: _examDate != null ? _calculateDaysUntilExam(_examDate!) : 0 , // PLACEHOLDER
+                              onPressed: (){
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                        builder: (context) => Calendar()),
+                                       );
+                              } ,
+                            ),
+                          ]),
+                        ])
+                      )
+                    )
+                  
+                ]
+              ),
+
+              SizedBox(height: 16),
+
+              // HOW DOES MEDICRECALL WORK, FAQ, FEEDBACK ICON BUTTONS
+              Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _MobileIconButton(
+                    label: 'How does MedicRecall work?',
+                    onPressed: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ExplanationScreen(),
+                        )
+                      );
+                    },
+                  ),
+                   SizedBox(height: 16),
+                  _MobileIconButton(
+                    label: 'Frequently asked Questions',
+                    onPressed: () async {
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const FAQScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                   SizedBox(height: 16),
+                  _MobileIconButton(
+                    label: 'Give us Feedback',
+                    onPressed: () async {
+                      landingService.onLanding = false;
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const FeedbackScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ],
+          )
+        )
+      )   
+
+      
+
+      :Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           scrollDirection: Axis.vertical,
@@ -719,6 +904,63 @@ class NewLandingState extends State<NewLanding> {
 
       setState(() {});
     }
+  }
+}
+
+class _MobileIconButton extends StatelessWidget {
+  
+  const _MobileIconButton({super.key, 
+    required this.label,
+    required this.onPressed,
+    this.iconFilePath,
+  });
+
+  final String label;
+  final Future<void> Function() onPressed;
+  final String? iconFilePath;
+
+  @override
+  Widget build(BuildContext context) {
+    //final theme = Theme.of(context);
+    //final themeProvider = Provider.of<ThemeProvider>(context);
+
+    return 
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 5.0),
+        child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: onPressed,
+          style: ElevatedButton.styleFrom(
+            elevation: 4,
+            //backgroundColor: themeProvider.isDarkMode ? Colors.black : Color.fromRGBO(44, 44, 44, 1),
+            backgroundColor: Colors.black,
+            padding: EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SizedBox(width: 15), 
+              if (iconFilePath != null) ...[
+                Image.asset(
+                  width: 30,
+                  iconFilePath!,
+                ),
+              ],
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                  style: textStyle1,
+                ),
+            
+            ]
+          ),
+          )
+        ,
+      ));
   }
 }
 

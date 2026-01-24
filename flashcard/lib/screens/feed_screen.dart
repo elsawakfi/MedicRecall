@@ -10,7 +10,7 @@ import 'package:flashcard_x/utils/last_revised.dart';
 // import 'package:flashcard_x/widgets/app_bar_title.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flashcard_x/widgets/drawer_widget2.dart';
-import '../widgets/countdown_button.dart';
+// import '../widgets/countdown_button.dart';
 import 'package:flip_card/flip_card.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -279,8 +279,9 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
                                           style: TextStyle(fontSize: 15),
                                         children:[
                                           TextSpan(
-                                            text: "Click the flashcard to flip it and see the answer.\n\n",
-                                            style: TextStyle(fontWeight: FontWeight.bold, color: Color.fromRGBO(219, 23, 17, 1), fontSize: 17)
+                                            text: "Active recall works best when you pause and genuinely try to retrieve the answer before flipping the card.\n"
+                                                  "Take a few seconds, think it through — then flip the card and check the answer.\n",
+                                            style: TextStyle(fontWeight: FontWeight.bold, color: Color.fromRGBO(219, 23, 17, 1), fontSize: 15)
                                           ),
                                           TextSpan(
                                             text: "The progress bar indicates the time remaining before you will be able to flip the flashcard.\n"
@@ -1025,31 +1026,39 @@ Widget makeCard(int index) {
           border: Border.all(color: const Color(0xFF8BAA91), width: 2),
           
         ),
-        child: Stack(children: [
+        child: Column(
+        children: [
+        
+        Expanded(
+        child: SingleChildScrollView(
+          physics: const ClampingScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Center(
+        child: Text(
+        flashcards[index]["front"]
+        .replaceAllMapped(RegExp(r'(?<!\s)-'), (match) => '-')
+        .replaceAll('-', '\n-'),
+        style: const TextStyle(fontSize: 24, color: Colors.black),
+        textAlign: TextAlign.center,
+        ),
+        ),
+        ),
+        ),
 
-          // Subtopic Details
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Text(
-              "Subtopic: ${flashcards[index]["subtopic"]}",
-              style: const TextStyle(fontSize: 24, color: Color.fromRGBO(0x75, 0x75, 0x75, 1)),
-              textAlign: TextAlign.center,
-            )
-          ),
 
-          // Card content
-          Align(
-            alignment: Alignment.center,
-            child: Text(
-              flashcards[index]["front"]
-                  .replaceAllMapped(RegExp(r'(?<!\s)-'), (match) => '‑')
-                  .replaceAll('-', '\n-'),
-              style: const TextStyle(fontSize: 24, color: Colors.black),
-              textAlign: TextAlign.center,
-            ) 
-          )
+        const SizedBox(height: 12),
 
-        ]) 
+
+        Text(
+        "Subtopic: ${flashcards[index]["subtopic"]}",
+        style: const TextStyle(
+        fontSize: 24,
+        color: Color.fromRGBO(0x75, 0x75, 0x75, 1),
+        ),
+        textAlign: TextAlign.center,
+        ),
+        ],
+)
       ),
 
       back: Container(
