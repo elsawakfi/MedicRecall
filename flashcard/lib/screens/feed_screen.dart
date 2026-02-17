@@ -46,28 +46,28 @@ class AboveEverythingState extends ChangeNotifier {
   } //the AbsorbPointer.
 }
 
-class MrAbsorbyManager {
+class DeckInteractionBlocker {
   //Object which governs the activation of the AbsorbingPointer
-  final ValueNotifier<bool> absorbingOn = ValueNotifier<bool>(false);
-  static const int timeToWait = 5;
-  Future<void> doRigamarole() async {
+  final ValueNotifier<bool> isBlocked = ValueNotifier<bool>(false);
+  static const int blockDurationMs = 5000;
+  Future<void> blockInteractionTemporarily() async {
     //Turns the AbsorbingPointer on, waits 5 seconds and then turns it off
-    absorbingOn.value = true;
+    isBlocked.value = true;
     // wait 5 seconds
-    await Future.delayed(const Duration(seconds: 5));
-    absorbingOn.value = false;
+    await Future.delayed(const Duration(milliseconds: blockDurationMs));
+    isBlocked.value = false;
   }
 }
 
-class MrContManager {
+class CheckButtonInteractionBlocker {
   //Object which governs the activation of the tick and AbsorbingPointer
-  final ValueNotifier<bool> absorbingOn = ValueNotifier<bool>(false);
-  static const int timeToWait = 5800;
-  Future<void> doRigamarole() async {
+  final ValueNotifier<bool> isBlocked = ValueNotifier<bool>(false);
+  static const int blockDurationMs = 5800;
+  Future<void> blockInteractionTemporarily() async {
     //Turns the AbsorbingPointer on, waits 5.8 seconds and then turns it off (This prevents a bug with the flipping AbsorbingPointer)
-    absorbingOn.value = true;
-    await Future.delayed(const Duration(milliseconds: timeToWait));
-    absorbingOn.value = false;
+    isBlocked.value = true;
+    await Future.delayed(const Duration(milliseconds: blockDurationMs));
+    isBlocked.value = false;
   }
 }
 
@@ -115,8 +115,8 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
       FirebaseWrapper.firestore().collection('users');
   late CollectionReference _flashcardsSeenRef;
   late List<Map<String, dynamic>> flashcards;
-  final MrAbsorbyManager mrManager = MrAbsorbyManager();
-  final MrContManager mrCont = MrContManager();
+  final DeckInteractionBlocker deckBlocker = DeckInteractionBlocker();
+  final CheckButtonInteractionBlocker checkButtonBlocker = CheckButtonInteractionBlocker();
   late final AnimationController _controller;
   late final WaitToFlipTimer _loadingBar; 
 
@@ -155,8 +155,8 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
 
     getData().then((_) {
       // make sure that the timer doesn't start before the flashcard is loaded
-      mrManager.doRigamarole();
-      mrCont.doRigamarole();
+      deckBlocker.blockInteractionTemporarily();
+      checkButtonBlocker.blockInteractionTemporarily();
       _loadingBar.go();
     });
     super.initState();
@@ -202,13 +202,15 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
                 alignment: Alignment.center,
                 key: const ValueKey('flashcard center'),
                 child: ValueListenableBuilder<bool>(
-                  //AbsorbPointer contained within a ValueListenableBuilder
-                  valueListenable: mrManager
-                      .absorbingOn, //allows dynamic rebuilding of a widget depending
+                  //GestureDetector blocks horizontal swipes but allows vertical scrolling
+                  valueListenable: deckBlocker
+                      .isBlocked, //allows dynamic rebuilding of a widget depending
                   builder: (BuildContext context, bool value, child) {
-                    //on changes to state (in this case the state of the mrAbsorbyManager)
-                    return AbsorbPointer(
-                      absorbing: value,
+                    //on changes to state (in this case the state of the DeckInteractionBlocker)
+                    return GestureDetector(
+                      onHorizontalDragStart: value ? (_) {} : null,
+                      onHorizontalDragUpdate: value ? (_) {} : null,
+                      onHorizontalDragEnd: value ? (_) {} : null,
                       child: deck
                     );
                   },
@@ -228,10 +230,10 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
                     child: Container(
                       alignment: Alignment.centerRight,
                       child: ValueListenableBuilder(
-                          valueListenable: mrCont.absorbingOn, //when the absorbingOn variable changes, rebuild the AbsorbingPointer with the new value of absorbing.
+                          valueListenable: checkButtonBlocker.isBlocked, //when the isBlocked variable changes, rebuild the AbsorbingPointer with the new value of absorbing.
                           builder: (BuildContext context, bool value, child) {
-                            return AbsorbPointer(
-                                absorbing: value,
+                            return IgnorePointer(
+                                ignoring: value,
                                 child: MouseRegion(
                                     cursor: SystemMouseCursors.click,
                                     child: Tooltip(
@@ -240,8 +242,8 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
                                         child: IconButton(
                                           onPressed: () {
                                             updateFirstSeen();
-                                            mrCont.doRigamarole();
-                                            mrManager.doRigamarole(); //activate the absorber for timeToWait seconds
+                                            checkButtonBlocker.blockInteractionTemporarily();
+                                            deckBlocker.blockInteractionTemporarily(); //activate the absorber for blockDurationMs milliseconds
                                             _loadingBar.go();
                                             deck.swipeLeft();
                                           },
@@ -346,12 +348,12 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
                       alignment: Alignment.centerLeft,
                       child: ValueListenableBuilder<bool>(
                             //AbsorbPointer contained within a ValueListenableBuilder
-                            valueListenable: mrCont
-                                .absorbingOn, //allows dynamic rebuilding of a widget depending
+                            valueListenable: checkButtonBlocker
+                                .isBlocked, //allows dynamic rebuilding of a widget depending
                             builder: (BuildContext context, bool value, child) {
-                              //on changes to state (in this case the state of the mrAbsorbyManager)
-                              return AbsorbPointer(
-                                  absorbing: value,
+                              //on changes to state (in this case the state of the DeckInteractionBlocker)
+                              return IgnorePointer(
+                                  ignoring: value,
                                   child: MouseRegion(
                                       cursor: SystemMouseCursors.click,
                                       child: Tooltip(
@@ -360,10 +362,10 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
                                           child: IconButton(
                                             onPressed: () {
                                               updateFirstSeen();
-                                              mrManager
-                                                  .doRigamarole(); //activate the absorber for timeToWait seconds
-                                              mrCont
-                                                  .doRigamarole(); //activate the continue absorber for 5.8 seconds
+                                              deckBlocker
+                                                  .blockInteractionTemporarily(); //activate the absorber for blockDurationMs milliseconds
+                                              checkButtonBlocker
+                                                  .blockInteractionTemporarily(); //activate the continue absorber for 5.8 seconds
                                               _loadingBar.go();
                                               deck.swipeRight();
                                             },
@@ -507,8 +509,8 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
       //   flashcards.removeAt(flashcardIndex);
       //   flashcardIndex -= 1; // adjust index so next card lines up correctly
       // });
-      mrManager.doRigamarole();
-      mrCont.doRigamarole();
+      deckBlocker.blockInteractionTemporarily();
+      checkButtonBlocker.blockInteractionTemporarily();
       _loadingBar.go();
     }
   }
@@ -519,26 +521,76 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
       print("Flashcards empty\n");
       debugPrint("Card deck empty.\n Your score is $score");
       showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: Text("Deck Completed!"),
-                        titleTextStyle: TextStyle(
-                          color: Colors.black,
-                        ),
-                        actions: 
-                        <Widget>[
-                      IconButton(
-                        onPressed: () {
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(builder: (context) => const NewLanding()),
-                            (route) => false,
-                          ); // Close the alert dialog
-                        },
-                        icon :const Icon(Icons.home_outlined,color: Colors.black,),
-                    
-                                    )]);});
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              backgroundColor: Colors.white,
+              contentPadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE8F0FF),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.emoji_events_outlined,
+                      color: Color(0xFF1E3A8A),
+                      size: 28,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    "Deck completed!",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Great work. You answered $sessionScore cards.",
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF4B5563),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+              actionsAlignment: MainAxisAlignment.center,
+              actionsPadding: const EdgeInsets.only(bottom: 16),
+              actions: <Widget>[
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (context) => const NewLanding()),
+                      (route) => false,
+                    );
+                  },
+                  icon: const Icon(Icons.home_outlined),
+                  label: const Text("Back to Home"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF1E3A8A),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          });
 
       await Future.delayed(const Duration(seconds: 2));
       
@@ -571,8 +623,8 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
 
       completedCardsNotifier.value++;
       updateSeenIncorrect();
-      mrManager.doRigamarole();
-      mrCont.doRigamarole();
+      deckBlocker.blockInteractionTemporarily();
+      checkButtonBlocker.blockInteractionTemporarily();
       _loadingBar.go();
 
     }
@@ -1012,77 +1064,174 @@ List<Widget> buildBackContent(String text) {
 }
 
 Widget makeCard(int index) {
+  bool isDesktop = MediaQuery.of(context).size.width >= 600;
+  double cardWidth = isDesktop 
+    ? MediaQuery.of(context).size.width * 0.4  // 40% on desktop (smaller)
+    : MediaQuery.of(context).size.width * (3/7); // keep current for mobile
+  double cardHeight = MediaQuery.sizeOf(context).height*0.55;
+  return FlashcardCard(
+    key: Key('flip_card_$index'),
+    frontText: flashcards[index]["front"],
+    backText: flashcards[index]["back"],
+    subtopic: flashcards[index]["subtopic"],
+    cardWidth: cardWidth,
+    cardHeight: cardHeight,
+    isBlocked: deckBlocker.isBlocked,
+    buildBackContent: buildBackContent,
+  );
+}
+}
 
-  return FlipCard(
-      key: Key('flip_card_$index'),
-      front: Container(
-        height: MediaQuery.sizeOf(context).height*0.55,
-        width: MediaQuery.of(context).size.width * (3/7),
-        alignment: Alignment.center,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFF8BAA91), width: 2),
-          
-        ),
-        child: Column(
-        children: [
-        
-        Expanded(
-        child: SingleChildScrollView(
-          physics: const ClampingScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Center(
-        child: Text(
-        flashcards[index]["front"]
-        .replaceAllMapped(RegExp(r'(?<!\s)-'), (match) => '-')
-        .replaceAll('-', '\n-'),
-        style: const TextStyle(fontSize: 24, color: Colors.black),
-        textAlign: TextAlign.center,
-        ),
-        ),
-        ),
-        ),
+class FlashcardCard extends StatefulWidget {
+  const FlashcardCard({
+    super.key,
+    required this.frontText,
+    required this.backText,
+    required this.subtopic,
+    required this.cardWidth,
+    required this.cardHeight,
+    required this.isBlocked,
+    required this.buildBackContent,
+  });
 
+  final String frontText;
+  final String backText;
+  final String subtopic;
+  final double cardWidth;
+  final double cardHeight;
+  final ValueListenable<bool> isBlocked;
+  final List<Widget> Function(String) buildBackContent;
 
-        const SizedBox(height: 12),
+  @override
+  State<FlashcardCard> createState() => _FlashcardCardState();
+}
 
+class _FlashcardCardState extends State<FlashcardCard> {
+  late final ScrollController _frontScrollController;
+  late final ScrollController _backScrollController;
 
-        Text(
-        "Subtopic: ${flashcards[index]["subtopic"]}",
-        style: const TextStyle(
-        fontSize: 24,
-        color: Color.fromRGBO(0x75, 0x75, 0x75, 1),
-        ),
-        textAlign: TextAlign.center,
-        ),
-        ],
-)
-      ),
+  final ScrollbarThemeData _scrollBarTheme = ScrollbarThemeData(
+    thumbColor: MaterialStateProperty.resolveWith<Color?>((states) {
+      if (states.contains(MaterialState.dragged) ||
+          states.contains(MaterialState.hovered)) {
+        return Colors.black.withOpacity(0.7);
+      }
+      return Colors.black.withOpacity(0.12);
+    }),
+    thickness: MaterialStateProperty.all(6),
+    radius: const Radius.circular(8),
+  );
 
-      back: Container(
-        height: MediaQuery.of(context).size.height*0.55,
-        width: MediaQuery.of(context).size.width * (3/7),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFAA8A8A), width: 2),
-        ),
-        child: IntrinsicHeight(child: SingleChildScrollView(
+  @override
+  void initState() {
+    super.initState();
+    _frontScrollController = ScrollController();
+    _backScrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _frontScrollController.dispose();
+    _backScrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: widget.isBlocked,
+      builder: (BuildContext context, bool isBlocked, child) {
+        return FlipCard(
+        key: widget.key,
+        flipOnTouch: !isBlocked,
+        front: Container(
+          height: widget.cardHeight,
+          width: widget.cardWidth,
+          alignment: Alignment.center,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFF8BAA91), width: 2),
+            
+          ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: buildBackContent(
-              flashcards[index]["back"]
-                  .replaceAllMapped(RegExp(r'(?<!\s)-'), (match) => '‑')
-                  .replaceAll('-', '\n-'),
+          children: [
+          
+          Expanded(
+          child: ScrollbarTheme(
+            data: _scrollBarTheme,
+            child: Scrollbar(
+              controller: _frontScrollController,
+              thumbVisibility: true,
+              interactive: true,
+              child: SingleChildScrollView(
+                controller: _frontScrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Center(
+              child: Text(
+              widget.frontText
+              .replaceAllMapped(RegExp(r'(?<!\s)-'), (match) => '-')
+              .replaceAll('-', '\n-'),
+              style: const TextStyle(fontSize: 24, color: Colors.black),
+              textAlign: TextAlign.center,
+              ),
+              ),
+              ),
             ),
           ),
-        )),
-      ),
+          ),
+
+
+          const SizedBox(height: 12),
+
+
+          Text(
+          "Subtopic: ${widget.subtopic}",
+          style: const TextStyle(
+          fontSize: 24,
+          color: Color.fromRGBO(0x75, 0x75, 0x75, 1),
+          ),
+          textAlign: TextAlign.center,
+          ),
+          ],
+)
+        ),
+
+        back: Container(
+          height: widget.cardHeight,
+          width: widget.cardWidth,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFAA8A8A), width: 2),
+          ),
+          child: ScrollbarTheme(
+            data: _scrollBarTheme,
+            child: Scrollbar(
+              controller: _backScrollController,
+              thumbVisibility: true,
+              interactive: true,
+              child: IntrinsicHeight(child: SingleChildScrollView(
+                controller: _backScrollController,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: widget.buildBackContent(
+                    widget.backText
+                        .replaceAllMapped(RegExp(r'(?<!\s)-'), (match) => '‑')
+                        .replaceAll('-', '\n-'),
+                  ),
+                ),
+              )),
+            ),
+          ),
+        ),
+      );
+      },
     );
-}
+  }
 }
 
 class WaitToFlipTimer extends StatefulWidget {

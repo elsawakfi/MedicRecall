@@ -48,6 +48,8 @@ class NewLandingState extends State<NewLanding> {
   DateTime? _firstStudyDate;
   bool onLanding = true;
   int buildCount = 0;
+  bool _initStarted = false;
+  bool _didChangeDependenciesHandled = false;
   final CollectionReference _userCollectionRef =
     FirebaseFirestore.instance.collection('users');
   CollectionReference users = FirebaseFirestore.instance.collection('users');
@@ -107,11 +109,8 @@ class NewLandingState extends State<NewLanding> {
    @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    //waits for build function to complete and then calls back to call the condition checking function
-    WidgetsBinding.instance.addPostFrameCallback((_)async{
-      await getTestDay();
-      await _loadSub();
-    });
+    if (_didChangeDependenciesHandled) return;
+    _didChangeDependenciesHandled = true;
   }
 
   // ----- Retrieve information for the dashboard -----
@@ -211,27 +210,29 @@ class NewLandingState extends State<NewLanding> {
   void initState() {
     super.initState();
     landingService.onLanding = true;
-    getTestDay();
-    getUser().then( (_) async {
-      await getUser();
-      await getNextTopicForReview();
-      await getNextMockForReview();
-      await LastRevised.recordLogin();
-      await loadStreakData();
-      // final nextTopic = await LastRevised.getNextTopicForReview();
-      await getExamDate(); // Remove the assignment since it returns void
-      await getTestDay();
-      // Update the state with the fetched data
-      // if (mounted) {
-      //   setState(() {
-      //     this.nextTopicForReview = nextTopic;
-      //     // Remove this.examDate = examDate; since getExamDate() returns void
-      //   });
-      // }
-      await getNextTopicForReview();
-      await _loadSub();
-    });
+    _initLandingData();
     
+  }
+
+  Future<void> _initLandingData() async {
+    if (_initStarted) return;
+    _initStarted = true;
+    await getUser();
+    await getTestDay();
+    await getExamDate();
+    await Future.wait([
+      getNextTopicForReview(),
+      getNextMockForReview(),
+      LastRevised.recordLogin(),
+      loadStreakData(),
+      _loadSub(),
+    ]);
+  }
+
+  @override
+  void dispose() {
+    stream?.cancel();
+    super.dispose();
   }
 
   Future<void> getUser() async {
