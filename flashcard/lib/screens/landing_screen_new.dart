@@ -1061,7 +1061,9 @@ class _IconButtonLarge extends StatelessWidget {
               child: Text(
               label,
               textAlign: TextAlign.center,
-                style: textStyle1,
+                style: textStyle1.copyWith(
+                  fontSize: MediaQuery.of(context).size.width < 500 ? 14 : 18,
+                ),
               ),
             ),
           ]
@@ -1207,25 +1209,47 @@ class DashboardBoxRight extends StatelessWidget {
                   style: textStyleBlack.copyWith(fontSize: 14),
                 ),
                 SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: _IconButtonLarge(
-                        label: 'Full-Sized Mock',
-                        iconFilePath: 'assets/dashboard_assets/play_circle.png',
-                        onPressed: onPressed1,
+                MediaQuery.of(context).size.width < 500
+                    ? Column(
+                        children: [
+                          SizedBox(
+                            height: 80,
+                            child: _IconButtonLarge(
+                              label: 'Full-Sized Mock',
+                              iconFilePath: 'assets/dashboard_assets/play_circle.png',
+                              onPressed: onPressed1,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            height: 80,
+                            child: _IconButtonLarge(
+                              label: 'Mini Mock',
+                              iconFilePath: 'assets/dashboard_assets/target.png',
+                              onPressed: onPressed2,
+                            ),
+                          ),
+                        ],
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: _IconButtonLarge(
+                              label: 'Full-Sized Mock',
+                              iconFilePath: 'assets/dashboard_assets/play_circle.png',
+                              onPressed: onPressed1,
+                            ),
+                          ),
+                          Expanded(
+                            child: _IconButtonLarge(
+                              label: 'Mini Mock',
+                              iconFilePath: 'assets/dashboard_assets/target.png',
+                              onPressed: onPressed2,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    Expanded(
-                      child: _IconButtonLarge(
-                        label: 'Mini Mock',
-                        iconFilePath: 'assets/dashboard_assets/target.png',
-                        onPressed: onPressed2,
-                      ),
-                    ),
-                  ],
-                ),
               ],
             )
           : Column(

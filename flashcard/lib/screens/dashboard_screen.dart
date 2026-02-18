@@ -443,23 +443,89 @@ Future<void> getTopics() async {
         body: Center(child: CircularProgressIndicator()),
       );
     } 
+    
+    bool isSmallScreen = MediaQuery.of(context).size.width < 500;
+    
     return Scaffold(
       drawer: const DrawMain2(),
       appBar: CustomAppBar(
         title: 'Flashcard Tutor',
       ),
-        body:  Center(
-      child: loading
-          ? const CircularProgressIndicator()
-          : SingleChildScrollView(
-        child: Padding(
-          padding : const EdgeInsets.symmetric(vertical:0,horizontal:2),
-          child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: makeColumn(),
-        ),
-      ),
-    ),),
+      body: isSmallScreen
+          ? Stack(
+              children: [
+                SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 2),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: makeColumnSmall(),
+                    ),
+                  ),
+                ),
+                // Revise button at bottom left with question mark on right
+                Positioned(
+                  bottom: 16,
+                  left: 16,
+                  right: 16,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          height: 80,
+                          child: ElevatedButton(
+                            key: const ValueKey("Revise"),
+                            style: ElevatedButton.styleFrom(
+                              elevation: 2,
+                              backgroundColor: Colors.black,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                            onPressed: reviseCards,
+                            child: const Text('Revise', textAlign: TextAlign.center),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      SizedBox(
+                        height: 80,
+                        width: 80,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            elevation: 2,
+                            backgroundColor: Colors.black,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.all(8),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          onPressed: explanationBox,
+                          child: const Icon(Icons.question_mark, color: Colors.white, size: 32),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            )
+          : Center(
+              child: loading
+                  ? const CircularProgressIndicator()
+                  : SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 2),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: makeColumn(),
+                        ),
+                      ),
+                    ),
+            ),
       floatingActionButton: const CustomFloatingButton(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
     );
@@ -999,6 +1065,36 @@ Future<void> getTopics() async {
           ),
         ),
 const SizedBox(height: 20),
+    ];
+
+    return widgets;
+  }
+
+  List<Widget> makeColumnSmall() {
+    // This is for very small screens where the Revise button is positioned at the bottom
+    List<Widget> widgets = [
+      const SizedBox(height: 10),
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Indicator(color: Color.fromRGBO(0xFA, 0xFA, 0xFA, 1), text: "Unseen"),
+          const SizedBox(height: 8),
+          Indicator(color: Color.fromRGBO(0xFF, 0x95, 0x95, 1), text: "Needs Review"),
+          const SizedBox(height: 8),
+          Indicator(color: Color.fromRGBO(0xB0, 0xFF, 0xC6, 1), text: "Recently Reviewed"),
+        ],
+      ),
+
+      const SizedBox(height: 24),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Column(
+          children: makeCheckboxListFromRows(),
+        ),
+      ),
+
+      // Extra padding at the bottom for the sticky button
+      const SizedBox(height: 120),
     ];
 
     return widgets;
