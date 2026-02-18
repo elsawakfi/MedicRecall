@@ -1009,13 +1009,64 @@ class _IconButton extends StatelessWidget {
                 child: Text(
                 label,
                 textAlign: TextAlign.center,
-                  style: textStyle1,
+                  style: textStyle1.copyWith(
+                    fontSize: MediaQuery.of(context).size.width < 500 ? 14 : 18,
+                  ),
                 ),
               ),
             ]
           ),
           )
         ),
+      );
+  }
+}
+
+class _IconButtonLarge extends StatelessWidget {
+  
+  const _IconButtonLarge({super.key, 
+    required this.label,
+    required this.onPressed,
+    this.iconFilePath,
+  });
+
+  final String label;
+  final Future<void> Function() onPressed;
+  final String? iconFilePath;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 5.0),
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          elevation: 4,
+          backgroundColor: Colors.black,
+          padding: EdgeInsets.symmetric(vertical: 24),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        child: Row(
+          children: [
+            SizedBox(width: 15), 
+            if (iconFilePath != null) ...[
+              Image.asset(
+                width: 30,
+                iconFilePath!,
+              ),
+            ],
+            Expanded(
+              child: Text(
+              label,
+              textAlign: TextAlign.center,
+                style: textStyle1,
+              ),
+            ),
+          ]
+        ),
+        )
       );
   }
 }
@@ -1157,28 +1208,20 @@ class DashboardBoxRight extends StatelessWidget {
                 ),
                 SizedBox(height: 16),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Flexible(
-                      flex: 1,
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 4.0),
-                        child: _IconButton(
-                          label: 'Full-Sized Mock',
-                          iconFilePath: 'assets/dashboard_assets/play_circle.png',
-                          onPressed: onPressed1,
-                        ),
+                    Expanded(
+                      child: _IconButtonLarge(
+                        label: 'Full-Sized Mock',
+                        iconFilePath: 'assets/dashboard_assets/play_circle.png',
+                        onPressed: onPressed1,
                       ),
                     ),
-                    Flexible(
-                      flex: 1,
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 4.0),
-                        child: _IconButton(
-                          label: 'Mini Mock',
-                          iconFilePath: 'assets/dashboard_assets/target.png',
-                          onPressed: onPressed2,
-                        ),
+                    Expanded(
+                      child: _IconButtonLarge(
+                        label: 'Mini Mock',
+                        iconFilePath: 'assets/dashboard_assets/target.png',
+                        onPressed: onPressed2,
                       ),
                     ),
                   ],
@@ -1192,15 +1235,21 @@ class DashboardBoxRight extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 4.0),
                 child: Row(
                   children: [
-                    _IconButton(
-                      label: 'Full-Sized Mock',
-                      iconFilePath: 'assets/dashboard_assets/play_circle.png',
-                      onPressed: onPressed1,
+                    Flexible(
+                      flex: 1,
+                      child: _IconButton(
+                        label: 'Full-Sized Mock',
+                        iconFilePath: 'assets/dashboard_assets/play_circle.png',
+                        onPressed: onPressed1,
+                      ),
                     ),
-                    _IconButton(
-                      label: 'Mini Mock',
-                      iconFilePath: 'assets/dashboard_assets/target.png',
-                      onPressed: onPressed2,
+                    Flexible(
+                      flex: 1,
+                      child: _IconButton(
+                        label: 'Mini Mock',
+                        iconFilePath: 'assets/dashboard_assets/target.png',
+                        onPressed: onPressed2,
+                      ),
                     ),
                   ]
                 ),

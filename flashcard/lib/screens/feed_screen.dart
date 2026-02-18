@@ -226,7 +226,7 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
 
                   // Cross to mark flashcard as wrong
                   Expanded(
-                    flex: 2,
+                    flex: MediaQuery.of(context).size.width < 600 ? 1 : 2,
                     child: Container(
                       alignment: Alignment.centerRight,
                       child: ValueListenableBuilder(
@@ -257,22 +257,27 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
 
                   // Center pannel for most of the content
                   Expanded(
-                    flex: 3,
+                    flex: MediaQuery.of(context).size.width < 600 ? 5 : 3,
                     child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
 
-                          SizedBox(height: 20),
+                          SizedBox(height: MediaQuery.of(context).size.width < 600 ? 12 : 20),
 
                           // INFORMATION
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text("Think before you flip!", style: TextStyle(fontSize: 18, color: Colors.white),),
-                              SizedBox(width: 10),
-                              GestureDetector(
-                                child: Icon(Icons.help_outline_rounded, color: Colors.white,),
-                                onTap: () {
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Flexible(
+                                  child: Text("Think before you flip!", style: TextStyle(fontSize: 16, color: Colors.white),),
+                                ),
+                                SizedBox(width: 8),
+                                GestureDetector(
+                                  child: Icon(Icons.help_outline_rounded, color: Colors.white, size: 24,),
+                                  onTap: () {
                                   showDialog(context: context, builder: (context) {
                                     return AlertDialog(
                                       title: Text("Instructions"),
@@ -298,15 +303,15 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
                                 },
                               )
                               
-                            ]
+                            ])
                           ),
 
-                          SizedBox(height: 10),
+                          SizedBox(height: MediaQuery.of(context).size.width < 600 ? 8 : 10),
 
                           // TIMER
                           _loadingBar,
 
-                          SizedBox(height: 20),
+                          SizedBox(height: MediaQuery.of(context).size.width < 600 ? 12 : 20),
 
                           // FLAHSCARD DECK
                           // A spacer is used in place here to leave a gap for the flashcards. They are above this on the stack
@@ -332,18 +337,17 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
                             )
                           ),
 
-                          SizedBox(height: 20)
+                          SizedBox(height: MediaQuery.of(context).size.width < 600 ? 12 : 20)
 
                         ]
                         
-                      ),
-
+                      )
                   ),
 
 
                   // Checkmark to mark flashcard as correct
                   Expanded(
-                    flex: 2,
+                    flex: MediaQuery.of(context).size.width < 600 ? 1 : 2,
                     child: Container(
                       alignment: Alignment.centerLeft,
                       child: ValueListenableBuilder<bool>(

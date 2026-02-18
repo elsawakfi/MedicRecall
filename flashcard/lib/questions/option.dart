@@ -51,17 +51,18 @@ class _OptionState extends State<Option> {
     return Column(children: [
       Container(
           width: double.infinity,
-          margin: const EdgeInsets.only(bottom: 10.0, left: 30.0, right: 30.0),
-          padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 10.0),
+          margin: const EdgeInsets.only(bottom: 10.0, left: 16.0, right: 16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
           decoration: BoxDecoration(
             color: Colors.black,
             borderRadius: BorderRadius.circular(10.0),
           ),
           child: SingleChildScrollView(
             // allow for scrolling if its a long question
-            child: Center(
+            child: Align(
+                alignment: Alignment.centerLeft,
                 child: Text(widget.optionText, // text displayed here
-                    textAlign: TextAlign.center,
+                    textAlign: TextAlign.left,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 20,
@@ -70,7 +71,7 @@ class _OptionState extends State<Option> {
 
       // this is the drop down menu for the user selection
       Container(
-        margin: const EdgeInsets.all(16),
+        margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),

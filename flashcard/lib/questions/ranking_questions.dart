@@ -91,8 +91,10 @@ class RankingQuestionsStateO extends State<RankingQuestions> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Expanded(
-              child: SingleChildScrollView(
-                  child: Column(
+              child: Scrollbar(
+                thumbVisibility: true,
+                child: SingleChildScrollView(
+                    child: Column(
             children: [
               Row(
                 children: const [
@@ -233,6 +235,7 @@ class RankingQuestionsStateO extends State<RankingQuestions> {
                   ))
             ],
           )))
+              ),
         ],
       )),
     );

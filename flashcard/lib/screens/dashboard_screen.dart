@@ -768,19 +768,27 @@ Future<void> getTopics() async {
   List<Widget> makeColumn() {
     List<Widget> widgets = [
       const SizedBox(height: 10),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        crossAxisAlignment: CrossAxisAlignment.center,
-
-        children: <Widget>[
-          Indicator(color: Color.fromRGBO(0xFA, 0xFA, 0xFA, 1), text: "Unseen"),
-          Indicator(color: Color.fromRGBO(0xFF, 0x95, 0x95, 1), text: "Needs Review"),
-          Indicator(color: Color.fromRGBO(0xB0, 0xFF, 0xC6, 1), text: "Recently Reviewed"),
-
-        ],
-
-
-      ),
+      if (MediaQuery.of(context).size.width < 800)
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Indicator(color: Color.fromRGBO(0xFA, 0xFA, 0xFA, 1), text: "Unseen"),
+            const SizedBox(height: 8),
+            Indicator(color: Color.fromRGBO(0xFF, 0x95, 0x95, 1), text: "Needs Review"),
+            const SizedBox(height: 8),
+            Indicator(color: Color.fromRGBO(0xB0, 0xFF, 0xC6, 1), text: "Recently Reviewed"),
+          ],
+        )
+      else
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Indicator(color: Color.fromRGBO(0xFA, 0xFA, 0xFA, 1), text: "Unseen"),
+            Indicator(color: Color.fromRGBO(0xFF, 0x95, 0x95, 1), text: "Needs Review"),
+            Indicator(color: Color.fromRGBO(0xB0, 0xFF, 0xC6, 1), text: "Recently Reviewed"),
+          ],
+        ),
 
       const SizedBox(height: 40),
       Container(
@@ -806,8 +814,8 @@ Future<void> getTopics() async {
             child: Align(child: TextButton(
               key: const ValueKey("Revise"),
               style: TextButton.styleFrom(
-                textStyle: const TextStyle(
-                  fontSize: 25,
+                textStyle: TextStyle(
+                  fontSize: MediaQuery.of(context).size.width < 800 ? 16 : 25,
                   backgroundColor: Colors.black,
                   color: Colors.white,
                 ),
@@ -869,23 +877,23 @@ Future<void> getTopics() async {
 
   List<Widget> makeMobileColumn() {
     List<Widget> widgets = [
-      const SizedBox(height: 10),
+      const SizedBox(height: 8),
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Indicator(color: Color.fromRGBO(0xFA, 0xFA, 0xFA, 1), text: "Unseen"),
-            const SizedBox(height: 14),
+            const SizedBox(height: 6),
             Indicator(color: Color.fromRGBO(0xFF, 0x95, 0x95, 1), text: "Needs Review"),
-            const SizedBox(height: 14),
+            const SizedBox(height: 6),
             Indicator(color: Color.fromRGBO(0xB0, 0xFF, 0xC6, 1), text: "Recently Reviewed"),
           ],
         ),
       ),
 
-      const SizedBox(height: 40),
+      const SizedBox(height: 24),
       Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Column(
@@ -894,22 +902,22 @@ Future<void> getTopics() async {
       ),
 
       // const SizedBox(height: 20),
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Row(
-          children: [
-            // Revise button - left side
-            Expanded(
-              child: SizedBox(
-                height: 48,
+      if (MediaQuery.of(context).size.width < 500)
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Column(
+            children: [
+              // Revise button - full width on very small screens
+              SizedBox(
+                height: 80,
                 child: ElevatedButton(
                   key: const ValueKey("Revise"),
                   style: ElevatedButton.styleFrom(
                     elevation: 2,
                     backgroundColor: const Color(0xFF1E3A8A),
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -918,30 +926,78 @@ Future<void> getTopics() async {
                   child: const Text('Revise', textAlign: TextAlign.center),
                 ),
               ),
-            ),
-
-            const SizedBox(width: 12), // spacing between buttons
-
-            // Explanation button - right side
-            SizedBox(
-              height: 54,
-              width: 54,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  elevation: 2,
-                  backgroundColor: Colors.black,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+              const SizedBox(height: 16),
+              // Explanation button - below revise on small screens
+              SizedBox(
+                height: 60,
+                width: 60,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    elevation: 2,
+                    backgroundColor: Colors.black,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.all(8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  onPressed: explanationBox,
+                  child: const Icon(Icons.question_mark, color: Colors.white, size: 28),
+                ),
+              ),
+            ],
+          ),
+        )
+      else
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Row(
+            children: [
+              // Revise button - left side
+              Expanded(
+                child: SizedBox(
+                  height: 56,
+                  child: ElevatedButton(
+                    key: const ValueKey("Revise"),
+                    style: ElevatedButton.styleFrom(
+                      elevation: 2,
+                      backgroundColor: const Color(0xFF1E3A8A),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    onPressed: reviseCards,
+                    child: const Text('Revise', textAlign: TextAlign.center),
                   ),
                 ),
-                onPressed: explanationBox,
-                child: const Icon(Icons.question_mark, color: Colors.white),
               ),
-            ),
-          ],
+
+              const SizedBox(width: 12), // spacing between buttons
+
+              // Explanation button - right side
+              SizedBox(
+                height: 56,
+                width: 56,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    elevation: 2,
+                    backgroundColor: Colors.black,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.all(8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  onPressed: explanationBox,
+                  child: const Icon(Icons.question_mark, color: Colors.white, size: 28),
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
 const SizedBox(height: 20),
     ];
 
