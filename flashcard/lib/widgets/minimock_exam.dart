@@ -48,6 +48,7 @@ class MiniMockExamState extends State<MiniMockExam> {
   bool rankingMerged = false; // Have the ranking options been merged? -> Occurs on screen sizes < 600 -> Prevents unnecessary computation
   List<Map<String, dynamic>> questions = []; // Store question data with the question number as key e.g Q14
   final ScrollController _scrollController = ScrollController();
+  final ScrollController _rankingScrollController = ScrollController();
 
   List<bool> flaggedQuestions = [];
   final options = 'ABCDEFGH';
@@ -81,6 +82,7 @@ class MiniMockExamState extends State<MiniMockExam> {
   void dispose() {
     _timerController.stopTimer(); // REQUIRED! Makes sure timer doesn't continue when page is left
      _scrollController.dispose(); // Dispose of the scroll controller
+     _rankingScrollController.dispose(); // Dispose of the ranking scroll controller
     super.dispose();
   }
 
@@ -414,8 +416,10 @@ class MiniMockExamState extends State<MiniMockExam> {
                 if (questions[currentQuestion]['type'] == "ranking") ...[
                     (MediaQuery.of(context).size.width < 600)
                       ? Scrollbar(
+                          controller: _rankingScrollController,
                           thumbVisibility: true,
                           child: SingleChildScrollView(
+                            controller: _rankingScrollController,
                             scrollDirection: Axis.horizontal,
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.start,
@@ -423,7 +427,7 @@ class MiniMockExamState extends State<MiniMockExam> {
                               children: [
                                 // Answer slots
                                 SizedBox(
-                                  width: MediaQuery.of(context).size.width - 32,
+                                  width: MediaQuery.of(context).size.width - 80,
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     crossAxisAlignment: CrossAxisAlignment.start,

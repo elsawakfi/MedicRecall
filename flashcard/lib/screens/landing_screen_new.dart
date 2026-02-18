@@ -1130,16 +1130,49 @@ class DashboardBoxRight extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 600;
   
     return Column(
       children: [
         Container(
-          height: 150,
+          height: isMobile ? null : 150,
+          padding: isMobile ? const EdgeInsets.all(16.0) : null,
           decoration: BoxDecoration(
             color: AppColours.almostWhite,
             borderRadius: BorderRadius.all(Radius.circular(10)),
           ),
-          child: Column(
+          child: isMobile 
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: textStyleBlack.copyWith(fontSize: 18),
+                ),
+                SizedBox(height: 5),
+                subtitle == null ? CircularProgressIndicator(color: Colors.black) : 
+                Text(
+                  subtitle!,
+                  style: textStyleBlack.copyWith(fontSize: 14),
+                ),
+                SizedBox(height: 16),
+                Row(
+                  children: [
+                    _IconButton(
+                      label: 'Full-Sized Mock',
+                      iconFilePath: 'assets/dashboard_assets/play_circle.png',
+                      onPressed: onPressed1,
+                    ),
+                    _IconButton(
+                      label: 'Mini Mock',
+                      iconFilePath: 'assets/dashboard_assets/target.png',
+                      onPressed: onPressed2,
+                    ),
+                  ],
+                ),
+              ],
+            )
+          : Column(
             children: [
               SizedBox(height: 4.0),
               Container(

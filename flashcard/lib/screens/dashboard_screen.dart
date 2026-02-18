@@ -872,12 +872,12 @@ Future<void> getTopics() async {
       const SizedBox(height: 10),
       Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           Indicator(color: Color.fromRGBO(0xFA, 0xFA, 0xFA, 1), text: "Unseen"),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           Indicator(color: Color.fromRGBO(0xFF, 0x95, 0x95, 1), text: "Needs Review"),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           Indicator(color: Color.fromRGBO(0xB0, 0xFF, 0xC6, 1), text: "Recently Reviewed"),
         ],
       ),
@@ -905,7 +905,7 @@ Future<void> getTopics() async {
                     elevation: 2,
                     backgroundColor: const Color(0xFF1E3A8A),
                     foregroundColor: Colors.white,
-                    textStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                    textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
