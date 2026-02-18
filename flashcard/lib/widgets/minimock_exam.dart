@@ -223,6 +223,7 @@ class MiniMockExamState extends State<MiniMockExam> {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 600;
     return PopScope(
         canPop: true,
         child: Scaffold(
@@ -411,7 +412,75 @@ class MiniMockExamState extends State<MiniMockExam> {
 
                 // If the question is a ranking question, display a reorderable list of options
                 if (questions[currentQuestion]['type'] == "ranking") ...[
-                    Row(
+                    (MediaQuery.of(context).size.width < 600)
+                      ? Scrollbar(
+                          thumbVisibility: true,
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Answer slots
+                                SizedBox(
+                                  width: MediaQuery.of(context).size.width - 32,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: rankingAnswers[currentQuestion].asMap().entries.map<Widget>((entry) {
+                                      int optionIndex = entry.key; // List index
+                                      String optionLetter = entry.value;
+                                      bool optionNotEmpty = rankingAnswers[currentQuestion][optionIndex].isNotEmpty;
+                                      String text = (optionNotEmpty) ? '$optionLetter. ${questions[currentQuestion]['options'][optionLetter.codeUnitAt(0) - 65]}'
+                                                                  : '${optionIndex+1}:';
+                                      return DragTarget<String>(
+                                        onAcceptWithDetails: (data) => ({
+                                            setState(() {
+                                              int sourceIndex = int.parse(data.data.split(':')[1]);
+                                              if (data.data.startsWith('internal')) {
+                                                // Swap data
+                                                String temp = rankingAnswers[currentQuestion][optionIndex];
+                                                rankingAnswers[currentQuestion][optionIndex] = rankingAnswers[currentQuestion][sourceIndex];
+                                                rankingAnswers[currentQuestion][sourceIndex] = temp;
+                                              } else if (data.data.startsWith('external')) {
+                                                if(optionNotEmpty){
+                                                  // Return current data to its original option card and accept new data
+                                                  rankingOptions[currentQuestion][optionLetter.codeUnitAt(0) - 65] = rankingAnswers[currentQuestion][optionIndex];
+                                                  rankingAnswers[currentQuestion][optionIndex] = rankingOptions[currentQuestion][sourceIndex];
+                                                  rankingOptions[currentQuestion][sourceIndex] = '';
+                                                }else {
+                                                  // Accept new data and remove the external option
+                                                  rankingAnswers[currentQuestion][optionIndex] = rankingOptions[currentQuestion][sourceIndex];
+                                                  rankingOptions[currentQuestion][sourceIndex] = '';
+                                                }
+                                              }
+                                            })
+                                        }),
+                                        builder: (context, candidateData, rejectedData) {
+                                          return (optionNotEmpty)
+                                          ? Draggable<String>(
+                                              data: 'internal:$optionIndex:$optionLetter',
+                                              key: ValueKey(optionLetter),
+                                              feedback: Container(
+                                                  constraints: BoxConstraints(
+                                                    // Nested if statement -> As user can  change the size of their screen we need to make sure we are using the correct values
+                                                    maxWidth: (MediaQuery.of(context).size.width < 600) ? MediaQuery.of(context).size.width - 32 : (MediaQuery.of(context).size.width < maxPreferredWidth) ? (MediaQuery.of(context).size.width/2) - 16 : (maxPreferredWidth/2) - 16,
+                                                    maxHeight: 170,
+                                                  ),
+                                                  child: OptionCard(text: text, overflow: false)),
+                                              childWhenDragging: OptionCard(text: '${optionIndex+1}:'),
+                                              child: OptionCard(text: '${optionIndex+1}: $text')
+                                          )
+                                          : OptionCard(text: text);
+                                        },
+                                      );
+                                  }).toList())
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      : Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [

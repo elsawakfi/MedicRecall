@@ -1,15 +1,15 @@
 // import 'dart:ffi';
-import 'dart:math';
+// import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flashcard_x/screens/calendar_screen.dart';
+// import 'package:flashcard_x/screens/calendar_screen.dart';
 import 'package:flashcard_x/screens/sign_in_screen.dart';
 import 'package:flashcard_x/screens/study_session_manager.dart';
 import 'package:flashcard_x/utils/algo.dart';
 import 'package:flashcard_x/utils/firebase_wrapper.dart';
 import 'package:flashcard_x/utils/last_revised.dart';
-import 'package:flashcard_x/utils/theme_provider.dart';
+// import 'package:flashcard_x/utils/theme_provider.dart';
 import '../widgets/drawer_widget2.dart';
 import 'package:flashcard_x/widgets/app_bar.dart';
 import 'package:flashcard_x/widgets/event.dart';
@@ -17,7 +17,7 @@ import 'package:flashcard_x/widgets/indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flashcard_x/screens/feed_screen.dart';
 import '../widgets/countdown_button.dart';
-import 'package:provider/provider.dart';
+// import 'package:provider/provider.dart';
 import '../utils/page_transition.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/foundation.dart';
@@ -215,6 +215,7 @@ class HomePageState extends State<HomePage> {
 
   List<Map<String, dynamic>> unordered = [];
   Map<String, bool> holderChecked = {};
+  topicNames = [];
 
   for (var doc in snapshot.docs) {
     final data = Map<String, dynamic>.from(doc.data() as Map<String, dynamic>);
@@ -522,6 +523,7 @@ Future<void> getTopics() async {
   Future<void> _computeRows() async{
     final DateTime today = DateTime.now();
     final List<TopicRow> newRows = [];
+    final List<Future<void>> sideEffects = [];
   for (final map in topics) {
     final topic = map["topic"] as String;
     final idx = topicNames.indexOf(topic);
@@ -587,10 +589,10 @@ Future<void> getTopics() async {
             tileColor = const Color(0xFFB0FFC6);
         }
         else{
-        await updateOneEvent(existing!, "Completed: $topic ", dateInCalendar!);
+      sideEffects.add(updateOneEvent(existing!, "Completed: $topic ", dateInCalendar!));
         
-        // Reset seen on backend (once)
-        await LastRevised.resetSeenCardsForTopic(topic);
+      // Reset seen on backend (once)
+      sideEffects.add(LastRevised.resetSeenCardsForTopic(topic));
       // set presentation for complete state
         tileColor = const Color(0xFFB0FFC6);
         dateText = DateFormat('dd/MM/yyyy').format(nextReview!);}
@@ -615,6 +617,17 @@ Future<void> getTopics() async {
   
   if (!mounted) return;
   setState(() => _rows = newRows);
+  if (sideEffects.isNotEmpty) {
+    Future.microtask(() async {
+      try {
+        await Future.wait(sideEffects);
+      } catch (e) {
+        if (kDebugMode) {
+          print("Side effects failed: $e");
+        }
+      }
+    });
+  }
   
   }
 
@@ -849,6 +862,83 @@ Future<void> getTopics() async {
         ],
       ),
       const SizedBox(height: 20),
+    ];
+
+    return widgets;
+  }
+
+  List<Widget> makeMobileColumn() {
+    List<Widget> widgets = [
+      const SizedBox(height: 10),
+      Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Indicator(color: Color.fromRGBO(0xFA, 0xFA, 0xFA, 1), text: "Unseen"),
+          const SizedBox(height: 8),
+          Indicator(color: Color.fromRGBO(0xFF, 0x95, 0x95, 1), text: "Needs Review"),
+          const SizedBox(height: 8),
+          Indicator(color: Color.fromRGBO(0xB0, 0xFF, 0xC6, 1), text: "Recently Reviewed"),
+        ],
+      ),
+
+      const SizedBox(height: 40),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Column(
+          children: makeCheckboxListFromRows(),
+        ),
+      ),
+
+      // const SizedBox(height: 20),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Row(
+          children: [
+            // Revise button - left side
+            Expanded(
+              child: SizedBox(
+                height: 54,
+                child: ElevatedButton(
+                  key: const ValueKey("Revise"),
+                  style: ElevatedButton.styleFrom(
+                    elevation: 2,
+                    backgroundColor: const Color(0xFF1E3A8A),
+                    foregroundColor: Colors.white,
+                    textStyle: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  onPressed: reviseCards,
+                  child: const Text('Revise', textAlign: TextAlign.center),
+                ),
+              ),
+            ),
+
+            const SizedBox(width: 12), // spacing between buttons
+
+            // Explanation button - right side
+            SizedBox(
+              height: 54,
+              width: 54,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  elevation: 2,
+                  backgroundColor: Colors.black,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                onPressed: explanationBox,
+                child: const Icon(Icons.question_mark, color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+      ),
+const SizedBox(height: 20),
     ];
 
     return widgets;
