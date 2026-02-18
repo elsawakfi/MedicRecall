@@ -870,16 +870,19 @@ Future<void> getTopics() async {
   List<Widget> makeMobileColumn() {
     List<Widget> widgets = [
       const SizedBox(height: 10),
-      Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Indicator(color: Color.fromRGBO(0xFA, 0xFA, 0xFA, 1), text: "Unseen"),
-          const SizedBox(height: 10),
-          Indicator(color: Color.fromRGBO(0xFF, 0x95, 0x95, 1), text: "Needs Review"),
-          const SizedBox(height: 10),
-          Indicator(color: Color.fromRGBO(0xB0, 0xFF, 0xC6, 1), text: "Recently Reviewed"),
-        ],
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Indicator(color: Color.fromRGBO(0xFA, 0xFA, 0xFA, 1), text: "Unseen"),
+            const SizedBox(height: 14),
+            Indicator(color: Color.fromRGBO(0xFF, 0x95, 0x95, 1), text: "Needs Review"),
+            const SizedBox(height: 14),
+            Indicator(color: Color.fromRGBO(0xB0, 0xFF, 0xC6, 1), text: "Recently Reviewed"),
+          ],
+        ),
       ),
 
       const SizedBox(height: 40),
@@ -898,14 +901,15 @@ Future<void> getTopics() async {
             // Revise button - left side
             Expanded(
               child: SizedBox(
-                height: 54,
+                height: 48,
                 child: ElevatedButton(
                   key: const ValueKey("Revise"),
                   style: ElevatedButton.styleFrom(
                     elevation: 2,
                     backgroundColor: const Color(0xFF1E3A8A),
                     foregroundColor: Colors.white,
-                    textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),

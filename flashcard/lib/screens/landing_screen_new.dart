@@ -1157,16 +1157,29 @@ class DashboardBoxRight extends StatelessWidget {
                 ),
                 SizedBox(height: 16),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    _IconButton(
-                      label: 'Full-Sized Mock',
-                      iconFilePath: 'assets/dashboard_assets/play_circle.png',
-                      onPressed: onPressed1,
+                    Flexible(
+                      flex: 1,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 4.0),
+                        child: _IconButton(
+                          label: 'Full-Sized Mock',
+                          iconFilePath: 'assets/dashboard_assets/play_circle.png',
+                          onPressed: onPressed1,
+                        ),
+                      ),
                     ),
-                    _IconButton(
-                      label: 'Mini Mock',
-                      iconFilePath: 'assets/dashboard_assets/target.png',
-                      onPressed: onPressed2,
+                    Flexible(
+                      flex: 1,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 4.0),
+                        child: _IconButton(
+                          label: 'Mini Mock',
+                          iconFilePath: 'assets/dashboard_assets/target.png',
+                          onPressed: onPressed2,
+                        ),
+                      ),
                     ),
                   ],
                 ),
