@@ -75,7 +75,7 @@ class HomePageState extends State<HomePage> {
   late CollectionReference _eventsCollectionRef;
   late List<String> topicNames = [];
   late List<int> topicScores = [];
-  late Map<String, dynamic>? topicData; 
+  Map<String, dynamic>? topicData; 
   final CollectionReference _userCollectionRef =
       FirebaseFirestore.instance.collection('users');
   StudySessionManager studySessionManager = StudySessionManager();
@@ -93,35 +93,25 @@ class HomePageState extends State<HomePage> {
       for (var doc in snapshots.docs) {
         var data = doc.data() as Map<String, dynamic>;
         if (data.containsKey('date') && data.containsKey('events') ) {
-          List<dynamic>? eventsList = data['events'] as List<dynamic>?;
+          Timestamp? timestamp = data['date'] as Timestamp?;
+          if (timestamp == null) continue;
           
-          for (var event in eventsList!){
-            String title = event.toString();          
-            if((!title.contains("Flashcards")) || title.contains("Completed")) {
-                continue;
-            //     Timestamp? timestamp = data['date'] as Timestamp?;
-            //       if (timestamp != null) {
-            //     DateTime date = timestamp.toDate();
-            //     date = DateTime(date.year, date.month, date.day);
-            //     List<String> events = eventsList.map((e) => e.toString()).toList();
-            //     allEvents[date] = events.map ((title) => Event(color: Colors.black, title: title)).toList();
-            // }
-            }
-            else{
-                Timestamp? timestamp = data['date'] as Timestamp?;
-                  if (timestamp != null) {
-                DateTime date = timestamp.toDate();
-                date = DateTime(date.year, date.month, date.day);
-                List<String> events = eventsList.map((e) => e.toString()).toList();
-                selectedEvents[date] = events.map((title) => Event(
-                    title: title,
-                    color : Colors.yellow
-                )).toList(); 
-              }
-        }
-
-
-            }
+          DateTime date = timestamp.toDate();
+          date = DateTime(date.year, date.month, date.day);
+          
+          List<dynamic>? eventsList = data['events'] as List<dynamic>?;
+          if (eventsList == null || eventsList.isEmpty) continue;
+          
+          // Filter flashcard events (exclude completed ones)
+          final flashcardEvents = eventsList
+              .map((e) => e.toString())
+              .where((title) => title.contains("Flashcards") && !title.contains("Completed"))
+              .map((title) => Event(title: title, color: Colors.yellow))
+              .toList();
+          
+          if (flashcardEvents.isNotEmpty) {
+            selectedEvents[date] = flashcardEvents;
+          }
         }
       }
       allEvents.addAll(selectedEvents);
@@ -351,7 +341,8 @@ Future<void> getTopics() async {
     setState(() => loading = true);
   }
 
-  topicData = await getTopicsDatabase();
+  // Cache topicData to avoid redundant queries
+  topicData ??= await getTopicsDatabase();
 
   if (mounted) {
     setState(() {
@@ -360,12 +351,13 @@ Future<void> getTopics() async {
     });
   }
 
-  topicScores = [];
-  for (final map in topics) {
-    List<String> subtopics = map["subtopics"];
-    int score = (await Algo().getScore(user.uid, subtopics))!;
-    topicScores.add(score);
-  }
+  // Parallelize score queries for all topics
+  topicScores = await Future.wait(
+    topics.map((map) async {
+      List<String> subtopics = map["subtopics"];
+      return (await Algo().getScore(user.uid, subtopics))!;
+    })
+  );
 }
 //Get all events from database, iterate over events and look for which date a flashcard topic has been scheduled 
   // Future<void> getTopics() async {
@@ -742,7 +734,7 @@ Future<void> getTopics() async {
                   subtitle: Row(
                     children: [
                       const Text("Next Review Date: ", style: TextStyle(color: Colors.black)),
-                      Text(row.formattedDate, style: const TextStyle(color: Colors.black)),
+                      Text(row.formattedDate, style: const TextStyle(color: Colors.black, fontSize: 14)),
                     ],
                   ),
                   children: row.subtopics.map((s) {

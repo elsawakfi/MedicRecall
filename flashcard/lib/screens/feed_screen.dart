@@ -49,11 +49,11 @@ class AboveEverythingState extends ChangeNotifier {
 class DeckInteractionBlocker {
   //Object which governs the activation of the AbsorbingPointer
   final ValueNotifier<bool> isBlocked = ValueNotifier<bool>(false);
-  static const int blockDurationMs = 5000;
+  static const int blockDurationMs = 4800;
   Future<void> blockInteractionTemporarily() async {
-    //Turns the AbsorbingPointer on, waits 5 seconds and then turns it off
+    //Turns the AbsorbingPointer on, waits for blockDurationMs and then turns it off
     isBlocked.value = true;
-    // wait 5 seconds
+    // wait for the duration
     await Future.delayed(const Duration(milliseconds: blockDurationMs));
     isBlocked.value = false;
   }
@@ -153,6 +153,7 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
       title = "Flashcard Tutor";
     });
 
+    firstSeen = DateTime.now();
     getData().then((_) {
       // make sure that the timer doesn't start before the flashcard is loaded
       deckBlocker.blockInteractionTemporarily();
@@ -168,11 +169,13 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  late SwipingDeck deck;
+
   @override
   Widget build(BuildContext context) {
     Feed.navKey;
-    SwipingDeck deck = displayDeck();
-    updateFirstSeen();
+    // Only create deck once, not on every rebuild
+    deck = displayDeck();
 
     if(finished && !cards.isNotEmpty){
        Future.delayed(Duration(seconds: 1), () {
@@ -443,6 +446,7 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
 
   //Handle the logic for switching to the next card
   SwipingDeck displayDeck() {
+    bool isDesktop = MediaQuery.of(context).size.width >= 600;
     return SwipingDeck(
       cardDeck: cards,
       onDeckEmpty: () { 
@@ -451,8 +455,8 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
       },
       onLeftSwipe: (Widget card) => nextCardLeft(),
       onRightSwipe: (Widget card) => nextCardRight(),
-      cardWidth: 400,
-      swipeAnimationDuration: const Duration(milliseconds: 500),
+      cardWidth: isDesktop ? 400 : MediaQuery.of(context).size.width * 0.8,
+      swipeAnimationDuration: Duration(milliseconds: isDesktop ? 250 : 500),
     );
   }
 
@@ -462,28 +466,30 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
 
   Future<void> getData() async {
     await getUser();
-    // if (choice == "revise") {
-    //   flashcards = await Algo().getCards(subtopics, user.uid);
-    // } else if (choice == "new") {
-    //   flashcards = await Algo().newCards(subtopics, user.uid);
-    // }
-    flashcards = await Algo().newCards(subtopics, user.uid);
-    var oldCards = await Algo().getCards(subtopics, user.uid);
-    oldCards = oldCards.where((c) => c["gotRight"] != true).toList(); //Crucial line of code
+    
+    // Run Firebase queries in parallel instead of sequentially
+    final results = await Future.wait([
+      Algo().newCards(subtopics, user.uid),
+      Algo().getCards(subtopics, user.uid),
+      Algo().getScore(user.uid, subtopics),
+    ]);
+    
+    flashcards = results[0] as List<Map<String, dynamic>>;
+    var oldCards = (results[1] as List<Map<String, dynamic>>)
+        .where((c) => c["gotRight"] != true).toList();
     flashcards.addAll(oldCards);
-    length = flashcards.length; //length = The total number of cards
+    length = flashcards.length;
+    score = results[2] as int;
+    
     if (length > 0) {
       await resetTimesSeen();
     }
-    score = (await Algo().getScore(user.uid, subtopics))!;
-    // print("score from feed_screen: $score");
+    
     if (length != 0) {
       getCardDeck();
-
       setState(() {
         loading = false;
       });
-      //nextCard();
     } else {
       setState(() {
         loading = false;
@@ -561,7 +567,7 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    "Great work. You answered $sessionScore cards.",
+                    "Great work!",
                     style: const TextStyle(
                       fontSize: 14,
                       color: Color(0xFF4B5563),
@@ -1021,9 +1027,11 @@ void getCardDeck() {
   }
 }
 
-List<Widget> buildBackContent(String text) {
+List<Widget> buildBackContent(String text, {bool isDesktop = true}) {
   List<Widget> widgets = [];
   List<String> sections = text.split(RegExp(r'\.\s*'));
+  double titleFontSize = isDesktop ? 27 : 18;
+  double descriptionFontSize = isDesktop ? 18 : 14;
   for (int i = 0; i < sections.length; i++) {
     String section = sections[i];
     if (section.trim().isEmpty) continue;
@@ -1037,7 +1045,7 @@ List<Widget> buildBackContent(String text) {
           child: Center(
             child: Text(
               title.trim(),
-              style: const TextStyle(fontSize: 27, fontWeight: FontWeight.bold, color: Colors.black),
+              style: TextStyle(fontSize: titleFontSize, fontWeight: FontWeight.bold, color: Colors.black),
             ),
           ),
         ),
@@ -1048,7 +1056,7 @@ List<Widget> buildBackContent(String text) {
           padding: const EdgeInsets.only(left: 24, top: 16),
           child: Text(
             '${description.trim()}.',
-            style: const TextStyle(fontSize: 18, color: Colors.black),
+            style: TextStyle(fontSize: descriptionFontSize, color: Colors.black),
           ),
         ),
       );
@@ -1058,7 +1066,7 @@ List<Widget> buildBackContent(String text) {
           padding: const EdgeInsets.only(left: 24, top: 16),
           child: Text(
             '${section.trim()}.',
-            style: const TextStyle(fontSize: 18, color: Colors.black),
+            style: TextStyle(fontSize: descriptionFontSize, color: Colors.black),
           ),
         ),
       );
@@ -1071,8 +1079,10 @@ Widget makeCard(int index) {
   bool isDesktop = MediaQuery.of(context).size.width >= 600;
   double cardWidth = isDesktop 
     ? MediaQuery.of(context).size.width * 0.4  // 40% on desktop (smaller)
-    : MediaQuery.of(context).size.width * (3/7); // keep current for mobile
-  double cardHeight = MediaQuery.sizeOf(context).height*0.55;
+    : MediaQuery.of(context).size.width * 0.60; // 75% on mobile for larger cards
+  double cardHeight = isDesktop
+    ? MediaQuery.sizeOf(context).height * 0.40
+    : MediaQuery.sizeOf(context).height * 0.50; // 60% on mobile for taller cards
   return FlashcardCard(
     key: Key('flip_card_$index'),
     frontText: flashcards[index]["front"],
@@ -1082,6 +1092,7 @@ Widget makeCard(int index) {
     cardHeight: cardHeight,
     isBlocked: deckBlocker.isBlocked,
     buildBackContent: buildBackContent,
+    isDesktop: isDesktop,
   );
 }
 }
@@ -1096,6 +1107,7 @@ class FlashcardCard extends StatefulWidget {
     required this.cardHeight,
     required this.isBlocked,
     required this.buildBackContent,
+    required this.isDesktop,
   });
 
   final String frontText;
@@ -1104,7 +1116,8 @@ class FlashcardCard extends StatefulWidget {
   final double cardWidth;
   final double cardHeight;
   final ValueListenable<bool> isBlocked;
-  final List<Widget> Function(String) buildBackContent;
+  final List<Widget> Function(String, {bool isDesktop}) buildBackContent;
+  final bool isDesktop;
 
   @override
   State<FlashcardCard> createState() => _FlashcardCardState();
@@ -1151,7 +1164,6 @@ class _FlashcardCardState extends State<FlashcardCard> {
         front: Container(
           height: widget.cardHeight,
           width: widget.cardWidth,
-          alignment: Alignment.center,
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -1173,14 +1185,18 @@ class _FlashcardCardState extends State<FlashcardCard> {
                 controller: _frontScrollController,
                 physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Center(
-              child: Text(
-              widget.frontText
-              .replaceAllMapped(RegExp(r'(?<!\s)-'), (match) => '-')
-              .replaceAll('-', '\n-'),
-              style: const TextStyle(fontSize: 24, color: Colors.black),
-              textAlign: TextAlign.center,
-              ),
+              child: Column(
+                children: [
+                  Center(
+                    child: Text(
+                      widget.frontText
+                          .replaceAllMapped(RegExp(r'(?<!\s)-'), (match) => '-')
+                          .replaceAll('-', '\n-'),
+                      style: TextStyle(fontSize: widget.isDesktop ? 24 : 16, color: Colors.black),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ],
               ),
               ),
             ),
@@ -1193,9 +1209,9 @@ class _FlashcardCardState extends State<FlashcardCard> {
 
           Text(
           "Subtopic: ${widget.subtopic}",
-          style: const TextStyle(
-          fontSize: 24,
-          color: Color.fromRGBO(0x75, 0x75, 0x75, 1),
+          style: TextStyle(
+          fontSize: widget.isDesktop ? 24 : 14,
+          color: const Color.fromRGBO(0x75, 0x75, 0x75, 1),
           ),
           textAlign: TextAlign.center,
           ),
@@ -1226,6 +1242,7 @@ class _FlashcardCardState extends State<FlashcardCard> {
                     widget.backText
                         .replaceAllMapped(RegExp(r'(?<!\s)-'), (match) => '‑')
                         .replaceAll('-', '\n-'),
+                    isDesktop: widget.isDesktop,
                   ),
                 ),
               )),
