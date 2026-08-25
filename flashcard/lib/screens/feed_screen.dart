@@ -48,27 +48,12 @@ class AboveEverythingState extends ChangeNotifier {
 
 class DeckInteractionBlocker {
   //Object which governs the activation of the AbsorbingPointer
-  final ValueNotifier<bool> isBlocked = ValueNotifier<bool>(false);
-  static const int blockDurationMs = 4800;
-  Future<void> blockInteractionTemporarily() async {
-    //Turns the AbsorbingPointer on, waits for blockDurationMs and then turns it off
-    isBlocked.value = true;
-    // wait for the duration
-    await Future.delayed(const Duration(milliseconds: blockDurationMs));
-    isBlocked.value = false;
-  }
+  final ValueNotifier<bool> isBlocked = ValueNotifier<bool>(true);
 }
 
 class CheckButtonInteractionBlocker {
   //Object which governs the activation of the tick and AbsorbingPointer
-  final ValueNotifier<bool> isBlocked = ValueNotifier<bool>(false);
-  static const int blockDurationMs = 5800;
-  Future<void> blockInteractionTemporarily() async {
-    //Turns the AbsorbingPointer on, waits 5.8 seconds and then turns it off (This prevents a bug with the flipping AbsorbingPointer)
-    isBlocked.value = true;
-    await Future.delayed(const Duration(milliseconds: blockDurationMs));
-    isBlocked.value = false;
-  }
+  final ValueNotifier<bool> isBlocked = ValueNotifier<bool>(true);
 }
 
 class Feed extends StatefulWidget {
@@ -114,11 +99,15 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
   final CollectionReference _userCollectionRef =
       FirebaseWrapper.firestore().collection('users');
   late CollectionReference _flashcardsSeenRef;
+  late String _userDocId;
+  final Set<String> _topicsSeen = <String>{};
   late List<Map<String, dynamic>> flashcards;
   final DeckInteractionBlocker deckBlocker = DeckInteractionBlocker();
   final CheckButtonInteractionBlocker checkButtonBlocker = CheckButtonInteractionBlocker();
   late final AnimationController _controller;
-  late final WaitToFlipTimer _loadingBar; 
+  late final WaitToFlipTimer _loadingBar;
+  bool _goHomeScheduled = false;
+  bool _deckBuilt = false;
 
   _FeedState(this.subtopics, this.count);
   late String title;
@@ -136,6 +125,12 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
       vsync: this,
       duration: Duration(seconds: 5)
     );
+    _controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        deckBlocker.isBlocked.value = false;
+        checkButtonBlocker.isBlocked.value = false;
+      }
+    });
     _loadingBar = WaitToFlipTimer(controller: _controller);
 
     setState(() {
@@ -156,9 +151,7 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
     firstSeen = DateTime.now();
     getData().then((_) {
       // make sure that the timer doesn't start before the flashcard is loaded
-      deckBlocker.blockInteractionTemporarily();
-      checkButtonBlocker.blockInteractionTemporarily();
-      _loadingBar.go();
+      _restartTimer();
     });
     super.initState();
   }
@@ -169,20 +162,36 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
     super.dispose();
   }
 
+  void _restartTimer() {
+    deckBlocker.isBlocked.value = true;
+    checkButtonBlocker.isBlocked.value = true;
+    _controller.reset();
+    _controller.forward();
+  }
+
   late SwipingDeck deck;
+  // Mirrors the package's internal card list. The package mutates its own
+  // cardDeck on every swipe, so this list must mutate in lockstep or the
+  // next rebuild of the deck would put already-swiped cards back on top.
+  List<Widget> _deckCards = const [];
 
   @override
   Widget build(BuildContext context) {
     Feed.navKey;
-    // Only create deck once, not on every rebuild
-    deck = displayDeck();
+    if (!_deckBuilt && cards.isNotEmpty) {
+      _deckCards = List<Widget>.from(cards);
+      _deckBuilt = true;
+    }
 
-    if(finished && !cards.isNotEmpty){
-       Future.delayed(Duration(seconds: 1), () {
-        goHome(subtopics, count);
-      });
+    if (finished && cards.isEmpty) {
+      if (!_goHomeScheduled) {
+        _goHomeScheduled = true;
+        Future.delayed(const Duration(seconds: 1), () {
+          if (mounted) goHome(subtopics, count);
+        });
+      }
       return const SizedBox.shrink();
-       }
+    }
 
     // Return empty widget so nothing else builds
    
@@ -205,17 +214,14 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
                 alignment: Alignment.center,
                 key: const ValueKey('flashcard center'),
                 child: ValueListenableBuilder<bool>(
-                  //GestureDetector blocks horizontal swipes but allows vertical scrolling
-                  valueListenable: deckBlocker
-                      .isBlocked, //allows dynamic rebuilding of a widget depending
-                  builder: (BuildContext context, bool value, child) {
-                    //on changes to state (in this case the state of the DeckInteractionBlocker)
-                    return GestureDetector(
-                      onHorizontalDragStart: value ? (_) {} : null,
-                      onHorizontalDragUpdate: value ? (_) {} : null,
-                      onHorizontalDragEnd: value ? (_) {} : null,
-                      child: deck
-                    );
+                  //While the timer runs, the deck is rebuilt with
+                  //disableDragging: true so the package's SwipingGestureDetector
+                  //becomes a no-op. That stops the card from moving regardless of
+                  //which recognizer wins the gesture arena.
+                  valueListenable: deckBlocker.isBlocked,
+                  builder: (BuildContext context, bool blocked, child) {
+                    deck = displayDeck(disableDragging: blocked);
+                    return deck;
                   },
                 ),
               ),
@@ -245,9 +251,7 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
                                         child: IconButton(
                                           onPressed: () {
                                             updateFirstSeen();
-                                            checkButtonBlocker.blockInteractionTemporarily();
-                                            deckBlocker.blockInteractionTemporarily(); //activate the absorber for blockDurationMs milliseconds
-                                            _loadingBar.go();
+                                            _restartTimer();
                                             deck.swipeLeft();
                                           },
                                           icon: const Icon(Icons.disabled_by_default_outlined),
@@ -281,29 +285,91 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
                                 GestureDetector(
                                   child: Icon(Icons.help_outline_rounded, color: Colors.white, size: 24,),
                                   onTap: () {
-                                  showDialog(context: context, builder: (context) {
-                                    return AlertDialog(
-                                      title: Text("Instructions"),
-                                      content: Text.rich(
-                                        TextSpan(
-                                          style: TextStyle(fontSize: 15),
-                                        children:[
-                                          TextSpan(
-                                            text: "Active recall works best when you pause and genuinely try to retrieve the answer before flipping the card.\n"
-                                                  "Take a few seconds, think it through — then flip the card and check the answer.\n",
-                                            style: TextStyle(fontWeight: FontWeight.bold, color: Color.fromRGBO(219, 23, 17, 1), fontSize: 15)
+                                    showDialog(context: context, builder: (context) {
+                                      return AlertDialog(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(16),
+                                        ),
+                                        backgroundColor: Colors.white,
+                                        contentPadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+                                        content: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                                          children: [
+                                            Center(
+                                              child: Container(
+                                                width: 56,
+                                                height: 56,
+                                                decoration: const BoxDecoration(
+                                                  color: Color(0xFFE8F0FF),
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: const Icon(
+                                                  Icons.lightbulb_outline,
+                                                  color: Color(0xFF1E3A8A),
+                                                  size: 28,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 12),
+                                            const Text(
+                                              "Think before you flip",
+                                              style: TextStyle(
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.w700,
+                                                color: Colors.black,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                            const SizedBox(height: 14),
+                                            Container(
+                                              padding: const EdgeInsets.all(14),
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFFE8F0FF),
+                                                borderRadius: BorderRadius.circular(10),
+                                              ),
+                                              child: const Text(
+                                                "Active recall works best when you pause and genuinely try to retrieve the answer before flipping the card.\n\n"
+                                                "Take a few seconds, think it through — then flip the card and check the answer.",
+                                                style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: Color(0xFF1E3A8A),
+                                                  height: 1.4,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 12),
+                                            const Text(
+                                              "The progress bar shows the time remaining before you can flip the card. "
+                                              "Active recall is only effective when you engage your brain and answer the question yourself first!",
+                                              style: TextStyle(
+                                                fontSize: 13,
+                                                color: Color(0xFF4B5563),
+                                                height: 1.4,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        actionsAlignment: MainAxisAlignment.center,
+                                        actionsPadding: const EdgeInsets.only(bottom: 16),
+                                        actions: <Widget>[
+                                          ElevatedButton(
+                                            onPressed: () => Navigator.of(context).pop(),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: const Color(0xFF1E3A8A),
+                                              foregroundColor: Colors.white,
+                                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(10),
+                                              ),
+                                            ),
+                                            child: const Text("Got it"),
                                           ),
-                                          TextSpan(
-                                            text: "The progress bar indicates the time remaining before you will be able to flip the flashcard.\n"
-                                            "This is to make sure that you think before your flip.\n"
-                                            "Active recall is only effective when you engage your brain and answer the question yourself before you flip the card!\n"
-                                          ),
-                                        ]
-                                        )
-                                      ),
-                                    );
-                                  });
-                                },
+                                        ],
+                                      );
+                                    });
+                                  },
                               )
                               
                             ])
@@ -369,11 +435,7 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
                                           child: IconButton(
                                             onPressed: () {
                                               updateFirstSeen();
-                                              deckBlocker
-                                                  .blockInteractionTemporarily(); //activate the absorber for blockDurationMs milliseconds
-                                              checkButtonBlocker
-                                                  .blockInteractionTemporarily(); //activate the continue absorber for 5.8 seconds
-                                              _loadingBar.go();
+                                              _restartTimer();
                                               deck.swipeRight();
                                             },
                                             icon: const Icon(Icons.check_box_outlined),
@@ -445,18 +507,27 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
   }
 
   //Handle the logic for switching to the next card
-  SwipingDeck displayDeck() {
+  SwipingDeck displayDeck({bool disableDragging = false}) {
     bool isDesktop = MediaQuery.of(context).size.width >= 600;
     return SwipingDeck(
-      cardDeck: cards,
-      onDeckEmpty: () { 
+      cardDeck: List<Widget>.from(_deckCards),
+      onDeckEmpty: () {
         LastRevised.logFlashCardDeck();
         goHome(subtopics, count);
       },
-      onLeftSwipe: (Widget card) => nextCardLeft(),
-      onRightSwipe: (Widget card) => nextCardRight(),
+      onLeftSwipe: (Widget card) {
+        nextCardLeft();
+        if (_deckCards.isNotEmpty) _deckCards.removeLast();
+        if (mounted) setState(() {});
+      },
+      onRightSwipe: (Widget card) {
+        nextCardRight();
+        if (_deckCards.isNotEmpty) _deckCards.removeLast();
+        if (mounted) setState(() {});
+      },
       cardWidth: isDesktop ? 400 : MediaQuery.of(context).size.width * 0.8,
       swipeAnimationDuration: Duration(milliseconds: isDesktop ? 250 : 500),
+      disableDragging: disableDragging,
     );
   }
 
@@ -519,9 +590,7 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
       //   flashcards.removeAt(flashcardIndex);
       //   flashcardIndex -= 1; // adjust index so next card lines up correctly
       // });
-      deckBlocker.blockInteractionTemporarily();
-      checkButtonBlocker.blockInteractionTemporarily();
-      _loadingBar.go();
+      _restartTimer();
     }
   }
 
@@ -633,9 +702,7 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
 
       completedCardsNotifier.value++;
       updateSeenIncorrect();
-      deckBlocker.blockInteractionTemporarily();
-      checkButtonBlocker.blockInteractionTemporarily();
-      _loadingBar.go();
+      _restartTimer();
 
     }
   }
@@ -658,10 +725,18 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
     //firebase data
     QuerySnapshot u =
         await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
-    String id = u.docs.last.id;
+    final userDoc = u.docs.last;
+    _userDocId = userDoc.id;
 
-    _flashcardsSeenRef =
-        FirebaseWrapper.firestore().collection("users/$id/flashcardsSeen");
+    final userData = userDoc.data() as Map<String, dynamic>;
+    if (userData["topicsSeen"] != null) {
+      for (final t in (userData["topicsSeen"] as List)) {
+        _topicsSeen.add(t.toString());
+      }
+    }
+
+    _flashcardsSeenRef = FirebaseWrapper.firestore()
+        .collection("users/$_userDocId/flashcardsSeen");
   }
 
   Future<void> updateSeenIncorrect() async {
@@ -704,23 +779,15 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
       }
     }
 
-    QuerySnapshot u =
-        await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
-    var userDoc = u.docs.last;
+    _recordTopicSeen(flashcards[flashcardIndex]["topic"]?.toString());
+  }
 
-    var topicsSeen = [];
-
-    Map<String, dynamic> data = userDoc.data() as Map<String, dynamic>;
-
-    if (data["topicsSeen"] != null) {
-      topicsSeen = data["topicsSeen"];
-    }
-
-    var flashcardTopic = flashcards[flashcardIndex]["topic"];
-
-    if (!topicsSeen.contains(flashcardTopic)) {
-      topicsSeen.add(flashcardTopic);
-      _userCollectionRef.doc(userDoc.id).update({"topicsSeen": topicsSeen});
+  void _recordTopicSeen(String? topic) {
+    if (topic == null) return;
+    if (_topicsSeen.add(topic)) {
+      _userCollectionRef
+          .doc(_userDocId)
+          .update({"topicsSeen": _topicsSeen.toList()});
     }
   }
 
@@ -753,7 +820,10 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
   }
 
   Future<List<bool>> getTopicList() async {
-    List<Map<String, dynamic>> topics = await getTopicDetails();
+    return _computeContainsTopic(await getTopicDetails());
+  }
+
+  List<bool> _computeContainsTopic(List<Map<String, dynamic>> topics) {
     List<bool> containsTopic = [
       false,
       false,
@@ -785,19 +855,14 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
   }
 
   Future<void> updateTopicCountAndTopicLastSeen() async {
-    CollectionReference usersRef =
-        FirebaseWrapper.firestore().collection('users');
-    QuerySnapshot querySnapshot =
-        await usersRef.where("userID", isEqualTo: user.uid).get();
+    final userDocRef = _userCollectionRef.doc(_userDocId);
+    final userSnap = await userDocRef.get();
 
-    String id = querySnapshot.docs.last.id;
+    List<dynamic> topicCount = userSnap["topicCount"];
+    List<dynamic> topicLastSeen = userSnap["topicLastSeen"];
 
-    List<dynamic> topicCount = querySnapshot.docs.last["topicCount"];
-
-    List<dynamic> topicLastSeen = querySnapshot.docs.last["topicLastSeen"];
-
-    List<bool> containsTopic = await getTopicList();
     List<Map<String, dynamic>> topics = await getTopicDetails();
+    List<bool> containsTopic = _computeContainsTopic(topics);
 
     var databaseFlashcards = await Algo().getFlashcards(user.uid);
     List<dynamic> topicList = [];
@@ -837,8 +902,7 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
       }
     }
 
-    usersRef
-        .doc(id)
+    userDocRef
         .update({"topicCount": topicCount, "topicLastSeen": topicLastSeen});
   }
 
@@ -882,48 +946,31 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
           "score": cardScore,
           "gotRight": true
         });
-        
+
       }
     }
 
-    QuerySnapshot u =
-        await _userCollectionRef.where("userID", isEqualTo: user.uid).get();
-    var userDoc = u.docs.last;
-
-    var topicsSeen = [];
-
-    Map<String, dynamic> data = userDoc.data() as Map<String, dynamic>;
-
-    if (data["topicsSeen"] != null) {
-      topicsSeen = data["topicsSeen"];
-    }
-
-    var flashcardTopic = flashcards[flashcardIndex]["topic"];
-
-    if (!topicsSeen.contains(flashcardTopic)) {
-      topicsSeen.add(flashcardTopic);
-      _userCollectionRef.doc(userDoc.id).update({"topicsSeen": topicsSeen});
-    }
+    _recordTopicSeen(flashcards[flashcardIndex]["topic"]?.toString());
   }
 
   Future<void> resetTimesSeen() async {
-    CollectionReference usersRef =
-        FirebaseWrapper.firestore().collection('users');
-    QuerySnapshot userSnapshot =
-        await usersRef.where("userID", isEqualTo: user.uid).get();
+    final userDocRef = _userCollectionRef.doc(_userDocId);
 
-    String id = userSnapshot.docs.last.id;
+    final results = await Future.wait([
+      Algo().getFlashcards(user.uid),
+      getTopicDetails(),
+      userDocRef.get(),
+    ]);
+    final allCards = results[0] as List<Map<String, dynamic>>;
+    final topics = results[1] as List<Map<String, dynamic>>;
+    final userSnap = results[2] as DocumentSnapshot;
+    final containsTopic = _computeContainsTopic(topics);
 
-    var cards = await Algo().getFlashcards(user.uid);
-    List<Map<String, dynamic>> filteredCards = cards
+    final filteredCards = allCards
         .where((card) =>
             (subtopics.contains(card["topic"]) && card["subtopic"] == "") ||
             subtopics.contains(card["subtopic"]))
         .toList();
-    bool exists = false;
-
-    List<Map<String, dynamic>> topics = await getTopicDetails();
-    var containsTopic = await getTopicList();
 
     var totalCards = 0;
     for (var i = 0; i < containsTopic.length; i++) {
@@ -932,77 +979,60 @@ class _FeedState extends State<Feed> with TickerProviderStateMixin {
       var intersection = subtopics
           .where((element) => subtopicStrings.contains(element))
           .toList();
-      List<int> indicesMap = [];
-     
       for (var subtopic in intersection) {
-        int index = subtopicStrings.indexOf(subtopic);
-        indicesMap.add(index);
-      }
-
-      for (var index in indicesMap) {
-        totalCards = topics[i]["subtopicLength"][index] + totalCards;
+        final index = subtopicStrings.indexOf(subtopic);
+        totalCards += (topics[i]["subtopicLength"][index] as int);
       }
     }
-    
 
-    if (filteredCards.length == totalCards) {
-      exists = true;
+    if (filteredCards.length != totalCards) return;
+
+    // Batch-fetch seen records for all flashcards (Firestore whereIn caps at 30).
+    final cardIds =
+        flashcards.map((c) => c["id"]).whereType<Object>().toList();
+    final Map<Object, QueryDocumentSnapshot> seenByCardId = {};
+    for (var start = 0; start < cardIds.length; start += 30) {
+      final chunk = cardIds.sublist(
+          start, start + 30 > cardIds.length ? cardIds.length : start + 30);
+      final snap =
+          await _flashcardsSeenRef.where("cardID", whereIn: chunk).get();
+      for (final doc in snap.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        seenByCardId[data["cardID"] as Object] = doc;
+      }
     }
 
     bool wrongCardExist = false;
-
-    List<dynamic> topicScore = userSnapshot.docs.last["topicScore"];
-    if (exists) {
-      for (int i = 0; i < flashcards.length; i++) {
-        QuerySnapshot querySnapshot = await _flashcardsSeenRef
-            .where("cardID", isEqualTo: flashcards[i]["id"])
-            .get();
-
-          
-
-        if (querySnapshot.docs.isNotEmpty) {
-          var data = querySnapshot.docs.first.data() as Map<String, dynamic>;
-          var gotRight = data["gotRight"];
-          if (!gotRight) {
-            wrongCardExist = true;
-          }
-        } else {
-          print("No documents found for cardID: ${flashcards[i]["id"]}");
-        }
-        // var data = querySnapshot.docs.first.data() as Map<String, dynamic>;
-
-        // // Retrieve timesSeen and gotRight value from the cards
-        // var gotRight = data["gotRight"];
-
-        // if (!gotRight) {
-        //   wrongCardExist = true;
-        // }
+    for (final id in cardIds) {
+      final doc = seenByCardId[id];
+      if (doc == null) {
+        print("No documents found for cardID: $id");
+        continue;
       }
-
-      if (!wrongCardExist) {
-        for (int i = 0; i < flashcards.length; i++) {
-          QuerySnapshot querySnapshot = await _flashcardsSeenRef
-              .where("cardID", isEqualTo: flashcards[i]["id"])
-              .get();
-          var tempId = querySnapshot.docs.first.id;
-
-          _flashcardsSeenRef
-              .doc(tempId)
-              .update({"timesSeen": 0, "gotRight": false});
-        }
-
-        for (int i = 0; i < containsTopic.length; i++) {
-          if (containsTopic[i]) {
-            var topicName = topics[i]["topic"];
-            List<String> subtopic = [];
-            subtopic.add(topicName);
-            topicScore[i] = await Algo().getScore(user.uid, subtopic);
-          }
-        }
-
-        usersRef.doc(id).update({"topicScore": topicScore});
+      final data = doc.data() as Map<String, dynamic>;
+      if (data["gotRight"] == false) {
+        wrongCardExist = true;
       }
     }
+
+    if (wrongCardExist) return;
+
+    // Reset all seen records in a single batched write.
+    final batch = FirebaseWrapper.firestore().batch();
+    for (final doc in seenByCardId.values) {
+      batch.update(doc.reference, {"timesSeen": 0, "gotRight": false});
+    }
+    await batch.commit();
+
+    final List<dynamic> topicScore = userSnap["topicScore"];
+    for (int i = 0; i < containsTopic.length; i++) {
+      if (containsTopic[i]) {
+        topicScore[i] =
+            await Algo().getScore(user.uid, [topics[i]["topic"] as String]);
+      }
+    }
+
+    userDocRef.update({"topicScore": topicScore});
   }
 
   void showResource(String resourceText) {
@@ -1181,24 +1211,34 @@ class _FlashcardCardState extends State<FlashcardCard> {
               controller: _frontScrollController,
               thumbVisibility: true,
               interactive: true,
-              child: SingleChildScrollView(
+              child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
                 controller: _frontScrollController,
                 physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                children: [
-                  Center(
-                    child: Text(
-                      widget.frontText
-                          .replaceAllMapped(RegExp(r'(?<!\s)-'), (match) => '-')
-                          .replaceAll('-', '\n-'),
-                      style: TextStyle(fontSize: widget.isDesktop ? 24 : 16, color: Colors.black),
-                      textAlign: TextAlign.center,
-                    ),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: Column(
+                    mainAxisAlignment: widget.isDesktop
+                        ? MainAxisAlignment.center
+                        : MainAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Text(
+                          widget.frontText
+                              .replaceAllMapped(RegExp(r'(?<!\s)-'), (match) => '-')
+                              .replaceAll('-', '\n-'),
+                          style: TextStyle(fontSize: widget.isDesktop ? 24 : 16, color: Colors.black),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              ),
+                ),
+              );
+            },
+          ),
             ),
           ),
           ),
@@ -1255,49 +1295,27 @@ class _FlashcardCardState extends State<FlashcardCard> {
   }
 }
 
-class WaitToFlipTimer extends StatefulWidget {
+class WaitToFlipTimer extends StatelessWidget {
   final AnimationController controller;
 
   const WaitToFlipTimer({super.key, required this.controller});
 
-  @override
-  State<WaitToFlipTimer> createState() => _WaitToFlipTimerState();
-
   void go() {
-    if (controller != null ) {
     controller.reset();
     controller.forward();
-   }
-  }
-}
-
-class _WaitToFlipTimerState extends State<WaitToFlipTimer> with TickerProviderStateMixin {
-  late VoidCallback _listener;
-  
-   @override
-  void initState() {
-    super.initState();
-    _listener = () {
-      if (mounted) setState(() {});
-    };
-    widget.controller.addListener(_listener);
   }
 
   @override
   Widget build(BuildContext context) {
-    return LinearProgressIndicator(
-      backgroundColor: Colors.white,
-      color: Color.fromRGBO(0x1E, 0x1E, 0x1E, 1),
-      value: widget.controller.value,
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, _) => LinearProgressIndicator(
+        backgroundColor: Colors.white,
+        color: const Color.fromRGBO(0x1E, 0x1E, 0x1E, 1),
+        value: controller.value,
+      ),
     );
   }
-
-  @override
-  void dispose() {
-    widget.controller.removeListener(_listener);
-    super.dispose();
-  }
-
 }
 
 

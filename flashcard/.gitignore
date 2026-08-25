@@ -52,3 +52,34 @@ app.*.map.json
 
 # FVM Version Cache
 .fvm/
+
+# Firebase
+.firebase/
+.firebase/hosting.*.cache
+
+# VS Code workspace files (personal)
+*.code-workspace
+
+# Root-level screenshots / misc images that aren't assets
+/flutter_*.png
+
+# Generated dartdoc output (keep build_docs.sh and dartdoc_options.yaml)
+doc/api/
+doc/categories/
+doc/favicon.png
+doc/medicrecall.css
+doc/_*.html
+doc/_footer_text.md
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+# OAuth client secrets / service-account / token files (never commit)
+**/credentials.json
+**/serviceAccountKey.json
+**/firebase-private.json
+**/token.json
+
+# Test coverage
+coverage/

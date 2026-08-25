@@ -1,0 +1,27 @@
+dartdoc:
+  # Custom HTML injected into every generated page.
+  header:
+    - doc/_header.html
+  footer:
+    - doc/_footer.html
+  # Markdown shown verbatim in the footer (right side).
+  footerText:
+    - doc/_footer_text.md
+  # Favicon shown in the browser tab.
+  favicon: doc/favicon.png
+  # Don't fail the build for missing doc comments or unresolved [refs] —
+  # the team is still backfilling /// comments.
+  ignore:
+    - undocumented
+    - unresolved-doc-reference
+  # Group classes into sections on the package landing page.
+  categories:
+    "Screens":
+      markdown: doc/categories/screens.md
+    "Widgets":
+      markdown: doc/categories/widgets.md
+    "Utilities":
+      markdown: doc/categories/utilities.md
+    "Questions":
+      markdown: doc/categories/questions.md
+  categoryOrder: ["Screens", "Widgets", "Utilities", "Questions"]

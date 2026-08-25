@@ -234,19 +234,24 @@ def update_exam_score(event: Event[Change[DocumentSnapshot]]) -> None:
 
 # STRIPE WEBHOOK HANDLER
 from firebase_functions import https_fn
+from firebase_functions.params import SecretParam
 from flask import Request
 import stripe
 import json
 
-# publishable_key = 'pk_live_51RjYJGJRBLxROQTkrzTdRB4J0BMANu1ZKM7f4y5hi8EKbvOjt04TAhf2FDxZT4nDFNhWIrYni5e2Mh5GIQ32Irg000A8NDm3zK'
-stripe.api_key = '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'
-# test api key stripe.api_key = 'sk_test_51RjYJGJRBLxROQTkzqF32OAcv4F3hIs8eGNlCSsDnLbWi5RKNNMW4X8v0cnYcupYWpXSLeQhK6lfLr0DBFckAeRu00seVGcn25'  # Your Stripe key
-# endpoint_secret = 'whsec_Her14t9w303zj5NzZIXkMrGeFr2dJ6dT' test endpoint
-endpoint_secret = 'whsec_Tt8cqHtfBFBxcyI0gFrN6pgyGF5yUTGH' #live endpoint 
+# Stripe keys live in Google Secret Manager, NOT in source. Set them once with:
+#   firebase functions:secrets:set STRIPE_API_KEY
+#   firebase functions:secrets:set STRIPE_WEBHOOK_SECRET
+# (paste the live secret key / webhook signing secret when prompted), then deploy.
+STRIPE_API_KEY = SecretParam("STRIPE_API_KEY")
+STRIPE_WEBHOOK_SECRET = SecretParam("STRIPE_WEBHOOK_SECRET")
+
 paymentLink = {3:"plink_1SL9xCJRBLxROQTk8MWafhWM",6:"plink_1SL9xFJRBLxROQTk5WazG0og",12:"plink_1SL9x6JRBLxROQTkNKKHEWvR"}
-@https_fn.on_request()
+@https_fn.on_request(secrets=[STRIPE_API_KEY, STRIPE_WEBHOOK_SECRET])
 def stripe_webhook(req: https_fn.Request) -> https_fn.Response:
     db = firestore.Client()
+    stripe.api_key = STRIPE_API_KEY.value
+    endpoint_secret = STRIPE_WEBHOOK_SECRET.value
     payload = req.get_data(as_text=True)
     sig_header = req.headers.get("stripe-signature")
 
